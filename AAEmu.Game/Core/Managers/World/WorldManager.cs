@@ -1,0 +1,1797 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Xml;
+
+using AAEmu.Commons.IO;
+using AAEmu.Commons.Utils;
+using AAEmu.Commons.Utils.XML;
+using AAEmu.Game.Core.Managers.Id;
+using AAEmu.Game.Core.Network.Game;
+using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.IO;
+using AAEmu.Game.Models;
+using AAEmu.Game.Models.ClientData;
+using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.DoodadObj;
+using AAEmu.Game.Models.Game.Gimmicks;
+using AAEmu.Game.Models.Game.NPChar;
+using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Models.Game.World;
+using AAEmu.Game.Models.Game.World.Transform;
+using AAEmu.Game.Models.Game.World.Xml;
+using AAEmu.Game.Models.Game.World.Zones;
+using AAEmu.Game.Utils.DB;
+
+using NLog;
+
+using InstanceWorld = AAEmu.Game.Models.Game.World.World;
+
+namespace AAEmu.Game.Core.Managers.World;
+
+public class WorldManager : Singleton<WorldManager>, IWorldManager
+{
+    // Default World and Instance ID that will be assigned to all Transforms as a Default value
+    public static uint DefaultWorldId { get; set; } = 0; // This will get reset to it's proper value when loading world data (which is usually 0)
+    public static uint DefaultInstanceId { get; set; } = 0;
+    private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+    private bool _loaded = false;
+
+    private Dictionary<uint, InstanceWorld> _worlds;
+    private Dictionary<uint, uint> _worldIdByZoneId;
+    private Dictionary<uint, WorldInteractionGroup> _worldInteractionGroups;
+    public bool IsSnowing = false;
+    private readonly ConcurrentDictionary<uint, GameObject> _objects;
+    private readonly ConcurrentDictionary<uint, BaseUnit> _baseUnits;
+    private readonly ConcurrentDictionary<uint, Unit> _units;
+    private readonly ConcurrentDictionary<uint, Doodad> _doodads;
+    private readonly ConcurrentDictionary<uint, Npc> _npcs;
+    private readonly ConcurrentDictionary<uint, Character> _characters;
+    private readonly ConcurrentDictionary<uint, AreaShape> _areaShapes;
+    private readonly ConcurrentDictionary<uint, Transfer> _transfers;
+    private readonly ConcurrentDictionary<uint, Gimmick> _gimmicks;
+    private readonly ConcurrentDictionary<uint, Slave> _slaves;
+    private readonly ConcurrentDictionary<uint, Mate> _mates;
+    private readonly ConcurrentDictionary<uint, IndunZone> _indunZones;
+
+    public const int CELL_SIZE = 1024;
+    /// <summary>
+    /// Sector Size
+    /// </summary>
+    public const int REGION_SIZE = 64;
+    public const int SECTORS_PER_CELL = CELL_SIZE / REGION_SIZE;
+    public const int SECTOR_HMAP_RESOLUTION = REGION_SIZE / 2;
+    public const int CELL_HMAP_RESOLUTION = CELL_SIZE / 2;
+
+    /*
+    REGION_NEIGHBORHOOD_SIZE (cell sector size) used for polling objects in your proximity
+    Was originally set to 1, recommended 3 and max 5
+    anything higher is overkill as you can't target it anymore in the client at that distance
+    */
+    public const sbyte REGION_NEIGHBORHOOD_SIZE = 2;
+
+    public WorldManager()
+    {
+        _objects = new ConcurrentDictionary<uint, GameObject>();
+        _baseUnits = new ConcurrentDictionary<uint, BaseUnit>();
+        _units = new ConcurrentDictionary<uint, Unit>();
+        _doodads = new ConcurrentDictionary<uint, Doodad>();
+        _npcs = new ConcurrentDictionary<uint, Npc>();
+        _characters = new ConcurrentDictionary<uint, Character>();
+        _areaShapes = new ConcurrentDictionary<uint, AreaShape>();
+        _transfers = new ConcurrentDictionary<uint, Transfer>();
+        _gimmicks = new ConcurrentDictionary<uint, Gimmick>();
+        _slaves = new ConcurrentDictionary<uint, Slave>();
+        _mates = new ConcurrentDictionary<uint, Mate>();
+        _indunZones = new ConcurrentDictionary<uint, IndunZone>();
+    }
+
+    private void ActiveRegionTick(TimeSpan delta)
+    {
+        // Players
+        foreach (var character in GetAllCharacters())
+        {
+            CombatTick(character);
+            RegenTick(character);
+            BreathTick(character);
+        }
+
+        // Pets
+        foreach (var mate in GetAllMates())
+        {
+            CombatTick(mate);
+            RegenTick(mate);
+        }
+
+        // Vehicles
+        foreach (var slave in GetAllSlaves())
+        {
+            CombatTick(slave);
+            RegenTick(slave);
+        }
+
+        /*
+        //var sw = new Stopwatch();
+        //sw.Start();
+        var activeRegions = new HashSet<Region>();
+        foreach (var world in _worlds.Values)
+        {
+            foreach (var region in world.Regions)
+            {
+                if (region == null)
+                    continue;
+                if (activeRegions.Contains(region))
+                    continue;
+                if (region.IsEmpty())
+                    continue;
+                foreach (var activeRegion in region.GetNeighbors())
+                {
+                    activeRegions.Add(activeRegion);
+                    var units = activeRegion.GetList<Unit>(new(), 0);
+                    foreach (var unit in units)
+                    {
+                        if (unit is not Character character) { continue; }
+                        CombatTick(character);
+                        RegenTick(character);
+                        BreathTick(character);
+                    }
+                }
+            }
+        }
+        //sw.Stop();
+        //Logger.Warn("ActiveRegionTick took {0}ms", sw.ElapsedMilliseconds);
+        */
+    }
+
+    /// <summary>
+    /// Handle is still in combat related things
+    /// </summary>
+    /// <param name="unit"></param>
+    private static void CombatTick(Unit unit)
+    {
+        // TODO: Make it so you can also become out of combat if you are not on any aggro lists
+        if (unit.IsInBattle && unit.LastCombatActivity.AddSeconds(30) < DateTime.UtcNow)
+        {
+            unit.IsInBattle = false;
+        }
+
+        if ((unit is Character character) && (character.IsInPostCast && character.LastCast.AddSeconds(5) < DateTime.UtcNow))
+        {
+            character.IsInPostCast = false;
+        }
+    }
+
+    /// <summary>
+    /// Call regeneration function of the unit
+    /// </summary>
+    /// <param name="unit"></param>
+    private static void RegenTick(Unit unit)
+    {
+        unit.Regenerate();
+    }
+
+    /// <summary>
+    /// Handle player's Breath updates
+    /// </summary>
+    /// <param name="character"></param>
+    private static void BreathTick(Character character)
+    {
+        if (character.IsDead || !character.IsUnderWater)
+        {
+            return;
+        }
+
+        character.DoChangeBreath();
+    }
+
+    public WorldInteractionGroup? GetWorldInteractionGroup(uint worldInteractionType)
+    {
+        if (_worldInteractionGroups.TryGetValue(worldInteractionType, out var group))
+            return group;
+        return null;
+    }
+
+    public void Load()
+    {
+        if (_loaded)
+            return;
+
+        _worlds = new Dictionary<uint, InstanceWorld>();
+        _worldIdByZoneId = new Dictionary<uint, uint>();
+        _worldInteractionGroups = new Dictionary<uint, WorldInteractionGroup>();
+
+        Logger.Info("Loading world data...");
+
+        #region LoadClientData
+
+        var worldXmlPaths = ClientFileManager.GetFilesInDirectory(Path.Combine("game", "worlds"), "world.xml", true);
+
+        if (worldXmlPaths.Count <= 0)
+        {
+            throw new OperationCanceledException("No client worlds data has been found, please check the readme.txt file inside the ClientData folder for more info.");
+        }
+        var worldNames = new List<string>();
+        worldNames.Add("main_world"); // Make sure main_world is the first even if it wouldn't exist
+
+        // Grab world_spawns.json info
+        var spawnPositionFile = Path.Combine(FileManager.AppPath, "Data", "Worlds", "world_spawns.json");
+        var contents = File.Exists(spawnPositionFile) ? File.ReadAllText(spawnPositionFile) : "";
+        var worldSpawnLookup = new List<WorldSpawnLocation>();
+        if (string.IsNullOrWhiteSpace(contents))
+            Logger.Error($"File {spawnPositionFile} doesn't exists or is empty.");
+        else
+            if (!JsonHelper.TryDeserializeObject(contents, out List<WorldSpawnLocation> worldSpawnLookupFromJson, out _))
+            Logger.Error($"Error in {spawnPositionFile}.");
+        else
+            worldSpawnLookup = worldSpawnLookupFromJson;
+
+        foreach (var worldXmlPath in worldXmlPaths)
+        {
+            var worldName = Path.GetFileName(Path.GetDirectoryName(worldXmlPath)); // the base name of the current directory
+            if (!worldNames.Contains(worldName))
+                worldNames.Add(worldName);
+        }
+
+        for (uint id = 0; id < worldNames.Count; id++)
+        {
+            var worldName = worldNames[(int)id];
+            if (worldName == "main_world")
+                WorldManager.DefaultWorldId = id; // prefer to do it like this, in case we change order or IDs later on
+
+            using var worldXmlData = ClientFileManager.GetFileStream(Path.Combine("game", "worlds", worldName, "world.xml"));
+            var xml = new XmlDocument();
+            xml.Load(worldXmlData);
+            var worldNode = xml.SelectSingleNode("/World");
+            if (worldNode != null)
+            {
+                var xmlWorld = new XmlWorld();
+                var world = new InstanceWorld();
+                world.Id = id;
+                world.TemplateId = id;
+                xmlWorld.ReadNode(worldNode, world);
+                world.SpawnPosition = worldSpawnLookup.FirstOrDefault(w => w.Name == world.Name)?.SpawnPosition ?? new WorldSpawnPosition();
+                world.SpawnPosition.WorldId = id;
+                // add coordinates for zones
+                foreach (var worldZones in world.XmlWorldZones.Values)
+                {
+                    foreach (var wsl in worldSpawnLookup)
+                    {
+                        if (wsl.Name == worldZones.Name)
+                        {
+                            worldZones.SpawnPosition = wsl.SpawnPosition;
+                            worldZones.SpawnPosition.WorldId = id;
+                            break;
+                        }
+                    }
+                }
+
+                _worlds.Add(id, world);
+
+                // cache zone keys to world reference
+                foreach (var zoneKey in world.ZoneKeys)
+                    _worldIdByZoneId.Add(zoneKey, id);
+
+                world.Water = new WaterBodies();
+            }
+        }
+
+        #endregion
+
+        #region LoadServerDB
+
+        using (var connection2 = SQLite.CreateServerConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM indun_zones";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var idz = new IndunZone()
+                        {
+                            ZoneGroupId = reader.GetUInt32("zone_group_id"),
+                            // 10.8.1.0 no longer stores name/comment/item_id in indun_zones.
+                            // Display names are client localization data, not server defaults.
+                            Name = string.Empty,
+                            LevelMin = reader.GetUInt32("level_min"),
+                            LevelMax = reader.GetUInt32("level_max"),
+                            MaxPlayers = reader.GetUInt32("max_players"),
+                            PvP = reader.GetBoolean("pvp"),
+                            HasGraveyard = reader.GetBoolean("has_graveyard"),
+                            ItemId = 0,
+                            RestoreItemTime = reader.GetUInt32("restore_item_time"),
+                            PartyOnly = reader.GetBoolean("party_only"),
+                            ClientDriven = reader.GetBoolean("client_driven"),
+                            SelectChannel = reader.GetBoolean("select_channel")
+                        };
+                        idz.LocalizedName = string.Empty;
+                        if (!_indunZones.TryAdd(idz.ZoneGroupId, idz))
+                            Logger.Fatal($"Unable to add zone_group_id: {idz.ZoneGroupId} from indun_zone");
+                    }
+                }
+            }
+
+            Logger.Debug($"Loaded {_indunZones.Count} dungeon zones");
+            /*
+            // add dummy main world as ID 0
+            if (!_indunZones.TryAdd(0, new IndunZone() { ZoneGroupId = 0, Name = "Main World", LocalizedName = "Erenor" }))
+            {
+                Logger.Fatal("Failed to add main world");
+                return;
+            }
+            */
+
+            using (var command = connection2.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM wi_group_wis";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var id = reader.GetUInt32("wi_id");
+                        var group = (WorldInteractionGroup)reader.GetUInt32("wi_group_id");
+                        _worldInteractionGroups.Add(id, group);
+                    }
+                }
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM aoe_shapes";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var shape = new AreaShape();
+                        shape.Id = reader.GetUInt32("id");
+                        shape.Type = (AreaShapeType)reader.GetUInt32("kind_id");
+                        shape.Value1 = reader.GetFloat("value1");
+                        shape.Value2 = reader.GetFloat("value2");
+                        shape.Value3 = reader.GetFloat("value3");
+                        _areaShapes.TryAdd(shape.Id, shape);
+                    }
+                }
+            }
+        }
+        #endregion
+
+        TickManager.Instance.OnTick.Subscribe(ActiveRegionTick, TimeSpan.FromSeconds(1));
+
+        _loaded = true;
+    }
+
+    public static bool LoadHeightMapFromDatFile(InstanceWorld world)
+    {
+        var heightMap = Path.Combine(FileManager.AppPath, "Data", "Worlds", world.Name, "hmap.dat");
+        if (!File.Exists(heightMap))
+        {
+            Logger.Trace($"HeightMap for `{world.Name}` not found");
+            return false;
+        }
+
+        using (var stream = new FileStream(heightMap, FileMode.Open, FileAccess.Read, FileShare.None, 2 << 20))
+        using (var br = new BinaryReader(stream))
+        {
+            var version = br.ReadInt32();
+            if (version == 1)
+            {
+                var hMapCellX = br.ReadInt32();
+                var hMapCellY = br.ReadInt32();
+                br.ReadDouble(); // heightMaxCoeff
+                br.ReadInt32(); // count
+
+                if (hMapCellX == world.CellX && hMapCellY == world.CellY)
+                {
+                    for (var cellX = 0; cellX < world.CellX; cellX++)
+                    {
+                        for (var cellY = 0; cellY < world.CellY; cellY++)
+                        {
+                            if (br.ReadBoolean())
+                                continue;
+                            for (var i = 0; i < SECTORS_PER_CELL; i++)
+                                for (var j = 0; j < SECTORS_PER_CELL; j++)
+                                    for (var x = 0; x < SECTOR_HMAP_RESOLUTION; x++)
+                                        for (var y = 0; y < SECTOR_HMAP_RESOLUTION; y++)
+                                        {
+                                            var sx = cellX * CELL_HMAP_RESOLUTION + i * SECTOR_HMAP_RESOLUTION + x;
+                                            var sy = cellY * CELL_HMAP_RESOLUTION + j * SECTOR_HMAP_RESOLUTION + y;
+
+                                            world.HeightMaps[sx, sy] = br.ReadUInt16();
+                                        }
+                        }
+                    }
+                }
+                else
+                {
+                    Logger.Warn("{0}: Invalid heightmap cells, does not match world definition ...", world.Name);
+                    return false;
+                }
+            }
+            else
+            {
+                Logger.Warn("{0}: Heightmap version not supported {1}", world.Name, version);
+                return false;
+            }
+        }
+
+        Logger.Info("{0} heightmap loaded", world.Name);
+        return true;
+    }
+
+    public static bool LoadHeightMapFromClientData(InstanceWorld world)
+    {
+        // Use world.xml to check if we have client data enabled
+        var worldXmlTest = Path.Combine("game", "worlds", world.Name, "world.xml");
+        if (!ClientFileManager.FileExists(worldXmlTest))
+            return false;
+
+        var version = VersionCalc.Draft;
+
+        for (var cellY = 0; cellY < world.CellY; cellY++)
+            for (var cellX = 0; cellX < world.CellX; cellX++)
+            {
+                var cellFileName = $"{cellX:000}_{cellY:000}";
+                var heightMapFile = Path.Combine("game", "worlds", world.Name, "cells", cellFileName, "client",
+                    "terrain", "heightmap.dat");
+                if (ClientFileManager.FileExists(heightMapFile))
+                    using (var stream = ClientFileManager.GetFileStream(heightMapFile))
+                    {
+                        if (stream == null)
+                        {
+                            //Logger.Trace($"Cell {cellFileName} not found or not used in {world.Name}");
+                            continue;
+                        }
+
+                        // Read the cell hmap data
+                        using (var br = new BinaryReader(stream))
+                        {
+                            var hmap = new Hmap();
+
+                            var disableReCalc = false; // (version == VersionCalc.V1) // Version is never VersionCalc.V1
+                            if (hmap.Read(br, disableReCalc) < 0)
+                            {
+                                Logger.Error($"Error reading {heightMapFile}");
+                                continue;
+                            }
+
+                            var nodes = hmap.Nodes
+                                .OrderBy(cell => cell.BoxHeightmap.Min.X)
+                                .ThenBy(cell => cell.BoxHeightmap.Min.Y)
+                                .Where(x => x.pHMData.Length > 0)
+                                .ToList();
+
+                            // Read nodes into heightmap array
+
+                            #region ReadNodes
+
+                            for (ushort sectorX = 0; sectorX < SECTORS_PER_CELL; sectorX++) // 16x16 sectors / cell
+                                for (ushort sectorY = 0; sectorY < SECTORS_PER_CELL; sectorY++)
+                                    for (ushort unitX = 0; unitX < SECTOR_HMAP_RESOLUTION; unitX++) // sector = 32x32 unit size
+                                        for (ushort unitY = 0; unitY < SECTOR_HMAP_RESOLUTION; unitY++)
+                                        {
+                                            var node = nodes[sectorX * SECTORS_PER_CELL + sectorY];
+                                            var oX = cellX * CELL_HMAP_RESOLUTION + sectorX * SECTOR_HMAP_RESOLUTION + unitX;
+                                            var oY = cellY * CELL_HMAP_RESOLUTION + sectorY * SECTOR_HMAP_RESOLUTION + unitY;
+
+                                            ushort value;
+                                            switch (version)
+                                            {
+                                                case VersionCalc.V1:
+                                                    {
+                                                        var doubleValue = node.fRange * 100000d;
+                                                        var rawValue = node.RawDataByIndex(unitX, unitY);
+
+                                                        value = (ushort)((doubleValue / 1.52604335620711f) *
+                                                                         world.HeightMaxCoefficient /
+                                                                         ushort.MaxValue * rawValue +
+                                                                         node.BoxHeightmap.Min.Z * world.HeightMaxCoefficient);
+                                                    }
+                                                    break;
+                                                case VersionCalc.V2:
+                                                    {
+                                                        value = node.RawDataByIndex(unitX, unitY);
+                                                        var height = node.RawDataToHeight(value);
+                                                    }
+                                                    break;
+                                                case VersionCalc.Draft:
+                                                    {
+                                                        var height = node.GetHeight(unitX, unitY);
+                                                        value = (ushort)(height * world.HeightMaxCoefficient);
+                                                    }
+                                                    break;
+                                                default:
+                                                    throw new NotSupportedException(nameof(version));
+                                            }
+
+                                            world.HeightMaps[oX, oY] = value;
+                                        }
+
+                            #endregion
+                        }
+                    }
+            }
+
+        Logger.Info("{0} heightmap loaded", world.Name);
+        return true;
+    }
+
+    public void LoadHeightmaps()
+    {
+        if (AppConfiguration.Instance.HeightMapsEnable) // TODO fastboot if HeightMapsEnable = false!
+        {
+            Logger.Info("Loading heightmaps...");
+
+            var loaded = 0;
+            foreach (var world in _worlds.Values)
+            {
+                if (AppConfiguration.Instance.ClientData.PreferClientHeightMap && LoadHeightMapFromClientData(world))
+                    loaded++;
+                else if (LoadHeightMapFromDatFile(world))
+                    loaded++;
+                else if (LoadHeightMapFromClientData(world))
+                    loaded++;
+            }
+
+            Logger.Info($"Loaded {loaded}/{_worlds.Count} heightmaps");
+        }
+    }
+
+    public void LoadWaterBodies()
+    {
+        foreach (var world in _worlds.Values)
+        {
+            var loadFromClient = true;
+
+            // Try to load from saved json data
+            var customFile = Path.Combine(FileManager.AppPath, "Data", "Worlds", world.Name, "water_bodies.json");
+            if (File.Exists(customFile))
+            {
+                if (WaterBodies.Load(customFile, out var newWater))
+                {
+                    world.Water = newWater;
+                    loadFromClient = false;
+                }
+            }
+
+            // If no custom data could be found or loaded, then load from client's cell data
+            if (loadFromClient)
+                LoadWaterBodiesFromClientData(world);
+        }
+    }
+
+    public InstanceWorld GetWorld(uint worldId)
+    {
+        if (_worlds.TryGetValue(worldId, out var res))
+            return res;
+        Logger.Fatal("GetWorld(): No such WorldId {0}", worldId);
+        return null;
+    }
+
+    public InstanceWorld[] GetWorlds()
+    {
+        return _worlds.Values.ToArray();
+    }
+
+    public uint GetWorldIdByZone(uint zoneId)
+    {
+        if (_worldIdByZoneId.TryGetValue(zoneId, out var worldId))
+            return worldId;
+        Logger.Fatal("GetWorldByZone(): No world defined for ZoneId {0}", zoneId);
+        return 0xffffffff; // -1
+    }
+    public InstanceWorld GetWorldByZone(uint zoneId)
+    {
+        if (_worldIdByZoneId.TryGetValue(zoneId, out var worldId))
+            return GetWorld(worldId);
+        Logger.Fatal("GetWorldByZone(): No world defined for ZoneId {0}", zoneId);
+        return null;
+    }
+
+    public uint GetZoneId(uint worldId, float x, float y)
+    {
+        if (!_worlds.TryGetValue(worldId, out var world))
+        {
+            Logger.Fatal("GetZoneId(): No such WorldId {0}", worldId);
+            return 0;
+        }
+        var sx = (int)(x / REGION_SIZE);
+        var sy = (int)(y / REGION_SIZE);
+
+        if (!world.ValidRegion(sx, sy))
+        {
+            Logger.Fatal("GetZoneId(): Coordinates out of bounds for WorldId {0} - x:{1:#,0.#} - y: {2:#,0.#}", worldId, x, y);
+            return 0;
+        }
+
+        var region = world.GetRegion(sx, sy);
+        return region.ZoneKey;
+    }
+
+    public float GetHeight(uint zoneId, float x, float y)
+    {
+        // try to find Z first in GeoData, and then in HeightMaps, if not found, leave Z as it is
+        var height = 0f;
+        var world = GetWorldByZone(zoneId);
+
+        if (AppConfiguration.Instance.World.GeoDataMode && world.Id > 0)
+        {
+            var position = new WorldSpawnPosition { WorldId = 0, ZoneId = zoneId, X = x, Y = y, Z = 0, Yaw = 0, Pitch = 0, Roll = 0 };
+            height = AiGeoDataManager.Instance.GetHeight(zoneId, position);
+        }
+
+        // check, as there is no geodata for main_world yet
+        if (height == 0)
+        {
+            if (AppConfiguration.Instance.HeightMapsEnable)
+            {
+                try
+                {
+                    //var world = GetWorldByZone(zoneId);
+                    height = world?.GetHeight(x, y) ?? 0f;
+                }
+                catch
+                {
+                    height = 0f;
+                }
+            }
+        }
+
+        return height;
+    }
+
+    /// <summary>
+    /// Returns target height of World position of transform according to loaded heightmaps
+    /// </summary>
+    /// <param name="transform"></param>
+    /// <returns>Height at target world transform, or transform.World.Position.Z if no heightmap could be found</returns>
+    public float GetHeight(Transform transform)
+    {
+        // try to find Z first in GeoData, and then in HeightMaps, if not found, leave Z as it is
+        var height = 0f;
+        if (AppConfiguration.Instance.World.GeoDataMode && transform.WorldId > 0)
+        {
+            height = AiGeoDataManager.Instance.GetHeight(transform.ZoneId, transform.World.Position);
+        }
+
+        // check, as there is no geodata for main_world yet
+        if (height == 0)
+        {
+            if (AppConfiguration.Instance.HeightMapsEnable)
+            {
+                try
+                {
+                    var world = GetWorld(transform.WorldId);
+                    height = world?.GetHeight(transform.World.Position.X, transform.World.Position.Y) ?? transform.World.Position.Z;
+                }
+                catch
+                {
+                    height = transform.World.Position.Z;
+                }
+            }
+            else
+            {
+                height = transform.World.Position.Z;
+            }
+        }
+
+        return height;
+    }
+
+    private static GameObject GetRootObj(GameObject obj)
+    {
+        if (obj.ParentObj == null)
+        {
+            return obj;
+        }
+        else
+        {
+            return GetRootObj(obj.ParentObj);
+        }
+    }
+
+    public Region GetRegion(GameObject obj)
+    {
+        obj = GetRootObj(obj);
+        var world = GetWorld(obj.Transform.WorldId);
+        return GetRegion(world, obj.Transform.World.Position.X, obj.Transform.World.Position.Y);
+    }
+
+    public Region[] GetNeighbors(uint worldId, int x, int y)
+    {
+        var world = _worlds[worldId];
+
+        var result = new List<Region>();
+        for (var a = -REGION_NEIGHBORHOOD_SIZE; a <= REGION_NEIGHBORHOOD_SIZE; a++)
+            for (var b = -REGION_NEIGHBORHOOD_SIZE; b <= REGION_NEIGHBORHOOD_SIZE; b++)
+                if (ValidRegion(world.Id, x + a, y + b) && world.Regions[x + a, y + b] != null)
+                    result.Add(world.Regions[x + a, y + b]);
+
+        return result.ToArray();
+    }
+
+    public GameObject GetGameObject(uint objId)
+    {
+        _objects.TryGetValue(objId, out var ret);
+        return ret;
+    }
+
+    public BaseUnit GetBaseUnit(uint objId)
+    {
+        _baseUnits.TryGetValue(objId, out var ret);
+        return ret;
+    }
+
+    public Doodad GetDoodad(uint objId)
+    {
+        _doodads.TryGetValue(objId, out var ret);
+        return ret;
+    }
+
+    public Doodad GetDoodadByDbId(uint dbId)
+    {
+        var ret = _doodads.FirstOrDefault(x => x.Value.DbId == dbId).Value;
+        return ret;
+    }
+
+    public List<Doodad> GetDoodadByHouseDbId(uint houseDbId)
+    {
+        var ret = _doodads.Where(x => x.Value.OwnerDbId == houseDbId).Select(y => y.Value).ToList();
+        return ret;
+    }
+
+    public Unit GetUnit(uint objId)
+    {
+        _units.TryGetValue(objId, out var ret);
+        return ret;
+    }
+
+    public Npc GetNpc(uint objId)
+    {
+        _npcs.TryGetValue(objId, out var ret);
+        return ret;
+    }
+
+    public Npc GetNpcByTemplateId(uint templateId)
+    {
+        return _npcs.Values.FirstOrDefault(x => x.TemplateId == templateId);
+    }
+
+    internal void SetNpc(uint objId, Npc npc)
+    {
+        _npcs[objId] = npc;
+    }
+
+    public Character GetCharacter(string name)
+    {
+        foreach (var player in _characters.Values)
+            if (name.ToLower().Equals(player.Name.ToLower()))
+                return player;
+        return null;
+    }
+
+    /// <summary>
+    /// Returns a player Character object based on the parameters.
+    /// Priority is TargetName > CurrentTarget > character
+    /// </summary>
+    /// <param name="character">Source character</param>
+    /// <param name="TargetName">Possible target name</param>
+    /// <param name="FirstNonNameArgument">Returns 1 if TargetName was a valid online character, 0 otherwise</param>
+    /// <returns></returns>
+    public static Character GetTargetOrSelf(Character character, string TargetName, out int FirstNonNameArgument)
+    {
+        FirstNonNameArgument = 0;
+        if ((TargetName != null) && (TargetName != string.Empty))
+        {
+            var player = WorldManager.Instance.GetCharacter(TargetName);
+            if (player != null)
+            {
+                FirstNonNameArgument = 1;
+                return player;
+            }
+        }
+        if ((character.CurrentTarget != null) && (character.CurrentTarget is Character))
+            return (Character)character.CurrentTarget;
+        return character;
+    }
+
+    public Character GetCharacterByObjId(uint id)
+    {
+        _characters.TryGetValue(id, out var ret);
+        return ret;
+    }
+
+    public Character GetCharacterById(uint id)
+    {
+        foreach (var player in _characters.Values)
+            if (player.Id.Equals(id))
+                return player;
+        return null;
+    }
+
+    public void AddObject(GameObject obj)
+    {
+        if (obj == null)
+            return;
+
+        _objects.TryAdd(obj.ObjId, obj);
+
+        if (obj is BaseUnit baseUnit)
+            _baseUnits.TryAdd(baseUnit.ObjId, baseUnit);
+        if (obj is Unit unit)
+            _units.TryAdd(unit.ObjId, unit);
+        if (obj is Doodad doodad)
+            _doodads.TryAdd(doodad.ObjId, doodad);
+        if (obj is Npc npc)
+            _npcs.TryAdd(npc.ObjId, npc);
+        if (obj is Character character)
+            _characters.TryAdd(character.ObjId, character);
+        if (obj is Transfer transfer)
+            _transfers.TryAdd(transfer.ObjId, transfer);
+        if (obj is Gimmick gimmick)
+            _gimmicks.TryAdd(gimmick.ObjId, gimmick);
+        if (obj is Slave slave)
+            _slaves.TryAdd(slave.ObjId, slave);
+        if (obj is Mate mate)
+            _mates.TryAdd(mate.ObjId, mate);
+    }
+
+    public bool RemoveObject(uint ObjId)
+    {
+        if (ObjId == 0)
+            return false;
+
+        var res = false;
+
+        if (_objects.TryRemove(ObjId, out _))
+        {
+            Logger.Debug($"WorldManager: object {ObjId} removed from _objects");
+            res = true;
+        }
+
+        if (_baseUnits.TryRemove(ObjId, out _))
+        {
+            Logger.Debug($"WorldManager: object {ObjId} removed from _baseUnits");
+            res = true;
+        }
+
+        if (_units.TryRemove(ObjId, out _))
+        {
+            Logger.Debug($"WorldManager: object {ObjId} removed from _units");
+            res = true;
+        }
+
+        if (_npcs.TryRemove(ObjId, out _))
+        {
+            Logger.Debug($"WorldManager: object {ObjId} removed from _npcs");
+            res = true;
+        }
+
+        //_doodads.TryRemove(ObjId, out _);
+        //_characters.TryRemove(ObjId, out _);
+        //_transfers.TryRemove(ObjId, out _);
+        //_gimmicks.TryRemove(ObjId, out _);
+        //_slaves.TryRemove(ObjId, out _);
+        //_mates.TryRemove(mate.ObjId, out _);
+
+        return res;
+    }
+    public void RemoveObject(GameObject obj)
+    {
+        if (obj == null)
+            return;
+
+        _objects.TryRemove(obj.ObjId, out _);
+
+        if (obj is BaseUnit)
+            _baseUnits.TryRemove(obj.ObjId, out _);
+        if (obj is Unit)
+            _units.TryRemove(obj.ObjId, out _);
+        if (obj is Doodad)
+            _doodads.TryRemove(obj.ObjId, out _);
+        if (obj is Npc)
+            _npcs.TryRemove(obj.ObjId, out _);
+        if (obj is Character)
+            _characters.TryRemove(obj.ObjId, out _);
+        if (obj is Transfer)
+            _transfers.TryRemove(obj.ObjId, out _);
+        if (obj is Gimmick)
+            _gimmicks.TryRemove(obj.ObjId, out _);
+        if (obj is Slave)
+            _slaves.TryRemove(obj.ObjId, out _);
+        if (obj is Mate mate)
+            _mates.TryRemove(mate.ObjId, out _);
+    }
+
+    /// <summary>
+    /// Publishes non-doodad world objects to a character that is already
+    /// registered in its current region. The 10.8 client receives doodads
+    /// through TCDoodadStream, so this path deliberately does not emit the
+    /// legacy SCDoodadsCreated packets used by Region.AddToCharacters.
+    /// </summary>
+    /// <returns>Number of world objects published to the character.</returns>
+    public int PublishCurrentRegionVisibility(Character character)
+    {
+        if (character == null)
+            return 0;
+
+        var region = character.Region ?? GetRegion(character);
+        if (region == null)
+            return 0;
+
+        // This fallback is not expected during the 10.8 bootstrap, but keeps
+        // the helper safe for a character that was not registered yet.
+        if (character.Region == null)
+        {
+            AddVisibleObject(character);
+            return 0;
+        }
+
+        var publishedObjects = 0;
+        var publishedNpcs = 0;
+        var publishedRegions = 0;
+
+        foreach (var neighbor in region.GetNeighbors())
+        {
+            if (neighbor == null)
+                continue;
+
+            publishedRegions++;
+
+            // Show all regular world objects to the entering character.
+            // Doodads are already streamed over the separate stream socket.
+            var objects = neighbor.GetObjectsList(new List<GameObject>(), character.ObjId);
+            foreach (var worldObject in objects)
+            {
+                if (worldObject == null || !worldObject.IsVisible)
+                    continue;
+
+                // Restore the verified unit-visibility path first. Doodads are
+                // already streamed separately, while houses, vehicles and
+                // other unit kinds still need their own 10.8 packet review.
+                if (worldObject is Npc npc)
+                {
+                    if (npc.Ai != null)
+                        npc.Ai.ShouldTick = true;
+                    publishedNpcs++;
+                }
+                else if (worldObject is not Character)
+                {
+                    continue;
+                }
+
+                worldObject.AddVisibleObject(character);
+                publishedObjects++;
+            }
+
+            // Show the entering character to players already in these regions.
+            foreach (var nearbyCharacter in neighbor.GetList(new List<Character>(), character.ObjId))
+                character.AddVisibleObject(nearbyCharacter);
+        }
+
+        Logger.Info(
+            "Published current region visibility: characterId={0}, regions={1}, objects={2}, npcs={3}",
+            character.Id,
+            publishedRegions,
+            publishedObjects,
+            publishedNpcs);
+
+        return publishedObjects;
+    }
+
+    /// <summary>
+    /// Publishes full target-10.8 DoodadInfo records after the client has
+    /// completed TCDoodadStream loading and sent CSWorldEntryReady. JSON/file
+    /// spawn remains unchanged; only template/function data comes from the
+    /// dedicated Data/base.sqlite3 doodad source.
+    /// </summary>
+    public int PublishProtocol1810CurrentRegionDoodads(Character character)
+    {
+        if (character == null)
+            return 0;
+
+        var region = character.Region ?? GetRegion(character);
+        if (region == null)
+            return 0;
+
+        var doodadsById = new Dictionary<uint, Doodad>();
+        foreach (var neighbor in region.GetNeighbors())
+        {
+            if (neighbor == null)
+                continue;
+
+            foreach (var doodad in neighbor.GetList(new List<Doodad>(), character.ObjId))
+            {
+                if (doodad?.IsVisible == true)
+                    doodadsById[doodad.ObjId] = doodad;
+            }
+        }
+
+        var doodads = doodadsById.Values.ToArray();
+        for (var i = 0; i < doodads.Length; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
+        {
+            var count = Math.Min(doodads.Length - i, SCDoodadsCreatedPacket.MaxCountPerPacket);
+            var batch = new Doodad[count];
+            Array.Copy(doodads, i, batch, 0, count);
+            character.SendPacket(new SCDoodadsCreatedPacket(batch));
+        }
+
+        Logger.Info(
+            "Published target 10.8 doodad records: characterId={0}, count={1}, packets={2}",
+            character.Id,
+            doodads.Length,
+            (doodads.Length + SCDoodadsCreatedPacket.MaxCountPerPacket - 1) / SCDoodadsCreatedPacket.MaxCountPerPacket);
+        return doodads.Length;
+    }
+
+    /// <summary>
+    /// Publishes target-10.8 NPC visibility independently from legacy Region
+    /// membership. The verified donor sends nearby NPCs immediately after the
+    /// 0x0192 in-game notification, before CSWorldEntryReady and movement.
+    /// </summary>
+    /// <returns>Number of NPCs sent to the entering character.</returns>
+    public int PublishProtocol1810NearbyNpcs(Character character, float radius = 150f, int maxCount = 50)
+    {
+        if (character?.Transform == null)
+            return 0;
+
+        var playerPosition = character.Transform.World.Position;
+        var worldId = character.Transform.WorldId;
+        var instanceId = character.Transform.InstanceId;
+        var allNpcs = _npcs.Values.Where(n => n?.Transform != null).ToList();
+        var sameWorld = allNpcs.Where(n => n.Transform.WorldId == worldId).ToList();
+        var sameInstance = sameWorld.Where(n => n.Transform.InstanceId == instanceId).ToList();
+
+        static bool HasFinitePosition(Npc npc)
+        {
+            var position = npc.Transform.World.Position;
+            return !float.IsNaN(position.X) && !float.IsInfinity(position.X) &&
+                   !float.IsNaN(position.Y) && !float.IsInfinity(position.Y) &&
+                   !float.IsNaN(position.Z) && !float.IsInfinity(position.Z);
+        }
+
+        static double DistanceSquared(Vector3 left, Vector3 right)
+        {
+            var dx = (double)left.X - right.X;
+            var dy = (double)left.Y - right.Y;
+            var dz = (double)left.Z - right.Z;
+            return dx * dx + dy * dy + dz * dz;
+        }
+
+        // Match the verified donor: worldId + distance are authoritative.
+        // InstanceId is logged for migration diagnostics but is not used as a
+        // hard filter because old spawn loaders commonly leave it at zero.
+        var nearestSameWorld = sameWorld
+            .Where(HasFinitePosition)
+            .Select(n => new
+            {
+                Npc = n,
+                DistanceSquared = DistanceSquared(playerPosition, n.Transform.World.Position)
+            })
+            .OrderBy(entry => entry.DistanceSquared)
+            .ToList();
+
+        var radiusSquared = (double)radius * radius;
+        var visibleNpcIds = character.Connection?.Protocol1810VisibleNpcObjIds;
+        var candidates = nearestSameWorld
+            .Where(entry => entry.DistanceSquared <= radiusSquared &&
+                            (visibleNpcIds == null || !visibleNpcIds.Contains(entry.Npc.ObjId)))
+            .Take(Math.Max(0, maxCount))
+            .ToList();
+
+        Logger.Warn(
+            "Protocol1810 NPC scan: characterId={0}, objId={1}, world={2}, instance={3}, region={4}, pos=({5:F1},{6:F1},{7:F1}), global={8}, sameWorld={9}, sameInstance={10}, visibleSameInstance={11}, withinRadius={12}, radius={13:F1}",
+            character.Id,
+            character.ObjId,
+            worldId,
+            instanceId,
+            character.Region?.Id ?? 0,
+            playerPosition.X,
+            playerPosition.Y,
+            playerPosition.Z,
+            allNpcs.Count,
+            sameWorld.Count,
+            sameInstance.Count,
+            sameInstance.Count(n => n.IsVisible),
+            candidates.Count,
+            radius);
+
+        foreach (var entry in nearestSameWorld.Take(5))
+        {
+            var npcPosition = entry.Npc.Transform.World.Position;
+            Logger.Warn(
+                "Protocol1810 NPC nearest: template={0}, objId={1}, name={2}, visible={3}, world={4}, instance={5}, region={6}, pos=({7:F1},{8:F1},{9:F1}), distance={10:F1}",
+                entry.Npc.TemplateId,
+                entry.Npc.ObjId,
+                entry.Npc.Name,
+                entry.Npc.IsVisible,
+                entry.Npc.Transform.WorldId,
+                entry.Npc.Transform.InstanceId,
+                entry.Npc.Region?.Id ?? 0,
+                npcPosition.X,
+                npcPosition.Y,
+                npcPosition.Z,
+                Math.Sqrt(entry.DistanceSquared));
+        }
+
+        // If no NPC shares the player's world/instance, log the nearest global
+        // entries as a direct diagnostic for world-id or spawn-coordinate
+        // mismatches introduced by database/config migration.
+        if (nearestSameWorld.Count == 0 && allNpcs.Count > 0)
+        {
+            foreach (var entry in allNpcs
+                         .Where(HasFinitePosition)
+                         .Select(n => new
+                         {
+                             Npc = n,
+                             DistanceSquared = DistanceSquared(playerPosition, n.Transform.World.Position)
+                         })
+                         .OrderBy(entry => entry.DistanceSquared)
+                         .Take(5))
+            {
+                var npcPosition = entry.Npc.Transform.World.Position;
+                Logger.Warn(
+                    "Protocol1810 NPC global-nearest mismatch: template={0}, objId={1}, world={2}, instance={3}, pos=({4:F1},{5:F1},{6:F1}), distance={7:F1}",
+                    entry.Npc.TemplateId,
+                    entry.Npc.ObjId,
+                    entry.Npc.Transform.WorldId,
+                    entry.Npc.Transform.InstanceId,
+                    npcPosition.X,
+                    npcPosition.Y,
+                    npcPosition.Z,
+                    Math.Sqrt(entry.DistanceSquared));
+            }
+        }
+
+        var sent = 0;
+        foreach (var entry in candidates)
+        {
+            var npc = entry.Npc;
+            try
+            {
+                if (npc.Ai != null)
+                    npc.Ai.ShouldTick = true;
+
+                // Typed target chain: 0x0133 -> 0x0321 -> 0x00A7.
+                // The generated NPC dump lets us compare the exact state body
+                // with donor captures if the client rejects one template.
+                npc.AddVisibleObject(character);
+                visibleNpcIds?.Add(npc.ObjId);
+                sent++;
+            }
+            catch (Exception exception)
+            {
+                Logger.Error(
+                    exception,
+                    "Protocol1810 NPC publish failed: characterId={0}, template={1}, objId={2}, distance={3:F1}",
+                    character.Id,
+                    npc.TemplateId,
+                    npc.ObjId,
+                    Math.Sqrt(entry.DistanceSquared));
+            }
+        }
+
+        var connection = character.Connection;
+        if (connection != null)
+        {
+            connection.Protocol1810NpcVisibilityAnchorValid = true;
+            connection.Protocol1810NpcVisibilityAnchorX = playerPosition.X;
+            connection.Protocol1810NpcVisibilityAnchorY = playerPosition.Y;
+            connection.Protocol1810NpcVisibilityAnchorZ = playerPosition.Z;
+        }
+
+        Logger.Info(
+            "Protocol1810 NPC publication complete: characterId={0}, sent={1}, candidates={2}, radius={3:F1}",
+            character.Id,
+            sent,
+            candidates.Count,
+            radius);
+
+        return sent;
+    }
+
+    /// <summary>
+    /// Reconciles the target-10.8 NPC set after authoritative character
+    /// movement. NPCs that left the radius are removed and newly-near NPCs are
+    /// serialized through the typed 0x0133 -> 0x0321 -> 0x00A7 chain.
+    /// </summary>
+    public int RefreshProtocol1810NearbyNpcs(
+        Character character,
+        bool force = false,
+        float radius = 150f,
+        float rescanDistance = 40f,
+        int maxCount = 50)
+    {
+        if (character?.Transform == null || character.Connection == null)
+            return 0;
+
+        var connection = character.Connection;
+        var playerPosition = character.Transform.World.Position;
+        if (!force && connection.Protocol1810NpcVisibilityAnchorValid)
+        {
+            var anchorDx = playerPosition.X - connection.Protocol1810NpcVisibilityAnchorX;
+            var anchorDy = playerPosition.Y - connection.Protocol1810NpcVisibilityAnchorY;
+            var anchorDz = playerPosition.Z - connection.Protocol1810NpcVisibilityAnchorZ;
+            var anchorDistanceSquared = anchorDx * anchorDx + anchorDy * anchorDy + anchorDz * anchorDz;
+            if (anchorDistanceSquared < rescanDistance * rescanDistance)
+                return 0;
+        }
+
+        static bool IsFinite(Npc npc)
+        {
+            var position = npc.Transform.World.Position;
+            return float.IsFinite(position.X) && float.IsFinite(position.Y) && float.IsFinite(position.Z);
+        }
+
+        var radiusSquared = (double)radius * radius;
+        var desiredNpcIds = _npcs.Values
+            .Where(npc => npc?.Transform != null && npc.Transform.WorldId == character.Transform.WorldId && IsFinite(npc))
+            .Select(npc => new
+            {
+                Npc = npc,
+                DistanceSquared =
+                    Math.Pow((double)npc.Transform.World.Position.X - playerPosition.X, 2) +
+                    Math.Pow((double)npc.Transform.World.Position.Y - playerPosition.Y, 2) +
+                    Math.Pow((double)npc.Transform.World.Position.Z - playerPosition.Z, 2)
+            })
+            .Where(entry => entry.DistanceSquared <= radiusSquared)
+            .OrderBy(entry => entry.DistanceSquared)
+            .Take(Math.Max(0, maxCount))
+            .Select(entry => entry.Npc.ObjId)
+            .ToHashSet();
+
+        var removed = 0;
+        foreach (var staleObjId in connection.Protocol1810VisibleNpcObjIds
+                     .Where(objId => !desiredNpcIds.Contains(objId))
+                     .ToList())
+        {
+            var staleNpc = GetNpc(staleObjId);
+            if (staleNpc != null)
+                staleNpc.RemoveVisibleObject(character);
+            else
+                connection.Protocol1810VisibleNpcObjIds.Remove(staleObjId);
+            removed++;
+        }
+
+        var sent = PublishProtocol1810NearbyNpcs(character, radius, maxCount);
+        Logger.Info(
+            "Protocol1810 NPC refresh: characterId={0}, removed={1}, sent={2}, tracked={3}, pos=({4:F1},{5:F1},{6:F1})",
+            character.Id,
+            removed,
+            sent,
+            connection.Protocol1810VisibleNpcObjIds.Count,
+            playerPosition.X,
+            playerPosition.Y,
+            playerPosition.Z);
+
+        return sent;
+    }
+
+    public void AddVisibleObject(GameObject obj)
+    {
+        if (obj == null)
+            return;
+        var region = GetRegion(obj); // Get region of Object or it's Root object if it has one
+        var currentRegion = obj.Region; // Current Region this object is in
+
+        // If region didn't change, ignore
+        if (region == null || currentRegion != null && currentRegion.Equals(region))
+            return;
+
+        if (currentRegion == null)
+        {
+            // If no currentRegion, add it (happens on new spawns)
+            foreach (var neighbor in region.GetNeighbors())
+                neighbor.AddToCharacters(obj);
+
+            region.AddObject(obj);
+            obj.Region = region;
+        }
+        else
+        {
+            // No longer in the same region, update things
+            // Remove visibility from oldNeighbors
+            var diffs = currentRegion.FindDifferenceBetweenRegions(region);
+            if (diffs != null)
+                foreach (var diff in diffs)
+                    diff?.RemoveFromCharacters(obj);
+
+            // Add visibility to newNeighbours
+            diffs = region.FindDifferenceBetweenRegions(currentRegion);
+            if (diffs != null)
+                foreach (var diff in diffs)
+                    if (obj.IsVisible)
+                        diff?.AddToCharacters(obj);
+
+            // Add this obj to the new region
+            region.AddObject(obj);
+            // Update it's region
+            obj.Region = region;
+
+            // remove the obj from the old region
+            currentRegion.RemoveObject(obj);
+        }
+
+        // Also show children
+        if (obj.Transform?.Children?.Count > 0)
+            foreach (var child in obj.Transform.Children)
+                if (child != null)
+                    AddVisibleObject(child.GameObject);
+
+        //Logger.Warn($" objects={_objects.Count}, doodads={_doodads.Count}, npcs={_npcs.Count}, characters={_characters.Count}");
+    }
+
+    public static void RemoveVisibleObject(GameObject obj)
+    {
+        if (obj?.Region == null)
+            return;
+
+        var neighbors = obj.Region.GetNeighbors();
+        obj.Region?.RemoveObject(obj);
+
+        if (neighbors == null)
+            return;
+
+        if (neighbors.Length > 0)
+            foreach (var neighbor in neighbors)
+                neighbor?.RemoveFromCharacters(obj);
+
+        obj.Region = null;
+
+        // Also remove children
+        if (obj.Transform is null)
+            return;
+
+        if (obj.Transform.Children?.Count > 0)
+            foreach (var child in obj.Transform.Children)
+                if (child != null)
+                    RemoveVisibleObject(child.GameObject);
+    }
+
+    public static List<T> GetAround<T>(GameObject obj) where T : class
+    {
+        var result = new List<T>();
+        if (obj?.Region == null)
+            return result;
+
+        foreach (var neighbor in obj.Region.GetNeighbors())
+            neighbor?.GetList(result, obj.ObjId);
+
+        return result;
+    }
+
+    public static List<T> GetAround<T>(GameObject obj, float radius, bool useModelSize = false) where T : class
+    {
+        var result = new List<T>();
+        if (obj?.Region == null)
+            return result;
+
+        if (useModelSize)
+            radius += obj.ModelSize;
+
+        if (radius > 0.0f && RadiusFitsCurrentRegion(obj, radius))
+        {
+            obj.Region.GetList(result, obj.ObjId, obj.Transform.World.Position.X, obj.Transform.World.Position.Y, radius * radius, useModelSize);
+        }
+        else
+        {
+            foreach (var neighbor in obj.Region.GetNeighbors())
+                neighbor?.GetList(result, obj.ObjId, obj.Transform.World.Position.X, obj.Transform.World.Position.Y, radius * radius, useModelSize);
+        }
+
+        return result;
+    }
+
+    private static bool RadiusFitsCurrentRegion(GameObject obj, float radius)
+    {
+        var xMod = obj?.Transform?.World?.Position.X % REGION_SIZE;
+        if (xMod - radius < 0 || xMod + radius > REGION_SIZE)
+            return false;
+
+        var yMod = obj?.Transform?.World?.Position.Y % REGION_SIZE;
+        if (yMod - radius < 0 || yMod + radius > REGION_SIZE)
+            return false;
+        return true;
+    }
+
+    public static List<T> GetAroundByShape<T>(GameObject obj, AreaShape shape) where T : GameObject
+    {
+        if (shape.Value1 == 0 && shape.Value2 == 0 && shape.Value3 == 0)
+            Logger.Warn("AreaShape with no size values was used");
+        if (shape.Type == AreaShapeType.Sphere)
+        {
+            var radius = shape.Value1;
+            var height = shape.Value2;
+            return GetAround<T>(obj, radius, true);
+        }
+
+        if (shape.Type == AreaShapeType.Cuboid)
+        {
+            var diagonal = Math.Sqrt(shape.Value1 * shape.Value1 + shape.Value2 * shape.Value2);
+            var res = GetAround<T>(obj, (float)diagonal, true);
+            res = shape.ComputeCuboid(obj, res);
+            return res;
+        }
+
+        Logger.Error("AreaShape had impossible type");
+        throw new ArgumentNullException(nameof(shape), "AreaShape type does not exist!");
+    }
+
+    public List<T> GetInCell<T>(uint worldId, int x, int y) where T : class
+    {
+        var result = new List<T>();
+        var regions = new List<Region>();
+        for (var a = x * SECTORS_PER_CELL; a < (x + 1) * SECTORS_PER_CELL; a++)
+            for (var b = y * SECTORS_PER_CELL; b < (y + 1) * SECTORS_PER_CELL; b++)
+            {
+                if (ValidRegion(worldId, a, b) && _worlds[worldId].Regions[a, b] != null)
+                    regions.Add(_worlds[worldId].Regions[a, b]);
+            }
+
+        foreach (var region in regions)
+            region.GetList(result, 0);
+        return result;
+    }
+
+    [Obsolete("Please use ChatManager.Instance.GetNationChat(race).SendPacker(packet) instead.")]
+    public void BroadcastPacketToNation(GamePacket packet, Race race)
+    {
+        var mRace = (((byte)race - 1) & 0xFC); // some bit magic that makes raceId into some kind of birth continent id
+        foreach (var character in _characters.Values)
+        {
+            var cmRace = (((byte)character.Race - 1) & 0xFC);
+            if (mRace != cmRace)
+                continue;
+            character.SendPacket(packet);
+        }
+    }
+
+    [Obsolete("Please use ChatManager.Instance.GetFactionChat(factionMotherId).SendPacker(packet) instead.")]
+    public void BroadcastPacketToFaction(GamePacket packet, uint factionMotherId)
+    {
+        foreach (var character in _characters.Values)
+        {
+            if (character.Faction.MotherId != factionMotherId)
+                continue;
+            character.SendPacket(packet);
+        }
+    }
+
+    [Obsolete("Please use ChatManager.Instance.GetZoneChat(zoneKey).SendPacker(packet) instead.")]
+    public void BroadcastPacketToZone(GamePacket packet, uint zoneKey)
+    {
+        // First find the zone group, so functions like /shout work in larger zones that use multiple zone keys
+        var zone = ZoneManager.Instance.GetZoneByKey(zoneKey);
+        var zoneGroupId = zone?.GroupId ?? 0;
+        var validZones = ZoneManager.Instance.GetZoneKeysInZoneGroupById(zoneGroupId);
+        foreach (var character in _characters.Values)
+        {
+            if (!validZones.Contains(character.Transform.ZoneId))
+                continue;
+            character.SendPacket(packet);
+        }
+    }
+
+    public void BroadcastPacketToServer(GamePacket packet)
+    {
+        foreach (var character in _characters.Values)
+        {
+            character.SendPacket(packet);
+        }
+    }
+
+    public Region GetRegion(uint zoneId, float x, float y)
+    {
+        var world = GetWorldByZone(zoneId);
+        var sx = (int)(x / REGION_SIZE);
+        var sy = (int)(y / REGION_SIZE);
+        return world.GetRegion(sx, sy);
+    }
+
+    private static Region GetRegion(InstanceWorld world, float x, float y)
+    {
+        var sx = (int)(x / REGION_SIZE);
+        var sy = (int)(y / REGION_SIZE);
+        return world.GetRegion(sx, sy);
+    }
+
+    private bool ValidRegion(uint worldId, int x, int y)
+    {
+        var world = GetWorld(worldId);
+        return world != null && world.ValidRegion(x, y);
+    }
+
+    public void OnPlayerJoin(Character character)
+    {
+        //turn snow on off 
+        Snow(character);
+
+        //family stuff
+        if (character.Family > 0)
+        {
+            FamilyManager.Instance.OnCharacterLogin(character);
+        }
+
+        StartingFirstJourney(character);
+    }
+
+    private void StartingFirstJourney(Character character)
+    {
+        var questId = 0u;
+        switch (character.Race)
+        {
+            case Race.Nuian: // Nuian
+                questId = 6839;
+                break;
+            case Race.Dwarf: // Dwarf
+                questId = 5811;
+                break;
+            case Race.Elf: // Elf
+                questId = 6840;
+                break;
+            case Race.Hariharan: // Hariharan
+                questId = 6842;
+                break;
+            case Race.Ferre: // Ferre
+                questId = 6841;
+                break;
+            case Race.Warborn: // Warborn
+                questId = 8228;
+                break;
+            case Race.Fairy:
+                break;
+            case Race.Returned:
+                break;
+        }
+        // showing it once
+        if (character.Updated - character.Created < TimeSpan.FromMinutes(1))
+        {
+            character.Quests.Add(questId);
+        }
+    }
+
+    public void Snow(Character character)
+    {
+        //send the char the packet
+        character.SendPacket(new SCOnOffSnowPacket(IsSnowing));
+
+    }
+
+    public static void ResendVisibleObjectsToCharacter(Character character)
+    {
+        // Re-send visible flags to character getting out of cinema
+        var stuffs = GetAround<GameObject>(character, REGION_NEIGHBORHOOD_SIZE * REGION_SIZE);
+        var doodads = new List<Doodad>();
+        foreach (var stuff in stuffs)
+        {
+            if (stuff is Doodad d)
+                doodads.Add(d);
+            else
+                stuff.AddVisibleObject(character);
+        }
+
+        for (var i = 0; i < doodads.Count; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
+        {
+            var count = Math.Min(doodads.Count - i, SCDoodadsCreatedPacket.MaxCountPerPacket);
+            var temp = doodads.GetRange(i, count).ToArray();
+            character.SendPacket(new SCDoodadsCreatedPacket(temp));
+        }
+    }
+
+    public List<Character> GetAllCharacters()
+    {
+        return _characters.Values.ToList();
+    }
+
+    public List<Npc> GetAllNpcs()
+    {
+        return _npcs.Values.ToList();
+    }
+
+    public List<Npc> GetAllNpcsFromWorld(uint worldId)
+    {
+        return _npcs.Values.Where(n => n.Transform.WorldId == worldId).ToList();
+    }
+
+    public List<Slave> GetAllSlaves()
+    {
+        return _slaves.Values.ToList();
+    }
+
+    public List<Mate> GetAllMates()
+    {
+        return _mates.Values.ToList();
+    }
+
+    public List<Doodad> GetAllDoodads()
+    {
+        return _doodads.Values.ToList();
+    }
+
+    public List<Slave> GetAllSlavesFromWorld(uint worldId)
+    {
+        return _slaves.Values.Where(n => n.Transform.WorldId == worldId).ToList();
+    }
+
+    public AreaShape GetAreaShapeById(uint id)
+    {
+        if (_areaShapes.TryGetValue(id, out var res))
+            return res;
+        return null;
+    }
+
+    public void Stop()
+    {
+        if (_worlds is not null)
+        {
+            foreach (var world in _worlds)
+            {
+                world.Value?.Physics?.Stop();
+            }
+        }
+    }
+
+    public void StartPhysics()
+    {
+        foreach (var (key, world) in _worlds)
+        {
+            world.Physics = new BoatPhysicsManager();
+            world.Physics.SimulationWorld = world;
+            world.Physics.Initialize();
+            world.Physics.StartPhysics();
+        }
+    }
+
+    public static bool LoadWaterBodiesFromClientData(InstanceWorld world)
+    {
+        // Use world.xml to check if we have client data enabled
+        var worldXmlTest = Path.Combine("game", "worlds", world.Name, "world.xml");
+        if (!ClientFileManager.FileExists(worldXmlTest))
+            return false;
+
+        var bodiesLoaded = 0;
+
+        // TODO: The data loaded here is incorrect !!!
+
+        for (var cellY = 0; cellY < world.CellY; cellY++)
+            for (var cellX = 0; cellX < world.CellX; cellX++)
+            {
+                var cellFileName = $"{cellX:000}_{cellY:000}";
+                var entityFile = Path.Combine("game", "worlds", world.Name, "cells", cellFileName, "client", "entities.xml");
+                if (ClientFileManager.FileExists(entityFile))
+                {
+                    var xmlString = ClientFileManager.GetFileAsString(entityFile);
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(xmlString);
+
+                    var _allEntityBlocks = xmlDoc.SelectNodes("/Mission/Objects/Entity");
+                    var cellPos = new Vector3(cellX * 1024, cellY * 1024, 0);
+
+                    for (var i = 0; i < _allEntityBlocks?.Count; i++)
+                    {
+                        var block = _allEntityBlocks[i];
+                        var attribs = XmlHelper.ReadNodeAttributes(block);
+
+                        if (!attribs.TryGetValue("Name", out var entityName))
+                            continue;
+
+                        // Is this Entity named like a water body ?
+                        // TODO: More sophisticated way of determining if it's water
+                        var isWaterBody = entityName.Contains("_water") || entityName.Contains("_pond") || entityName.Contains("_lake") || entityName.Contains("_river");
+                        if (isWaterBody == false)
+                            continue;
+
+                        if (attribs.TryGetValue("EntityClass", out var entityClass))
+                        {
+                            // Is it a AreaShape ?
+                            if (entityClass == "AreaShape")
+                            {
+                                var areaBlock = block.SelectSingleNode("Area");
+                                if (areaBlock == null)
+                                    continue; // this shape has no area defined
+
+                                // Create WaterBody here
+                                var newWaterBodyArea = new WaterBodyArea(entityName);
+                                newWaterBodyArea.Id = XmlHelper.ReadAttribute(attribs, "EntityId", 0u);
+                                newWaterBodyArea.Guid = XmlHelper.ReadAttribute(attribs, "Guid", "");
+
+                                var entityPosString = XmlHelper.ReadAttribute(attribs, "Pos", "0,0,0");
+                                var areaPos = XmlHelper.StringToVector3(entityPosString);
+
+                                // Read Area Data (height)
+                                var areaAttribs = XmlHelper.ReadNodeAttributes(areaBlock);
+                                newWaterBodyArea.Height = XmlHelper.ReadAttribute(areaAttribs, "Height", 0f);
+
+                                // Get Points within the Area
+                                var pointBlocks = areaBlock.SelectNodes("Points/Point");
+
+                                var firstPos = Vector3.Zero;
+                                for (var p = 0; p < pointBlocks.Count; p++)
+                                {
+                                    var pointAttribs = XmlHelper.ReadNodeAttributes(pointBlocks[p]);
+                                    var pointPosString = XmlHelper.ReadAttribute(pointAttribs, "Pos", "0,0,0");
+                                    var pointPos = XmlHelper.StringToVector3(pointPosString);
+                                    var pos = cellPos + areaPos + pointPos;
+                                    newWaterBodyArea.Points.Add(pos);
+                                    if (p == 0)
+                                        firstPos = pos;
+                                }
+
+                                if (pointBlocks.Count > 2)
+                                    newWaterBodyArea.Points.Add(firstPos);
+
+                                newWaterBodyArea.UpdateBounds();
+                                world.Water.Areas.Add(newWaterBodyArea);
+                                bodiesLoaded++;
+                            }
+                        }
+                    }
+                }
+            }
+
+        if (bodiesLoaded > 0)
+            Logger.Info($"{bodiesLoaded} waters bodies loaded for {world.Name}");
+        return true;
+    }
+
+    public InstanceWorld CreateWorld(InstanceWorld originalWorld)
+    {
+        if (originalWorld == null)
+            return null;
+
+        // Apply Data to world
+        var newInstance = new InstanceWorld();
+        newInstance.Id = WorldIdManager.Instance.GetNextId();
+        newInstance.TemplateId = originalWorld.TemplateId;
+        newInstance.Name = originalWorld.Name;
+        newInstance.CellX = originalWorld.CellX;
+        newInstance.CellY = originalWorld.CellY;
+        newInstance.OceanLevel = originalWorld.OceanLevel;
+        newInstance.MaxHeight = originalWorld.MaxHeight;
+        newInstance.HeightMaxCoefficient = originalWorld.HeightMaxCoefficient;
+        newInstance.SpawnPosition = originalWorld.SpawnPosition.Clone();
+        newInstance.SpawnPosition.WorldId = newInstance.Id;
+        newInstance.ZoneKeys = originalWorld.ZoneKeys;
+        newInstance.HeightMaps = originalWorld.HeightMaps; // TODO слишком долго копирует, клиент дисконнектит .CloneJson();
+        newInstance.XmlWorldZones = originalWorld.XmlWorldZones; // TODO копирование зацикливается
+        newInstance.Physics = originalWorld.Physics;  // TODO копирование зацикливается .CloneJson();
+        newInstance.Physics.SimulationWorld.Id = newInstance.Id;
+        newInstance.Water = originalWorld.Water; // TODO .CloneJson();
+        var dx = originalWorld.CellX * SECTORS_PER_CELL;
+        var dy = originalWorld.CellY * SECTORS_PER_CELL;
+        newInstance.Regions = new Region[dx, dy];
+        for (var y = 0; y < dy; y++)
+        {
+            for (var x = 0; x < dx; x++)
+            {
+                newInstance.Regions[x, y] = new Region(newInstance.Id, x, y, originalWorld.ZoneKeys[0]);
+            }
+        }
+
+        newInstance.Physics.SimulationWorld.Regions = newInstance.Regions;
+        //SpawnManager.Instance.CloneNpcEventSpawners((byte)originalWorld.TemplateId, (byte)newInstance.Id);
+
+        _worlds.Add(newInstance.Id, newInstance);
+
+        return newInstance;
+    }
+
+    public void RemoveWorld(uint worldId)
+    {
+        if (!_worlds.Remove(worldId))
+        {
+            Logger.Info($"[Dungeon] couldn't remove the dungeon id={worldId}!");
+        }
+        //if (!SpawnManager.Instance.RemoveNpcEventSpawners((byte)worldId))
+        //{
+        //    Logger.Info($"[Dungeon] could not delete the list of NpcEventSpawners for dungeon id={worldId}!");
+        //}
+    }
+}

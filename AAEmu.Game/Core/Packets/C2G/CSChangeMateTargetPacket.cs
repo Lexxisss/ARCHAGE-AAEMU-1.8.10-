@@ -1,0 +1,21 @@
+﻿using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Network.Game;
+
+namespace AAEmu.Game.Core.Packets.C2G;
+
+public class CSChangeMateTargetPacket : GamePacket
+{
+    public CSChangeMateTargetPacket() : base(CSOffsets.CSChangeMateTargetPacket, 5)
+    {
+    }
+
+    public override void Read(PacketStream stream)
+    {
+        var tlId = stream.ReadUInt16();
+        var objId = stream.ReadBc();
+
+        //Logger.Warn("ChangeMateTarget, TlId: {0}, ObjId: {1}", tlId, objId);
+        MateManager.Instance.ChangeTargetMate(Connection, tlId, objId);
+    }
+}

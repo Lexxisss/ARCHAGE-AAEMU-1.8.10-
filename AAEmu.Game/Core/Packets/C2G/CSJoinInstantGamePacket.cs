@@ -1,0 +1,19 @@
+﻿using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Network.Game;
+
+namespace AAEmu.Game.Core.Packets.C2G;
+
+public class CSJoinInstantGamePacket : GamePacket
+{
+    public CSJoinInstantGamePacket() : base(CSOffsets.CSJoinInstantGamePacket, 5)
+    {
+    }
+
+    public override void Read(PacketStream stream)
+    {
+        var join = stream.ReadBoolean();
+        var qualifiedId = stream.ReadUInt64();
+
+        Logger.Warn("JoinInstantGame, Join: {0}, QualifiedId: {1}", join, qualifiedId);
+    }
+}

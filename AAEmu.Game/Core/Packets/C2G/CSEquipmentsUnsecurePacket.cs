@@ -1,0 +1,17 @@
+﻿using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Network.Game;
+
+namespace AAEmu.Game.Core.Packets.C2G;
+
+public class CSEquipmentsUnsecurePacket : GamePacket
+{
+    public CSEquipmentsUnsecurePacket() : base(CSOffsets.CSEquipmentsUnsecurePacket, 5)
+    {
+    }
+
+    public override void Read(PacketStream stream)
+    {
+        // Empty struct
+        Logger.Warn("EquipmentsUnsecure");
+    }
+}
