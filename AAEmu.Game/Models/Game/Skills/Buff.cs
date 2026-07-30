@@ -226,13 +226,23 @@ public class Buff
 
     public uint GetTimeElapsed()
     {
-        var time = (uint)(DateTime.UtcNow - StartTime).TotalMilliseconds;
-        return time > 0 ? time : 0;
+        if (StartTime == DateTime.MinValue)
+            return 0;
+
+        var elapsed = Math.Max(0d, (DateTime.UtcNow - StartTime).TotalMilliseconds);
+        if (Duration > 0)
+            elapsed = Math.Min(elapsed, Duration);
+
+        return (uint)Math.Min(elapsed, uint.MaxValue);
     }
 
     public void WriteData(PacketStream stream)
     {
-        stream.WritePisc(Charge, Duration / 10, 0, (long)(Template.Tick / 10));
+        // The client stores total and elapsed time in milliseconds, but BuffData
+        // transmits them in 10 ms units inside PISC. Remaining time is derived
+        // client-side as total - elapsed.
+        var elapsed = Duration > 0 ? GetTimeElapsed() : 0u;
+        stream.WritePisc(Charge, Duration / 10, elapsed / 10, (long)(Template.Tick / 10));
     }
 
     /// <summary>

@@ -49,7 +49,6 @@ public class BuffEffect : EffectTemplate
         ushort abLevel = 1;
         if (caster is Character character)
         {
-            Logger.Debug("BuffEffect");
             if (source.Skill != null)
             {
                 var template = source.Skill.Template;
@@ -79,11 +78,6 @@ public class BuffEffect : EffectTemplate
         // Safeguard to prevent accidental flagging
         if (Buff.Kind == BuffKind.Bad && !caster.CanAttack(target) && caster != target)
             return;
-
-        Logger.Debug(
-            "BuffEffect APPLY skill={0}, buff={1}, caster={2}, target={3}, targetType={4}, kind={5}",
-            source.Skill?.Template.Id ?? 0u, Buff.BuffId, caster.ObjId, target.ObjId,
-            target.GetType().Name, Buff.Kind);
 
         target.Buffs.AddBuff(new Buff(target, caster, casterObj, Buff, source.Skill, time) { AbLevel = abLevel });
 

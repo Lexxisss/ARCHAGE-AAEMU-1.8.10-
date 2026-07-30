@@ -254,10 +254,6 @@ public class Skill
         {
             CastTime = castTime
         }, true);
-        Logger.Debug(
-            "SkillLifecycle START skill={0}, tl={1}, caster={2}, target={3}, castMs={4}, startAnim={5}, fireAnim={6}",
-            Id, TlId, caster.ObjId, target.ObjId, castTime, Template.StartAnimId, Template.FireAnimId);
-
         if (castTime > 0)
         {
             // Has casting time, schedule a task for it
@@ -817,9 +813,6 @@ public class Skill
         if (Template.FireAnim != null && Template.UseAnimTime)
             totalDelay += (int)(Template.FireAnim.CombatSyncTime * (unit.GlobalCooldownMul / 100));
 
-        Logger.Debug(
-            "SkillLifecycle FIRE skill={0}, tl={1}, caster={2}, target={3}, delayMs={4}, fireAnim={5}",
-            Id, TlId, caster.ObjId, target.ObjId, totalDelay, Template.FireAnimId);
         caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject)
         {
             ComputedDelay = totalDelay

@@ -6,7 +6,7 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCBuffCreatedPacket : GamePacket
 {
-    public override PacketLogLevel LogLevel => PacketLogLevel.Debug;
+    public override PacketLogLevel LogLevel => PacketLogLevel.Trace;
     private readonly Buff _buff;
 
     public SCBuffCreatedPacket(Buff buff) : base(SCOffsets.SCBuffCreatedPacket, 5)
@@ -23,13 +23,14 @@ public class SCBuffCreatedPacket : GamePacket
         stream.WriteBc(_buff.Owner.ObjId);            // bc/owner object id
         stream.Write(_buff.Index);                    // optional runtime buff id
 
-        // BuffData: t, l, a, PISC data, s, stack.
+        // Target BuffData order: t, l, a, s, stack, then PISC
+        // (charged, total duration / 10, elapsed time / 10, tick / 10).
         stream.Write(_buff.Template.BuffId);
         stream.Write((byte)(_buff.Caster?.Level ?? 0));
         stream.Write(_buff.AbLevel);
-        _buff.WriteData(stream);
         stream.Write(_buff.Skill?.Template.Id ?? 0u);
         stream.Write(_buff.Stack);
+        _buff.WriteData(stream);
         return stream;
     }
 
