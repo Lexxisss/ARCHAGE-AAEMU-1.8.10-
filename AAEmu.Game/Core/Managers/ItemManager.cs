@@ -623,7 +623,7 @@ public class ItemManager : Singleton<ItemManager>
         SkillManager.Instance.OnSkillsLoaded += OnSkillsLoaded;
 
         using (var connection2 = SQLite.CreateConnection("Data", SQLite.ServerDatabase))
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateConnection("Data", SQLite.TargetClientDatabase))
         {
             Logger.Info("Loading item templates ...");
 
@@ -1126,6 +1126,39 @@ public class ItemManager : Singleton<ItemManager>
             var sheetMusicItemTemplate = new MusicSheetTemplate { Id = Item.SheetMusic };
             _templates.Add(sheetMusicItemTemplate.Id, sheetMusicItemTemplate);
 
+            // Target 10.8 normalizes item pricing into its own per-currency table instead of
+            // price/refund/honor_price/living_point_price columns on items. Currency ids match
+            // ShopCurrencyType (0=Money, 1=Honor, 2=VocationBadges).
+            var itemMoneyPrices = new Dictionary<uint, (int price, int refund)>();
+            var itemHonorPrices = new Dictionary<uint, (int price, int refund)>();
+            var itemLivingPointPrices = new Dictionary<uint, (int price, int refund)>();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM item_prices";
+                command.Prepare();
+                using (var sqliteReader = command.ExecuteReader())
+                using (var reader = new SQLiteWrapperReader(sqliteReader))
+                {
+                    while (reader.Read())
+                    {
+                        var itemId = reader.GetUInt32("item_id");
+                        var entry = (reader.GetInt32("price"), reader.GetInt32("refund"));
+                        switch (reader.GetByte("currency_id"))
+                        {
+                            case (byte)ShopCurrencyType.Money:
+                                itemMoneyPrices[itemId] = entry;
+                                break;
+                            case (byte)ShopCurrencyType.Honor:
+                                itemHonorPrices[itemId] = entry;
+                                break;
+                            case (byte)ShopCurrencyType.VocationBadges:
+                                itemLivingPointPrices[itemId] = entry;
+                                break;
+                        }
+                    }
+                }
+            }
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT * FROM items";
@@ -1141,8 +1174,9 @@ public class ItemManager : Singleton<ItemManager>
                         template.Name = reader.IsDBNull("name") ? "" : reader.GetString("name");
                         template.CategoryId = reader.GetInt32("category_id");
                         template.Level = reader.GetInt32("level");
-                        template.Price = reader.GetInt32("price");
-                        template.Refund = reader.GetInt32("refund");
+                        var moneyPrice = itemMoneyPrices.GetValueOrDefault(id);
+                        template.Price = moneyPrice.price;
+                        template.Refund = moneyPrice.refund;
                         template.BindType = (ItemBindType)reader.GetUInt32("bind_id");
                         template.PickupLimit = reader.GetInt32("pickup_limit");
                         template.MaxCount = reader.GetInt32("max_stack_size");
@@ -1154,7 +1188,7 @@ public class ItemManager : Singleton<ItemManager>
                         template.Gradable = reader.GetBoolean("gradable", true);
                         template.LootMulti = reader.GetBoolean("loot_multi", true);
                         template.LootQuestId = reader.GetUInt32("loot_quest_id");
-                        template.HonorPrice = reader.GetInt32("honor_price");
+                        template.HonorPrice = itemHonorPrices.GetValueOrDefault(id).price;
                         template.ExpAbsLifetime = reader.GetInt32("exp_abs_lifetime");
                         template.ExpOnlineLifetime = reader.GetInt32("exp_online_lifetime");
                         template.SpecialtyZoneId = !reader.IsDBNull("specialty_zone_id") ? reader.GetUInt32("specialty_zone_id") : 0;
@@ -1166,7 +1200,7 @@ public class ItemManager : Singleton<ItemManager>
                         template.LevelLimit = reader.GetInt32("level_limit");
                         template.FixedGrade = reader.GetInt32("fixed_grade");
                         template.Disenchantable = reader.GetBoolean("disenchantable", true);
-                        template.LivingPointPrice = reader.GetInt32("living_point_price");
+                        template.LivingPointPrice = itemLivingPointPrices.GetValueOrDefault(id).price;
                         template.CharGender = reader.GetByte("char_gender_id");
 
                         _templates.TryAdd(template.Id, template);
