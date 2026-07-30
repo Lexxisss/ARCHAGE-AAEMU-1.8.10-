@@ -118,6 +118,7 @@ public class CharacterMails
         if (mail.Send())
         {
             Self.SendPacket(new SCMailSentPacket(mail.Header, itemSlots.ToArray(), UnreadMailCount));
+            Self.Quests?.OnMailSent(mail.Body.Attachments);
             // Take the fee
             Self.SubtractMoney(SlotType.Inventory, mailFee + money0);
             return true;

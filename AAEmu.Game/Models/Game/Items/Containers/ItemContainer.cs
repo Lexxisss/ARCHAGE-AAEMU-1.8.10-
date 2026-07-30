@@ -618,6 +618,7 @@ public class ItemContainer
 
         // First try to add to existing item counts
         var itemTasks = new List<ItemTask>();
+        var acquiredCounts = new List<(Item item, int addedCount)>();
 
         // Never update in mail containers
         if (ContainerType != SlotType.Mail)
@@ -631,6 +632,7 @@ public class ItemContainer
                     i.Count += addAmount;
                     amountToAdd -= addAmount;
                     itemTasks.Add(new ItemCountUpdate(i, addAmount));
+                    acquiredCounts.Add((i, addAmount));
                     updatedItemsList.Add(i);
                     Owner?.Inventory.OnAcquiredItem(i, addAmount, true);
                 }
@@ -678,13 +680,19 @@ public class ItemContainer
             if (AddOrMoveExistingItem(ItemTaskType.Invalid, newItem, prefSlot)) // Task set to invalid as we send our own packets inside this function
             {
                 itemTasks.Add(new ItemAdd(newItem));
+                acquiredCounts.Add((newItem, addAmount));
                 newItemsList.Add(newItem);
             }
             else
                 throw new GameException("AcquireDefaultItem(); Unable to add new items"); // Inventory should have enough space, something went wrong
         }
         if (taskType != ItemTaskType.Invalid)
-            Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
+        {
+            // Opcode 0x10B carries a single item change per packet on the target
+            // 1.8.1.0 client, so each acquired/updated item gets its own packet.
+            foreach (var (item, addedCount) in acquiredCounts)
+                Owner?.SendPacket(new SCItemAcquiredPacket(taskType, item, addedCount));
+        }
         UpdateFreeSlotCount();
 
         // Send item expire packets if needed

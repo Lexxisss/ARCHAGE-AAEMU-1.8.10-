@@ -27,7 +27,7 @@ namespace AAEmu.Game.Models.Game.Quests;
 
 public partial class Quest : PacketMarshaler
 {
-    private const int ObjectiveCount = 5;
+    private const int ObjectiveCount = ClientObjectiveCount;
     private readonly ISphereQuestManager _sphereQuestManager;
     private readonly IQuestManager _questManager;
     private readonly ITaskManager _taskManager;
@@ -1805,60 +1805,11 @@ EndLoop:
 
     #region Packets and Database
 
-    public override PacketStream Write(PacketStream stream)
-    {
-        stream.Write(Id);
-        stream.Write(TemplateId);
-        stream.Write((byte)Status);
-        foreach (var objective in Objectives) // TODO do-while, count 5
-        {
-            stream.Write(objective);
-        }
+    public override PacketStream Write(PacketStream stream) => WriteTargetQuestContext(stream);
 
-        stream.Write(false);          // isCheckSet
-        stream.WriteBc((uint)ObjId);  // ObjId
-        stream.Write(0u);             // type(id)
-        stream.WriteBc((uint)ObjId);  // ObjId
-        stream.WriteBc((uint)ObjId);  // ObjId
-        stream.Write(LeftTime);       // quest time limit
-        stream.Write(LeftTime == -1 ? 0 : ComponentId); // type(id) - indicates which step is limited
-        stream.Write(DoodadId);                // doodadId
-        stream.Write(DateTime.UtcNow);         // acceptTime
-        stream.Write((byte)QuestAcceptorType); // type QuestAcceptorType
-        stream.Write(AcceptorType);            // acceptorType npcId or doodadId
-        return stream;
-    }
+    public void ReadData(byte[] data) => ReadRuntimeData(data);
 
-    public void ReadData(byte[] data)
-    {
-        var stream = new PacketStream(data);
-        for (var i = 0; i < ObjectiveCount; i++)
-        {
-            Objectives[i] = stream.ReadInt32();
-        }
-
-        Step = (QuestComponentKind)stream.ReadByte();
-        QuestAcceptorType = (QuestAcceptorType)stream.ReadByte();
-        ComponentId = stream.ReadUInt32();
-        AcceptorType = stream.ReadUInt32();
-        Time = stream.ReadDateTime();
-    }
-
-    public byte[] WriteData()
-    {
-        var stream = new PacketStream();
-        foreach (var objective in Objectives)
-        {
-            stream.Write(objective);
-        }
-
-        stream.Write((byte)Step);
-        stream.Write((byte)QuestAcceptorType);
-        stream.Write(ComponentId);
-        stream.Write(AcceptorType);
-        stream.Write(Time);
-        return stream.GetBytes();
-    }
+    public byte[] WriteData() => WriteRuntimeData();
 
     #endregion
 }

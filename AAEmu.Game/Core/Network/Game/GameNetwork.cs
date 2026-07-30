@@ -277,6 +277,7 @@ public class GameNetwork : Singleton<GameNetwork>
         //RegisterPacket(CSOffsets.CSPickBuffInstantGamePacket, 5, typeof(CSPickBuffInstantGamePacket));
         //RegisterPacket(CSOffsets.CSBattlefieldPickshipPacket, 5, typeof(CSBattlefieldPickshipPacket));
         RegisterPacket(CSOffsets.CSStartQuestContextPacket, 5, typeof(CSStartQuestContextPacket));
+        RegisterPacket(CSOffsets.CSDoodadQuestNotiPacket, 5, typeof(CSDoodadQuestNotiPacket));
         RegisterPacket(CSOffsets.CSCompleteQuestContextPacket, 5, typeof(CSCompleteQuestContextPacket));
         RegisterPacket(CSOffsets.CSDropQuestContextPacket, 5, typeof(CSDropQuestContextPacket));
         RegisterPacket(CSOffsets.CSQuestTalkMadePacket, 5, typeof(CSQuestTalkMadePacket));

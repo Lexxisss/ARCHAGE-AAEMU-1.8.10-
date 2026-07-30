@@ -25,7 +25,11 @@ public partial class Character
         base.DoDie(killer, killReason);
 
         if (killer is Character enemy && enemy.Faction.MotherId != Faction.MotherId)
+        {
             enemy.HostileFactionKills++;
+            var isPartyKill = TeamManager.Instance.GetActiveTeamByUnit(enemy.Id) != null;
+            enemy.Quests?.OnPlayerKill(this, isPartyKill);
+        }
 
         DropTradePackToFloor();
     }

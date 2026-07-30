@@ -46,7 +46,7 @@ public class InteractionEffect : EffectTemplate
             //character.Quests.OnInteraction(WorldInteraction, target);
             // инициируем событие
             //Task.Run(() => QuestManager.Instance.DoInteractionEvents((Character)caster, target.TemplateId));
-            QuestManager.Instance.DoInteractionEvents((Character)caster, target.TemplateId);
+            character.Quests.OnInteraction(WorldInteraction, target);
         }
     }
 }

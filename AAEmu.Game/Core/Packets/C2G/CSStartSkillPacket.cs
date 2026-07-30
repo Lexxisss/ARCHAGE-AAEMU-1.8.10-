@@ -66,7 +66,7 @@ public class CSStartSkillPacket : GamePacket
             return;
         }
 
-        Logger.Trace(
+        Logger.Debug(
             "StartSkill: skill={0}, flag={1}, caster={2}, target={3}",
             skillId,
             flag,

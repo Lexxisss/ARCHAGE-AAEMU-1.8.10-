@@ -41,7 +41,7 @@ public class AcceptQuestEffect : EffectTemplate
                 if (itemQuestId > 0)
                 {
                     // Add alternative quest Id
-                    if (!character.Quests.Add(itemQuestId))
+                    if (!character.Quests.Add(itemQuestId, false, 0, 0, 0, skillItem.ItemTemplateId))
                         return;
                     // Immediately add the source using a OnItemGather event
                     //character.Quests.OnItemGather(item, item.Count);

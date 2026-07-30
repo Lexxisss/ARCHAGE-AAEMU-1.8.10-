@@ -341,7 +341,7 @@ public static class CSOffsets
     public const ushort CSStartSkillPacket = 0x1A5;
     public const ushort off_3A1327E0 = 0x12B;
     public const ushort CSStopLootingPacket = 0x16B;
-    public const ushort off_3A132C7C = 0x177;
+    public const ushort CSDoodadQuestNotiPacket = 0x177;
     public const ushort CSCreateDoodadPacket = 0x10B;
     public const ushort CSNaviTeleportPacket = 0x0BE;
     public const ushort CSNaviOpenPortalPacket = 0x149;
@@ -538,7 +538,7 @@ public static class CSOffsets
     public const ushort CSSelectInteractionExPacket = 0x013; // target 10.8 x2game.dll
     public const ushort CSSellHouseCancelPacket = 0xfff;
     public const ushort CSSellHousePacket = 0xfff;
-    public const ushort CSSendChatMessagePacket = 0xfff;
+    public const ushort CSSendChatMessagePacket = 0x027; // target 10.8 x2game.dll
     public const ushort CSSendMailPacket = 0xfff;
     public const ushort CSSetCraftingPayPacket = 0xfff;
     public const ushort CSSetForceAttackPacket = 0xfff;

@@ -108,7 +108,7 @@ public abstract class NpcAi
     {
         /*if ((!Owner?.Region?.IsEmpty() ?? false)
             || (Owner?.Region?.AreNeighborsEmpty() ?? false))*/
-        if (Owner?.Region?.HasPlayerActivity() ?? false)
+        if (ShouldTick || (Owner?.Region?.HasPlayerActivity() ?? false))
         {
             _currentBehavior?.Tick(delta);
 

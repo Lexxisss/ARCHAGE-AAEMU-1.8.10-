@@ -318,6 +318,7 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
 
         // Delete the backpack
         player.Inventory.Equipment.ConsumeItem(ItemTaskType.SellBackpack, backpack.TemplateId, 1, backpack);
+        player.Quests?.OnBackpackSold(backpack.TemplateId);
         // TODO: Calculate proper labor by skill level
         player.ChangeLabor(-60, (int)ActabilityType.Commerce);
 

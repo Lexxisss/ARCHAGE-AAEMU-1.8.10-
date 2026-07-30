@@ -3,30 +3,17 @@ using AAEmu.Game.Core.Network.Game;
 
 namespace AAEmu.Game.Core.Packets.C2G;
 
-public class CSTryQuestCompleteAsLetItDonePacket : GamePacket
+public sealed class CSTryQuestCompleteAsLetItDonePacket : GamePacket
 {
-    private uint id;
-    private uint objId;
-    private int selected;
     public CSTryQuestCompleteAsLetItDonePacket() : base(CSOffsets.CSTryQuestCompleteAsLetItDonePacket, 5)
     {
     }
 
     public override void Read(PacketStream stream)
     {
-        id = stream.ReadUInt32();
-        objId = stream.ReadBc();
-        selected = stream.ReadInt32();
-
-        Logger.Warn("TryQuestCompleteAsLetItDone, Id: {0}, ObjId: {1}, Selected: {2}", id, objId, selected);
-
-        if (
-            objId > 0
-            && Connection.ActiveChar.CurrentTarget != null
-            && Connection.ActiveChar.CurrentTarget.ObjId != objId
-           )
-            return;
-        Connection.ActiveChar.Quests.Complete(id, selected);
+        var questId = stream.ReadUInt32();
+        var reportObjectId = stream.ReadBc();
+        var selected = stream.ReadInt32();
+        Connection.ActiveChar.Quests.CompleteTarget(questId, reportObjectId, 0, selected, true);
     }
 }
-

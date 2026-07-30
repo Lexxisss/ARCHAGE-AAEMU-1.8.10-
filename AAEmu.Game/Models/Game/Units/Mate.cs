@@ -570,6 +570,7 @@ public sealed class Mate : Unit
         if (change)
         {
             BroadcastPacket(new SCLevelChangedPacket(ObjId, Level), true);
+            WorldManager.Instance.GetCharacterByObjId(OwnerObjId)?.Quests?.OnMateLevelChanged(this);
             //StartRegen();
         }
 

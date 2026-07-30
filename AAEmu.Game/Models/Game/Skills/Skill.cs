@@ -177,6 +177,17 @@ public class Skill
         // If skill uses Plots, then start the plot
         if (Template.Plot != null)
         {
+            // Plot-driven skills register their real cooldown from inside the
+            // asynchronous plot script (via a Cooldown special effect), which
+            // leaves a race window: a duplicate CSStartSkillPacket arriving
+            // before the plot task runs would still see no cooldown and start
+            // a second, independent cast. Reserve a provisional cooldown
+            // synchronously so a same-tick duplicate is rejected immediately;
+            // the plot's own Cooldown effect will overwrite it with the real
+            // value once it executes.
+            var provisionalCooldown = Template.CooldownTime > 0 ? (int)Template.CooldownTime : Math.Max(Template.CastingTime, 250);
+            unit.Cooldowns.AddCooldown(Template.Id, (uint)provisionalCooldown);
+
             Task.Run(() => Template.Plot.Run(caster, casterCaster, target, targetCaster, skillObject, this));
             if (Template.PlotOnly)
                 return SkillResult.Success;
@@ -1152,6 +1163,8 @@ public class Skill
                 {
                     item.effect.Template.Apply(caster, casterCaster, item.target, targetCaster, new CastSkill(Template.Id, TlId), new EffectSource(this), skillObject, DateTime.UtcNow, packets);
                 }
+                if (caster is Character questCaster)
+                    questCaster.Quests?.OnEffectFired(item.effect.EffectId);
             }
             else
                 Logger.Error($"Template not found for Skill[{Template.Id}] Effect[{item.effect.EffectId}]");

@@ -53,7 +53,7 @@ public class ManaBurnEffect : EffectTemplate
             targetUnit.ReduceCurrentMp(caster, (int)finalDamage);
             var packet = new SCUnitDamagedPacket(castObj, casterObj, caster.ObjId, target.ObjId, 0, 0)
             {
-                _manaBurn = (int)finalDamage
+                ManaBurn = (int)finalDamage
             };
             target.BroadcastPacket(packet, true);
         }

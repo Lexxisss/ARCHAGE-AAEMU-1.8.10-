@@ -176,7 +176,7 @@ public static class SCOffsets
     public const ushort SCLeavedChatChannelPacket = 0x19B;
     public const ushort SCChatMessagePacket = 0x2F3;
     public const ushort SCChatlocalizedmessagePacket = 0x09A;
-    public const ushort SCNpcChatMessagePacket = 0x011;
+    public const ushort SCNpcChatMessagePacket = 0x09D; // target 10.8 x2game.dll
     public const ushort SCReportedSpammerPacket = 0x06A;
     public const ushort SCNoticeMessagePacket = 0x38B;
     public const ushort SCChatFailedPacket = 0x1A8;
@@ -286,7 +286,6 @@ public static class SCOffsets
     public const ushort SCDiceBidRuleChangePacket = 0x26F;
     public const ushort SCHungPacket = 0x22D;
     public const ushort SCUnhungPacket = 0x079;
-    public const ushort SCBondDoodadPacket = 0x06E;
     public const ushort SCUnbondDoodadPacket = 0x222;
     public const ushort SCPlaySequencePacket = 0x246;
     public const ushort SCGimmicksRemovedPacket = 0x1DB;
@@ -330,7 +329,7 @@ public static class SCOffsets
     public const ushort SCUnitPortalUsedPacket = 0x092;
     public const ushort SCIncreasedFavoritePortalLimitPacket = 0x158;
     public const ushort SCSoundAreaEventPacket = 0x2B5;
-    public const ushort SCAreaChatBubblePacket = 0x254;
+    public const ushort SCAreaChatBubblePacket = 0x180; // target 10.8 x2game.dll
     public const ushort SCChatBubblePacket = 0x0A8;
     public const ushort SCAreaTeamMessagePacket = 0x109;
     public const ushort SCDoodadSoundPacket = 0x005;
@@ -522,7 +521,7 @@ public static class SCOffsets
     public const ushort SCTodayAssignmentItemSentPacket = 0x193;
     public const ushort SCTodayAssignmentChangedPacket = 0x1D7;
     public const ushort off_3A109DBC = 0x1B9;
-    public const ushort off_3A109DCC = 0x23C;
+    public const ushort SCQuestNotifierInitPacket = 0x23C;
     public const ushort SCUpdatePremiumPointPacket = 0x2A7;
     public const ushort SCPremiumPointChangedPacket = 0x03E;
     public const ushort SCUnitGmModeChangedPacket = 0x17C;
@@ -980,7 +979,7 @@ public static class SCOffsets
     public const ushort SCAccountAttributePacket = 0xfff;
     public const ushort SCAddActionPointPacket = 0xfff;
     public const ushort SCAddFriendPacket = 0xfff;
-    public const ushort SCAttachToDoodadPacket = 0xfff;
+    public const ushort SCAttachToDoodadPacket = 0x06E;
     public const ushort SCAuctionCanceledPacket = 0xfff;
     public const ushort SCAuctionLowestPricePacket = 0xfff;
     public const ushort SCAuctionPostedPacket = 0xfff;

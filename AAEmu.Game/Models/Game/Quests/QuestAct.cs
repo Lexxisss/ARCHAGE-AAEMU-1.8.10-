@@ -14,6 +14,7 @@ public class QuestAct : IComparable<QuestAct>, IQuestAct
     public string DetailType { get; set; }
     public QuestComponent QuestComponent { get; }
     public QuestActTemplate Template { get; set; }
+    public QuestActDefinition Definition { get; set; }
 
     public QuestAct(QuestComponent parent)
     {

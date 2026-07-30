@@ -194,6 +194,7 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
         // authoritative coordinates as the client.
         character.SetPosition(_x, _y, _z, rotation.X, rotation.Y, rotation.Z);
         character.Transform.ResetFinalizeTransform();
+        character.Quests?.OnPositionChanged();
 
         var regionChanged = oldRegion != character.Region;
         var zoneChanged = oldZone != character.Transform.ZoneId;

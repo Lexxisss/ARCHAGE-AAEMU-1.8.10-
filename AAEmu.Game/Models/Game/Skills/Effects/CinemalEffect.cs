@@ -1,6 +1,7 @@
 ﻿using System;
 
 using AAEmu.Game.Core.Packets;
+using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Skills.Templates;
 using AAEmu.Game.Models.Game.Units;
 
@@ -17,5 +18,9 @@ public class CinemalEffect : EffectTemplate
         CompressedGamePackets packetBuilder = null)
     {
         Logger.Trace("CinemalEffect");
+        if (caster is Character character)
+            character.Quests?.OnCinemaStarted(CinemaId);
+        else if (target is Character targetCharacter)
+            targetCharacter.Quests?.OnCinemaStarted(CinemaId);
     }
 }

@@ -410,7 +410,7 @@ DROP TABLE IF EXISTS `quests`;
 CREATE TABLE `quests` (
   `id` int unsigned NOT NULL,
   `template_id` int unsigned NOT NULL,
-  `data` tinyblob NOT NULL,
+  `data` mediumblob NOT NULL,
   `status` tinyint NOT NULL,
   `owner` int unsigned NOT NULL,
   PRIMARY KEY (`id`,`owner`)

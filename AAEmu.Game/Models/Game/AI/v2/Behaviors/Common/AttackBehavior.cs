@@ -46,7 +46,7 @@ public class AttackBehavior : BaseCombatBehavior
         // Will delay for 150 Milliseconds to eliminate the hanging of the skill
         if (!Ai.Owner.CheckInterval(Delay)) { return; }
         var targetDist = Ai.Owner.GetDistanceTo(Ai.Owner.CurrentTarget);
-        PickSkillAndUseIt(SkillUseConditionKind.OnAlert, Ai.Owner.CurrentTarget, targetDist); // используем скиллы на врага
+        PickSkillAndUseIt(SkillUseConditionKind.InCombat, Ai.Owner.CurrentTarget, targetDist); // используем скиллы на врага
     }
 
     public override void Exit()

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
@@ -7,6 +7,14 @@ using AAEmu.Game.Models.Game.Chat;
 
 namespace AAEmu.Game.Core.Packets.G2C;
 
+/// <summary>
+/// Echoes a chat message to a recipient. Wire layout matched against 1.8.1.0
+/// client captures on opcode 0x2F3 - channelType/subType/factionId (with the
+/// factionId repeated), then caster info, message, up to 4 chat links, ability
+/// and a fixed 0/0/1 tail. Note the client's own "White" (say) channel numeric
+/// value is what this codebase's ChatType enum calls Party; the swap below is
+/// intentional and mirrors CSSendChatMessagePacket's inverse remap on read.
+/// </summary>
 public class SCChatMessagePacket : GamePacket
 {
     private readonly ChatType _type;
@@ -75,25 +83,29 @@ public class SCChatMessagePacket : GamePacket
 
     public override PacketStream Write(PacketStream stream)
     {
-        #region Int64_chat
-        stream.Write((short)_type);                         // ChatType -> ChatChannelNo
-        stream.Write((short)(_character?.Faction.Id ?? 0)); // chat, subType
-        stream.Write(_character?.Faction.Id ?? 0);          // chat, factionId
-        #endregion Int64_chat
+        var channelType = _type == ChatType.White ? ChatType.Party : _type;
+        var channelFactionId = _character?.Faction.Id ?? 0;
 
+        stream.Write((short)channelType);
+        stream.Write((byte)0); // subType
+        stream.Write((ushort)channelFactionId);
+        stream.Write(channelFactionId);
         stream.WriteBc(_character?.ObjId ?? 0);
         stream.Write(_character?.Id ?? 0);
-        stream.Write(_character != null ? _languageType : (byte)0);
+        stream.Write(0);
+        stream.Write(_character != null ? GetLanguageType(_languageType) : (byte)0);
         stream.Write(_character != null ? (byte)_character.Race : (byte)0);
-        stream.Write(_character?.Faction.Id ?? 0); //type
-        stream.Write(_character != null ? _character.Name : "");
-
+        stream.Write(channelFactionId);
+        if (_character?.Connection?.GetAttribute("gmFlag") != null)
+            stream.Write(_character != null ? "GM " + _character.Name : "");
+        else
+            stream.Write(_character != null ? _character.Name : "");
         stream.Write(_message);
 
         for (var i = 0; i < 4; i++)
         {
             var linkedType = _linkType?[i] ?? 0;
-            stream.Write(linkedType); // linkType
+            stream.Write(linkedType);
 
             if (linkedType > 0)
             {
@@ -102,20 +114,36 @@ public class SCChatMessagePacket : GamePacket
                 switch (linkedType)
                 {
                     case 1:
-                        stream.Write(_data[i]);   // data length = 208
+                        stream.Write(_data[i]);
                         break;
                     case 3:
-                        stream.Write(_qType[i]);  // qType
+                        stream.Write(_qType[i]);
                         break;
                     case 4:
-                        stream.Write(_itemId[i]); // itemId
+                        stream.Write(_itemId[i]);
+                        break;
+                    case 5:
+                        stream.WriteBc(0);
                         break;
                 }
             }
         }
 
-        stream.Write(_character != null ? _ability : 0);
-        stream.Write((byte)0); //option int in 1.2, byte in 3+
+        stream.Write(_character != null ? GetAbility(_ability) : 0);
+        stream.Write((byte)0);
+        stream.Write((byte)0);
+        stream.Write((byte)1);
+
         return stream;
+    }
+
+    private static byte GetLanguageType(byte languageType)
+    {
+        return languageType != 0 ? languageType : (byte)9;
+    }
+
+    private static int GetAbility(int ability)
+    {
+        return ability != 0 ? ability : 20000;
     }
 }

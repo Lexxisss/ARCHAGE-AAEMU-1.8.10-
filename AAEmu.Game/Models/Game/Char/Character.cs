@@ -1339,6 +1339,8 @@ public partial class Character : Unit, ICharacter
             Abilities.AddActiveExp(exp); // TODO ... or all?
         SendPacket(new SCExpChangedPacket(ObjId, exp, shouldAddAbilityExp));
         CheckLevelUp();
+        if (exp > 0)
+            Quests?.OnExperienceGained(exp);
 
         //Quests.OnLevelUp(); // TODO added for quest Id=5967
         // инициируем событие
@@ -1460,6 +1462,8 @@ public partial class Character : Unit, ICharacter
 
         LaborPower += change;
         SendPacket(new SCCharacterLaborPowerChangedPacket(change, actabilityId, actabilityChange, actabilityStep));
+        if (change < 0)
+            Quests?.OnLaborSpent(-change, (uint)Math.Max(0, actabilityId));
     }
 
     public void ChangeGamePoints(GamePointKind kind, int change)
@@ -1483,6 +1487,13 @@ public partial class Character : Unit, ICharacter
         int[,] points = { { (int)kind, change } };
 
         SendPacket(new SCCharacterGamePointsPacket(points));
+        if (change > 0)
+        {
+            if (kind == GamePointKind.Honor)
+                Quests?.OnHonorGained(change);
+            else if (kind == GamePointKind.Vocation)
+                Quests?.OnVocationGained(change);
+        }
     }
 
     public override int GetAbLevel(AbilityType type)

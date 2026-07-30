@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers.World;
@@ -24,7 +24,7 @@ using QuestNpcAiName = AAEmu.Game.Models.Game.Quests.Static.QuestNpcAiName;
 
 namespace AAEmu.Game.Core.Managers;
 
-public class QuestManager : Singleton<QuestManager>, IQuestManager
+public partial class QuestManager : Singleton<QuestManager>, IQuestManager
 {
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
     private bool _loaded = false;
@@ -33,9 +33,11 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     protected Dictionary<uint, List<IQuestAct>> _acts = new();
     private Dictionary<string, List<IQuestAct>> _actsByType = new();
     private Dictionary<uint, QuestAct> _actsDic = new();
+    private readonly Dictionary<string, Dictionary<uint, QuestActDefinition>> _actDefinitions = new(StringComparer.Ordinal);
     protected Dictionary<string, Dictionary<uint, QuestActTemplate>> _actTemplates = new();
     private Dictionary<uint, List<uint>> _groupItems = new();
     private Dictionary<uint, List<uint>> _groupNpcs = new();
+    private Dictionary<uint, List<uint>> _groupQuestContexts = new();
     private Dictionary<uint, QuestComponent> _templateComponents = new();
     public Dictionary<uint, Dictionary<uint, QuestTimeoutTask>> QuestTimeoutTask = new();
 
@@ -61,7 +63,7 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     {
         var res = (_acts.TryGetValue(id, out var act) ? act : new List<IQuestAct>()).ToArray();
         //Array.Sort(res); // На некоторых данных вызывает System.InvalidOperationException: Failed to compare two elements in the array. System.InvalidOperationException: Failed to compare two elements in the array.
-        // 
+        //
         return res;
     }
 
@@ -78,6 +80,15 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
             return default;
         return _actTemplates[type].ContainsKey(id) ? (T)_actTemplates[type][id] : default;
     }
+
+    public QuestActDefinition GetActDefinition(uint id, string type)
+    {
+        return _actDefinitions.TryGetValue(type, out var definitions) && definitions.TryGetValue(id, out var definition)
+            ? definition
+            : null;
+    }
+
+    public IReadOnlyCollection<string> GetLoadedActTypes() => _actDefinitions.Keys;
 
     public List<uint> GetGroupItems(uint groupId)
     {
@@ -114,7 +125,7 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
             {
                 if (_acts.TryGetValue(questComponent.Key, out var questActs))
                 {
-                    questComponent.Value.ActTemplates.AddRange(questActs.Select(a => a.Template));
+                    questComponent.Value.ActTemplates.AddRange(questActs.Select(a => a.Template).Where(x => x != null));
                     questComponent.Value.Acts.AddRange(questActs);
                 }
             }
@@ -126,29 +137,24 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
         if (_loaded)
             return;
 
-        foreach (var type in Helpers.GetTypesInNamespace(Assembly.GetAssembly(typeof(QuestManager)), "AAEmu.Game.Models.Game.Quests.Acts"))
-            if (type.BaseType == typeof(QuestActTemplate))
-                _actTemplates.Add(type.Name, new Dictionary<uint, QuestActTemplate>());
-
-        Logger.Info("Loading quests...");
-        using (var connection = SQLite.CreateConnection())
+        Logger.Info("Loading target 10.8 quest system...");
+        using (var connection = QuestSQLite.CreateConnection())
         {
             LoadQuestContexts(connection);
             LoadQuestComponents(connection);
             LoadQuestSupplies(connection);
             LoadQuestActs(connection);
-
-            LoadQuestActTemplates(connection);
+            LoadQuestActDefinitions(connection);
             LoadQuestItemGroups(connection);
             LoadQuestMonsterNpcs(connection);
-
+            LoadQuestContextGroups(connection);
             UpdateQuestComponentActs();
         }
+
+        ValidateQuestData();
         _loaded = true;
 
-        // Start daily reset task
         var dailyCron = "0 0 0 ? * * *";
-        // TODO: Make sure it obeys server time settings
         TaskManager.Instance.CronSchedule(new QuestDailyResetTask(), dailyCron);
     }
 
@@ -157,63 +163,59 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     /// </summary>
     /// <param name="itemItemTemplateId"></param>
     /// <returns></returns>
-    public uint GetQuestIdFromStarterItem(uint itemItemTemplateId)
-    {
-        // This is a very ugly reverse search function
-        foreach (var actTemplate in _actTemplates["QuestActConAcceptItem"].Values)
-        {
-            if (actTemplate is not QuestActConAcceptItem actAcceptItem)
-                continue;
-            if (actAcceptItem.ItemId != itemItemTemplateId)
-                continue;
+    public uint GetQuestIdFromStarterItem(uint itemItemTemplateId) =>
+        GetQuestIdFromStarterItemNew(itemItemTemplateId);
 
-            // find quest_acts data
-            foreach (var actList in _acts.Values)
-            {
-                foreach (var questAct in actList)
-                {
-                    if (questAct.DetailType == "QuestActConAcceptItem" && questAct.DetailId == actAcceptItem.Id)
-                    {
-                        // Use component Id to check if it's a starter, and return contextId (QuestId)
-                        foreach (var (questId, questContext) in _templates)
-                        {
-                            if ((questContext.Components.TryGetValue(questAct.ComponentId, out var questComponent)) &&
-                                (questComponent.KindId == QuestComponentKind.Start))
-                                return questId;
-                        }
-                    }
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    /// <summary>
-    /// Simplified version of GetQuestIdFromStarterItem
-    /// </summary>
-    /// <param name="itemItemTemplateId">Item id</param>
-    /// <returns>Gets the target quest which accepts the item</returns>
+    /// <summary>Resolves item-started quests from the target quest database.</summary>
     public uint GetQuestIdFromStarterItemNew(uint itemItemTemplateId)
     {
-        foreach (var foundActs in _actTemplates["QuestActConAcceptItem"].Values.Where(qAcceptItem => qAcceptItem is QuestActConAcceptItem qai && qai.ItemId == itemItemTemplateId))
-        {
-            var matchingAct = _actsByType["QuestActConAcceptItem"]
-                .FirstOrDefault(act =>
-                    act.QuestComponent?.KindId == QuestComponentKind.Start && act.DetailId == foundActs.Id);
+        if (!_actsByType.TryGetValue("QuestActConAcceptItem", out var acts))
+            return 0;
 
-            if (matchingAct != null)
-            {
-                return matchingAct.QuestComponent.QuestTemplate.Id;
-            }
+        foreach (var questAct in acts.Cast<QuestAct>().OrderBy(x => x.Id))
+        {
+            var definition = questAct.Definition;
+            if (definition == null || definition.GetUInt32("item_id") != itemItemTemplateId)
+                continue;
+            if (questAct.QuestComponent?.KindId != QuestComponentKind.Start)
+                continue;
+            return questAct.QuestComponent.QuestTemplate.Id;
         }
+
         return 0;
     }
+
+
+    private void LoadQuestContextGroups(SqliteConnection connection)
+    {
+        if (!QuestSQLite.TableExists(connection, "quest_context_group_members"))
+            return;
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_context_group_members")}";
+        using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+        while (reader.Read())
+        {
+            var groupId = reader.GetUInt32("quest_context_group_id");
+            var questId = reader.GetUInt32("context_id");
+            if (!_groupQuestContexts.TryGetValue(groupId, out var quests))
+            {
+                quests = new List<uint>();
+                _groupQuestContexts[groupId] = quests;
+            }
+            quests.Add(questId);
+        }
+    }
+
+    public bool CheckGroupQuest(uint groupId, uint questId) =>
+        _groupQuestContexts.TryGetValue(groupId, out var quests) && quests.Contains(questId);
+
+    public bool IsAnyQuestInGroupCompleted(ICharacter owner, uint groupId) =>
+        owner?.Quests != null && _groupQuestContexts.TryGetValue(groupId, out var quests) && quests.Any(owner.Quests.HasQuestCompleted);
 
     private void LoadQuestMonsterNpcs(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM quest_monster_npcs";
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_monster_npcs")}";
         command.Prepare();
         using var reader = new SQLiteWrapperReader(command.ExecuteReader());
         while (reader.Read())
@@ -235,7 +237,7 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     private void LoadQuestItemGroups(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM quest_item_group_items";
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_item_group_items")}";
         command.Prepare();
         using var reader = new SQLiteWrapperReader(command.ExecuteReader());
         while (reader.Read())
@@ -258,7 +260,7 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     private void LoadQuestActs(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM quest_acts ORDER BY quest_component_id ASC, id ASC";
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_acts")} ORDER BY quest_component_id ASC, id ASC";
         command.Prepare();
         using var reader = new SQLiteWrapperReader(command.ExecuteReader());
         while (reader.Read())
@@ -279,8 +281,6 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
             }
             else
                 _actsByType[template.DetailType].Add(template);
-
-            _actsByType[template.DetailType].Add(template);
             if (_acts.TryGetValue(template.ComponentId, out var act))
                 list = act;
             else
@@ -294,11 +294,67 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
         }
     }
 
+    private void LoadQuestActDefinitions(SqliteConnection connection)
+    {
+        foreach (var detailType in _actsByType.Keys.OrderBy(x => x, StringComparer.Ordinal))
+        {
+            var tableName = QuestActDefinition.GetTableName(detailType);
+            if (!QuestSQLite.TableExists(connection, tableName))
+                throw new InvalidOperationException($"Missing quest detail table for {detailType}: {tableName}");
+
+            var definitions = new Dictionary<uint, QuestActDefinition>();
+            using var command = connection.CreateCommand();
+            command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, tableName)} ORDER BY id ASC";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var values = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                for (var ordinal = 0; ordinal < reader.FieldCount; ordinal++)
+                {
+                    var name = reader.GetName(ordinal);
+                    values[name] = reader.IsDBNull(ordinal) ? null : reader.GetValue(ordinal);
+                }
+
+                var id = values.TryGetValue("id", out var rawId) && rawId != null
+                    ? checked((uint)Convert.ToInt64(rawId))
+                    : 0;
+                if (id == 0)
+                    continue;
+
+                definitions[id] = new QuestActDefinition(id, detailType, tableName, values);
+            }
+
+            _actDefinitions[detailType] = definitions;
+            foreach (var act in _actsByType[detailType].Cast<QuestAct>())
+            {
+                if (!definitions.TryGetValue(act.DetailId, out var definition))
+                    throw new InvalidOperationException($"Missing {detailType} detail id {act.DetailId} for quest act {act.Id}");
+                act.Definition = definition;
+            }
+        }
+    }
+
+    private void ValidateQuestData()
+    {
+        var componentCount = _templates.Values.Sum(x => x.Components.Count);
+        var actCount = _acts.Values.Sum(x => x.Count);
+        var unbound = _acts.Values.SelectMany(x => x).Cast<QuestAct>().Count(x => x.Definition == null);
+        if (unbound != 0)
+            throw new InvalidOperationException($"Quest loader left {unbound} acts without definitions");
+
+        Logger.Info(
+            "Target quest data loaded: contexts={0}, components={1}, acts={2}, detailTypes={3}",
+            _templates.Count,
+            componentCount,
+            actCount,
+            _actDefinitions.Count);
+    }
+
     private void LoadQuestSupplies(SqliteConnection connection)
     {
         Logger.Info("Loaded {0} quests", _templates.Count);
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM quest_supplies";
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_supplies")}";
         command.Prepare();
         using var reader = new SQLiteWrapperReader(command.ExecuteReader());
         while (reader.Read())
@@ -315,7 +371,7 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     private void LoadQuestComponents(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM quest_components ORDER BY quest_context_id ASC, component_kind_id ASC, id ASC";
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_components")} ORDER BY quest_context_id ASC, component_kind_id ASC, id ASC";
         command.Prepare();
         using var reader = new SQLiteWrapperReader(command.ExecuteReader());
         while (reader.Read())
@@ -348,7 +404,7 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
     private void LoadQuestContexts(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM quest_contexts ORDER BY id ASC";
+        command.CommandText = $"SELECT * FROM {QuestSQLite.ResolveTable(connection, "quest_contexts")} ORDER BY id ASC";
         command.Prepare();
         using var reader = new SQLiteWrapperReader(command.ExecuteReader());
         while (reader.Read())
@@ -1535,210 +1591,87 @@ public class QuestManager : Singleton<QuestManager>, IQuestManager
 
     public void DoReportEvents(ICharacter owner, uint questContextId, uint npcObjId, uint doodadObjId, int selected)
     {
-        if (npcObjId > 0)
+        if (owner?.Quests == null)
+            return;
+        if (npcObjId != 0)
         {
-            var npc = WorldManager.Instance.GetNpc(npcObjId);
-            if (npc == null)
-            {
-                return;
-            }
-
-            //Connection.ActiveChar.Quests.OnReportToNpc(_npcObjId, _questContextId, _selected);
-            // инициируем событие доклада Npc о выполнении задания
-            owner.Events?.OnReportNpc(this, new OnReportNpcArgs
-            {
-                QuestId = questContextId,
-                NpcId = npc.TemplateId,
-                Selected = selected,
-                Transform = npc.Transform
-            });
+            owner.Quests.OnReportToNpc(npcObjId, questContextId, selected);
+            return;
         }
-        else if (doodadObjId > 0)
+        if (doodadObjId != 0)
         {
-            var doodad = WorldManager.Instance.GetDoodad(doodadObjId);
-            if (doodad == null)
-            {
-                return;
-            }
-
-            //Connection.ActiveChar.Quests.OnReportToDoodad(_doodadObjId, _questContextId, _selected);
-            // инициируем событие
-            owner.Events?.OnReportDoodad(this, new OnReportDoodadArgs
-            {
-                QuestId = questContextId,
-                DoodadId = doodad.TemplateId,
-                Selected = selected,
-                Transform = doodad.Transform
-            });
+            owner.Quests.OnReportToDoodad(doodadObjId, questContextId, selected);
+            return;
         }
-        else
-        {
-            owner.Quests.Complete(questContextId, selected, true);
-        }
+        owner.Quests.CompleteTarget(questContextId, 0, 0, selected, false);
     }
 
     public void DoConsumedEvents(ICharacter owner, uint templateId, int count)
     {
-        //Owner?.Quests?.OnItemUse(item);
-        // инициируем событие
-        owner?.Events?.OnItemUse(this, new OnItemUseArgs
-        {
-            ItemId = templateId,
-            Count = count
-        });
-        owner?.Events?.OnItemGroupUse(this, new OnItemGroupUseArgs
-        {
-            ItemGroupId = templateId,
-            Count = count
-        });
+        owner?.Quests?.OnItemUse(templateId, count);
     }
 
     public void DoAcquiredEvents(ICharacter owner, uint templateId, int count)
     {
-        //Owner?.Quests?.OnItemGather(item, count);
-        // инициируем событие
-        owner?.Events?.OnItemGather(this, new OnItemGatherArgs
-        {
-            ItemId = templateId,
-            Count = count
-        });
-        owner?.Events?.OnItemGroupGather(this, new OnItemGroupGatherArgs
-        {
-            ItemId = templateId,
-            Count = count
-        });
+        owner?.Quests?.OnItemGather(templateId, count);
     }
 
     public void DoInteractionEvents(ICharacter owner, uint templateId)
     {
-        //character.Quests.OnInteraction(WorldInteraction, target);
-        // инициируем событие
-        owner?.Events?.OnInteraction(this, new OnInteractionArgs
+        owner?.Quests?.DispatchRuntimeEvent(new QuestRuntimeEvent
         {
-            DoodadId = templateId
+            Type = QuestRuntimeEventType.DoodadInteraction,
+            TemplateId = templateId,
+            Count = 1
         });
     }
 
     public void DoTalkMadeEvents(ICharacter owner, uint npcObjId, uint questContextId, uint questComponentId, uint questActId)
     {
-        if (npcObjId <= 0) { return; }
-
-        var npc = WorldManager.Instance.GetNpc(npcObjId);
-        if (npc == null) { return; }
-
-        //Connection.ActiveChar.Quests.OnTalkMade(_npcObjId, _questContextId, _questCompId, _questActId);
-        // инициируем событие доклада Npc о выполнении задания
-        owner.Events?.OnTalkMade(this, new OnTalkMadeArgs
-        {
-            QuestId = questContextId,
-            NpcId = npc.TemplateId,
-            QuestComponentId = questComponentId,
-            QuestActId = questActId,
-            Transform = npc.Transform
-        });
-        owner.Events?.OnTalkNpcGroupMade(this, new OnTalkNpcGroupMadeArgs
-        {
-            QuestId = questContextId,
-            NpcGroupId = npc.TemplateId,
-            QuestComponentId = questComponentId,
-            QuestActId = questActId,
-            Transform = npc.Transform
-        });
+        owner?.Quests?.OnTalkMade(npcObjId, questContextId, questComponentId, questActId);
     }
 
     public void DoOnMonsterHuntEvents(ICharacter owner, Npc npc)
     {
-        if (npc == null) { return; }
-
-        var npcZoneGroupId = ZoneManager.Instance.GetZoneByKey(npc.Transform.ZoneId)?.GroupId ?? 0;
-
-        //character.Quests.OnKill(this);
-        owner.Events?.OnMonsterHunt(this, new OnMonsterHuntArgs
-        {
-            NpcId = npc.TemplateId,
-            Count = 1,
-            Transform = npc.Transform
-        });
-        owner.Events?.OnMonsterGroupHunt(this, new OnMonsterGroupHuntArgs
-        {
-            NpcId = npc.TemplateId,
-            Count = 1,
-            Position = npc.Transform
-        });
-        owner.Events?.OnZoneKill(this, new OnZoneKillArgs
-        {
-            ZoneGroupId = npcZoneGroupId,
-            Killer = owner,
-            Victim = npc
-        });
-        owner.Events?.OnZoneMonsterHunt(this, new OnZoneMonsterHuntArgs
-        {
-            ZoneGroupId = npcZoneGroupId
-        });
+        owner?.Quests?.OnKill(npc);
     }
-    //public void DoOnMonsterGroupHuntEvents(Character owner, Npc npc)
-    //{
-    //    if (npc == null) { return; }
-
-    //    //character.Quests.OnKill(this);
-    //    owner.Events?.OnMonsterGroupHunt(this, new OnMonsterGroupHuntArgs
-    //    {
-    //        NpcId = npc.TemplateId,
-    //        Count = 1,
-    //        Position = npc.Transform
-    //    });
-    //}
 
     public void DoOnAggroEvents(ICharacter owner, Npc npc)
     {
-        if (npc == null) { return; }
-
-        //player?.Quests.OnAggro(this);
-        owner.Events?.OnAggro(this, new OnAggroArgs
-        {
-            NpcId = npc.TemplateId,
-            Transform = npc.Transform
-        });
+        owner?.Quests?.OnAggro(npc);
     }
 
     public void DoOnExpressFireEvents(ICharacter owner, uint emotionId, uint characterObjId, uint npcObjId)
     {
-        if (npcObjId <= 0) { return; }
-
-        var npc = WorldManager.Instance.GetNpc(npcObjId);
-        if (npc == null) { return; }
-
-        //Connection?.ActiveChar?.Quests?.OnExpressFire(emotionId, objId, obj2Id);
-        owner.Events?.OnExpressFire(this, new OnExpressFireArgs
-        {
-            NpcId = npc.TemplateId,
-            EmotionId = emotionId
-        });
+        owner?.Quests?.OnExpressFire(emotionId, characterObjId, npcObjId);
     }
 
     public void DoOnLevelUpEvents(ICharacter owner)
     {
-        //Quests.OnLevelUp(); // TODO added for quest Id=5967
-        owner.Events?.OnLevelUp(this, new OnLevelUpArgs());
-
-        owner.Events?.OnAbilityLevelUp(this, new OnAbilityLevelUpArgs());
+        owner?.Quests?.OnLevelUp();
+        if (owner is Character character)
+        {
+            foreach (var ability in character.Abilities.Values)
+            {
+                var level = ExperienceManager.Instance.GetLevelFromExp(ability.Exp);
+                owner.Quests.OnAbilityLevelChanged((uint)ability.Id, level);
+            }
+        }
     }
 
     public void DoOnCraftEvents(ICharacter owner, uint craftId)
     {
-        //Owner.Quests.OnCraft(_craft); // TODO added for quest Id=6024
-        owner.Events?.OnCraft(this, new OnCraftArgs
-        {
-            CraftId = craftId
-        });
+        owner?.Quests?.OnCraft(craftId);
     }
 
     public void DoOnEnterSphereEvents(ICharacter owner, SphereQuest sphereQuest)
     {
-        //trigger.Owner.Quests.OnEnterSphere(trigger.Sphere);
-        owner.Events?.OnEnterSphere(this, new OnEnterSphereArgs
-        {
-            SphereQuest = sphereQuest
-        });
+        owner?.Quests?.OnEnterSphere(sphereQuest);
     }
+
+    public void DispatchRuntimeEvent(ICharacter owner, QuestRuntimeEvent runtimeEvent)
+    {
+        owner?.Quests?.DispatchRuntimeEvent(runtimeEvent);
+    }
+
 }

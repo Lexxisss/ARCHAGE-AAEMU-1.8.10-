@@ -1,13 +1,19 @@
-﻿using AAEmu.Commons.Network;
+using System.Collections.Generic;
+
+using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
-using AAEmu.Game.Models.Game;
 using AAEmu.Game.Models.Game.Chat;
 
 namespace AAEmu.Game.Core.Packets.C2G;
 
+/// <summary>
+/// Wire layout matches the target 1.8.1.0 client (opcode 0x027): type/subType/
+/// factionId, targetName, a "00 FF" marker byte pair, message, languageType,
+/// ability, then up to 4 chat-link blocks (item/quest/recruit/plain-text links).
+/// </summary>
 public class CSSendChatMessagePacket : GamePacket
 {
     public CSSendChatMessagePacket() : base(CSOffsets.CSSendChatMessagePacket, 5)
@@ -17,15 +23,50 @@ public class CSSendChatMessagePacket : GamePacket
     public override void Read(PacketStream stream)
     {
         var type = (ChatType)stream.ReadInt16();
-        var unk1 = stream.ReadInt16();
-        var unk2 = stream.ReadInt32();
+        var subType = stream.ReadInt16();
+        var factionId = stream.ReadUInt32();
 
         var targetName = stream.ReadString();
+        ReadChatMarker(stream);
         var message = stream.ReadString();
         var languageType = stream.ReadByte();
         var ability = stream.ReadInt32();
 
-        Logger.Debug(message);
+        for (var i = 0; i < 4; i++)
+        {
+            var linkType = stream.ReadByte();
+            if (linkType <= 0)
+                continue;
+
+            stream.ReadInt16(); // start
+            stream.ReadInt16(); // length
+            switch (linkType)
+            {
+                case 1:
+                    stream.ReadBytes(208); // plain-text link data
+                    break;
+                case 3:
+                    stream.ReadInt32(); // quest link qType
+                    break;
+                case 4:
+                    stream.ReadInt64(); // item link itemId
+                    break;
+                case 5:
+                    stream.ReadBc(); // recruit link
+                    break;
+            }
+        }
+
+        type = NormalizeChatType(type, subType, factionId, targetName);
+
+        Logger.Debug(
+            "ChatMessage: type={0}, subType={1}, factionId={2}, targetName='{3}', message='{4}', left={5}",
+            type,
+            subType,
+            factionId,
+            targetName,
+            message,
+            stream.LeftBytes);
 
         if (message.StartsWith(CommandManager.CommandPrefix))
         {
@@ -88,7 +129,11 @@ public class CSSendChatMessagePacket : GamePacket
                 }
                 else
                 {
-                    Connection.ActiveChar.SendErrorMessage(ErrorMessageType.ChatNotInParty);
+                    // The 1.8.1.0 client sends type=Party for normal say chat when not in
+                    // a party under some conditions; fall back to White instead of erroring.
+                    Connection.ActiveChar.BroadcastPacket(
+                        new SCChatMessagePacket(ChatType.White, Connection.ActiveChar, message, ability, languageType),
+                        true);
                 }
                 break;
             case ChatType.Trade: //trade
@@ -139,5 +184,41 @@ public class CSSendChatMessagePacket : GamePacket
                 Logger.Warn("Unsupported chat type {0} from {1}", type, Connection.ActiveChar.Name);
                 break;
         }
+    }
+
+    private void ReadChatMarker(PacketStream stream)
+    {
+        if (stream.LeftBytes >= 2 && stream.Buffer[stream.Pos] == 0x00 && stream.Buffer[stream.Pos + 1] == 0xFF)
+        {
+            stream.ReadByte();
+            stream.ReadByte();
+            return;
+        }
+
+        Logger.Warn(
+            "ChatMessage: expected 1.8 chat marker 00 FF after targetName, pos={0}, left={1}",
+            stream.Pos,
+            stream.LeftBytes);
+    }
+
+    private static ChatType NormalizeChatType(ChatType parsedType, short parsedSubType, uint parsedFactionId, string parsedTargetName)
+    {
+        if (parsedType == ChatType.Party &&
+            parsedSubType == 0 &&
+            parsedFactionId == 0 &&
+            string.IsNullOrEmpty(parsedTargetName))
+        {
+            return ChatType.White;
+        }
+
+        if (parsedType == ChatType.Trade &&
+            parsedSubType == 0 &&
+            parsedFactionId == 0 &&
+            string.IsNullOrEmpty(parsedTargetName))
+        {
+            return ChatType.White;
+        }
+
+        return parsedType;
     }
 }

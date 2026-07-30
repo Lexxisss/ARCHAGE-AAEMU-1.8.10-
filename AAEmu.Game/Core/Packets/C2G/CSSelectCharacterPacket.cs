@@ -77,6 +77,7 @@ public class CSSelectCharacterPacket : GamePacket
 
             Connection.ActiveChar.Quests.Send();
             Connection.ActiveChar.Quests.SendCompleted();
+            Connection.ActiveChar.Quests.RefreshQuestNotifier();
             Connection.ActiveChar.Quests.RecallEvents();
 
             Connection.ActiveChar.Actability.Send();

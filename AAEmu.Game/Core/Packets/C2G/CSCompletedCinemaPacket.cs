@@ -14,6 +14,7 @@ public class CSCompletedCinemaPacket : GamePacket
     {
         // Empty struct
         Logger.Warn("CompletedCinema");
+        Connection.ActiveChar?.Quests?.OnCinemaCompleted();
 
         WorldManager.ResendVisibleObjectsToCharacter(Connection.ActiveChar);
     }

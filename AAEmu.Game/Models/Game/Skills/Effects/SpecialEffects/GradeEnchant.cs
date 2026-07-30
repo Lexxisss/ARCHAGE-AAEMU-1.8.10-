@@ -151,6 +151,8 @@ public class GradeEnchant : SpecialEffectAction
             character.Inventory.Bag.ConsumeItem(ItemTaskType.GradeEnchant, charmItem.TemplateId, 1, charmItem);
 
         character.SendPacket(new SCItemGradeEnchantResultPacket((byte)result, item, initialGrade, item.Grade));
+        if (item.Grade != initialGrade)
+            character.Quests?.OnEnchantScaleChanged();
         character.BroadcastPacket(new SCSkillEndedPacket(skill.TlId), true);
 
         // Let the world know if we got lucky enough

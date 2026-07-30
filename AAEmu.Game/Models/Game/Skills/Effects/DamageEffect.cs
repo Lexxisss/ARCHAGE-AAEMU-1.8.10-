@@ -109,7 +109,6 @@ public class DamageEffect : EffectTemplate
         {
             var missPacket = new SCUnitDamagedPacket(castObj, casterObj, caster.ObjId, target.ObjId, 0, 0)
             {
-                HoldableId = (byte)(holdable?.HoldableTemplate?.Id ?? 0),
                 HitType = hitType
             };
             // TODO: Gotta figure out how to tell if it should be applied on getting hit, or on hitting
@@ -404,7 +403,6 @@ public class DamageEffect : EffectTemplate
         target.CombatBuffs.TriggerCombatBuffs((Unit)caster, target as Unit, hitType, false);
         var packet = new SCUnitDamagedPacket(castObj, casterObj, caster.ObjId, target.ObjId, value, absorbed)
         {
-            HoldableId = (byte)(holdable?.HoldableTemplate?.Id ?? 0),
             HitType = hitType
         };
 

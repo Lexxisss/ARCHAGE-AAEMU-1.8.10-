@@ -180,6 +180,7 @@ public class TeamManager : Singleton<TeamManager>
                 target.InParty = true;
                 target.SendPacket(new SCTeamPingPosPacket(true, activeTeam.PingPosition, 0));
                 activeTeam.BroadcastPacket(new SCTeamMemberJoinedPacket(activeTeam.Id, newTeamMember, party), target.Id);
+                activeInvitation.Owner.Quests?.OnTeamInvite(activeInvitation.Target);
             }
         }
 
@@ -239,6 +240,7 @@ public class TeamManager : Singleton<TeamManager>
         }
         ChatManager.Instance.GetPartyChat(newTeam, activeInvitation.Owner).JoinChannel(activeInvitation.Owner);
         ChatManager.Instance.GetPartyChat(newTeam, activeInvitation.Target).JoinChannel(activeInvitation.Target);
+        activeInvitation.Owner.Quests?.OnTeamInvite(activeInvitation.Target);
     }
 
     public void CreateSoloTeam(Character character, bool asParty)

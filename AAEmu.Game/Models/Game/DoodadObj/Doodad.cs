@@ -569,6 +569,10 @@ public class Doodad : BaseUnit
         // the phase change packet call must be after the phase functions to have the correct FuncGroupId in the packet
         BroadcastPacket(new SCDoodadPhaseChangedPacket(this), true); // change the phase to display doodad
 
+        // Doodad data/runtime remains independent. Only publish a successful phase change to the quest runtime.
+        if (!stop && caster is Character questCharacter)
+            questCharacter.Quests.OnDoodadPhaseChanged(this);
+
         return stop; // if true, it did not pass the check for the quest (it must be aborted)
     }
 
