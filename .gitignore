@@ -1,4 +1,4 @@
-.vs/
+﻿.vs/
 .vscode/
 .idea/
 bin/
@@ -36,3 +36,11 @@ publish/
 SC0133_NPC_REVERSE_VERIFIED.md
 AAEmu_1.8.1.0_SC0133_NPC.patch
 AAEmu_SC0133_NPC_DRAFT.patch
+AAEmu_1.8.1.0_IMPLEMENTATION_REPORT*.md
+CSStartSkill_0x01A5_target_verified.md
+FULL_skill_system_target_verified.md
+opcode_audit_report.md
+Docs/IMPLEMENTATION_REPORT.md
+Docs/item_protocol_1.8.1.0.md
+Docs/vendor_database_map_1.8.1.0.md
+Docs/vendor_verification_1.8.1.0.*
