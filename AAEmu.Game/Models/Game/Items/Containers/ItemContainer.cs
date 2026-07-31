@@ -542,9 +542,11 @@ public class ItemContainer
 
             var toRemove = Math.Min(preferredItem.Count, amountToConsume);
 
-            // Decided before the count changes: emptying the slot is announced by action 7,
-            // which reports the amount being taken, while a partial consume uses an action 5
-            // delta. The two are mutually exclusive.
+            // Decided before the count changes, so the removal still carries the full stack:
+            // emptying the slot is announced by action 8, which physically destroys the
+            // client's item object, while a partial consume uses an action 5 delta. The two
+            // are mutually exclusive - an action 5 that merely reaches zero leaves the slot
+            // object alive and drawn grey.
             var emptiesSlot = preferredItem.Count <= toRemove;
             if (emptiesSlot)
                 itemTasks.Add(new ItemRemove(preferredItem));
@@ -640,7 +642,10 @@ public class ItemContainer
             }
             else
             {
-                var removeTask = new ItemRemoveSlot(item);
+                // Action 8. This was action 13, which the client's task dispatcher maps
+                // straight to "not applied" - it never reaches a helper that can touch a
+                // slot. That is why the last unit of a stack always left a grey entry.
+                var removeTask = new ItemRemove(item, item.SlotType, (byte)item.Slot, toRemove);
                 var deferRelease = deferredRemovals != null;
                 if (!RemoveItem(ItemTaskType.Invalid, item, !deferRelease, consumptionCollector != null))
                     return false;
@@ -905,7 +910,10 @@ public class ItemContainer
 
     private void SendItemAcquisitionBatches(IReadOnlyList<Item> items)
     {
-        const int maxItems = byte.MaxValue;
+        // The client's acquisition packet holds at most 15 records, not 255. This is a
+        // notification only - it does not repaint the bag, so nothing here substitutes for
+        // a correct 0x010B task.
+        const int maxItems = 15;
         if (items == null || items.Count == 0 || Owner is not Character character)
             return;
 
