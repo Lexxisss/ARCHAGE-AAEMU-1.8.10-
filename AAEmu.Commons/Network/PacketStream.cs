@@ -592,10 +592,50 @@ public class PacketStream : ICloneable, IComparable
         return result;
     }
 
+    /// <summary>
+    /// Reads the 11-byte world position used by every movement body.
+    /// </summary>
+    /// <remarks>
+    /// The wire form is <c>X:u32, Y:u32, Z:u16 + 6 bits</c>, with the top two bits of the
+    /// last byte holding the Y and X signs. Each coordinate only ever fills three bytes, so
+    /// on the wire it reads as three significant bytes followed by a zero.
+    ///
+    /// This used to read the correct 11 bytes and then decode them with the nine-byte
+    /// offsets, so X came out right while Y picked up the padding byte as its low byte and
+    /// Z was read from Y's high byte onwards. Both were badly wrong, and the sign bits were
+    /// taken from the middle of Z.
+    /// </remarks>
     public (float x, float y, float z) ReadPosition()
     {
-        var position = ReadBytes(11);
-        return Helpers.ConvertPosition(position);
+        var raw = ReadBytes(11);
+        var packed = new[] { raw[0], raw[1], raw[2], raw[4], raw[5], raw[6], raw[8], raw[9], raw[10] };
+        return Helpers.ConvertPosition(packed);
+    }
+
+    /// <summary>
+    /// Writes the 11-byte world position used by every movement body. See <see cref="ReadPosition"/>.
+    /// </summary>
+    /// <remarks>
+    /// Distinct from <see cref="WritePosition(float,float,float)"/>, which emits the nine
+    /// significant bytes without the padding and is what the non-movement packets use.
+    /// Writing that shorter form inside a movement body leaves it two bytes short and shifts
+    /// velocity, rotation, stance and the actor flags out of place.
+    /// </remarks>
+    public PacketStream WriteWorldPosition(float x, float y, float z)
+    {
+        var p = Helpers.ConvertPosition(x, y, z);
+        Write(p[0]);
+        Write(p[1]);
+        Write(p[2]);
+        Write((byte)0);
+        Write(p[3]);
+        Write(p[4]);
+        Write(p[5]);
+        Write((byte)0);
+        Write(p[6]);
+        Write(p[7]);
+        Write(p[8]);
+        return this;
     }
 
     public Quaternion ReadQuaternionShort()

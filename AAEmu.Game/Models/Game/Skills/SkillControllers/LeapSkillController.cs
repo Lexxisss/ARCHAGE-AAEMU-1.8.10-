@@ -138,14 +138,14 @@ public class LeapSkillController : SkillController
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = flags;     // 5-walk, 4-run, 3-stand still
+        moveType.ActorFlags = flags;     // gate word for the optional blocks only
         moveType.Flags = 4;
 
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 127;
         moveType.DeltaMovement[2] = 0;
-        moveType.Stance = 0;    // COMBAT = 0x0, IDLE = 0x1
+        moveType.Stance = 0;    // 0 Stand
         moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
         moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
 

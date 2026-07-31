@@ -45,7 +45,7 @@ public class VehicleMoveType : MoveType
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
-        stream.WritePosition(X, Y, Z);
+        stream.WriteWorldPosition(X, Y, Z);
         stream.Write(VelX);
         stream.Write(VelY);
         stream.Write(VelZ);

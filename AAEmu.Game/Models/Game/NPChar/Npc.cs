@@ -981,7 +981,7 @@ public class Npc : Unit
         */
     }
 
-    public void MoveTowards(Vector3 other, float distance, byte flags = 4)
+    public void MoveTowards(Vector3 other, float distance, byte flags = 0)
     {
         distance *= Ai.Owner.MoveSpeedMul; // Apply speed modifier
         if (distance < 0.01f)
@@ -1034,7 +1034,13 @@ public class Npc : Unit
         }
 
         var angle = MathUtil.CalculateAngleFrom(Transform.Local.Position, other);
-        var (velX, velY) = MathUtil.AddDistanceToFront(4000, 0, 0, (float)angle.DegToRad());
+        // Velocity has to agree with the distance actually covered: the client decodes each
+        // short as raw / 32768 * 60 and extrapolates from it between updates, so a flat value
+        // that contradicts the real displacement is what makes a unit slide. travelDist is one
+        // 100 ms tick's worth of movement, so scale it back up to units per second.
+        var speedPerSecond = travelDist * 10f;
+        var velocityRaw = Math.Clamp(speedPerSecond / 60f * 32768f, short.MinValue, short.MaxValue);
+        var (velX, velY) = MathUtil.AddDistanceToFront(velocityRaw, 0, 0, (float)angle.DegToRad());
         Transform.Local.SetRotationDegree(0f, 0f, (float)angle - 90);
         var (rx, ry, rz) = Transform.Local.ToRollPitchYawSBytesMovement();
 
@@ -1047,14 +1053,14 @@ public class Npc : Unit
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = flags;     // 5-walk, 4-run, 3-stand still
+        moveType.ActorFlags = flags;     // gate word for the optional blocks only
         moveType.Flags = 4;
 
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 127;
         moveType.DeltaMovement[2] = 0;
-        moveType.Stance = 0;    // COMBAT = 0x0, IDLE = 0x1
+        moveType.Stance = 0;    // 0 Stand
         moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
         moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
 
@@ -1063,7 +1069,7 @@ public class Npc : Unit
         BroadcastPacket(new SCOneUnitMovementPacket(ObjId, moveType), false);
     }
 
-    public void LookTowards(Vector3 other, byte flags = 4)
+    public void LookTowards(Vector3 other, byte flags = 0)
     {
         var oldPosition = Transform.Local.ClonePosition();
 
@@ -1085,14 +1091,14 @@ public class Npc : Unit
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = flags;     // 5-walk, 4-run, 3-stand still
+        moveType.ActorFlags = flags;     // gate word for the optional blocks only
         moveType.Flags = 4;
 
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 0;
         moveType.DeltaMovement[2] = 0;
-        moveType.Stance = 0;    // COMBAT = 0x0, IDLE = 0x1
+        moveType.Stance = 0;    // 0 Stand
         moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
         moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
 
@@ -1118,7 +1124,7 @@ public class Npc : Unit
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 0;
         moveType.DeltaMovement[2] = 0;
-        moveType.Stance = (sbyte)(CurrentAggroTarget > 0 ? 0 : 1);    // COMBAT = 0x0, IDLE = 0x1
+        moveType.Stance = 0;    // 0 Stand
         moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
         moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
         BroadcastPacket(new SCOneUnitMovementPacket(ObjId, moveType), false);

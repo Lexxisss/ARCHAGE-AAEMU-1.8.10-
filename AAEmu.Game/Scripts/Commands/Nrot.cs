@@ -77,7 +77,7 @@ public class Nrot : ICommand
             moveType.DeltaMovement[0] = 0;
             moveType.DeltaMovement[1] = 0;
             moveType.DeltaMovement[2] = 0;
-            moveType.Stance = 1; //combat=0, idle=1
+            moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
             moveType.Alertness = 0; //idle=0, combat=2
             moveType.Time = Seq;
 
