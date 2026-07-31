@@ -505,26 +505,28 @@ public class NpcManager : Singleton<NpcManager>
                         _defaultFaceItemsByModel[reader.GetUInt32("model_id")] = reader.GetUInt32("face_item_id");
                 }
 
-                // Ferre player defaults (20117/20118) use the character-only
-                // odd-eye face assets. When used as an NPC body part, the base
-                // face remains visible below the total-custom morph. Resolve
-                // the race-matching NPC base face from item_body_parts instead.
-                command.CommandText = @"
-                    SELECT ibp.model_id, MIN(ibp.item_id) AS face_item_id
-                    FROM item_body_parts ibp
-                    INNER JOIN characters c ON c.model_id = ibp.model_id
-                    WHERE c.char_race_id = 6
-                      AND ibp.slot_type_id = 23
-                      AND ibp.npc_only = 0
-                      AND LOWER(ibp.face_mask) LIKE '%ferre%'
-                    GROUP BY ibp.model_id";
-                command.Prepare();
-                using (var sqliteReader = command.ExecuteReader())
-                using (var reader = new SQLiteWrapperReader(sqliteReader))
-                {
-                    while (reader.Read())
-                        _defaultFaceItemsByModel[reader.GetUInt32("model_id")] = reader.GetUInt32("face_item_id");
-                }
+                // Firran used to be steered off the faces the characters table names for them
+                // - 20117 and 20118 - onto the lowest-numbered item_body_parts row carrying a
+                // ferre face mask, which is 563 for males and 408 for females. Those two rows
+                // define no eyes at all:
+                //
+                //   563 / 408:      left_eye_x/y/width/height = 0, right_eye_* = 0, odd_eye 0
+                //   20117 / 20118:  left_eye_x 412, width 100, height 100, odd_eye 1
+                //
+                // With a face carrying no eye geometry, Firran cannot look like Firran, which
+                // is what the wrong-eyes reports were. So the characters table is left as the
+                // authoritative default here, for every humanoid model including theirs.
+                //
+                // Sending 20117/20118 was tried once before and produced a base head showing
+                // through and some NPCs with no head - but at that time a full Face morph was
+                // being sent for them as well, and the morph is authored against the default
+                // face rather than the one we were substituting. The two were fighting. The
+                // appearance override for Firran is now the Skin variant, which carries no
+                // morph, so this face is no longer competing with one.
+                //
+                // The 8141/8157 pair remains a trap in this table: same slot, ferre model,
+                // nuian face mask. Any rule that reintroduces a search here must filter on the
+                // mask, not just on the model.
 
                 // Some NPC cloth packs reference intentionally invisible or
                 // incomplete armor records. Sending such an item makes this

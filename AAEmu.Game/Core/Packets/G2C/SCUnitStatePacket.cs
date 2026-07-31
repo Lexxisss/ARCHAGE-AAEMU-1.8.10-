@@ -175,16 +175,72 @@ public class SCUnitStatePacket : GamePacket
 
         #endregion CharacterInfo_3EB0
 
-        // Tried and rejected in play: sending the block only for templates that name a real
-        // total_character_customs row. Those 2583 NPCs still rendered TEST text and black
-        // hands, so the fault is not limited to the appearances LoadCustom invents - the
-        // block breaks them even when the underlying data is genuine.
+        // Humanoid NPCs get the Skin variant of this block. Nothing else gets an override at
+        // all: sending one broadly put TEST text and black hands back, including on the 2583
+        // NPCs whose look comes from a genuine total_character_customs row, so the fault is
+        // not confined to the appearances LoadCustom invents.
         //
-        // So no NPC gets an override at all for now, and the client is left to resolve the
-        // look from templateId and modelRef as it already can.
+        // In this client's layout the Skin discriminator stops the block after three colour
+        // fields:
+        //
+        //     type:u8, hairColorId:u32, hornColorId:u32, skinColorId:u32   - 13 bytes
+        //
+        // No model id, no body normal map, and no Face sub-block. That is enough for the
+        // races whose NPCs read acceptably without one.
+        //
+        // Firran get the full Face variant, because for them it is not optional. Their
+        // customs all name face_id 0, so every Firran NPC of a gender wears the same face
+        // body part; everything that makes one differ from the next lives in the Face block
+        // and nowhere else. Across the 114 male rows: 98 distinct morph modifiers, 81
+        // distinct pupil colours, 13 face normal maps. Suppress the block and every male
+        // Firran is necessarily identical - which is exactly what it looked like.
+        //
+        // The layout used here matches the verified 0x0133 field order end to end, including
+        // bodyNormalMapId/Weight sitting after the two-tone fields and immediately before the
+        // face payload, the modifier written as a u16 length followed by its bytes rather
+        // than as a bare 128-byte run, and the 20-byte visual-race/wing tail after it. Any
+        // of those three wrong shifts everything that follows.
+        //
+        // The skin colour is sent as stored. It used to be zeroed together with the body
+        // normal map, and the two are not equivalent - the data says so. body_normal_maps is
+        // numbered from 1, yet 0 is what every Nuian, Elf, Hariharan and Firran custom
+        // actually stores: it is that field's "no override" sentinel. skin_colors is numbered
+        // 1..171 with no row 0 at all, so zeroing it handed the client an id that cannot
+        // resolve. An NPC whose skin colour did not resolve gets no block rather than a zero.
+        //
+        // The copy is packet-local on purpose: never mutate the NPC template or player data.
         var modelParams = _unit.ModelParams ?? new UnitCustomModelParams(UnitCustomModelType.None);
         if (npc != null)
-            modelParams = new UnitCustomModelParams(UnitCustomModelType.None);
+        {
+            if (npc.ModelId is 20 or 21 && modelParams.Face != null && modelParams.SkinColorId != 0)
+            {
+                modelParams = new UnitCustomModelParams(UnitCustomModelType.Face)
+                    .SetId(modelParams.Id)
+                    .SetHairColorId(modelParams.HairColorId)
+                    .SetHornColorId(modelParams.HornColorId)
+                    .SetSkinColorId(modelParams.SkinColorId)
+                    .SetModelId(modelParams.ModelId)
+                    .SetDefaultHairColor(modelParams.DefaultHairColor)
+                    .SetTwoToneHair(modelParams.TwoToneHair)
+                    .SetTwoToneFirstWidth(modelParams.TwoToneFirstWidth)
+                    .SetTwoToneSecondWidth(modelParams.TwoToneSecondWidth)
+                    .SetBodyNormalMapId(0)
+                    .SetBodyNormalMapWeight(0f)
+                    .SetFace(modelParams.Face);
+            }
+            else if (npc.ModelId is 10 or 11 or 14 or 15 or 16 or 17 or 18 or 19 or 24 or 25
+                     && modelParams.SkinColorId != 0)
+            {
+                modelParams = new UnitCustomModelParams(UnitCustomModelType.Skin)
+                    .SetHairColorId(modelParams.HairColorId)
+                    .SetHornColorId(modelParams.HornColorId)
+                    .SetSkinColorId(modelParams.SkinColorId);
+            }
+            else
+            {
+                modelParams = new UnitCustomModelParams(UnitCustomModelType.None);
+            }
+        }
 
         stream.Write(modelParams);
         modelParamsEnd = stream.Count;
