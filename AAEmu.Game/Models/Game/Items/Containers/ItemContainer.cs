@@ -384,8 +384,11 @@ public class ItemContainer
         {
             sourceContainer.Items.Remove(item);
             sourceContainer.UpdateFreeSlotCount();
+            // Emptying a slot is a delta that takes its amount to zero. Both dedicated
+            // removal actions we tried - Seize and action 7 - left the slot drawn as a grey
+            // ghost, while action 5 is the one adjustment the client demonstrably applies.
             if (sourceContainer.ContainerType != SlotType.Mail)
-                sourceItemTasks.Add(new ItemRemoveSlot(item.Id, sourceSlotType, sourceSlot));
+                sourceItemTasks.Add(new ItemAdd(item, -item.Count, sourceSlotType, sourceSlot));
         }
         // We use Invalid when doing internals, don't send to client
         if (taskType != ItemTaskType.Invalid)
@@ -472,6 +475,11 @@ public class ItemContainer
         if (!CanDestroy(item))
             return false;
 
+        // Captured before anything clears it: the amount that has to be taken off the slot.
+        var removedAmount = item.Count;
+        var removedFromSlotType = item.SlotType;
+        var removedFromSlot = (byte)item.Slot;
+
         if (!suppressInventoryEvents)
             Owner?.Inventory.OnConsumedItem(item, item.Count);
         OnLeaveContainer(item, null);
@@ -486,10 +494,10 @@ public class ItemContainer
         var res = item._holdingContainer.Items.Remove(item);
         if (res && task != ItemTaskType.Invalid)
         {
-            // Action 7 is the mirror of the action 6 used to introduce an item: slot plus the
-            // full record. Seize carries only an id, which left a consumed item on screen
-            // until the bag was rebuilt.
-            item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(task, new List<ItemTask> { new ItemRemove(item) }, new List<ulong>()));
+            item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(
+                task,
+                new List<ItemTask> { new ItemAdd(item, -removedAmount, removedFromSlotType, removedFromSlot) },
+                new List<ulong>()));
         }
         if (res && releaseIdAsWell)
         {
@@ -521,7 +529,6 @@ public class ItemContainer
 
         var totalConsumed = 0;
         var itemTasks = new List<ItemTask>();
-        var touchedSlots = new List<int>();
 
         // Try to consume preferred item first
         if ((amountToConsume > 0) && (preferredItem != null))
@@ -537,17 +544,17 @@ public class ItemContainer
             preferredItem.Count -= toRemove;
             amountToConsume -= toRemove;
 
+            // The delta is emitted here in both cases, including the one that empties the
+            // slot - by the time RemoveItem runs the count is already zero, so it has no
+            // amount left to report.
+            itemTasks.Add(new ItemAdd(preferredItem, -toRemove));
             if (preferredItem.Count > 0)
             {
                 Owner?.Inventory.OnConsumedItem(preferredItem, toRemove);
-                // Same action as when a stack grows, with the delta negated.
-                itemTasks.Add(new ItemAdd(preferredItem, -toRemove));
-                touchedSlots.Add(preferredItem.Slot);
             }
             else
             {
-                touchedSlots.Add(preferredItem.Slot);
-                RemoveItem(taskType, preferredItem, true); // Normally, this can never fail
+                RemoveItem(ItemTaskType.Invalid, preferredItem, true); // Normally, this can never fail
             }
 
             totalConsumed += toRemove;
@@ -562,16 +569,14 @@ public class ItemContainer
                 i.Count -= toRemove;
                 amountToConsume -= toRemove;
 
+                itemTasks.Add(new ItemAdd(i, -toRemove));
                 if (i.Count > 0)
                 {
                     Owner?.Inventory.OnConsumedItem(i, toRemove);
-                    itemTasks.Add(new ItemAdd(i, -toRemove));
-                    touchedSlots.Add(i.Slot);
                 }
                 else
                 {
-                    touchedSlots.Add(i.Slot);
-                    RemoveItem(taskType, i, true); // Normally, this can never fail
+                    RemoveItem(ItemTaskType.Invalid, i, true); // Normally, this can never fail
                 }
 
                 totalConsumed += toRemove;
