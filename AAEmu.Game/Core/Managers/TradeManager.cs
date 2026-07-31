@@ -356,7 +356,7 @@ public class TradeManager : Singleton<TradeManager>
                 //item.Slot = -1;
                 //var newItem = target.Inventory.AddItem(item);
                 //tasksTarget.Add(new ItemAdd(newItem));
-                tasksTarget.Add(new ItemAdd(item));
+                tasksTarget.Add(new ItemGain(item));
             }
         }
         // Handle Items from Target
@@ -370,7 +370,7 @@ public class TradeManager : Singleton<TradeManager>
                 //item.Slot = -1;
                 //var newItem = owner.Inventory.AddItem(item);
                 // tasksOwner.Add(new ItemAdd(newItem));
-                tasksOwner.Add(new ItemAdd(item));
+                tasksOwner.Add(new ItemGain(item));
             }
         }
 

@@ -613,7 +613,7 @@ public class Inventory
                 ni.Slot = toSlot;
                 ni._holdingContainer = targetContainer;
                 targetContainer.Items.Add(ni);
-                itemTasks.Add(new ItemAdd(ni));
+                itemTasks.Add(new ItemGain(ni));
                 if (targetContainer != sourceContainer)
                     targetContainer.UpdateFreeSlotCount();
                 else
