@@ -1,4 +1,4 @@
-using AAEmu.Commons.Network;
+﻿using AAEmu.Commons.Network;
 
 namespace AAEmu.Game.Models.Game.Items.Actions;
 
@@ -16,22 +16,35 @@ public class ItemAdd : ItemTask
 {
     private readonly Item _item;
     private readonly int _amount;
+    private readonly SlotType _slotType;
+    private readonly byte _slot;
 
     /// <param name="item">Item whose slot is being adjusted.</param>
     /// <param name="amount">Signed change in units - negative when consuming.</param>
     public ItemAdd(Item item, int amount)
+        : this(item, amount, item.SlotType, (byte)item.Slot)
+    {
+    }
+
+    /// <summary>
+    /// Overload for the slot an item is leaving, where the item object has already been
+    /// moved and no longer carries the slot that needs adjusting.
+    /// </summary>
+    public ItemAdd(Item item, int amount, SlotType slotType, byte slot)
     {
         _type = ItemAction.Create;
         _item = item;
         _amount = amount;
+        _slotType = slotType;
+        _slot = slot;
     }
 
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
 
-        stream.Write((byte)_item.SlotType); // type   : u8
-        stream.Write((byte)_item.Slot);     // index  : u8
+        stream.Write((byte)_slotType);      // type   : u8
+        stream.Write(_slot);                // index  : u8
         stream.Write(_item.Id);             // id     : u64
         stream.Write(_amount);              // amount : i32, signed delta
         stream.Write(_item.TemplateId);     // type   : u32 (item template)
