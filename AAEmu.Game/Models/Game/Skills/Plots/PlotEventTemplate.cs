@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Models.Game.Skills.Effects;
@@ -9,6 +9,12 @@ namespace AAEmu.Game.Models.Game.Skills.Plots;
 public class PlotEventTemplate
 {
     public uint Id { get; set; }
+    public bool AoeDiminishing { get; set; }
+    public string Name { get; set; }
+    public bool OnlyDieUnit { get; set; }
+    public bool OnlyMyPet { get; set; }
+    public bool OnlyMySlave { get; set; }
+    public bool OnlyPetOwner { get; set; }
     public uint PlotId { get; set; }
     public int Position { get; set; }
     public uint SourceUpdateMethodId { get; set; }
@@ -22,8 +28,9 @@ public class PlotEventTemplate
     public int TargetUpdateMethodParam7 { get; set; }
     public int TargetUpdateMethodParam8 { get; set; }
     public int TargetUpdateMethodParam9 { get; set; }
+    public int TargetUpdateMethodParam10 { get; set; }
+    public int TargetUpdateMethodParam11 { get; set; }
     public int Tickets { get; set; }
-    public bool AoeDiminishing { get; set; }
     public LinkedList<PlotEventCondition> Conditions { get; set; }
     public LinkedList<PlotAoeCondition> AoeConditions { get; set; }
     public LinkedList<PlotEventEffect> Effects { get; set; }

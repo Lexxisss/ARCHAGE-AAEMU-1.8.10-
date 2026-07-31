@@ -288,7 +288,7 @@ public static class CSOffsets
     public const ushort off_3A12D86C = 0x0EC;
     public const ushort off_3A12FA7C = 0x1E4;
     public const ushort CSChangeHouseNamePacket = 0x0AD;
-    public const ushort CSChangeHousePermissionPacket = 0x00A;
+    public const ushort CSChangeHousePermissionPacket = 0x00A; // target 10.8 x2game.dll [high]
     public const ushort off_3A12FAAC = 0x1F0;
     public const ushort off_3A12FABC = 0x0AE;
     public const ushort off_3A12FACC = 0x120;
@@ -534,7 +534,7 @@ public static class CSOffsets
     public const ushort CSResetSkillsPacket = 0x05D; // target x2game.dll constructor
     public const ushort CSResurrectCharacterPacket = 0xfff;
     public const ushort CSRollDicePacket = 0xfff;
-    public const ushort CSSecurityReportPacket = 0xfff;
+    public const ushort CSSecurityReportPacket = 0x08A; // target 10.8 x2game.dll [confirmed_serializer]
     public const ushort CSSelectInteractionExPacket = 0x013; // target 10.8 x2game.dll
     public const ushort CSSellHouseCancelPacket = 0xfff;
     public const ushort CSSellHousePacket = 0xfff;

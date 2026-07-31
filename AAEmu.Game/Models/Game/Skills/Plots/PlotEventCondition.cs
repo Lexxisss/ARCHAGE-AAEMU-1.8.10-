@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+
 using AAEmu.Game.Models.Game.Skills.Plots.Tree;
 using AAEmu.Game.Models.Game.Skills.Plots.Type;
 using AAEmu.Game.Models.Game.Units;
@@ -7,13 +8,15 @@ namespace AAEmu.Game.Models.Game.Skills.Plots;
 
 public class PlotEventCondition
 {
+    public int Id { get; set; }
     public PlotCondition Condition { get; set; }
+    public uint ConditionId { get; set; }
+    public PlotEventTemplate Event { get; set; }
+    public uint EventId { get; set; }
+    public bool NotifyFailure { get; set; }
     public int Position { get; set; }
     public PlotEffectSource SourceId { get; set; }
     public PlotEffectTarget TargetId { get; set; }
-    //public bool NotifyFailure { get; set; }
-
-    // TODO 1.2 // public bool NotifyFailure { get; set; }
 
     public bool CheckCondition(PlotState state, PlotTargetInfo targetInfo)
     {
@@ -21,7 +24,7 @@ public class PlotEventCondition
             return true;
 
         //if (NotifyFailure)
-        ;//Maybe do something here?
+        //Maybe do something here?
 
         return false;
 
@@ -84,8 +87,7 @@ public class PlotEventCondition
                     throw new InvalidOperationException("This can't happen");
             }
 
-            if (condition.Condition.Check(source, state.CasterCaster, target,
-                state.TargetCaster, state.SkillObject, condition, state.ActiveSkill))
+            if (condition.Condition.Check(source, state.CasterCaster, target, state.TargetCaster, state.SkillObject, state.ActiveSkill))
             {
                 continue;
             }
@@ -94,7 +96,7 @@ public class PlotEventCondition
             break;
         }
 
-        //Check 
+        //Check
         // var result = condition.Condition.Check(instance.Caster, instance.CasterCaster, instance.Target, instance.TargetCaster, instance.SkillObject, condition);
         // if (result)
         // {

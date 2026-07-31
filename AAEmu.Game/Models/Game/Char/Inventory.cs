@@ -279,19 +279,89 @@ public class Inventory
     public bool SplitOrMoveItem(ItemTaskType taskType, ulong fromItemId, SlotType fromType, byte fromSlot,
         ulong toItemId, SlotType toType, byte toSlot, int count = 0)
     {
+        // Resolve containers by the client-requested slot TYPE first, and trust what is actually
+        // sitting in that slot server-side over the itemId the client claims - the client's cached
+        // itemId for a slot can go stale (e.g. after a couple of quick equip/unequip round-trips
+        // without the client UI catching up), and rejecting outright on a stale id made every other
+        // unequip attempt fail until the character re-equipped. Self-heal by using the slot's real
+        // item instead; only hard-reject when an item genuinely exists but the client's claimed
+        // location doesn't match its real one at all.
+        var requestedSourceContainer = _itemContainers.GetValueOrDefault(fromType);
+        var requestedTargetContainer = _itemContainers.GetValueOrDefault(toType);
+        if (requestedSourceContainer == null || requestedTargetContainer == null)
+        {
+            Logger.Error(
+                "SplitOrMoveItem - Invalid container request {0}:{1} => {2}:{3}, fromItemId={4}, toItemId={5}",
+                fromType, fromSlot, toType, toSlot, fromItemId, toItemId);
+            return false;
+        }
+
         var fromItem = ItemManager.Instance.GetItemByItemId(fromItemId);
-        if (fromItem == null && fromItemId != 0)
+        var sourceSlotItem = requestedSourceContainer.GetItemBySlot(fromSlot);
+        if (sourceSlotItem != null && fromItemId != sourceSlotItem.Id)
+        {
+            Logger.Warn(
+                "SplitOrMoveItem - Source ItemId {0} does not match slot {1}:{2}; using slot item {3}:{4}",
+                fromItemId, fromType, fromSlot, sourceSlotItem.Id, sourceSlotItem.TemplateId);
+            fromItem = sourceSlotItem;
+            fromItemId = fromItem.Id;
+        }
+        else if (fromItem == null && fromItemId != 0)
         {
             Logger.Error($"SplitOrMoveItem - ItemId {fromItemId} no longer exists, possibly a phantom item.");
             return false;
         }
-
-        // Grab target container for easy manipulation
-        var sourceContainer = fromItem?._holdingContainer ?? Bag;
-        if (!_itemContainers.TryGetValue(toType, out var targetContainer))
+        else if (fromItem != null && (fromItem.SlotType != fromType || fromItem.Slot != fromSlot))
         {
-            targetContainer = Bag;
+            Logger.Warn(
+                "SplitOrMoveItem - Source ItemId {0} is at {1}:{2}, but client requested {3}:{4}; rejecting mismatched move",
+                fromItemId, fromItem.SlotType, fromItem.Slot, fromType, fromSlot);
+            return false;
         }
+
+        var toItem = ItemManager.Instance.GetItemByItemId(toItemId);
+        var targetSlotItem = requestedTargetContainer.GetItemBySlot(toSlot);
+        if (targetSlotItem != null && toItemId == 0)
+        {
+            var freeSlot = requestedTargetContainer.GetUnusedSlot(-1);
+            if (freeSlot < 0)
+            {
+                Owner?.SendErrorMessage(ErrorMessageType.NotEnoughEmptySlotsInBag);
+                return false;
+            }
+
+            Logger.Warn(
+                "SplitOrMoveItem - Client target slot {0}:{1} was occupied by {2}:{3}; using free slot {4}",
+                toType, toSlot, targetSlotItem.Id, targetSlotItem.TemplateId, freeSlot);
+            toSlot = (byte)freeSlot;
+            targetSlotItem = null;
+        }
+
+        if (targetSlotItem != null && toItemId != targetSlotItem.Id)
+        {
+            Logger.Warn(
+                "SplitOrMoveItem - Target ItemId {0} does not match slot {1}:{2}; using slot item {3}:{4}",
+                toItemId, toType, toSlot, targetSlotItem.Id, targetSlotItem.TemplateId);
+            toItem = targetSlotItem;
+            toItemId = toItem.Id;
+        }
+        else if (toItem == null && toItemId != 0)
+        {
+            Logger.Warn(
+                "SplitOrMoveItem - Target ItemId {0} missing, treating slot {1}:{2} as empty",
+                toItemId, toType, toSlot);
+            toItemId = 0;
+        }
+        else if (toItem != null && (toItem.SlotType != toType || toItem.Slot != toSlot))
+        {
+            Logger.Warn(
+                "SplitOrMoveItem - Target ItemId {0} is at {1}:{2}, but client requested {3}:{4}; rejecting mismatched move",
+                toItemId, toItem.SlotType, toItem.Slot, toType, toSlot);
+            return false;
+        }
+
+        var sourceContainer = requestedSourceContainer;
+        var targetContainer = requestedTargetContainer;
 
         return SplitOrMoveItemEx(taskType, sourceContainer, targetContainer, fromItemId, fromType, fromSlot, toItemId, toType, toSlot, count);
     }

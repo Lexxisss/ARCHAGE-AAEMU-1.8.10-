@@ -1,11 +1,15 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
+using AAEmu.Commons.Exceptions;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.Faction;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Templates;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Models.StaticValues;
 using AAEmu.Game.Utils;
 
 using NLog;
@@ -16,104 +20,85 @@ public class PlotCondition
 {
     protected static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
     public uint Id { get; set; }
-    public bool NotCondition { get; set; }
     public PlotConditionType Kind { get; set; }
+    public int KindId { get; set; }
+    public bool NotCondition { get; set; }
+    public bool OrUnitReqs { get; set; }
     public int Param1 { get; set; }
     public int Param2 { get; set; }
     public int Param3 { get; set; }
+    public int Param4 { get; set; }
 
-    public bool Check(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, PlotEventCondition eventCondition, Skill skill)
+    /// <summary>
+    /// Checks if this PlotCondition is true
+    /// </summary>
+    public bool Check(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, Skill skill)
     {
-        var res = true;
-        switch (Kind)
+        var res = Kind switch
         {
-            case PlotConditionType.Level:
-                res = ConditionLevel(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3);
-                break;
-            case PlotConditionType.Relation:
-                res = ConditionRelation(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3);
-                break;
-            case PlotConditionType.Direction:
-                res = ConditionDirection(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, eventCondition);
-                break;
-            case PlotConditionType.BuffTag:
-                res = ConditionBuffTag(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, eventCondition);
-                break;
-            case PlotConditionType.WeaponEquipStatus:
-                res = ConditionWeaponEquipStatus(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3);
-                break;
-            case PlotConditionType.Chance:
-                res = ConditionChance(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.Dead:
-                res = ConditionDead(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.CombatDiceResult:
-                res = ConditionCombatDiceResult(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3, skill); // Every CombatDiceResult is a NotCondition -> false makes it true. 
-                break;
-            case PlotConditionType.InstrumentType:
-                res = ConditionInstrumentType(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.Range:
-                res = ConditionRange(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.Variable:
-                res = ConditionVariable(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3);
-                break;
-            case PlotConditionType.UnitAttrib:
-                res = ConditionUnitAttrib(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.Actability:
-                res = ConditionActability(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.Stealth:
-                res = ConditionStealth(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.Visible:
-                res = ConditionVisible(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-            case PlotConditionType.ABLevel:
-                res = ConditionABLevel(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2,
-                    Param3);
-                break;
-        }
+            PlotConditionType.Level => ConditionLevel(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Relation => ConditionRelation(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Direction => ConditionDirection(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.BuffTag => ConditionBuffTag(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.WeaponEquipStatus => ConditionWeaponEquipStatus(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Chance => ConditionChance(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Dead => ConditionDead(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.CombatDiceResult => ConditionCombatDiceResult(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4, skill), // Every CombatDiceResult is a NotCondition -> false makes it true.
+            PlotConditionType.InstrumentType => ConditionInstrumentType(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Range => ConditionRange(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Variable => ConditionVariable(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.UnitAttrib => ConditionUnitAttrib(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Actability => ConditionActability(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Stealth => ConditionStealth(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.Visible => ConditionVisible(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            PlotConditionType.ABLevel => ConditionAbLevel(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
+            _ => true
+        };
 
-        Logger.Trace("PlotCondition : {0} | Params : {1}, {2}, {3} | Result : {4}", Kind, Param1, Param2, Param3, NotCondition ? !res : res);
+        Logger.Trace($"PlotCondition : {Kind} | Params : {Param1}, {Param2}, {Param3}, {Param4} | Result : {(NotCondition ? "NOT" : "")} {res}");
 
         return NotCondition ? !res : res;
     }
 
-    private static bool ConditionLevel(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int minLevel, int maxLevel, int unk3)
+    // 1
+    private static bool ConditionLevel(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int minLevel, int maxLevel, int unused3, int unused4)
     {
-        var Caster = caster as Unit;
-        return Caster.Level >= minLevel && Caster.Level <= maxLevel;
+        if (caster is not Unit casterUnit)
+        {
+            Logger.Debug($"PlotCondition Level check without caster being a Unit");
+            return false;
+        }
+        return casterUnit.Level >= minLevel && casterUnit.Level <= maxLevel;
     }
 
-    private static bool ConditionRelation(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3)
+    // 2
+    private static bool ConditionRelation(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int relationType, int unused2, int unused3, int unused4)
     {
+        Logger.Debug($"ConditionRelation {relationType} {caster} -> {target}");
+
         // Param1 is either 1, 4 or 5
+        switch (relationType)
+        {
+            case 1: // Friendly?
+                return caster.Faction.GetRelationState(target.Faction) == RelationState.Friendly;
+            case 4: // Hostile?
+                return caster.Faction.GetRelationState(target.Faction) == RelationState.Hostile;
+            case 5: //
+                break;
+        }
         return true;
     }
 
-    private static bool ConditionDirection(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3, PlotEventCondition eventCondition)
+    // 3
+    private static bool ConditionDirection(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int unused1, int unused2, int unused3, int unused4)
     {
         return MathUtil.IsFront(caster, target);
     }
 
-    private static bool ConditionBuffTag(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int tagId, int unk2, int unk3, PlotEventCondition eventCondition)
+    // 4 does not exist
+
+    // 5
+    private static bool ConditionBuffTag(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int tagId, int unused2, int unused3, int unused4)
     {
         // if (eventCondition.TargetId == PlotEffectTarget.Source)
         //     return caster.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId((uint)tagId));
@@ -122,14 +107,14 @@ public class PlotCondition
         return target.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId((uint)tagId));
     }
 
-    private static bool ConditionWeaponEquipStatus(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int weaponEquipStatus, int unk2, int unk3)
+    // 6
+    private static bool ConditionWeaponEquipStatus(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int weaponEquipStatus, int unused2, int unused3, int unused4)
     {
         // Weapon equip status can be :
         // 1 = 1handed
         // 2 = 2handed
         // 3 = duel-wielded
-        WeaponWieldKind wieldKind = (WeaponWieldKind)weaponEquipStatus;
+        var wieldKind = (WeaponWieldKind)weaponEquipStatus;
         if (caster is Character character)
         {
             return character.GetWeaponWieldKind() == wieldKind;
@@ -137,50 +122,75 @@ public class PlotCondition
         return false;
     }
 
-    private static bool ConditionChance(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int chance, int unk2, int unk3)
+    // 7
+    private static bool ConditionChance(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int chance, int unused2, int unused3, int unused4)
     {
-        var Caster = caster as Unit;
-        // Param2 is only used once, and its value is "1"
+        if (caster is not Unit casterUnit)
+        {
+            Logger.Debug($"PlotCondition Chance check without caster being a Unit");
+            return false;
+        }
+
+        // NOTE: Param2 is only used once, and its value is "1"
+        // It's used for fishing skill 18711, so it could mean the roll is affected by vocation skill level rates
+        // That event sets a variable to 11 and trigger FinishChanneling if true
+        // Nowhere in the skill does it seem to check for this value (only for 0 or 1)
         var roll = Rand.Next(0, 100);
-        Caster.ConditionChance = roll <= chance;
+        casterUnit.ConditionChance = roll <= chance;
+
+        Logger.Debug($"PlotConditionChance Params : {chance}, {unused2}, {unused3} | Result : {roll <= chance}");
+
         return roll <= chance;
     }
 
-    private static bool ConditionDead(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3)
+    // 8
+    private static bool ConditionDead(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int unused1, int unused2, int unused3, int unused4)
     {
-        var unitTarget = (Unit)target;
-        return unitTarget.Hp == 0;
+        if (target is Unit unitTarget)
+            return unitTarget.Hp == 0;
+
+        return false;
     }
 
-    private static bool ConditionCombatDiceResult(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3, Skill skill)
+    // 9
+    private static bool ConditionCombatDiceResult(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int expectedResult, int unused2, int unused3, int unused4, Skill skill)
     {
-        if (target is Unit trg)
+        if (target is Unit targetUnit)
         {
-            //Super hacky way to do combat dice....
-            var hitType = skill.RollCombatDice(caster, trg);
-            if (!skill.HitTypes.ContainsKey(trg.ObjId))
-                skill.HitTypes.Add(trg.ObjId, hitType);
-            else
-                skill.HitTypes[trg.ObjId] = hitType;
+            if (!skill.HitTypes.TryGetValue(targetUnit.ObjId, out var hitType))
+            {
+                hitType = skill.RollCombatDice(caster, targetUnit);
+                skill.HitTypes[targetUnit.ObjId] = hitType;
+            }
 
-            return hitType == SkillHitType.MeleeDodge
-                || hitType == SkillHitType.MeleeParry
-                || hitType == SkillHitType.MeleeBlock
-                || hitType == SkillHitType.MeleeMiss
-                || hitType == SkillHitType.RangedDodge
-                || hitType == SkillHitType.RangedParry
-                || hitType == SkillHitType.RangedBlock
-                || hitType == SkillHitType.RangedMiss
-                || hitType == SkillHitType.Immune;
+            var missed = skill.SkillMissed(targetUnit.ObjId);
+            Logger.Debug(
+                "PlotConditionCombatDiceResult Params : Expected: {0} | HitType: {1} ({2}) | Missed: {3}",
+                expectedResult,
+                hitType,
+                (int)hitType,
+                missed);
+
+            return expectedResult switch
+            {
+                51 => !missed,
+                204 => missed,
+                _ => hitType == SkillHitType.MeleeDodge
+                    || hitType == SkillHitType.MeleeParry
+                    || hitType == SkillHitType.MeleeBlock
+                    || hitType == SkillHitType.MeleeMiss
+                    || hitType == SkillHitType.RangedDodge
+                    || hitType == SkillHitType.RangedParry
+                    || hitType == SkillHitType.RangedBlock
+                    || hitType == SkillHitType.RangedMiss
+                    || hitType == SkillHitType.Immune
+            };
         }
-        return true; // Every CombatDiceResult is a NotCondition -> false makes it true.
+        return true; // Almost Every CombatDiceResult is a NotCondition -> false makes it true.
     }
 
-    private static bool ConditionInstrumentType(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int instrumentTypeId, int unk2, int unk3)
+    // 10
+    private static bool ConditionInstrumentType(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int instrumentTypeId, int unused2, int unused3, int unused4)
     {
         // Param1 is either 21, 22 or 23
         if (caster is Character character)
@@ -197,77 +207,141 @@ public class PlotCondition
         return false;
     }
 
-    private static bool ConditionRange(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int minRange, int maxRange, int unk3)
+    // 11
+    private static bool ConditionRange(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int minRange, int maxRange, int unused3, int unused4)
     {
         // Param1 = Min range
         // Param2 = Max range
-        var range = MathUtil.CalculateDistance(caster.Transform.World.Position, target.Transform.World.Position);
-        range -= 2;//Temp fix because the calculation is off
-        range = Math.Max(0f, range);
+        if (caster is not Unit casterUnit)
+            return false;
+
+        var range = casterUnit.GetDistanceTo(target);
+
         return range >= minRange && range <= maxRange;
     }
 
-    private static bool ConditionVariable(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3)
+    // 12
+    private static bool ConditionVariable(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int variableIndex, int operation, int compareValue, int unused4)
     {
-        var Caster = caster as Unit;
-        int index = unk1;
-        int operation = unk2;
-        int value = unk3;
-        //There is a high chance this is not implemented correctly..
-        //If refactoring. See SpecialEffect -> SetVariable as well
-        if (operation == 1)
+        if (caster is not Unit casterUnit)
         {
-            //TODO obtain variables directly from plot.
-            return Caster.ActivePlotState.Variables[index] == value;
+            Logger.Warn($"PlotCondition Variable check without caster being a Unit");
+            return false;
         }
-        Logger.Error("Invalid Plot Variable Condition Operation[{0}]", operation);
-        return false;
+
+        if (casterUnit.ActivePlotState?.Variables == null)
+        {
+            Logger.Warn("PlotConditionVariable missing active plot state for caster {0} ({1})", casterUnit.Name, casterUnit.ObjId);
+            return false;
+        }
+
+        if (variableIndex < 0)
+        {
+            Logger.Warn(
+                "PlotConditionVariable index out of range for caster {0} ({1}): index={2}, variables={3}",
+                casterUnit.Name,
+                casterUnit.ObjId,
+                variableIndex,
+                casterUnit.ActivePlotState.Variables.Length);
+            return false;
+        }
+
+        var variableValue = casterUnit.ActivePlotState.GetVariable(variableIndex);
+        Logger.Debug($"PlotConditionVariable Params : Index: {variableIndex}, Operation: {operation}, compareValue: {compareValue} | Index Value: {variableValue}");
+        // There is a high chance this is not implemented correctly ...
+        // If refactoring. See SpecialEffect -> SetVariable as well
+
+        return CompareWithOperator(variableValue, operation, compareValue);
     }
 
-    private static bool ConditionUnitAttrib(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3)
+    // 13
+    private static bool ConditionUnitAttrib(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int attributeType, int operation, int compareValue, int unused4)
     {
-        // All 3 params used. No idea.
-        return true;
+        if (caster is not Unit casterUnit)
+        {
+            Logger.Warn($"PlotCondition UnitAttrib check without caster being a Unit");
+            return false;
+        }
+
+        if (!int.TryParse(casterUnit.GetAttribute((UnitAttribute)attributeType), out var attributeValue))
+            attributeValue = 0;
+
+        return CompareWithOperator(attributeValue, operation, compareValue);
     }
 
-    private static bool ConditionActability(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int actabilityId, int op, int level)
+    // 14
+    private static bool ConditionActability(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int actabilityId, int operation, int compareValue, int unused4)
     {
         // Check actability level
         // Param1 = Actability ID
         // Param2 = Operator (2, 3, 5) for equal, less than and less than or equal
         // Param3 = Actability Level
-        return true;
+        if (caster is not Character player)
+        {
+            // Not a player
+            return false;
+        }
+
+        var actAbility = player.Actability.Actabilities.GetValueOrDefault((uint)actabilityId);
+        var actAbilityPoints = actAbility?.Point ?? 0;
+
+        return CompareWithOperator(actAbilityPoints, operation, compareValue);
     }
 
-    private static bool ConditionStealth(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3)
+    // 15
+    private static bool ConditionStealth(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int unused1, int unused2, int unused3, int unused4)
     {
-        // unsure if player or target
+        // Unsure if player or target, plot logic suggests it is the target
         // only used for Flamebolt for some reason.
-        // Also always a "NotCondition" so will default to false (result will be True)
-        return true;
+        // Is also always a "NotCondition" so will default to false (result will be True) (only on non-stealth targets)
+        return target?.Buffs.CheckBuffTag((uint)TagsEnum.Stealth) ?? false;
     }
 
-    private static bool ConditionVisible(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int unk1, int unk2, int unk3)
+    // 16
+    private static bool ConditionVisible(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int unused1, int unused2, int unused3, int unused4)
     {
         // used for LOS ?
-        return true;
+        if (target is Unit targetUnit)
+            return !targetUnit.Buffs.CheckBuffTag((uint)TagsEnum.Stealth) && !targetUnit.Invisible;
+
+        return false;
     }
-    private static bool ConditionABLevel(BaseUnit caster, SkillCaster casterCaster, BaseUnit target,
-        SkillCastTarget targetCaster, SkillObject skillObject, int abilityType, int min, int max)
+
+
+    private static bool ConditionAbLevel(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int abilityType, int minimumLevel, int maximumLevel, int unused4)
     {
         if (caster is Character character)
         {
             var ability = character.Abilities.Abilities[(AbilityType)abilityType];
             int abLevel = ExperienceManager.Instance.GetLevelFromExp(ability.Exp);
-            return abLevel >= min && abLevel <= max;
+
+            return abLevel >= minimumLevel && abLevel <= maximumLevel;
         }
+
         //Should this ever not be a character using this condition?
         return false;
+    }
+
+    /// <summary>
+    /// Helper function for condition checks with comparators
+    /// </summary>
+    /// <exception cref="GameException">Invalid operator</exception>
+    private static bool CompareWithOperator(int value, int operation, int compareValue)
+    {
+        switch (operation) // operator
+        {
+            case 1: // ==
+                return value == compareValue;
+            case 2: // > x
+                return value > compareValue;
+            case 3: // >= x
+                return value >= compareValue;
+            case 4: // < x
+                return value < compareValue;
+            case 5: // <= x
+                return value <= compareValue;
+            default:
+                throw new GameException($"CompareWithOperator: Unknown Comparison Operation {operation}");
+        }
     }
 }

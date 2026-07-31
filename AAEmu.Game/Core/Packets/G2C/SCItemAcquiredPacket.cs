@@ -17,13 +17,15 @@ public class SCItemAcquiredPacket : GamePacket
     private readonly ItemTaskType _taskType;
     private readonly Item _item;
     private readonly int _count;
+    private readonly bool _isNewItem;
 
-    public SCItemAcquiredPacket(ItemTaskType taskType, Item item, int count)
+    public SCItemAcquiredPacket(ItemTaskType taskType, Item item, int count, bool isNewItem = true)
         : base(SCOffsets.SCItemTaskSuccessPacket, 5)
     {
         _taskType = taskType;
         _item = item;
         _count = Math.Max(1, count);
+        _isNewItem = isNewItem;
     }
 
     public override PacketStream Write(PacketStream stream)
@@ -32,8 +34,14 @@ public class SCItemAcquiredPacket : GamePacket
         stream.Write((byte)_taskType);
         stream.Write((byte)1);
 
-        stream.Write((byte)ItemAction.Create);
-        stream.Write((byte)ItemTaskLogType.MoveItem);
+        // Empirically, Create/GainItem (used for genuinely new items) is silently dropped
+        // by the client on this opcode - confirmed in-game: a brand new quest-reward item
+        // never appeared, while a reward potion that already existed in the bag (taking
+        // the AddStack/UpdateOnly branch below) stacked correctly. Until the real "new
+        // item" sub-format is confirmed, use the proven-working AddStack/UpdateOnly pair
+        // unconditionally; _isNewItem is kept on the packet for when that gets sorted out.
+        stream.Write((byte)ItemAction.AddStack);
+        stream.Write((byte)ItemTaskLogType.UpdateOnly);
         stream.Write((byte)_item.SlotType);
         stream.Write((byte)_item.Slot);
         stream.Write(_item.Id);

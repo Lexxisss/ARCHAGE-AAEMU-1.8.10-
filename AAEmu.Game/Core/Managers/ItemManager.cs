@@ -785,12 +785,26 @@ public class ItemManager : Singleton<ItemManager>
                 {
                     while (reader.Read())
                     {
-                        var template = new Wearable();
-                        template.TypeId = reader.GetUInt32("armor_type_id");
-                        template.SlotTypeId = reader.GetUInt32("slot_type_id");
-                        template.ArmorBp = reader.GetInt32("armor_bp");
-                        //MagicResistanceBp = reader.GetInt32("magic_resistance_bp") // there is no such field in the database for version 3.0.3.0
-                        _wearables.Add(template.TypeId * 128 + template.SlotTypeId, template);
+                        var typeId = reader.GetUInt32("armor_type_id");
+                        var slotTypeId = reader.GetUInt32("slot_type_id");
+                        var key = typeId * 128 + slotTypeId;
+                        // Target 10.8 splits armor_bp and magic_resistance_bp for the same
+                        // (armor_type_id, slot_type_id) pair across two separate rows instead
+                        // of one; merge them into a single template instead of treating the
+                        // second row as a duplicate key.
+                        if (!_wearables.TryGetValue(key, out var template))
+                        {
+                            template = new Wearable
+                            {
+                                TypeId = typeId,
+                                SlotTypeId = slotTypeId
+                            };
+                            _wearables.Add(key, template);
+                        }
+                        if (!reader.IsDBNull("armor_bp"))
+                            template.ArmorBp = reader.GetInt32("armor_bp");
+                        if (!reader.IsDBNull("magic_resistance_bp"))
+                            template.MagicResistanceBp = reader.GetInt32("magic_resistance_bp");
                     }
                 }
             }
@@ -1363,6 +1377,7 @@ public class ItemManager : Singleton<ItemManager>
                         template.Weight9 = reader.GetInt32("weight_9");
                         template.Weight10 = reader.GetInt32("weight_10");
                         template.Weight11 = reader.GetInt32("weight_11");
+                        template.Weight12 = reader.GetInt32("weight_12");
                         _itemGradeDistributions.Add(template.Id, template);
                     }
                 }
@@ -1820,6 +1835,11 @@ public class ItemManager : Singleton<ItemManager>
             {
                 while (reader.Read())
                 {
+                    // A malformed/unexpected row (bad template, bad enum string, etc.) must not abort
+                    // the rest of this "SELECT * FROM items" scan - that would silently drop every item
+                    // still queued behind it (for every other character), not just the offending row.
+                    try
+                    {
                     var itemType = reader.GetString("type");
                     var itemId = reader.GetUInt64("id");
                     var itemTemplateId = reader.GetUInt32("template_id");
@@ -1867,6 +1887,24 @@ public class ItemManager : Singleton<ItemManager>
                     item.OwnerId = reader.GetUInt64("owner");
                     item.TemplateId = itemTemplateId;
                     item.Template = GetTemplate(item.TemplateId);
+                    if (item.Template == null)
+                    {
+                        // BodyPart items (default character appearance, e.g. the starting shirt) can
+                        // have no static template row at all - keep them anyway instead of dropping
+                        // the character's appearance. Anything else with no template can't be safely
+                        // read further below (Template.FixedGrade/.Gradable/.Name are all dereferenced
+                        // unconditionally), so skip just this row instead of throwing and aborting the
+                        // rest of the "SELECT * FROM items" result set for every other item still queued.
+                        if (item is BodyPart)
+                        {
+                            Logger.Warn("Restoring body part without static template {0} for item {1}, owner={2}; keeping it for character appearance.", item.TemplateId, item.Id, item.OwnerId);
+                        }
+                        else
+                        {
+                            Logger.Error("Unable to restore template {0} for item {1}, owner={2}, item will not be loaded!", item.TemplateId, item.Id, item.OwnerId);
+                            continue;
+                        }
+                    }
                     var containerId = reader.GetUInt64("container_id");
                     item.SlotType = (SlotType)Enum.Parse(typeof(SlotType), reader.GetString("slot_type"), true);
                     var thisItemSlot = reader.GetInt32("slot");
@@ -1883,10 +1921,13 @@ public class ItemManager : Singleton<ItemManager>
                     item.ReadDetails(details);
 
                     // Overwrite Fixed-grade items, just to make sure. Retail does not do this, but it just feels better if we do
-                    if (item.Template.FixedGrade >= 0)
-                        item.Grade = (byte)item.Template.FixedGrade;
-                    else if (item.Template.Gradable)
-                        item.Grade = reader.GetByte("grade"); // Load from our DB if the item is gradable
+                    if (item.Template != null)
+                    {
+                        if (item.Template.FixedGrade >= 0)
+                            item.Grade = (byte)item.Template.FixedGrade;
+                        else if (item.Template.Gradable)
+                            item.Grade = reader.GetByte("grade"); // Load from our DB if the item is gradable
+                    }
 
                     item.ExpirationTime = reader.IsDBNull("expire_time") ? DateTime.MinValue : reader.GetDateTime("expire_time");
                     item.ExpirationOnlineMinutesLeft = reader.GetDouble("expire_online_minutes");
@@ -1910,7 +1951,7 @@ public class ItemManager : Singleton<ItemManager>
                     }
                     else
                     {
-                        Logger.Trace($"Can't find a container for Item {item.Id} ({item.Template.Name}), ContainerId: {containerId}");
+                        Logger.Trace($"Can't find a container for Item {item.Id} ({item.Template?.Name ?? "<missing-template>"}), ContainerId: {containerId}");
                         // This Item does not have a valid container it can fit in
 
                         if (item.OwnerId > 0)
@@ -1935,6 +1976,11 @@ public class ItemManager : Singleton<ItemManager>
                             item.Slot = thisItemSlot; // Override the slot number again in case things didn't go as planned
                             item.IsDirty = false;
                         }
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, "Failed to load a row from 'items', skipping it and continuing with the rest");
                     }
                 }
             }

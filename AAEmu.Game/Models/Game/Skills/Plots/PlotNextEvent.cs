@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,20 +14,26 @@ namespace AAEmu.Game.Models.Game.Skills.Plots;
 public class PlotNextEvent
 {
     public uint Id { get; set; }
-    public PlotEventTemplate Event { get; set; }
-    public int Position { get; set; }
-    public bool PerTarget { get; set; }
-    public bool Casting { get; set; }
-    public int Delay { get; set; }
-    public int Speed { get; set; }
-    public bool Channeling { get; set; }
-    public int CastingInc { get; set; }
     public bool AddAnimCsTime { get; set; }
-    public bool CastingDelayable { get; set; }
-    public bool CastingCancelable { get; set; }
     public bool CancelOnBigHit { get; set; }
-    public bool UseExeTime { get; set; }
+    public bool Casting { get; set; }
+    public bool CastingCancelable { get; set; }
+    public bool CastingDelayable { get; set; }
+    public int CastingInc { get; set; }
+    public bool CastingUseable { get; set; }
+    public bool Channeling { get; set; }
+    public bool CombatResource { get; set; }
+    public int Delay { get; set; }
+    public PlotEventTemplate Event { get; set; }
+    public uint EventId { get; set; }
     public bool Fail { get; set; }
+    public bool HighAbilityResource { get; set; }
+    public uint NextEventId { get; set; }
+    public bool PerTarget { get; set; }
+    public int Position { get; set; }
+    public int Speed { get; set; }
+    public bool UseExeTime { get; set; }
+    public int Weight { get; set; }
 
     private int GetAnimDelay(IEnumerable<PlotEventEffect> effects)
     {

@@ -618,7 +618,7 @@ public class ItemContainer
 
         // First try to add to existing item counts
         var itemTasks = new List<ItemTask>();
-        var acquiredCounts = new List<(Item item, int addedCount)>();
+        var acquiredCounts = new List<(Item item, int addedCount, bool isNewItem)>();
 
         // Never update in mail containers
         if (ContainerType != SlotType.Mail)
@@ -632,7 +632,7 @@ public class ItemContainer
                     i.Count += addAmount;
                     amountToAdd -= addAmount;
                     itemTasks.Add(new ItemCountUpdate(i, addAmount));
-                    acquiredCounts.Add((i, addAmount));
+                    acquiredCounts.Add((i, addAmount, false));
                     updatedItemsList.Add(i);
                     Owner?.Inventory.OnAcquiredItem(i, addAmount, true);
                 }
@@ -680,7 +680,7 @@ public class ItemContainer
             if (AddOrMoveExistingItem(ItemTaskType.Invalid, newItem, prefSlot)) // Task set to invalid as we send our own packets inside this function
             {
                 itemTasks.Add(new ItemAdd(newItem));
-                acquiredCounts.Add((newItem, addAmount));
+                acquiredCounts.Add((newItem, addAmount, true));
                 newItemsList.Add(newItem);
             }
             else
@@ -690,8 +690,8 @@ public class ItemContainer
         {
             // Opcode 0x10B carries a single item change per packet on the target
             // 1.8.1.0 client, so each acquired/updated item gets its own packet.
-            foreach (var (item, addedCount) in acquiredCounts)
-                Owner?.SendPacket(new SCItemAcquiredPacket(taskType, item, addedCount));
+            foreach (var (item, addedCount, isNewItem) in acquiredCounts)
+                Owner?.SendPacket(new SCItemAcquiredPacket(taskType, item, addedCount, isNewItem));
         }
         UpdateFreeSlotCount();
 
