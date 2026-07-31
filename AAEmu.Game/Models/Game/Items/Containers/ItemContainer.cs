@@ -475,8 +475,8 @@ public class ItemContainer
         if (!CanDestroy(item))
             return false;
 
-        // Captured before anything clears it: the amount that has to be taken off the slot.
-        var removedAmount = item.Count;
+        // Captured before the move clears them: action 7 reports the slot being emptied,
+        // and by the time the packet is built the item may already carry a different one.
         var removedFromSlotType = item.SlotType;
         var removedFromSlot = (byte)item.Slot;
 
