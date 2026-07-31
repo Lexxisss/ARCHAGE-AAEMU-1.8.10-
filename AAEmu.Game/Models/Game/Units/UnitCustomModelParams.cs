@@ -165,10 +165,9 @@ public class FaceModel : PacketMarshaler
         stream.Write(EyebrowColor);
         stream.Write(DecoColor);
 
-        stream.Write(Modifier, true);
-        // Added after the modifier array in the compiled 10.8.1.0 serializer
-        // 0x39969450. These 20 bytes were previously misclassified as part of
-        // the character tail by the working reference implementation.
+        stream.Write(NormalizeModifier(Modifier), true);
+        // Target UnitCustomModel serializer 0x39969450 includes this
+        // visual-race/wing tail in SCUnitState immediately after Modifier.
         stream.Write(VisualRace);
         stream.Write(VisualGender);
         stream.Write(VisualRaceExpiredTime);
@@ -186,32 +185,22 @@ public class FaceModel : PacketMarshaler
     }
 
     /// <summary>
-    /// Face payload embedded in protocol 10.8/1810 SCUnitState. Captured
-    /// opcode 0x0133 bodies end the face block after the 128-byte modifier
-    /// array; the later visual-race/wing tail belongs to other serializers.
+    /// Compatibility alias. SCUnitState 0x0133 uses the same complete target
+    /// FaceModel form as Write(), including the visual-race/wing tail.
     /// </summary>
-    public PacketStream Write1810(PacketStream stream)
+    public PacketStream Write1810(PacketStream stream) => Write(stream);
+
+    private static byte[] NormalizeModifier(byte[] modifier)
     {
-        stream.Write(MovableDecalAssetId);
-        stream.Write(MovableDecalWeight);
-        stream.Write(MovableDecalScale);
-        stream.Write(MovableDecalRotate);
-        stream.Write(MovableDecalMoveX);
-        stream.Write(MovableDecalMoveY);
-        stream.WritePisc(FixedDecalAsset[0].AssetId, FixedDecalAsset[1].AssetId, FixedDecalAsset[2].AssetId, FixedDecalAsset[3].AssetId);
-        stream.WritePisc(FixedDecalAsset[4].AssetId, FixedDecalAsset[5].AssetId);
-        stream.WritePisc(DiffuseMapId, NormalMapId, EyelashMapId);
-        for (var i = 0; i < 6; i++)
-            stream.Write(FixedDecalAsset[i].AssetWeight);
-        stream.Write(NormalMapWeight);
-        stream.Write(LipColor);
-        stream.Write(LeftPupilColor);
-        stream.Write(RightPupilColor);
-        stream.Write(EyebrowColor);
-        stream.Write(DecoColor);
-        stream.Write(Modifier, true);
-        return stream;
+        if (modifier is { Length: 128 })
+            return modifier;
+
+        var normalized = new byte[128];
+        if (modifier != null)
+            System.Array.Copy(modifier, normalized, System.Math.Min(modifier.Length, normalized.Length));
+        return normalized;
     }
+
 }
 
 public class UnitCustomModelParams : PacketMarshaler
@@ -369,35 +358,10 @@ public class UnitCustomModelParams : PacketMarshaler
     }
 
     /// <summary>
-    /// Protocol 10.8/1810 custom-model form used inside SCUnitState 0x0133.
-    /// It preserves the target field order but uses the captured 255-byte
-    /// Face payload rather than the 275-byte form used by other packets.
+    /// Compatibility alias. Target SCUnitState uses the complete serializer,
+    /// including the 20-byte FaceModel visual-race/wing tail.
     /// </summary>
-    public PacketStream Write1810(PacketStream stream)
-    {
-        stream.Write((byte)_type);
-        if (_type == UnitCustomModelType.None)
-            return stream;
-
-        stream.Write(HairColorId);
-        if (_type == UnitCustomModelType.Hair)
-            return stream;
-
-        stream.Write(HornColorId);
-        stream.Write(SkinColorId);
-        if (_type == UnitCustomModelType.Skin)
-            return stream;
-
-        stream.Write(ModelId);
-        stream.Write(DefaultHairColor);
-        stream.Write(TwoToneHair);
-        stream.Write(TwoToneFirstWidth);
-        stream.Write(TwoToneSecondWidth);
-        stream.Write(BodyNormalMapId);
-        stream.Write(BodyNormalMapWeight);
-        Face.Write1810(stream);
-        return stream;
-    }
+    public PacketStream Write1810(PacketStream stream) => Write(stream);
 
     private void ReadLegacy3030(PacketStream stream)
     {

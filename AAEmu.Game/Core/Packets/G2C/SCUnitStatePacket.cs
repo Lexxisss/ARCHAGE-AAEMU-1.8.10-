@@ -175,30 +175,16 @@ public class SCUnitStatePacket : GamePacket
 
         #endregion CharacterInfo_3EB0
 
+        // Tried and rejected in play: sending the block only for templates that name a real
+        // total_character_customs row. Those 2583 NPCs still rendered TEST text and black
+        // hands, so the fault is not limited to the appearances LoadCustom invents - the
+        // block breaks them even when the underlying data is genuine.
+        //
+        // So no NPC gets an override at all for now, and the client is left to resolve the
+        // look from templateId and modelRef as it already can.
         var modelParams = _unit.ModelParams ?? new UnitCustomModelParams(UnitCustomModelType.None);
-        if (npc != null && npc.ModelId is 10 or 11 or 14 or 15 or 16 or 17 or 18 or 19 or 20 or 21 or 24 or 25)
-        {
-            // Humanoid NPCs need the face modifier and pupil colours from
-            // total_character_customs. Sending their skin/body normal-map ids as
-            // a live override makes this client select placeholder TEST/black
-            // materials, so keep those two material overrides neutral. Build a
-            // packet-local copy: never mutate the NPC template or player data.
-            modelParams = modelParams.Face == null
-                ? new UnitCustomModelParams(UnitCustomModelType.None)
-                : new UnitCustomModelParams(UnitCustomModelType.Face)
-                    .SetId(modelParams.Id)
-                    .SetHairColorId(modelParams.HairColorId)
-                    .SetHornColorId(modelParams.HornColorId)
-                    .SetSkinColorId(0)
-                    .SetModelId(modelParams.ModelId)
-                    .SetDefaultHairColor(modelParams.DefaultHairColor)
-                    .SetTwoToneHair(modelParams.TwoToneHair)
-                    .SetTwoToneFirstWidth(modelParams.TwoToneFirstWidth)
-                    .SetTwoToneSecondWidth(modelParams.TwoToneSecondWidth)
-                    .SetBodyNormalMapId(0)
-                    .SetBodyNormalMapWeight(0f)
-                    .SetFace(modelParams.Face);
-        }
+        if (npc != null)
+            modelParams = new UnitCustomModelParams(UnitCustomModelType.None);
 
         stream.Write(modelParams);
         modelParamsEnd = stream.Count;
@@ -1237,26 +1223,35 @@ public class SCUnitStatePacket : GamePacket
                     if (validFlags == 0)
                         return;
 
-                    for (var i = 0; i < items.Count; i++)
+                    // Target serializer 0x3996AB80 iterates all 35 mask
+                    // bits and selects the NPC entry shape by protocol slot,
+                    // not by the server-side runtime Item subclass.
+                    for (var slot = 0; slot < 35; slot++)
                     {
-                        var item = npc.Equipment.GetItemBySlot(i);
+                        if ((validFlags & (1UL << slot)) == 0)
+                            continue;
 
-                        if (item is BodyPart)
+                        var item = npc.Equipment.GetItemBySlot(slot);
+                        if (item == null)
+                            throw new InvalidOperationException(
+                                $"NPC equipment mask references empty slot {slot} for template {npc.TemplateId}");
+
+                        if (slot is >= 19 and <= 25)
                         {
+                            // FACE..BEARD are body-part references.
                             stream.Write(item.TemplateId);
                         }
-                        else if (item != null)
+                        else if (slot == 27 || slot is >= 30 and <= 33)
                         {
-                            if (i == 27) // Cosplay
-                            {
-                                stream.Write(item);
-                            }
-                            else
-                            {
-                                stream.Write(item.TemplateId);
-                                stream.Write(0L);
-                                stream.Write((byte)0);
-                            }
+                            // COSPLAY plus target visual/full-item slots.
+                            stream.Write(item);
+                        }
+                        else
+                        {
+                            // Compact NPC item: templateId:u32, iid:u64, grade:u8.
+                            stream.Write(item.TemplateId);
+                            stream.Write(item.Id);
+                            stream.Write(item.Grade);
                         }
                     }
                     break;

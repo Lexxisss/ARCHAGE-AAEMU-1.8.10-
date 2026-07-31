@@ -32,5 +32,16 @@ public enum EquipmentItemSlot : byte
     // ---- somehow_special
     Backpack = 26,
     Cosplay = 27,
-    Stabilizer = 28
+    CosplayLooks = 28,
+    // Legacy AAEmu data currently places equip_pack_cloths.stabilizer_id in
+    // this compact slot. The target script enum names bit 28 COSPLAYLOOKS.
+    Stabilizer = CosplayLooks,
+    RaceCosplay = 29,
+    RaceCosplayLooks = 30,
+    // The target equipment serializer iterates four additional internal bits,
+    // but the target binary exposes no public ES_* names for them.
+    ProtocolSlot31 = 31,
+    ProtocolSlot32 = 32,
+    ProtocolSlot33 = 33,
+    ProtocolSlot34 = 34
 }
