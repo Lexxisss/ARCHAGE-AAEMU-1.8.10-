@@ -778,7 +778,11 @@ public class ItemContainer
                 var addAmount = Math.Min(freeSpace, amountToAdd);
                 item.Count += addAmount;
                 amountToAdd -= addAmount;
-                itemTasks.Add(new ItemCountUpdate(item, addAmount));
+                // A slot the client already knows about is restated with its new total via
+                // action 5, not with a delta - a two-task packet observed on this client
+                // carries exactly that for a stack that grew, alongside an action 6 for a
+                // separate brand new item. Action 4 does not appear on this protocol at all.
+                itemTasks.Add(new ItemAdd(item));
                 acquiredCounts.Add((item, addAmount, false));
                 updatedItems.Add(item);
             }
@@ -827,10 +831,10 @@ public class ItemContainer
             }
 
             amountToAdd -= addAmount;
-            // Captures always pair these two under one task type: the compact Create
-            // announces the slot delta, then action 6 delivers the full item record the
-            // client needs to actually draw it.
-            itemTasks.Add(new ItemAdd(newItem));
+            // A brand new item is announced with action 6 alone, which carries the complete
+            // item record the client needs to build the object. Pairing it with an action 5
+            // for the same item was wrong: where both appear in one packet they address
+            // different slots - one restating a grown stack, the other introducing a new item.
             itemTasks.Add(new ItemGain(newItem));
             acquiredCounts.Add((newItem, addAmount, true));
             newItems.Add(newItem);
