@@ -1630,9 +1630,16 @@ public class ItemManager : Singleton<ItemManager>
             command.Transaction = transaction;
             lock (_removedItems)
             {
-                // Removed items no longer carry reliable ownership information. Leave the
-                // global removal queue to the regular save tick during an owner-scoped save.
-                if (!ownerId.HasValue && _removedItems.Count > 0)
+                // Drain the removal queue on every save, owner-scoped included. ReleaseId
+                // hands the item id straight back to the pool for reuse, so deferring the
+                // DELETE to a later global save leaves a window where the row still exists
+                // while its id is already free: a new item takes that id and its
+                // REPLACE INTO overwrites the old row, losing one of the two items. That is
+                // a real inventory corruption, and it survives a relog because it happened
+                // in the database. Removed items are gone globally, so deleting their rows
+                // during an owner-scoped save is correct even though the queue is not
+                // owner-scoped itself.
+                if (_removedItems.Count > 0)
                 {
                     using (var deleteCommand = connection.CreateCommand())
                     {
