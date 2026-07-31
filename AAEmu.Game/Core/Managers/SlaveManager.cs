@@ -809,7 +809,7 @@ public class SlaveManager : Singleton<SlaveManager>
         #region SQLLite
 
         using (var connection2 = SQLite.CreateConnection("Data", SQLite.ServerDatabase))
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {
