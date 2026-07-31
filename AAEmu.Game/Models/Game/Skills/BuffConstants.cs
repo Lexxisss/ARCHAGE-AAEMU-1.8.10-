@@ -16,6 +16,7 @@ public enum BuffConstants : uint
     FallStun = 1391, // From fall damage
     Bloodlust = 1482, // Ctrl+F
     Retribution = 2167,
+    Dash = 2675, // Sprint - drains mana on every tick while it is up
     RemovalDebuff = 2250, // for houses
     LoggedOn = 2423, // player is logging in
     Deterioration = 3553, // Deterioration

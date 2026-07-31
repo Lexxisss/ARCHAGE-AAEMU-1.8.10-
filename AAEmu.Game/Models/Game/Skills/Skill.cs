@@ -203,7 +203,7 @@ public class Skill
                 // below, which are the only two places that broadcast SCSkillFiredPacket - so
                 // the caster's cast/swing animation was never sent for any plot-only skill,
                 // even though the plot itself resolves damage correctly. Broadcast it here too.
-                caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
+                caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject, caster), true);
                 return SkillResult.Success;
             }
         }
@@ -276,9 +276,19 @@ public class Skill
 
         // The target client creates its visual skill state on SCSkillStarted.
         // Instant skills still require this stage before SCSkillFired.
-        caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, targetCaster, this, skillObject)
+        //
+        // The live server always reports a unit target here, even when the client asked to
+        // cast at something else - gathering skills target the doodad, and passing that
+        // through left the client with no unit to animate, so mining ran its full cast and
+        // produced ore with no gathering animation at all.
+        var startedTarget = targetCaster is SkillCastUnitTarget
+            ? targetCaster
+            : new SkillCastUnitTarget(caster.ObjId);
+
+        caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, startedTarget, this, skillObject)
         {
-            CastTime = castTime
+            CastTime = castTime,
+            BaseCastTime = Template.CastingTime
         }, true);
         if (castTime > 0)
         {
@@ -784,7 +794,7 @@ public class Skill
             doodad.Spawn();
         }
 
-        caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
+        caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject, caster), true);
         unit.SkillTask = new EndChannelingTask(this, caster, casterCaster, target, targetCaster, skillObject, doodad);
         TaskManager.Instance.Schedule(unit.SkillTask, TimeSpan.FromMilliseconds(Template.ChannelingTime));
     }
@@ -836,7 +846,7 @@ public class Skill
         if (Template.FireAnim != null && Template.UseAnimTime)
             totalDelay += (int)(Template.FireAnim.CombatSyncTime * (unit.GlobalCooldownMul / 100));
 
-        caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject)
+        caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject, caster)
         {
             ComputedDelay = totalDelay
         }, true);

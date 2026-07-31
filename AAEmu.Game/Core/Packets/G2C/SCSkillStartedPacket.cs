@@ -21,7 +21,11 @@ public class SCSkillStartedPacket : GamePacket
     private readonly Skill _skill;
     private readonly SkillObject _skillObject;
 
+    /// <summary>Cast time after the caster's modifiers, in milliseconds.</summary>
     public int CastTime { get; set; }
+
+    /// <summary>Unmodified cast time from the skill template, in milliseconds.</summary>
+    public int BaseCastTime { get; set; }
 
     public SCSkillStartedPacket(
         uint id,
@@ -49,9 +53,10 @@ public class SCSkillStartedPacket : GamePacket
         stream.Write(_skillObject);
         stream.Write(_skillObject.InputDirection);
 
-        var wireCastTime = ToWireTime(CastTime);
-        stream.Write(wireCastTime);
-        stream.Write(wireCastTime);
+        // Real cast time first, then the template's unmodified value - the client uses the
+        // pair to drive the cast bar. Writing the same number twice hid any haste/slow.
+        stream.Write(ToWireTime(CastTime));
+        stream.Write(ToWireTime(BaseCastTime > 0 ? BaseCastTime : CastTime));
         stream.Write(false);   // castSynergy
         stream.Write((byte)0); // optional f/c/e/p block
         return stream;

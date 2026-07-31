@@ -256,6 +256,13 @@ public class Unit : BaseUnit, IUnit
     public int SummarizeDamage { get; set; }
     public bool IsAutoAttack = false;
     public uint SkillId;
+
+    /// <summary>
+    /// Remaining melee swing animations for this unit, refilled and reshuffled once
+    /// drained. Per-unit on purpose: a shared queue would interleave swings between
+    /// everyone fighting at the same time.
+    /// </summary>
+    public Queue<int> FireAnimQueue { get; set; }
     private bool _isInBattle;
     public ushort TlId { get; set; }
     public ItemContainer Equipment { get; set; }

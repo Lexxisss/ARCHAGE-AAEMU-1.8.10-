@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 
+using AAEmu.Commons.Exceptions;
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
@@ -44,20 +45,40 @@ public class CSStartSkillPacket : GamePacket
 
         var flag = stream.ReadByte();
         var objectType = (SkillObjectType)(flag & 0x3F);
-        if (!Enum.IsDefined(typeof(SkillObjectType), objectType))
-        {
-            Logger.Warn("StartSkill: unsupported skill object type {0} for skill {1}", objectType, skillId);
-            return;
-        }
         var skillObject = SkillObject.GetByType(objectType);
         skillObject.Flag80 = (flag & 0x80) != 0;
         skillObject.Flag40 = (flag & 0x40) != 0;
+
+        // An object type we have no layout for falls back to the plain SkillObject, which
+        // reads nothing - what both 5.0 and the working 1.8 build do. Rejecting the cast
+        // outright instead meant every skill carrying an unmapped object type was dropped,
+        // which is what broke all doodad interaction (type 28).
         if (objectType != SkillObjectType.None)
-            skillObject.Read(stream);
+        {
+            try
+            {
+                skillObject.Read(stream);
+            }
+            catch (MarshalException)
+            {
+                // A payload that does not match our layout must not take the session down
+                // with it: opening the coin purse sends a type 4 body shorter than the 20
+                // bytes we expect, and the exception propagated all the way up to
+                // GameProtocolHandler, which responds by shutting the connection down.
+                Logger.Warn(
+                    "StartSkill: skill object type {0} payload for skill {1} does not match the expected layout, ignoring the object",
+                    objectType,
+                    skillId);
+                skillObject = SkillObject.GetByType(SkillObjectType.None);
+                skillObject.Flag80 = (flag & 0x80) != 0;
+                skillObject.Flag40 = (flag & 0x40) != 0;
+            }
+        }
 
         // x2game.dll serializes this byte after every SkillObject payload,
         // including SkillObjectType.None. It is named inputDirection in RTTI.
-        skillObject.InputDirection = stream.ReadByte();
+        if (stream.LeftBytes > 0)
+            skillObject.InputDirection = stream.ReadByte();
 
         var template = SkillManager.Instance.GetSkillTemplate(skillId);
         if (template == null)
