@@ -584,10 +584,6 @@ public class ItemContainer
         if (taskType != ItemTaskType.Invalid)
         {
             Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
-            // The count delta alone left a consumed stack drawn as an unusable grey icon,
-            // so resync the affected slots the same way the acquire path does.
-            if (ContainerType == SlotType.Inventory)
-                Owner?.Inventory?.SendInventoryChunkRefresh(touchedSlots);
         }
         UpdateFreeSlotCount();
         return totalConsumed;
@@ -864,14 +860,6 @@ public class ItemContainer
 
             var acquiredItems = acquiredCounts.Select(x => x.item).Distinct().ToList();
             SendItemAcquisitionBatches(acquiredItems);
-
-            // Neither packet above puts a full item into a slot the client has not seen:
-            // the Create task is a compact delta and 0x0164 is an acquisition notice.
-            // Confirmed in-game that without this resync the item stays invisible even
-            // after a relog-free inventory refresh. 0x061 is the only packet that carries
-            // the complete item body, so resend the chunks for every touched slot.
-            if (ContainerType == SlotType.Inventory)
-                Owner?.Inventory?.SendInventoryChunkRefresh(acquiredCounts.Select(x => x.item.Slot));
         }
 
         UpdateFreeSlotCount();
