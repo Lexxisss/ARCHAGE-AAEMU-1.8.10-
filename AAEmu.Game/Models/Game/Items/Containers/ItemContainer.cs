@@ -827,7 +827,11 @@ public class ItemContainer
             }
 
             amountToAdd -= addAmount;
+            // Captures always pair these two under one task type: the compact Create
+            // announces the slot delta, then action 6 delivers the full item record the
+            // client needs to actually draw it.
             itemTasks.Add(new ItemAdd(newItem));
+            itemTasks.Add(new ItemGain(newItem));
             acquiredCounts.Add((newItem, addAmount, true));
             newItems.Add(newItem);
         }

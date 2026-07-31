@@ -84,6 +84,27 @@ public class ItemTaskPacket1810Tests
         Assert.Equal(expectedLength, stream.Count);
     }
 
+    /// <summary>
+    /// Verified against a live capture (op10B body 113): action 6 pairs with GainItem and
+    /// carries slotType, slot and the standard 64-byte item record. The capture decodes to
+    /// templateId 23633, id 16841771, count 1, so the field order is fixed by observation.
+    /// </summary>
+    [Fact]
+    public void GainActionCarriesTheFullItemRecord()
+    {
+        var stream = new PacketStream();
+        new ItemGain(CreateItem()).Write(stream);
+        var bytes = stream.GetBytes();
+
+        Assert.Equal((byte)ItemAction.Take, bytes[0]);
+        Assert.Equal((byte)ItemTaskLogType.GainItem, bytes[1]);
+        Assert.Equal((byte)SlotType.Inventory, bytes[2]);
+        Assert.Equal(9, bytes[3]);
+        // The item record starts with its template id, not its instance id.
+        Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 4));
+        Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 8));
+    }
+
     [Fact]
     public void SeizeContainsOnlyInstanceIdAfterActionHeader()
     {
