@@ -1106,8 +1106,19 @@ public partial class Quest
     {
         lock (_runtimeLock)
         {
-            foreach (var act in Template.Components.Values.SelectMany(x => x.Acts).OfType<QuestAct>())
+            // Reward acts carry the same cleanup/destroy_when_drop flags as the items a
+            // quest hands out for its own use, but those flags describe the quest's
+            // supplies, not its payout. ApplyRuntimeRewards calls this right after
+            // granting the rewards, so including the Reward component here handed the
+            // player their items and immediately consumed them again - the reason only
+            // the selective reward (which the client draws by itself) appeared to survive.
+            foreach (var component in Template.Components.Values)
             {
+                if (component.KindId == QuestComponentKind.Reward)
+                    continue;
+
+                foreach (var act in component.Acts.OfType<QuestAct>())
+                {
                 var d = act.Definition;
                 if (d == null)
                     continue;
@@ -1122,6 +1133,7 @@ public partial class Quest
                 var available = GetInventoryCount(itemId, -1);
                 if (available > 0)
                     Owner.Inventory.ConsumeItem(new[] { SlotType.Inventory }, ItemTaskType.QuestRemoveSupplies, itemId, Math.Min(available, count), null);
+                }
             }
         }
     }

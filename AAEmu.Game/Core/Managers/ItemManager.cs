@@ -335,14 +335,21 @@ public class ItemManager : Singleton<ItemManager>
     public bool TookLootDropItem(Character character, List<Item> lootDropItems, Item lootDropItem, int count)
     {
         var objId = (uint)(lootDropItem.Id >> 32);
+
+        // Never trust the count the client sent. A zero or negative value made
+        // AcquireDefaultItem a no-op that still reported success, after which the drop was
+        // removed below - the item was destroyed without ever reaching the bag, which is
+        // why such a pickup stayed missing even across a relog.
+        var amountToTake = count <= 0 ? lootDropItem.Count : Math.Min(count, lootDropItem.Count);
+
         if (lootDropItem.TemplateId == Item.Coins)
         {
-            character.AddMoney(SlotType.Inventory, lootDropItem.Count);
+            character.AddMoney(SlotType.Inventory, amountToTake);
         }
         else
         {
             if (!character.Inventory.Bag.AcquireDefaultItem(ItemTaskType.Loot, lootDropItem.TemplateId,
-                count > lootDropItem.Count ? lootDropItem.Count : count, lootDropItem.Grade))
+                amountToTake, lootDropItem.Grade))
             {
                 // character.SendErrorMessage(ErrorMessageType.BagFull);
                 character.SendPacket(new SCLootItemFailedPacket(ErrorMessageType.BagFull, lootDropItem.Id, lootDropItem.TemplateId));
@@ -350,8 +357,12 @@ public class ItemManager : Singleton<ItemManager>
             }
         }
 
-        lootDropItems.Remove(lootDropItem);
-        character.SendPacket(new SCLootItemTookPacket(lootDropItem.TemplateId, lootDropItem.Id, lootDropItem.Count));
+        // Only drop the entry once it is actually empty, otherwise a partial pickup
+        // silently threw away the rest of the stack.
+        lootDropItem.Count -= amountToTake;
+        if (lootDropItem.Count <= 0)
+            lootDropItems.Remove(lootDropItem);
+        character.SendPacket(new SCLootItemTookPacket(lootDropItem.TemplateId, lootDropItem.Id, amountToTake));
 
         if (lootDropItems.Count <= 0)
         {

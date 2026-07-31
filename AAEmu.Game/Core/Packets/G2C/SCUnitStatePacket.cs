@@ -1247,20 +1247,15 @@ public class SCUnitStatePacket : GamePacket
                         }
                         else if (item != null)
                         {
-                            // Per G:\Work\UnitState_NPC_0x0133_verified.md: full Item is used only
-                            // for NPC slots 27, 31, 32 and 33 - everything else in range uses the
-                            // compact 13-byte form. Slots 31-33 were previously falling into the
-                            // compact branch, under-writing the body and shifting every field that
-                            // follows (buffs etc.) for any NPC equipped in those slots.
-                            if (i == 27 || (i >= 31 && i <= 33)) // Cosplay, 31, 32, 33
+                            if (i == 27) // Cosplay
                             {
                                 stream.Write(item);
                             }
                             else
                             {
                                 stream.Write(item.TemplateId);
-                                stream.Write(item.Id);
-                                stream.Write(item.Grade);
+                                stream.Write(0L);
+                                stream.Write((byte)0);
                             }
                         }
                     }
