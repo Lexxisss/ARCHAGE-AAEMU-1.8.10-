@@ -664,13 +664,19 @@ public class CharacterManager : Singleton<CharacterManager>
                 {
                     DeleteCharacterAssets(character, false);
 
-                    // Send delete packet to the player if online
-                    if (gameConnection != null)
-                    {
-                        gameConnection.SendPacket(new SCCharacterDeletedPacket(character.Id, character.Name));
-                        // Not sure if this is the way it should be send or not, but it seems to work with status 1
-                        gameConnection.SendPacket(new SCCharacterDeleteResponsePacket(character.Id, 1, character.DeleteRequestTime, character.DeleteTime));
-                    }
+                    // SCCharacterDeleted is what makes an observer drop the deleted character
+                    // from their friend and blocked lists, so it has to reach everyone who
+                    // might be holding it - not just the account that asked for the deletion.
+                    // Broadcasting to everyone online is the blunt version: the client
+                    // ignores a name it does not know, and there is no per-observer social
+                    // index here to target it more precisely.
+                    WorldManager.Instance.BroadcastPacketToServer(
+                        new SCCharacterDeletedPacket(character.Id, character.Name));
+
+                    // The response is the requester's own answer: status 1 also removes the
+                    // character from that client's selection list.
+                    gameConnection?.SendPacket(
+                        new SCCharacterDeleteResponsePacket(character.Id, 1, character.DeleteRequestTime, character.DeleteTime));
                 }
                 return res > 0;
             }
