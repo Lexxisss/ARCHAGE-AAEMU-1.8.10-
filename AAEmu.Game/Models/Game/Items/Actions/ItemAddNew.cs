@@ -1,46 +1,30 @@
-﻿using AAEmu.Commons.Network;
+﻿using System;
+
+using AAEmu.Commons.Network;
 
 namespace AAEmu.Game.Models.Game.Items.Actions;
 
+/// <summary>
+/// Target 1.8.1.0 action 16 (ChangeOwner): destination slot followed by the
+/// common full item serializer. It shares the serializer used by Take/Remove.
+/// </summary>
 public class ItemAddNew : ItemTask
 {
     private readonly Item _item;
 
     public ItemAddNew(Item item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         _item = item;
-        _type = ItemAction.ChangeOwner; // 15
+        _type = ItemAction.ChangeOwner; // 16
     }
 
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
-
         stream.Write((byte)_item.SlotType);
         stream.Write((byte)_item.Slot);
-
-        stream.Write(_item.TemplateId);
-        stream.Write(_item.Id);
-        stream.Write(_item.Grade);
-        stream.Write((byte)0);
-        stream.Write(_item.Count);
-
-        var details = new PacketStream();
-        details.Write((byte)_item.DetailType);
-
-        _item.WriteDetails(details);
-
-        stream.Write((short)128);
-        stream.Write(details, false);
-        stream.Write(new byte[128 - details.Count]);
-        stream.Write(_item.CreateTime);
-        stream.Write(_item.LifespanMins);
-        stream.Write(_item.MadeUnitId);
-        stream.Write(_item.WorldId);
-        stream.Write(_item.UnsecureTime);
-        stream.Write(_item.UnpackTime);
-        stream.Write(_item.ChargeUseSkillTime);
-
+        _item.Write(stream);
         return stream;
     }
 }

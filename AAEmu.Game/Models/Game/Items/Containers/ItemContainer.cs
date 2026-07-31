@@ -290,7 +290,11 @@ public class ItemContainer
     /// <param name="item">Item Object to add/move to this container</param>
     /// <param name="preferredSlot">preferred slot to place this item in</param>
     /// <returns>Fails on Full Inventory or if target slot is invalid</returns>
-    public bool AddOrMoveExistingItem(ItemTaskType taskType, Item item, int preferredSlot = -1)
+    public bool AddOrMoveExistingItem(
+        ItemTaskType taskType,
+        Item item,
+        int preferredSlot = -1,
+        bool suppressInventoryEvents = false)
     {
         if (item == null)
             return false;
@@ -389,14 +393,6 @@ public class ItemContainer
             if (sourceItemTasks.Count > 0)
                 sourceContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, sourceItemTasks, new List<ulong>()));
 
-            // The task-list packets above are the pre-1.8.1.0 variable-length format that
-            // this client no longer parses on 0x10B, so looted items / mail attachments
-            // would sit in the bag unseen until a relog. Resend the chunked inventory sync
-            // for both the destination and the source slot to keep the client in step.
-            if (ContainerType == SlotType.Inventory)
-                Owner?.Inventory?.SendInventoryChunkRefresh(new[] { newSlot });
-            if ((sourceContainer != null) && (sourceContainer != this) && (sourceSlotType == SlotType.Inventory))
-                sourceContainer.Owner?.Inventory?.SendInventoryChunkRefresh(new[] { (int)sourceSlot });
         }
 
         ApplyBindRules(taskType);
@@ -404,24 +400,27 @@ public class ItemContainer
         // Moved to the end of the method so that the item is already in the inventory
         // Only trigger when moving between container with different owners with the exception of this being move to Mail container
         //if ((sourceContainer != this) && (item.OwnerId != OwnerId) && (this.ContainerType != SlotType.Mail))
-        if ((sourceContainer != this) && (this.ContainerType != SlotType.Mail))
+        if (!suppressInventoryEvents && (sourceContainer != this) && (this.ContainerType != SlotType.Mail))
         {
             Owner?.Inventory.OnAcquiredItem(item, item.Count);
         }
         else
         // Got attachment from Mail
-        if ((item.SlotType == SlotType.Mail) && (this.ContainerType != SlotType.Mail))
+        if (!suppressInventoryEvents && (item.SlotType == SlotType.Mail) && (this.ContainerType != SlotType.Mail))
         {
             Owner?.Inventory.OnAcquiredItem(item, item.Count);
         }
         else
         // Adding mail attachment
-        if ((item.SlotType != SlotType.Mail) && (this.ContainerType == SlotType.Mail))
+        if (!suppressInventoryEvents && (item.SlotType != SlotType.Mail) && (this.ContainerType == SlotType.Mail))
         {
             Owner?.Inventory.OnConsumedItem(item, item.Count);
         }
 
-        return ((itemTasks.Count + sourceItemTasks.Count) > 0);
+        // Reaching this point means the mutation succeeded. SlotType.None containers
+        // (buy-back) intentionally produce no destination task, so task count is not a
+        // valid success indicator for newly-created partial-sale entries.
+        return true;
     }
 
     private bool CanDestroy(Item item)
@@ -466,31 +465,26 @@ public class ItemContainer
     /// <param name="item">Item object to be removed</param>
     /// <param name="releaseIdAsWell">Set to true if this item needs to be removed from the world</param>
     /// <returns></returns>
-    public bool RemoveItem(ItemTaskType task, Item item, bool releaseIdAsWell)
+    public bool RemoveItem(ItemTaskType task, Item item, bool releaseIdAsWell, bool suppressInventoryEvents = false)
     {
         if (!CanDestroy(item))
             return false;
 
-        Owner?.Inventory.OnConsumedItem(item, item.Count);
+        if (!suppressInventoryEvents)
+            Owner?.Inventory.OnConsumedItem(item, item.Count);
         OnLeaveContainer(item, null);
 
         // Handle items that can expire
         GamePacket sync = null;
         if ((item.ExpirationOnlineMinutesLeft > 0.0) || (item.ExpirationTime > DateTime.UtcNow) || (item.UnpackTime > DateTime.UtcNow))
             sync = ItemManager.ExpireItemPacket(item);
-        if (sync != null)
+        if (sync != null && !suppressInventoryEvents)
             this.Owner?.SendPacket(sync);
 
-        var removedFromSlot = item.Slot;
-        var removedFromSlotType = item.SlotType;
         var res = item._holdingContainer.Items.Remove(item);
         if (res && task != ItemTaskType.Invalid)
         {
             item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(task, new List<ItemTask> { new ItemRemoveSlot(item) }, new List<ulong>()));
-            // Same reason as in AddOrMoveExistingItem: the task-list packet above is the
-            // old format this client ignores, so the emptied slot has to be resynced.
-            if (removedFromSlotType == SlotType.Inventory)
-                item._holdingContainer?.Owner?.Inventory?.SendInventoryChunkRefresh(new[] { removedFromSlot });
         }
         if (res && releaseIdAsWell)
         {
@@ -522,7 +516,7 @@ public class ItemContainer
 
         var totalConsumed = 0;
         var itemTasks = new List<ItemTask>();
-        var consumedSlots = new List<int>();
+        var touchedSlots = new List<int>();
 
         // Try to consume preferred item first
         if ((amountToConsume > 0) && (preferredItem != null))
@@ -542,10 +536,11 @@ public class ItemContainer
             {
                 Owner?.Inventory.OnConsumedItem(preferredItem, toRemove);
                 itemTasks.Add(new ItemCountUpdate(preferredItem, -toRemove));
-                consumedSlots.Add(preferredItem.Slot);
+                touchedSlots.Add(preferredItem.Slot);
             }
             else
             {
+                touchedSlots.Add(preferredItem.Slot);
                 RemoveItem(taskType, preferredItem, true); // Normally, this can never fail
             }
 
@@ -565,10 +560,11 @@ public class ItemContainer
                 {
                     Owner?.Inventory.OnConsumedItem(i, toRemove);
                     itemTasks.Add(new ItemCountUpdate(i, -toRemove));
-                    consumedSlots.Add(i.Slot);
+                    touchedSlots.Add(i.Slot);
                 }
                 else
                 {
+                    touchedSlots.Add(i.Slot);
                     RemoveItem(taskType, i, true); // Normally, this can never fail
                 }
 
@@ -582,15 +578,94 @@ public class ItemContainer
         if (taskType != ItemTaskType.Invalid)
         {
             Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
-            // Stacks that were only decremented (not emptied) are not covered by
-            // RemoveItem's resync, so refresh their slots here.
+            // The count delta alone left a consumed stack drawn as an unusable grey icon,
+            // so resync the affected slots the same way the acquire path does.
             if (ContainerType == SlotType.Inventory)
-                Owner?.Inventory?.SendInventoryChunkRefresh(consumedSlots);
+                Owner?.Inventory?.SendInventoryChunkRefresh(touchedSlots);
         }
         UpdateFreeSlotCount();
         return totalConsumed;
     }
 
+    /// <summary>
+    /// Consumes an exact amount without sending a packet and appends the target
+    /// 1.8.1.0 delta actions to the caller-owned transaction task list.
+    /// </summary>
+    public bool TryConsumeForTransaction(
+        uint templateId,
+        int amountToConsume,
+        List<ItemTask> taskCollector,
+        List<Item> deferredRemovals = null,
+        List<(Item item, int count)> consumptionCollector = null)
+    {
+        if (amountToConsume <= 0 || taskCollector == null)
+            return false;
+
+        if (!GetAllItemsByTemplate(templateId, -1, out var foundItems, out var totalCount) || totalCount < amountToConsume)
+            return false;
+
+        foreach (var item in foundItems)
+        {
+            if (amountToConsume <= 0)
+                break;
+
+            var toRemove = Math.Min(item.Count, amountToConsume);
+            item.Count -= toRemove;
+            amountToConsume -= toRemove;
+            if (consumptionCollector != null)
+                consumptionCollector.Add((item, toRemove));
+            else
+                Owner?.Inventory.OnConsumedItem(item, toRemove);
+
+            if (item.Count > 0)
+            {
+                taskCollector.Add(new ItemCountUpdate(item, -toRemove));
+            }
+            else
+            {
+                var removeTask = new ItemRemoveSlot(item);
+                var deferRelease = deferredRemovals != null;
+                if (!RemoveItem(ItemTaskType.Invalid, item, !deferRelease, consumptionCollector != null))
+                    return false;
+                if (deferRelease)
+                    deferredRemovals.Add(item);
+                taskCollector.Add(removeTask);
+            }
+        }
+
+        UpdateFreeSlotCount();
+        return amountToConsume == 0;
+    }
+    public void CommitDeferredTransactionRemovals(IEnumerable<Item> removedItems)
+    {
+        if (removedItems == null)
+            return;
+
+        foreach (var item in removedItems)
+        {
+            if (item == null || Items.Contains(item))
+                continue;
+            item._holdingContainer = null;
+            ItemManager.Instance.ReleaseId(item.Id);
+        }
+    }
+
+    public void RollBackDeferredTransactionRemovals(IEnumerable<Item> removedItems)
+    {
+        if (removedItems == null)
+            return;
+
+        foreach (var item in removedItems)
+        {
+            if (item == null || Items.Contains(item))
+                continue;
+            item._holdingContainer = this;
+            item.OwnerId = OwnerId;
+            item.SlotType = ContainerType;
+            Items.Add(item);
+        }
+        UpdateFreeSlotCount();
+    }
     /// <summary>
     /// Adds items to container using templateId and gradeToAdd, if items aren't full stacks, those will be updated first, new items will be generated for the remaining amounts
     /// </summary>
@@ -617,88 +692,119 @@ public class ItemContainer
     /// <param name="crafterId"></param>
     /// <param name="preferredSlot"></param>
     /// <returns></returns>
-    public bool AcquireDefaultItemEx(ItemTaskType taskType, uint templateId, int amountToAdd, int gradeToAdd, out List<Item> newItemsList, out List<Item> updatedItemsList, uint crafterId, int preferredSlot = -1)
+    public bool AcquireDefaultItemEx(
+        ItemTaskType taskType,
+        uint templateId,
+        int amountToAdd,
+        int gradeToAdd,
+        out List<Item> newItemsList,
+        out List<Item> updatedItemsList,
+        uint crafterId,
+        int preferredSlot = -1,
+        List<ItemTask> taskCollector = null,
+        List<(Item item, int count, bool isNew)> acquisitionCollector = null,
+        List<GamePacket> syncPacketCollector = null)
     {
-        newItemsList = new List<Item>();
-        updatedItemsList = new List<Item>();
+        // Local aliases: the rollback below is a local function, and C# forbids touching
+        // out parameters from one. The out parameters reference these same list objects,
+        // so callers still observe every change made here.
+        var newItems = new List<Item>();
+        var updatedItems = new List<Item>();
+        newItemsList = newItems;
+        updatedItemsList = updatedItems;
         if (amountToAdd <= 0)
         {
-            // Reports success while adding nothing, so callers that consume a source on
-            // success (loot drops, mail attachments) would destroy it. Log it - a caller
-            // reaching here is passing through an unvalidated client-supplied amount.
             Logger.Warn($"AcquireDefaultItemEx(); refused amount {amountToAdd} for template {templateId}, task {taskType}");
-            return true;
+            return false;
         }
 
-        GetAllItemsByTemplate(templateId, gradeToAdd, out var currentItems, out var currentTotalItemCount);
         var template = ItemManager.Instance.GetTemplate(templateId);
-        if (template == null)
-            return false; // Invalid item templateId
-        var totalFreeSpaceForThisItem = (currentItems.Count * template.MaxCount) - currentTotalItemCount + (FreeSlotCount * template.MaxCount);
-
-        // Trying to add too many item units to this container ?
-        if (amountToAdd > totalFreeSpaceForThisItem)
+        if (template == null || template.MaxCount <= 0)
             return false;
 
-        // Calculate grade to actually add for new items
-        if ((template.FixedGrade >= 0) && (template.Gradable == false))
+        // Resolve the effective grade before looking for stack targets. Searching with
+        // grade -1 first could merge a fixed-grade item into a stack of another grade.
+        if (template.FixedGrade >= 0 && !template.Gradable)
             gradeToAdd = template.FixedGrade;
         if (gradeToAdd == -1)
             gradeToAdd = template.FixedGrade;
         if (gradeToAdd < 0)
             gradeToAdd = 0;
 
-        // First try to add to existing item counts
+        GetAllItemsByTemplate(templateId, gradeToAdd, out var currentItems, out var currentTotalItemCount);
+        var totalFreeSpaceForThisItem =
+            ((long)currentItems.Count * template.MaxCount) - currentTotalItemCount + ((long)FreeSlotCount * template.MaxCount);
+        if (amountToAdd > totalFreeSpaceForThisItem)
+            return false;
+
+        var originalCounts = currentItems.ToDictionary(x => x.Id, x => x.Count);
         var itemTasks = new List<ItemTask>();
         var acquiredCounts = new List<(Item item, int addedCount, bool isNewItem)>();
+        var createdItems = new List<Item>();
+        var syncPackets = new List<GamePacket>();
 
-        // Never update in mail containers
+        bool RollBackAcquire()
+        {
+            foreach (var item in currentItems)
+                if (originalCounts.TryGetValue(item.Id, out var originalCount))
+                    item.Count = originalCount;
+
+            foreach (var created in createdItems)
+            {
+                if (created?._holdingContainer == this)
+                    RemoveItem(ItemTaskType.Invalid, created, true, true);
+                else if (created != null && created.Id != 0)
+                    ItemManager.Instance.ReleaseId(created.Id);
+            }
+
+            newItems.Clear();
+            updatedItems.Clear();
+            UpdateFreeSlotCount();
+            return false;
+        }
+
+        // Never update an existing stack in mail containers.
         if (ContainerType != SlotType.Mail)
         {
-            foreach (var i in currentItems)
+            foreach (var item in currentItems)
             {
-                // Stop as soon as everything is placed. This used to break only on a
-                // negative remainder, so once the amount hit exactly 0 the loop kept
-                // walking the remaining stacks and queued no-op updates for them, which
-                // were then sent to the client as a bogus +1 on each untouched stack.
                 if (amountToAdd <= 0)
                     break;
 
-                var freeSpace = i.Template.MaxCount - i.Count;
-                if (freeSpace > 0)
-                {
-                    var addAmount = Math.Min(freeSpace, amountToAdd);
-                    i.Count += addAmount;
-                    amountToAdd -= addAmount;
-                    itemTasks.Add(new ItemCountUpdate(i, addAmount));
-                    acquiredCounts.Add((i, addAmount, false));
-                    updatedItemsList.Add(i);
-                    Owner?.Inventory.OnAcquiredItem(i, addAmount, true);
-                }
+                var freeSpace = item.Template.MaxCount - item.Count;
+                if (freeSpace <= 0)
+                    continue;
+
+                var addAmount = Math.Min(freeSpace, amountToAdd);
+                item.Count += addAmount;
+                amountToAdd -= addAmount;
+                itemTasks.Add(new ItemCountUpdate(item, addAmount));
+                acquiredCounts.Add((item, addAmount, false));
+                updatedItems.Add(item);
             }
         }
 
-        var syncPackets = new List<GamePacket>();
         while (amountToAdd > 0)
         {
             var addAmount = Math.Min(amountToAdd, template.MaxCount);
             var newItem = ItemManager.Instance.Create(templateId, addAmount, (byte)gradeToAdd);
             if (newItem == null)
             {
-                Logger.Error($"Failed to add item with ID {templateId}, possible duplicate entries!");
+                Logger.Error($"AcquireDefaultItemEx(); failed to create template {templateId}");
+                return RollBackAcquire();
             }
-            // Add name if marked as crafter (single stack items only)
-            if ((crafterId > 0) && (newItem.Template.MaxCount == 1))
+            createdItems.Add(newItem);
+
+            if (crafterId > 0 && newItem.Template.MaxCount == 1)
             {
                 newItem.MadeUnitId = crafterId;
-                newItem.WorldId = 1; // TODO: proper world id handling, this should actually be the ServerId
+                newItem.WorldId = 1; // TODO: resolve the actual server world id
             }
-            amountToAdd -= addAmount;
-            var prefSlot = preferredSlot;
-            if ((newItem.Template is BackpackTemplate) && (ContainerType == SlotType.Equipment))
-                prefSlot = (int)EquipmentItemSlot.Backpack;
 
-            // Timers
+            var targetSlot = preferredSlot;
+            if (newItem.Template is BackpackTemplate && ContainerType == SlotType.Equipment)
+                targetSlot = (int)EquipmentItemSlot.Backpack;
+
             if (newItem.Template.ExpAbsLifetime > 0)
                 syncPackets.Add(ItemManager.SetItemExpirationTime(newItem, DateTime.UtcNow.AddMinutes(newItem.Template.ExpAbsLifetime)));
             if (newItem.Template.ExpOnlineLifetime > 0)
@@ -706,56 +812,90 @@ public class ItemContainer
             if (newItem.Template.ExpDate > 0)
                 syncPackets.Add(ItemManager.SetItemExpirationTime(newItem, DateTime.UtcNow.AddMinutes(newItem.Template.ExpDate)));
 
-            if ((newItem is EquipItem equipItem) && (newItem.Template is EquipItemTemplate equipItemTemplate))
+            if (newItem is EquipItem equipItem && newItem.Template is EquipItemTemplate equipItemTemplate)
             {
                 equipItem.ChargeCount = equipItemTemplate.ChargeCount;
-                if ((equipItemTemplate.ChargeLifetime > 0) && (equipItemTemplate.BindType.HasFlag(ItemBindType.BindOnUnpack) == false))
+                if (equipItemTemplate.ChargeLifetime > 0 && !equipItemTemplate.BindType.HasFlag(ItemBindType.BindOnUnpack))
                     equipItem.ChargeStartTime = DateTime.UtcNow;
             }
 
-            if (AddOrMoveExistingItem(ItemTaskType.Invalid, newItem, prefSlot)) // Task set to invalid as we send our own packets inside this function
+            if (!AddOrMoveExistingItem(
+                    ItemTaskType.Invalid, newItem, targetSlot, suppressInventoryEvents: true))
             {
-                itemTasks.Add(new ItemAdd(newItem));
-                acquiredCounts.Add((newItem, addAmount, true));
-                newItemsList.Add(newItem);
+                Logger.Error($"AcquireDefaultItemEx(); failed to place template {templateId} in container {ContainerType}");
+                return RollBackAcquire();
             }
-            else
-                throw new GameException("AcquireDefaultItem(); Unable to add new items"); // Inventory should have enough space, something went wrong
+
+            amountToAdd -= addAmount;
+            itemTasks.Add(new ItemAdd(newItem));
+            acquiredCounts.Add((newItem, addAmount, true));
+            newItems.Add(newItem);
         }
-        if (taskType != ItemTaskType.Invalid)
+
+        if (taskCollector != null)
+            taskCollector.AddRange(itemTasks);
+
+        if (acquisitionCollector != null)
         {
-            // Order matters here, and it is the whole trick.
-            //
-            // 0x061 is the only packet that carries a full item body, and it does land -
-            // after it the client owns correct item data, proven by the fact that a
-            // client-side inventory sort (which sends nothing to the server, it just
-            // repaints from the local model) reveals the item. What 0x061 does not do
-            // mid-session is repaint the slot.
-            //
-            // 0x10B with AddStack does repaint, which is why topping up a stack the client
-            // already knew about always worked instantly. It only carries
-            // id/count/templateId though, so on its own it cannot introduce an item.
-            //
-            // So: hand over the data first, then poke the slot. Sending 0x10B first meant
-            // announcing a stack the client had never heard of, and that announcement was
-            // simply dropped.
-            if (ContainerType == SlotType.Inventory)
-            {
-                var touchedSlots = acquiredCounts.Select(x => x.item.Slot);
-                Owner?.Inventory?.SendInventoryChunkRefresh(touchedSlots);
-            }
-
-            foreach (var (item, addedCount, _) in acquiredCounts)
-                Owner?.SendPacket(new SCItemAcquiredPacket(taskType, item, addedCount));
+            foreach (var (item, addedCount, isNewItem) in acquiredCounts)
+                acquisitionCollector.Add((item, addedCount, isNewItem));
         }
+        else
+        {
+            foreach (var (item, addedCount, isNewItem) in acquiredCounts)
+                Owner?.Inventory.OnAcquiredItem(item, addedCount, isNewItem);
+        }
+
+        if (taskType != ItemTaskType.Invalid && itemTasks.Count > 0)
+        {
+            SendItemTaskBatches(taskType, itemTasks);
+
+            var acquiredItems = acquiredCounts.Select(x => x.item).Distinct().ToList();
+            SendItemAcquisitionBatches(acquiredItems);
+
+            // Neither packet above puts a full item into a slot the client has not seen:
+            // the Create task is a compact delta and 0x0164 is an acquisition notice.
+            // Confirmed in-game that without this resync the item stays invisible even
+            // after a relog-free inventory refresh. 0x061 is the only packet that carries
+            // the complete item body, so resend the chunks for every touched slot.
+            if (ContainerType == SlotType.Inventory)
+                Owner?.Inventory?.SendInventoryChunkRefresh(acquiredCounts.Select(x => x.item.Slot));
+        }
+
         UpdateFreeSlotCount();
-
-        // Send item expire packets if needed
         foreach (var sync in syncPackets)
-            if (sync != null)
-                Owner?.SendPacket(sync);
+        {
+            if (sync == null)
+                continue;
 
-        return (itemTasks.Count > 0);
+            if (syncPacketCollector != null)
+                syncPacketCollector.Add(sync);
+            else
+                Owner?.SendPacket(sync);
+        }
+
+        return itemTasks.Count > 0;
+    }
+
+
+    private void SendItemTaskBatches(ItemTaskType taskType, IReadOnlyList<ItemTask> tasks)
+    {
+        const int maxTasks = 30;
+        if (taskType == ItemTaskType.Invalid || tasks == null)
+            return;
+
+        for (var offset = 0; offset < tasks.Count; offset += maxTasks)
+            Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, tasks.Skip(offset).Take(maxTasks).ToList(), []));
+    }
+
+    private void SendItemAcquisitionBatches(IReadOnlyList<Item> items)
+    {
+        const int maxItems = byte.MaxValue;
+        if (items == null || items.Count == 0 || Owner is not Character character)
+            return;
+
+        for (var offset = 0; offset < items.Count; offset += maxItems)
+            Owner.SendPacket(new SCItemAcquisitionPacket(character.Name, items.Skip(offset).Take(maxItems).ToList()));
     }
 
     /// <summary>
@@ -842,7 +982,7 @@ public class ItemContainer
             }
         }
         if (itemTasks.Count > 0)
-            Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
+            SendItemTaskBatches(taskType, itemTasks);
     }
 
     /// <summary>

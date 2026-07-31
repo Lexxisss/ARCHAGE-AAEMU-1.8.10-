@@ -8,7 +8,7 @@ public class ItemUpdateRepair : ItemTask
 
     public ItemUpdateRepair(Item item)
     {
-        _type = ItemAction.UpdateDetail; // 9
+        _type = ItemAction.UpdateDetail; // 10
         _item = item;
     }
 

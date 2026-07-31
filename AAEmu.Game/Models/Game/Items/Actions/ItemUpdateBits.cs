@@ -10,7 +10,7 @@ public class ItemUpdateBits : ItemTask
 
     public ItemUpdateBits(Item item)
     {
-        _type = ItemAction.SetFlagsBits; // 10
+        _type = ItemAction.SetFlagsBits; // 11
         _item = item;
         //_itemId = item.Id;
         //_slotType = item.SlotType;
@@ -24,6 +24,7 @@ public class ItemUpdateBits : ItemTask
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
+        stream.Write((byte)0); // actionOwnerType
         stream.Write((byte)_item.SlotType);  // type
         stream.Write((byte)_item.Slot);      // index
         stream.Write(_item.Id);              // id

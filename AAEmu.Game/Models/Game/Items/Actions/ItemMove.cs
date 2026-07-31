@@ -13,7 +13,8 @@ public class ItemMove : ItemTask
 
     public ItemMove(SlotType fromSlotType, byte fromSlot, ulong fromItemId, SlotType toSlotType, byte toSlot, ulong toItemId)
     {
-        _type = ItemAction.SwapSlot; // 8
+        _type = ItemAction.SwapSlot; // 9
+        _logType = fromSlotType == toSlotType ? ItemTaskLogType.SwapItem : ItemTaskLogType.MoveItem;
         _fromSlotType = fromSlotType;
         _fromSlot = fromSlot;
         _fromItemId = fromItemId;

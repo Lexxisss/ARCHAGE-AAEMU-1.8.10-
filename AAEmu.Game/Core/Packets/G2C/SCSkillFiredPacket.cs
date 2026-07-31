@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +16,7 @@ namespace AAEmu.Game.Core.Packets.G2C;
 /// </summary>
 public class SCSkillFiredPacket : GamePacket
 {
-    public override PacketLogLevel LogLevel => PacketLogLevel.Trace;
+    public override PacketLogLevel LogLevel => PacketLogLevel.Debug;
 
     /// <summary>Melee auto attack - the one skill whose animation is weapon dependent.</summary>
     private const uint MeleeAttackSkillId = 2;

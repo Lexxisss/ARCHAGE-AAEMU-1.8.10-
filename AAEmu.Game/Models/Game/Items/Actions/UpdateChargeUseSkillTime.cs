@@ -14,7 +14,7 @@ public class UpdateChargeUseSkillTime : ItemTask
     /// <param name="count">Amount to add or subtract</param>
     public UpdateChargeUseSkillTime(Item item, int count)
     {
-        _type = ItemAction.UpdateChargeUseSkillTime; // 19
+        _type = ItemAction.UpdateChargeUseSkillTime; // 20
         _item = item;
         _count = count;
     }

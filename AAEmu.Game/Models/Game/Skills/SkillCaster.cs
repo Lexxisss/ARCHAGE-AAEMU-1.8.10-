@@ -107,7 +107,15 @@ public class SkillItem : SkillCaster
 
     public uint ItemTemplateId { get; set; }
     public byte Type1 { get; set; }
-    public uint Type2 { get; set; }
+
+    /// <summary>
+    /// Trailing value of the item caster block. Verified 8 bytes wide against the target
+    /// serializer: caster type 2 is bc3 + u64 + u32 + u8 + u64 = 24 bytes. Reading it as 4
+    /// left everything after the caster short by four bytes, so the SkillObject header was
+    /// taken from the middle of this value - which is what turned using a coin purse into a
+    /// bogus type 4 object and a read past the end of the packet.
+    /// </summary>
+    public ulong Type2 { get; set; }
     public Item SkillSourceItem { get; private set; }
 
     public SkillItem()
@@ -128,7 +136,7 @@ public class SkillItem : SkillCaster
         ItemId = stream.ReadUInt64();
         ItemTemplateId = stream.ReadUInt32();
         Type1 = stream.ReadByte();
-        Type2 = stream.ReadUInt32();
+        Type2 = stream.ReadUInt64();
     }
 
     public override PacketStream Write(PacketStream stream)
