@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -258,11 +258,10 @@ public class Unit : BaseUnit, IUnit
     public uint SkillId;
 
     /// <summary>
-    /// Remaining melee swing animations for this unit, refilled and reshuffled once
-    /// drained. Per-unit on purpose: a shared queue would interleave swings between
-    /// everyone fighting at the same time.
+    /// Which hand swings next while dual wielding. Per-unit on purpose: shared state would
+    /// interleave swings between everyone fighting at the same time.
     /// </summary>
-    public Queue<int> FireAnimQueue { get; set; }
+    public bool NextSwingUsesOffHand { get; set; }
     private bool _isInBattle;
     public ushort TlId { get; set; }
     public ItemContainer Equipment { get; set; }

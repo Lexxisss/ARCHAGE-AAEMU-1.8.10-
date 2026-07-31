@@ -826,6 +826,16 @@ public class ItemManager : Singleton<ItemManager>
                         template.ItemProcId = reader.GetInt32("item_proc_id");
                         template.StatMultiplier = reader.GetInt32("stat_multiplier");
                         template.FormulaHDps = new Formula(reader.GetString("formula_hdps"));
+                        template.AnimL1Id = reader.GetInt32("anim_l1_id", 0);
+                        template.AnimL1Ratio = reader.GetInt32("anim_l1_ratio", 0);
+                        template.AnimL2Id = reader.GetInt32("anim_l2_id", 0);
+                        template.AnimL2Ratio = reader.GetInt32("anim_l2_ratio", 0);
+                        template.AnimL3Id = reader.GetInt32("anim_l3_id", 0);
+                        template.AnimR1Id = reader.GetInt32("anim_r1_id", 0);
+                        template.AnimR1Ratio = reader.GetInt32("anim_r1_ratio", 0);
+                        template.AnimR2Id = reader.GetInt32("anim_r2_id", 0);
+                        template.AnimR2Ratio = reader.GetInt32("anim_r2_ratio", 0);
+                        template.AnimR3Id = reader.GetInt32("anim_r3_id", 0);
 
                         _holdables.Add(template.Id, template);
                     }

@@ -274,32 +274,32 @@ public class Skill
         }
         */
 
-        // The target client creates its visual skill state on SCSkillStarted.
-        // Instant skills still require this stage before SCSkillFired.
-        //
-        // The live server always reports a unit target here, even when the client asked to
-        // cast at something else - gathering skills target the doodad, and passing that
-        // through left the client with no unit to animate, so mining ran its full cast and
-        // produced ore with no gathering animation at all.
-        var startedTarget = targetCaster is SkillCastUnitTarget
-            ? targetCaster
-            : new SkillCastUnitTarget(caster.ObjId);
-
-        caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, startedTarget, this, skillObject)
-        {
-            CastTime = castTime,
-            BaseCastTime = Template.CastingTime
-        }, true);
         if (castTime > 0)
         {
-            // Has casting time, schedule a task for it
+            // Only a skill with a real preparation phase gets SCSkillStarted. The client's
+            // fired handler runs the start processor itself with zeroed start times, so
+            // announcing a start for an instant skill risks a duplicate start state.
+            //
+            // The live server always reports a unit target here, even when the client asked
+            // to cast at something else - gathering targets the doodad, and passing that
+            // through left the client with no unit to animate, so mining ran its full cast
+            // and produced ore with no gathering animation at all.
+            var startedTarget = targetCaster is SkillCastUnitTarget
+                ? targetCaster
+                : new SkillCastUnitTarget(caster.ObjId);
+
+            caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, startedTarget, this, skillObject)
+            {
+                CastTime = castTime,
+                BaseCastTime = Template.CastingTime
+            }, true);
+
             unit.SkillTask = new CastTask(this, caster, casterCaster, target, targetCaster, skillObject);
             TaskManager.Instance.Schedule(unit.SkillTask, TimeSpan.FromMilliseconds(castTime));
         }
         else
         {
-            // Immediate skill. Started is queued first so the client can create
-            // the transient visual state before processing Fired.
+            // Instant skill: a correct SCSkillFired alone carries it.
             Cast(caster, casterCaster, target, targetCaster, skillObject);
         }
 
