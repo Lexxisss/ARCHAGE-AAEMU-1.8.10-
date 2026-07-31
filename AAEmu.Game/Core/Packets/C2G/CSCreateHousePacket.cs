@@ -12,6 +12,15 @@ public class CSCreateHousePacket : GamePacket
         //
     }
 
+    /// <summary>
+    /// House placement request. The payload is exactly 48 bytes:
+    ///
+    ///     designType:i32, x:i64, y:i64, z:f32, zRot:f32, item:u64, moneyAmount:i64, ht:i32
+    ///
+    /// The money field is 64 bits, not 32. Reading it as an int left everything after it
+    /// shifted by four, so <c>ht</c> picked up the high half of the money and a ninth field
+    /// was invented past the end of the payload to absorb the difference.
+    /// </summary>
     public override void Read(PacketStream stream)
     {
         var designId = stream.ReadUInt32();
@@ -20,16 +29,15 @@ public class CSCreateHousePacket : GamePacket
         var z = stream.ReadSingle();
         var zRot = stream.ReadSingle();
         var itemId = stream.ReadUInt64();
-        var moneyAmount = stream.ReadInt32();
+        var moneyAmount = stream.ReadInt64();
         var ht = stream.ReadInt32();
-        var autoUseAaPoint = stream.ReadBoolean();
 
-        Logger.Debug($"CreateHouse, Id: {designId}, X: {x}, Y: {y}, Z: {z}, ZRot: {zRot}");
+        Logger.Debug($"CreateHouse, Id: {designId}, X: {x}, Y: {y}, Z: {z}, ZRot: {zRot}, Money: {moneyAmount}, Ht: {ht}");
 
         HousingManager.Instance.Build(
             Connection,
             designId, x, y, z, zRot,
-            itemId, moneyAmount, ht, autoUseAaPoint
+            itemId, moneyAmount, ht
         );
     }
 }

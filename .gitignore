@@ -47,3 +47,5 @@ Docs/vendor_verification_1.8.1.0.*
 reverse_*/
 *_deep/
 CHARACTER_DELETION_DEEP_REVERSE_RU.md
+housing_reverse_report*.md
+*_reverse_report*.md
