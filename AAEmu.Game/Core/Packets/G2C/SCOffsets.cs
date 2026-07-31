@@ -991,7 +991,7 @@ public static class SCOffsets
     public const ushort SCChargeMoneyPaidPacket = 0xfff;
     public const ushort SCCofferContentsUpdatePacket = 0xfff;
     public const ushort SCConstructHouseTaxPacket = 0x256;
-    public const ushort SCEscapeSlavePacket = 0xfff;
+    public const ushort SCEscapeSlavePacket = 0x2ED;
     public const ushort SCFactionDeclareHostileResultPacket = 0xfff;
     public const ushort SCFactionImmigrateInvitePacket = 0xfff;
     public const ushort SCFactionImmigrateInviteResultPacket = 0xfff;
@@ -1014,6 +1014,6 @@ public static class SCOffsets
     public const ushort SCMileageChangedPacket = 0xfff;
     public const ushort SCMineAmountPacket = 0xfff;
     public const ushort SCMyHousePacket = 0xfff;
-    public const ushort SCMySlavePacket = 0xfff;
+    public const ushort SCMySlavePacket = 0x366;
     public const ushort SCNationalMonumentChangedPacket = 0xfff;
 }

@@ -139,7 +139,7 @@ public static class CSOffsets
     public const ushort CSBagHandleSelectiveItemsPacket = 0x0B1;
     public const ushort off_3A0F1EBC = 0x053;
     public const ushort CSSkillControllerStatePacket = 0x0FD;
-    public const ushort CSMountMatePacket = 0x07F;
+    public const ushort CSMountMatePacket = 0x003;
     public const ushort CSLeaveWorldPacket = 0x0B2;
     public const ushort CSCancelLeaveWorldPacket = 0x086;
     public const ushort CSIdleStatusPacket = 0x0E2;
@@ -301,7 +301,7 @@ public static class CSOffsets
     public const ushort CSChangeMateUserStatePacket = 0x0C7;
     public const ushort CSSpawnSlavePacket = 0x1F6;
     public const ushort CSDespawnSlavePacket = 0x118;
-    public const ushort CSDestroySlavePacket = 0x0A7;
+    public const ushort CSDestroySlavePacket = 0x170;
     public const ushort CSBindSlavePacket = 0x017;
     public const ushort off_3A130744 = 0x208;
     public const ushort CSBoardingTransferPacket = 0x0B3;
