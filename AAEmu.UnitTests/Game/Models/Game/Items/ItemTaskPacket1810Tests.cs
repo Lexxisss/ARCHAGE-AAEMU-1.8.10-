@@ -35,7 +35,9 @@ public class ItemTaskPacket1810Tests
 
         Assert.Equal(20, bytes.Length);
         Assert.Equal((byte)ItemAction.Create, bytes[0]);
-        Assert.Equal((byte)ItemTaskLogType.UpdateOnly, bytes[1]);
+        // Captures pair Create with MoveItem in all 44 observed samples; UpdateOnly here
+        // is a pairing the client does not act on.
+        Assert.Equal((byte)ItemTaskLogType.MoveItem, bytes[1]);
         Assert.Equal((byte)SlotType.Inventory, bytes[2]);
         Assert.Equal(9, bytes[3]);
         Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 4));
