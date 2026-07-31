@@ -256,6 +256,13 @@ public class BuffTemplate
                 RadarManager.Instance.RegisterForPublicTransport(character, TransferTelescopeRange);
             if (TelescopeRange > 0)
                 RadarManager.Instance.RegisterForShips(character, TelescopeRange);
+            // Sprint charges mana per tick rather than up front: the skill carries no mana
+            // cost in the database, the cost lives on this buff as tick_level_mana_cost.
+            if (character.Buffs.CheckBuff((uint)BuffConstants.Dash))
+            {
+                var manaRegen = new ManaRegenTemplate(character, buff.Template.Tick, buff.Template.TickLevelManaCost, character.Level);
+                ManaRegenManager.Instance.Register(character, manaRegen);
+            }
         }
     }
 
