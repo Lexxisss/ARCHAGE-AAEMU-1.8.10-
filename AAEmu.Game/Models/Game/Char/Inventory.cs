@@ -937,6 +937,45 @@ public class Inventory
         }
     }
 
+    /// <summary>
+    /// Resends the 10-slot inventory chunk(s) covering the given bag slots.
+    /// Newly created items only reach the client through this chunked
+    /// SCCharacterInvenContentsPacket (0x061) - the same packet that already
+    /// works for the initial login sync. The single-item acquire packet on
+    /// opcode 0x10B does not register a slot the client has never seen
+    /// before, so without this refresh new items only appear after a relog.
+    /// </summary>
+    public void SendInventoryChunkRefresh(IEnumerable<int> slots)
+    {
+        if (slots == null)
+            return;
+
+        const int slotsPerChunk = 10;
+        var chunks = slots
+            .Where(slot => slot >= 0 && slot < Owner.NumInventorySlots)
+            .Select(slot => slot / slotsPerChunk)
+            .Distinct()
+            .OrderBy(chunk => chunk)
+            .ToList();
+
+        if (chunks.Count == 0)
+            return;
+
+        var slottedBag = Bag.GetSlottedItemsList();
+        foreach (var chunk in chunks)
+        {
+            var startSlot = chunk * slotsPerChunk;
+            var chunkItems = new Item[slotsPerChunk];
+            for (var i = 0; i < slotsPerChunk; i++)
+            {
+                var slot = startSlot + i;
+                if (slot < slottedBag.Count)
+                    chunkItems[i] = slottedBag[slot];
+            }
+            Owner.SendPacket(new SCCharacterInvenContentsPacket(SlotType.Inventory, 1, (byte)chunk, chunkItems));
+        }
+    }
+
     private void SendFragmentedInventory(SlotType slotType, byte numItems, Item[] bag)
     {
         var tempItem = new Item[10];

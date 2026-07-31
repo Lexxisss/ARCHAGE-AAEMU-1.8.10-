@@ -388,6 +388,15 @@ public class ItemContainer
                 Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
             if (sourceItemTasks.Count > 0)
                 sourceContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, sourceItemTasks, new List<ulong>()));
+
+            // The task-list packets above are the pre-1.8.1.0 variable-length format that
+            // this client no longer parses on 0x10B, so looted items / mail attachments
+            // would sit in the bag unseen until a relog. Resend the chunked inventory sync
+            // for both the destination and the source slot to keep the client in step.
+            if (ContainerType == SlotType.Inventory)
+                Owner?.Inventory?.SendInventoryChunkRefresh(new[] { newSlot });
+            if ((sourceContainer != null) && (sourceContainer != this) && (sourceSlotType == SlotType.Inventory))
+                sourceContainer.Owner?.Inventory?.SendInventoryChunkRefresh(new[] { (int)sourceSlot });
         }
 
         ApplyBindRules(taskType);
@@ -472,9 +481,17 @@ public class ItemContainer
         if (sync != null)
             this.Owner?.SendPacket(sync);
 
+        var removedFromSlot = item.Slot;
+        var removedFromSlotType = item.SlotType;
         var res = item._holdingContainer.Items.Remove(item);
         if (res && task != ItemTaskType.Invalid)
+        {
             item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(task, new List<ItemTask> { new ItemRemoveSlot(item) }, new List<ulong>()));
+            // Same reason as in AddOrMoveExistingItem: the task-list packet above is the
+            // old format this client ignores, so the emptied slot has to be resynced.
+            if (removedFromSlotType == SlotType.Inventory)
+                item._holdingContainer?.Owner?.Inventory?.SendInventoryChunkRefresh(new[] { removedFromSlot });
+        }
         if (res && releaseIdAsWell)
         {
             item._holdingContainer = null;
@@ -505,6 +522,7 @@ public class ItemContainer
 
         var totalConsumed = 0;
         var itemTasks = new List<ItemTask>();
+        var consumedSlots = new List<int>();
 
         // Try to consume preferred item first
         if ((amountToConsume > 0) && (preferredItem != null))
@@ -524,6 +542,7 @@ public class ItemContainer
             {
                 Owner?.Inventory.OnConsumedItem(preferredItem, toRemove);
                 itemTasks.Add(new ItemCountUpdate(preferredItem, -toRemove));
+                consumedSlots.Add(preferredItem.Slot);
             }
             else
             {
@@ -546,6 +565,7 @@ public class ItemContainer
                 {
                     Owner?.Inventory.OnConsumedItem(i, toRemove);
                     itemTasks.Add(new ItemCountUpdate(i, -toRemove));
+                    consumedSlots.Add(i.Slot);
                 }
                 else
                 {
@@ -560,7 +580,13 @@ public class ItemContainer
 
         // We use Invalid when doing internals, don't send to client
         if (taskType != ItemTaskType.Invalid)
+        {
             Owner?.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
+            // Stacks that were only decremented (not emptied) are not covered by
+            // RemoveItem's resync, so refresh their slots here.
+            if (ContainerType == SlotType.Inventory)
+                Owner?.Inventory?.SendInventoryChunkRefresh(consumedSlots);
+        }
         UpdateFreeSlotCount();
         return totalConsumed;
     }
@@ -596,7 +622,13 @@ public class ItemContainer
         newItemsList = new List<Item>();
         updatedItemsList = new List<Item>();
         if (amountToAdd <= 0)
+        {
+            // Reports success while adding nothing, so callers that consume a source on
+            // success (loot drops, mail attachments) would destroy it. Log it - a caller
+            // reaching here is passing through an unvalidated client-supplied amount.
+            Logger.Warn($"AcquireDefaultItemEx(); refused amount {amountToAdd} for template {templateId}, task {taskType}");
             return true;
+        }
 
         GetAllItemsByTemplate(templateId, gradeToAdd, out var currentItems, out var currentTotalItemCount);
         var template = ItemManager.Instance.GetTemplate(templateId);
@@ -625,6 +657,13 @@ public class ItemContainer
         {
             foreach (var i in currentItems)
             {
+                // Stop as soon as everything is placed. This used to break only on a
+                // negative remainder, so once the amount hit exactly 0 the loop kept
+                // walking the remaining stacks and queued no-op updates for them, which
+                // were then sent to the client as a bogus +1 on each untouched stack.
+                if (amountToAdd <= 0)
+                    break;
+
                 var freeSpace = i.Template.MaxCount - i.Count;
                 if (freeSpace > 0)
                 {
@@ -636,9 +675,6 @@ public class ItemContainer
                     updatedItemsList.Add(i);
                     Owner?.Inventory.OnAcquiredItem(i, addAmount, true);
                 }
-
-                if (amountToAdd < 0)
-                    break;
             }
         }
 
@@ -688,10 +724,29 @@ public class ItemContainer
         }
         if (taskType != ItemTaskType.Invalid)
         {
-            // Opcode 0x10B carries a single item change per packet on the target
-            // 1.8.1.0 client, so each acquired/updated item gets its own packet.
-            foreach (var (item, addedCount, isNewItem) in acquiredCounts)
-                Owner?.SendPacket(new SCItemAcquiredPacket(taskType, item, addedCount, isNewItem));
+            // Order matters here, and it is the whole trick.
+            //
+            // 0x061 is the only packet that carries a full item body, and it does land -
+            // after it the client owns correct item data, proven by the fact that a
+            // client-side inventory sort (which sends nothing to the server, it just
+            // repaints from the local model) reveals the item. What 0x061 does not do
+            // mid-session is repaint the slot.
+            //
+            // 0x10B with AddStack does repaint, which is why topping up a stack the client
+            // already knew about always worked instantly. It only carries
+            // id/count/templateId though, so on its own it cannot introduce an item.
+            //
+            // So: hand over the data first, then poke the slot. Sending 0x10B first meant
+            // announcing a stack the client had never heard of, and that announcement was
+            // simply dropped.
+            if (ContainerType == SlotType.Inventory)
+            {
+                var touchedSlots = acquiredCounts.Select(x => x.item.Slot);
+                Owner?.Inventory?.SendInventoryChunkRefresh(touchedSlots);
+            }
+
+            foreach (var (item, addedCount, _) in acquiredCounts)
+                Owner?.SendPacket(new SCItemAcquiredPacket(taskType, item, addedCount));
         }
         UpdateFreeSlotCount();
 
