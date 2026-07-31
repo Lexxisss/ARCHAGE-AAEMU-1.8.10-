@@ -388,10 +388,7 @@ public class ItemContainer
             // removal actions we tried - Seize and action 7 - left the slot drawn as a grey
             // ghost, while action 5 is the one adjustment the client demonstrably applies.
             if (sourceContainer.ContainerType != SlotType.Mail)
-            {
-                sourceItemTasks.Add(new ItemAdd(item, -item.Count, sourceSlotType, sourceSlot));
                 sourceItemTasks.Add(new ItemRemove(item, sourceSlotType, sourceSlot));
-            }
         }
         // We use Invalid when doing internals, don't send to client
         if (taskType != ItemTaskType.Invalid)
@@ -499,11 +496,7 @@ public class ItemContainer
         {
             item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(
                 task,
-                new List<ItemTask>
-                {
-                    new ItemAdd(item, -removedAmount, removedFromSlotType, removedFromSlot),
-                    new ItemRemove(item, removedFromSlotType, removedFromSlot)
-                },
+                new List<ItemTask> { new ItemRemove(item, removedFromSlotType, removedFromSlot) },
                 new List<ulong>()));
         }
         if (res && releaseIdAsWell)
@@ -548,23 +541,24 @@ public class ItemContainer
             }
 
             var toRemove = Math.Min(preferredItem.Count, amountToConsume);
+
+            // Decided before the count changes: emptying the slot is announced by action 7,
+            // which reports the amount being taken, while a partial consume uses an action 5
+            // delta. The two are mutually exclusive.
+            var emptiesSlot = preferredItem.Count <= toRemove;
+            if (emptiesSlot)
+                itemTasks.Add(new ItemRemove(preferredItem));
+
             preferredItem.Count -= toRemove;
             amountToConsume -= toRemove;
 
-            // The delta is emitted here in both cases, including the one that empties the
-            // slot - by the time RemoveItem runs the count is already zero, so it has no
-            // amount left to report.
-            itemTasks.Add(new ItemAdd(preferredItem, -toRemove));
-            if (preferredItem.Count > 0)
+            if (!emptiesSlot)
             {
+                itemTasks.Add(new ItemAdd(preferredItem, -toRemove));
                 Owner?.Inventory.OnConsumedItem(preferredItem, toRemove);
             }
             else
             {
-                // Zeroing the amount is not enough on its own to clear the slot, so the
-                // removal follows it in the same packet. Neither half worked alone: Seize,
-                // action 7 and a delta to zero each left the slot drawn as a grey ghost.
-                itemTasks.Add(new ItemRemove(preferredItem));
                 RemoveItem(ItemTaskType.Invalid, preferredItem, true); // Normally, this can never fail
             }
 
@@ -577,17 +571,21 @@ public class ItemContainer
             foreach (var i in foundItems)
             {
                 var toRemove = Math.Min(i.Count, amountToConsume);
+
+                var emptiesSlot = i.Count <= toRemove;
+                if (emptiesSlot)
+                    itemTasks.Add(new ItemRemove(i));
+
                 i.Count -= toRemove;
                 amountToConsume -= toRemove;
 
-                itemTasks.Add(new ItemAdd(i, -toRemove));
-                if (i.Count > 0)
+                if (!emptiesSlot)
                 {
+                    itemTasks.Add(new ItemAdd(i, -toRemove));
                     Owner?.Inventory.OnConsumedItem(i, toRemove);
                 }
                 else
                 {
-                    itemTasks.Add(new ItemRemove(i));
                     RemoveItem(ItemTaskType.Invalid, i, true); // Normally, this can never fail
                 }
 
