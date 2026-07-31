@@ -1,4 +1,4 @@
-namespace AAEmu.Game.Core.Packets.C2G;
+﻿namespace AAEmu.Game.Core.Packets.C2G;
 
 public static class CSOffsets
 {
@@ -349,7 +349,11 @@ public static class CSOffsets
     public const ushort CSSetLogicDoodadPacket = 0x1EB;
     public const ushort CSCleanupLogicLinkPacket = 0x04B;
     public const ushort CSChangeDoodadDataPacket = 0x1C0;
-    public const ushort CSBuyItemsPacket = 0x148;
+    // 0x148 belongs to CSDoodadPurchaseItemPacket; the buy request arrives on 0x210,
+    // confirmed in the target client (serializer 0x399DEDD0 - the same address the vendor
+    // implementation report cites as the buy serializer). Listening on the wrong opcode
+    // meant a purchase request never reached the handler at all.
+    public const ushort CSBuyItemsPacket = 0x210;
     public const ushort off_3A133BEC = 0x140;
     public const ushort CSInteractNPCPacket = 0x1DE;
     public const ushort CSInteractNPCEndPacket = 0x1D1;
@@ -471,7 +475,6 @@ public static class CSOffsets
     public const ushort off_3A150720 = 0x1ED;
     public const ushort CSSellItemsPacket = 0x193;
     public const ushort CSListSoldItemPacket = 0x1C8;
-    public const ushort off_3A150750 = 0x210;
     public const ushort CSSpecialtyCurrentLoadPacket = 0x175;
     public const ushort off_3A15077C = 0x18B;
     public const ushort CSStartTradePacket = 0x0DA;
