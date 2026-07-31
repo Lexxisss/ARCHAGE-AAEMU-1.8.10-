@@ -388,7 +388,10 @@ public class ItemContainer
             // removal actions we tried - Seize and action 7 - left the slot drawn as a grey
             // ghost, while action 5 is the one adjustment the client demonstrably applies.
             if (sourceContainer.ContainerType != SlotType.Mail)
+            {
                 sourceItemTasks.Add(new ItemAdd(item, -item.Count, sourceSlotType, sourceSlot));
+                sourceItemTasks.Add(new ItemRemove(item, sourceSlotType, sourceSlot));
+            }
         }
         // We use Invalid when doing internals, don't send to client
         if (taskType != ItemTaskType.Invalid)
@@ -496,7 +499,11 @@ public class ItemContainer
         {
             item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(
                 task,
-                new List<ItemTask> { new ItemAdd(item, -removedAmount, removedFromSlotType, removedFromSlot) },
+                new List<ItemTask>
+                {
+                    new ItemAdd(item, -removedAmount, removedFromSlotType, removedFromSlot),
+                    new ItemRemove(item, removedFromSlotType, removedFromSlot)
+                },
                 new List<ulong>()));
         }
         if (res && releaseIdAsWell)
@@ -554,6 +561,10 @@ public class ItemContainer
             }
             else
             {
+                // Zeroing the amount is not enough on its own to clear the slot, so the
+                // removal follows it in the same packet. Neither half worked alone: Seize,
+                // action 7 and a delta to zero each left the slot drawn as a grey ghost.
+                itemTasks.Add(new ItemRemove(preferredItem));
                 RemoveItem(ItemTaskType.Invalid, preferredItem, true); // Normally, this can never fail
             }
 
@@ -576,6 +587,7 @@ public class ItemContainer
                 }
                 else
                 {
+                    itemTasks.Add(new ItemRemove(i));
                     RemoveItem(ItemTaskType.Invalid, i, true); // Normally, this can never fail
                 }
 
