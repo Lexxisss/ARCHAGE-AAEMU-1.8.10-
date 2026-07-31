@@ -929,7 +929,10 @@ public class Inventory
     }
 
     /// <summary>
-    /// Resends the 10-slot inventory chunk(s) covering the given bag slots.
+    /// Resends the 10-slot inventory chunk(s) covering the given bag slots. Kept for an
+    /// explicit full resync; item acquisition and consumption no longer use it, because the
+    /// authoritative overwrite it performs fights with the per-slot deltas of 0x010B.
+    /// Retained deliberately - it is the only packet that carries a complete item body.
     /// Newly created items only reach the client through this chunked
     /// SCCharacterInvenContentsPacket (0x061) - the same packet that already
     /// works for the initial login sync. The single-item acquire packet on
