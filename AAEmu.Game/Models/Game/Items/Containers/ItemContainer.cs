@@ -475,6 +475,14 @@ public class ItemContainer
         if (!CanDestroy(item))
             return false;
 
+        // A summon item and the vehicle it summons are two halves of one thing: the item
+        // carries the vehicle's database id. Destroying the item without removing that row
+        // left the vehicle stored forever under an item that no longer exists, and it came
+        // back on the next load. releaseIdAsWell distinguishes an actual destruction from a
+        // move between containers.
+        if (releaseIdAsWell && item is SummonSlave summonSlave && summonSlave.SlaveDbId > 0)
+            SlaveManager.Instance.OnDeleteSlaveItem(summonSlave.SlaveDbId);
+
         // Captured before the move clears them: action 7 reports the slot being emptied,
         // and by the time the packet is built the item may already carry a different one.
         var removedFromSlotType = item.SlotType;

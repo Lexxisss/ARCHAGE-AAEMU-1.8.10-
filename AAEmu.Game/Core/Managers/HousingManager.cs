@@ -48,6 +48,13 @@ public class HousingManager : Singleton<HousingManager>
     private List<ItemHousingDecoration> _housingItemHousingDecorations;
     private List<HousingItemHousings> _housingItemHousings;
     private Dictionary<uint, HousingTemplate> _housingTemplates;
+
+    /// <summary>Every conversion of one design into another, keyed by its own id.</summary>
+    private Dictionary<uint, HousingRebuilding> _housingRebuildings;
+
+    /// <summary>Materials a rebuild consumes, grouped by rebuild id.</summary>
+    private Dictionary<uint, List<HousingRebuildingMaterial>> _housingRebuildingMaterials;
+
     private bool _isCheckingTaxTiming;
     private List<uint> _removedHousings;
 
@@ -127,6 +134,8 @@ public class HousingManager : Singleton<HousingManager>
         _housingItemHousings = new List<HousingItemHousings>();
         _housingDecorations = new Dictionary<uint, HousingDecoration>();
         _housingItemHousingDecorations = new List<ItemHousingDecoration>();
+        _housingRebuildings = new Dictionary<uint, HousingRebuilding>();
+        _housingRebuildingMaterials = new Dictionary<uint, List<HousingRebuildingMaterial>>();
 
         // var housingAreas = new Dictionary<uint, HousingAreas>();
         // var houseTaxes = new Dictionary<uint, HouseTax>();
@@ -309,6 +318,60 @@ public class HousingManager : Singleton<HousingManager>
                     }
                 }
             }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM housing_rebuildings";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var template = new HousingRebuilding
+                        {
+                            Id = reader.GetUInt32("id"),
+                            HousingId = reader.GetUInt32("housing_id"),
+                            SkillId = reader.GetUInt32("skill_id"),
+                            ActabilityGroupId = reader.GetUInt32("actability_group_id", 0),
+                            LaborPower = reader.GetInt32("labor_power", 0),
+                            Name = reader.GetString("name", string.Empty),
+                            ChangePointDesc = reader.GetString("change_point_desc", string.Empty)
+                        };
+
+                        _housingRebuildings[template.Id] = template;
+                    }
+                }
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM housing_rebuilding_materials";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var material = new HousingRebuildingMaterial
+                        {
+                            Id = reader.GetUInt32("id"),
+                            HousingRebuildingId = reader.GetUInt32("housing_rebuilding_id"),
+                            ItemId = reader.GetUInt32("item_id"),
+                            Count = reader.GetInt32("count", 0)
+                        };
+
+                        if (!_housingRebuildingMaterials.TryGetValue(material.HousingRebuildingId, out var list))
+                        {
+                            list = new List<HousingRebuildingMaterial>();
+                            _housingRebuildingMaterials.Add(material.HousingRebuildingId, list);
+                        }
+
+                        list.Add(material);
+                    }
+                }
+            }
+
+            Logger.Info("Loaded {0} housing rebuildings with {1} material groups",
+                _housingRebuildings.Count, _housingRebuildingMaterials.Count);
         }
 
         Logger.Info("Loading Player Buildings ...");
@@ -584,57 +647,8 @@ public class HousingManager : Singleton<HousingManager>
         var houseTemplate = _housingTemplates[designId];
         CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
 
-        if (FeaturesManager.Fsets.Check(Models.Game.Features.Feature.taxItem))
-        {
-            // Pay in Tax Certificate
-
-            var userTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.TaxCertificate);
-            var userBoundTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.BoundTaxCertificate);
-            var totalUserTaxCount = userTaxCount + userBoundTaxCount;
-            var totalCertsCost = (int)Math.Ceiling(totalTaxAmountDue / 10000f);
-
-            // Annoyingly complex item consumption, maybe we need a separate function in inventory to handle this kind of thing
-            var consumedCerts = totalCertsCost;
-            if (totalCertsCost > totalUserTaxCount)
-            {
-                connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
-                return;
-            }
-            else
-            {
-                var c = consumedCerts;
-                // Use Bound First
-                if ((userBoundTaxCount > 0) && (c > 0))
-                {
-                    if (c > userBoundTaxCount)
-                        c = userBoundTaxCount;
-                    connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.BoundTaxCertificate, c, null);
-                    consumedCerts -= c;
-                }
-                c = consumedCerts;
-                if ((userTaxCount > 0) && (c > 0))
-                {
-                    if (c > userTaxCount)
-                        c = userTaxCount;
-                    connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.TaxCertificate, c, null);
-                    consumedCerts -= c;
-                }
-
-                if (consumedCerts != 0)
-                    Logger.Error($"Something went wrong when paying tax for new building for player {connection.ActiveChar.Name}");
-            }
-        }
-        else
-        {
-            // Pay in Gold
-            // TODO: test house with actual gold tax
-            if (totalTaxAmountDue > connection.ActiveChar.Money)
-            {
-                connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
-                return;
-            }
-            connection.ActiveChar.SubtractMoney(SlotType.Inventory, totalTaxAmountDue, ItemTaskType.HouseCreation);
-        }
+        if (!ChargePlacementTax(connection, totalTaxAmountDue))
+            return;
 
         if (connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseBuilding, sourceDesignItem.TemplateId, 1, sourceDesignItem) <= 0)
         {
@@ -712,6 +726,188 @@ public class HousingManager : Singleton<HousingManager>
         house.Name = string.Concat(name.Substring(0, 1).ToUpper(), name.AsSpan(1));
         house.IsDirty = true; // Manually set the IsDirty on House level
         connection.SendPacket(new SCUnitNameChangedPacket(house.ObjId, house.Name));
+    }
+
+    /// <summary>
+    /// Takes the up-front tax a placement or a rebuild owes, in certificates where the feature
+    /// is enabled and in gold otherwise.
+    /// </summary>
+    /// <returns>False when the player cannot pay; an error has already been sent to them.</returns>
+    private static bool ChargePlacementTax(GameConnection connection, int totalTaxAmountDue)
+    {
+        if (FeaturesManager.Fsets.Check(Models.Game.Features.Feature.taxItem))
+        {
+            var userTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.TaxCertificate);
+            var userBoundTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.BoundTaxCertificate);
+            var totalUserTaxCount = userTaxCount + userBoundTaxCount;
+            var totalCertsCost = (int)Math.Ceiling(totalTaxAmountDue / 10000f);
+
+            if (totalCertsCost > totalUserTaxCount)
+            {
+                connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
+                return false;
+            }
+
+            // Bound certificates first, so the player keeps the tradeable ones.
+            var consumedCerts = totalCertsCost;
+            var c = consumedCerts;
+            if (userBoundTaxCount > 0 && c > 0)
+            {
+                if (c > userBoundTaxCount)
+                    c = userBoundTaxCount;
+                connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.BoundTaxCertificate, c, null);
+                consumedCerts -= c;
+            }
+
+            c = consumedCerts;
+            if (userTaxCount > 0 && c > 0)
+            {
+                if (c > userTaxCount)
+                    c = userTaxCount;
+                connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.TaxCertificate, c, null);
+                consumedCerts -= c;
+            }
+
+            if (consumedCerts != 0)
+                Logger.Error($"Something went wrong when paying tax for new building for player {connection.ActiveChar.Name}");
+
+            return true;
+        }
+
+        if (totalTaxAmountDue > connection.ActiveChar.Money)
+        {
+            connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
+            return false;
+        }
+
+        connection.ActiveChar.SubtractMoney(SlotType.Inventory, totalTaxAmountDue, ItemTaskType.HouseCreation);
+        return true;
+    }
+
+    /// <summary>
+    /// Finds the rebuild offered by a given skill that produces a given design.
+    /// </summary>
+    /// <remarks>
+    /// A rebuild is identified by that pair rather than by the target design alone: several
+    /// skills can lead to the same design from different starting buildings.
+    /// </remarks>
+    /// <returns>The rebuild id, or 0 when the skill does not offer that design.</returns>
+    public uint GetHousingRebuildingId(uint skillId, uint housingId)
+    {
+        foreach (var rebuilding in _housingRebuildings.Values)
+        {
+            if (rebuilding.SkillId == skillId && rebuilding.HousingId == housingId)
+                return rebuilding.Id;
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Materials a rebuild consumes. Empty when the rebuild is unknown or free.
+    /// </summary>
+    public IReadOnlyList<HousingRebuildingMaterial> GetMaterialsByHousingRebuildingId(uint housingRebuildingId)
+    {
+        return _housingRebuildingMaterials.TryGetValue(housingRebuildingId, out var materials)
+            ? materials
+            : Array.Empty<HousingRebuildingMaterial>();
+    }
+
+    /// <summary>
+    /// Removes the old building immediately before a rebuild puts a new one in its place.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately not <see cref="Demolish"/>: an ordinary demolition expires the protection,
+    /// rewrites the tax state and mails the contents back to the owner. None of that is wanted
+    /// here, because the building is being replaced rather than lost and the replacement
+    /// carries its own fresh tax period. Doing both would bill the player twice and post them
+    /// a refund for a house they still have.
+    /// </remarks>
+    public void DemolishBeforeRebuilding(GameConnection connection, House house)
+    {
+        if (house == null || !_houses.ContainsKey(house.Id))
+        {
+            connection?.ActiveChar?.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+            return;
+        }
+
+        if (connection != null && house.OwnerId != connection.ActiveChar.Id)
+        {
+            connection.ActiveChar?.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+            return;
+        }
+
+        var ownerChar = WorldManager.Instance.GetCharacterById(house.OwnerId);
+
+        house.OwnerId = 0;
+        house.CoOwnerId = 0;
+        house.AccountId = 0;
+        house.SellPrice = 0;
+        house.SellToPlayerId = 0;
+        house.Permission = HousingPermission.Public;
+        house.IsDirty = true;
+
+        ownerChar?.SendPacket(new SCHouseRemovedPacket(house.TlId));
+
+        _removedHousings.Add(house.Id);
+        RemoveDeadHouse(house);
+    }
+
+    /// <summary>
+    /// Replaces an existing building with another design at the same spot.
+    /// </summary>
+    /// <remarks>
+    /// The caller is expected to have checked and consumed the rebuild materials and to have
+    /// called <see cref="DemolishBeforeRebuilding"/> first. Tax is charged the same way a new
+    /// placement charges it, because the replacement starts a fresh protection period.
+    ///
+    /// No design item is consumed here - a rebuild is paid for in materials, not in a design.
+    /// </remarks>
+    /// <param name="oldHouseName">Carried over so the building keeps its name across the swap.</param>
+    public House Rebuild(GameConnection connection, uint designId, float posX, float posY, float posZ, float zRot,
+        string oldHouseName)
+    {
+        if (connection?.ActiveChar == null)
+            return null;
+
+        if (!_housingTemplates.TryGetValue(designId, out var houseTemplate))
+        {
+            connection.ActiveChar.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+            return null;
+        }
+
+        CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
+
+        if (!ChargePlacementTax(connection, totalTaxAmountDue))
+            return null;
+
+        var house = Create(designId, connection.ActiveChar.Faction.Id);
+        house.Id = HousingIdManager.Instance.GetNextId();
+        house.Transform.Local.SetPosition(posX, posY, posZ);
+        house.Transform.Local.SetZRotation(zRot);
+
+        if (!string.IsNullOrEmpty(oldHouseName))
+            house.Name = oldHouseName;
+
+        house.OwnerId = connection.ActiveChar.Id;
+        house.CoOwnerId = connection.ActiveChar.Id;
+        house.AccountId = connection.AccountId;
+        house.Ht = 0;
+        house.Permission = HousingPermission.Private;
+        house.AllowRecover = true;
+        house.PlaceDate = DateTime.UtcNow;
+        house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays);
+
+        house.CurrentStep = house.Template.BuildSteps.Count > 0 ? 0 : -1;
+
+        _houses.Add(house.Id, house);
+        _housesTl.Add(house.TlId, house);
+
+        connection.ActiveChar.SendPacket(new SCMyHousePacket(house));
+        house.Spawn();
+        UpdateTaxInfo(house);
+
+        return house;
     }
 
     /// <summary>
