@@ -27,6 +27,9 @@ public class SCSkillStartedPacket : GamePacket
     /// <summary>Unmodified cast time from the skill template, in milliseconds.</summary>
     public int BaseCastTime { get; set; }
 
+    /// <summary>Optional f/c/e/p/d block; defaults to empty.</summary>
+    public SkillExtraData ExtraData { get; set; } = SkillExtraData.Default;
+
     public SCSkillStartedPacket(
         uint id,
         ushort tl,
@@ -58,7 +61,8 @@ public class SCSkillStartedPacket : GamePacket
         stream.Write(ToWireTime(CastTime));
         stream.Write(ToWireTime(BaseCastTime > 0 ? BaseCastTime : CastTime));
         stream.Write(false);   // castSynergy
-        stream.Write((byte)0); // optional f/c/e/p block
+        // Sparse f/c/e/p/d block, serialized last. Empty here, which is the mask alone.
+        ExtraData.Write(stream);
         return stream;
     }
 

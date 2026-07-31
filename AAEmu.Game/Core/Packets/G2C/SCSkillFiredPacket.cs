@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using AAEmu.Commons.Network;
+using AAEmu.Commons.Utils;
+using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Models.Game.Items;
+using AAEmu.Game.Models.Game.Items.Templates;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Skills;
@@ -21,19 +23,22 @@ public class SCSkillFiredPacket : GamePacket
     /// <summary>Melee auto attack - the one skill whose animation is weapon dependent.</summary>
     private const uint MeleeAttackSkillId = 2;
 
-    // Swing animation id -> the effect delay the client expects for it. Melee does not use
-    // the skill template's flat FireAnimId: the client picks a swing animation per hit from
-    // the set belonging to the equipped weapons, and ignores an id outside that set. That
-    // is why melee dealt damage but played no swing, while ranged skills - which do use the
-    // template value - animated correctly.
-    private static readonly Dictionary<int, int> FireAnimRightHand = new() { { 3, 46 }, { 87, 35 } };
-    private static readonly Dictionary<int, int> FireAnimLeftHand = new() { { 4, 45 }, { 88, 35 } };
-    private static readonly Dictionary<int, int> FireAnimTwoHand = new() { { 7, 45 }, { 95, 45 }, { 139, 45 } };
-    private static readonly Dictionary<int, int> FireAnimFist = new() { { 1, 26 }, { 2, 80 } };
-    private static readonly Dictionary<int, int> FireAnimNpc = new() { { 1, 37 }, { 2, 80 } };
+    // Melee does not use the skill template's flat FireAnimId: the client only accepts a
+    // swing id belonging to the equipped weapon, and silently plays nothing for anything
+    // else - which is why melee dealt damage with no visible swing while ranged skills,
+    // which do use the template value, animated fine.
+    //
+    // The ids come from the weapon's holdable record: anim_r1/r2/r3 for the right hand and
+    // anim_l1/l2/l3 for the left, with the *_ratio fields weighting the first two. Another
+    // build hardcoded {3,87}/{4,88}/{7,95}/{1,2} - those are literally holdable rows 1, 3
+    // and 0 of this table, so reading the table covers every weapon rather than four.
+    /// <summary>Holdable id used when nothing is equipped.</summary>
+    private const uint FistHoldableId = 0;
 
     private const int MainHandSlot = 15;
     private const int OffHandSlot = 16;
+
+    private enum SwingHand { Right, Left }
 
     private readonly uint _id;
     private readonly ushort _tl;
@@ -44,13 +49,20 @@ public class SCSkillFiredPacket : GamePacket
     private readonly Unit _casterUnit;
     private readonly Character _character;
 
-    private readonly bool _rightHand;
-    private readonly bool _leftHand;
-    private readonly bool _twoHand;
-    private readonly bool _fist;
+    private readonly Holdable _mainHand;
+    private readonly Holdable _offHand;
 
     /// <summary>Delay before the server applies the effects, in milliseconds.</summary>
     public int ComputedDelay { get; set; }
+
+    /// <summary>Optional f/c/e/p/d block; defaults to empty.</summary>
+    public SkillExtraData ExtraData { get; set; } = SkillExtraData.Default;
+
+    /// <summary>Bit 0 of the trailing packed flag byte.</summary>
+    public bool FlagA { get; set; }
+
+    /// <summary>Bit 1 of the trailing packed flag byte.</summary>
+    public bool FlagB { get; set; }
 
     public SCSkillFiredPacket(
         uint id,
@@ -74,21 +86,21 @@ public class SCSkillFiredPacket : GamePacket
         if (_skill.Template.Id != MeleeAttackSkillId || _character == null)
             return;
 
-        _rightHand = _character.Equipment.GetItemBySlot(MainHandSlot) != null;
-        _leftHand = _character.Equipment.GetItemBySlot(OffHandSlot) != null;
+        _mainHand = GetHoldable(_character.Equipment.GetItemBySlot(MainHandSlot));
+        _offHand = GetHoldable(_character.Equipment.GetItemBySlot(OffHandSlot));
 
-        // A shield occupies the off hand without being a weapon to swing with.
+        // A shield sits in the off hand without being something to swing with.
         if (_character.Buffs.CheckBuff((uint)BuffConstants.EquipShield))
-            _leftHand = false;
+            _offHand = null;
 
+        // A two-handed weapon is held in the main hand and leaves the off hand unused.
         if (_character.Buffs.CheckBuff((uint)BuffConstants.EquipTwoHanded))
-        {
-            _twoHand = true;
-            _rightHand = false;
-            _leftHand = false;
-        }
+            _offHand = null;
+    }
 
-        _fist = !_twoHand && !_rightHand && !_leftHand;
+    private static Holdable GetHoldable(Item item)
+    {
+        return (item?.Template as WeaponTemplate)?.HoldableTemplate;
     }
 
     public override PacketStream Write(PacketStream stream)
@@ -110,10 +122,9 @@ public class SCSkillFiredPacket : GamePacket
         stream.Write(ToWireTime(ComputedDelay));
         stream.Write(ToWireTime(_skill.Template.ChannelingTime));
 
-        // Optional f/c/e/p block. Zero means that no optional fields follow.
-        stream.Write((byte)0);
+        ExtraData.Write(stream);
         stream.WritePisc(_id, _skill.Template.FireAnimId);
-        stream.Write((byte)0); // trailing target flag
+        WriteTrailingFlag(stream);
         return stream;
     }
 
@@ -127,63 +138,61 @@ public class SCSkillFiredPacket : GamePacket
             return;
         }
 
-        var animTable = GetFireAnimTable();
-        var animId = GetNextAnimationId(animTable);
-        animTable.TryGetValue(animId, out var animDelay);
-        WriteTail(stream, (short)animDelay, animId);
+        WriteTail(stream, (short)ToWireTime(ComputedDelay), PickSwingAnimation());
+    }
+
+    /// <summary>
+    /// Alternates hands when dual wielding, then picks one of that hand's three swings using
+    /// the holdable's ratio weights. Nothing equipped falls back to the bare-hand holdable.
+    /// </summary>
+    private long PickSwingAnimation()
+    {
+        var hand = SwingHand.Right;
+        if (_mainHand == null && _offHand != null)
+        {
+            hand = SwingHand.Left;
+        }
+        else if (_mainHand != null && _offHand != null)
+        {
+            // Dual wield: keep the hands strictly alternating rather than random, which is
+            // what a swing sequence looks like in game.
+            hand = _casterUnit.NextSwingUsesOffHand ? SwingHand.Left : SwingHand.Right;
+            _casterUnit.NextSwingUsesOffHand = !_casterUnit.NextSwingUsesOffHand;
+        }
+
+        var holdable = hand == SwingHand.Left ? _offHand : _mainHand;
+        holdable ??= ItemManager.Instance.GetHoldable(FistHoldableId);
+        if (holdable == null)
+            return _skill.Template.FireAnimId;
+
+        var (first, firstRatio, second, secondRatio, third) = hand == SwingHand.Left
+            ? (holdable.AnimL1Id, holdable.AnimL1Ratio, holdable.AnimL2Id, holdable.AnimL2Ratio, holdable.AnimL3Id)
+            : (holdable.AnimR1Id, holdable.AnimR1Ratio, holdable.AnimR2Id, holdable.AnimR2Ratio, holdable.AnimR3Id);
+
+        var roll = Rand.Next(0, 100);
+        if (first > 0 && roll < firstRatio)
+            return first;
+        if (second > 0 && roll < firstRatio + secondRatio)
+            return second;
+        if (third > 0)
+            return third;
+
+        return first > 0 ? first : _skill.Template.FireAnimId;
     }
 
     private void WriteTail(PacketStream stream, short effectDelay, long fireAnimId)
     {
         stream.Write(effectDelay);
         stream.Write((short)0);
-        stream.Write((byte)0); // optional f/c/e/p block, zero means nothing follows
+        ExtraData.Write(stream);
         stream.WritePisc(_id, fireAnimId);
-        stream.Write((byte)0); // trailing target flag
+        WriteTrailingFlag(stream);
     }
 
-    private Dictionary<int, int> GetFireAnimTable()
+    /// <summary>Two booleans packed into one byte: bit0 and bit1.</summary>
+    private void WriteTrailingFlag(PacketStream stream)
     {
-        if (_character == null)
-            return FireAnimNpc;
-        if (_twoHand)
-            return FireAnimTwoHand;
-        if (_fist)
-            return FireAnimFist;
-
-        var table = new Dictionary<int, int>();
-        // Right hand alone, or right hand with a shield, swings from the right-hand set.
-        if (_rightHand)
-            Merge(table, FireAnimRightHand);
-        // An off hand weapon contributes its own swings; with an empty right hand the
-        // character alternates the off hand with an unarmed swing.
-        if (_leftHand)
-        {
-            if (!_rightHand)
-                Merge(table, FireAnimFist);
-            Merge(table, FireAnimLeftHand);
-        }
-
-        return table.Count > 0 ? table : FireAnimFist;
-    }
-
-    private int GetNextAnimationId(Dictionary<int, int> animTable)
-    {
-        var queue = _casterUnit.FireAnimQueue;
-        if (queue == null || queue.Count == 0)
-        {
-            var rng = new Random();
-            queue = new Queue<int>(animTable.Keys.OrderBy(_ => rng.Next()));
-            _casterUnit.FireAnimQueue = queue;
-        }
-
-        return queue.Count > 0 ? queue.Dequeue() : 0;
-    }
-
-    private static void Merge(Dictionary<int, int> target, Dictionary<int, int> source)
-    {
-        foreach (var kvp in source)
-            target[kvp.Key] = kvp.Value;
+        stream.Write((byte)((FlagA ? 0x01 : 0) | (FlagB ? 0x02 : 0)));
     }
 
     private static ushort ToWireTime(int milliseconds)
