@@ -12,7 +12,7 @@ namespace AAEmu.Game.Core.Packets.G2C;
 /// </summary>
 public class SCSkillStartedPacket : GamePacket
 {
-    public override PacketLogLevel LogLevel => PacketLogLevel.Trace;
+    public override PacketLogLevel LogLevel => PacketLogLevel.Debug;
 
     private readonly uint _id;
     private readonly ushort _tl;

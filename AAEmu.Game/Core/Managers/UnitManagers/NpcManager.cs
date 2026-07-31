@@ -30,8 +30,6 @@ public class NpcManager : Singleton<NpcManager>
     private bool _loaded = false;
 
     private Dictionary<uint, NpcTemplate> _templates;
-    private Dictionary<uint, List<Merchants>> _merchantGoods; // npcId, list <MerchantGoods>
-    private Dictionary<uint, List<MerchantPacks>> _merchantPackGoods; // packId, list <MerchantPacks>
     private Dictionary<uint, TotalCharacterCustom> _totalCharacterCustoms;
     private Dictionary<uint, Dictionary<uint, List<BodyPartTemplate>>> _itemBodyParts;
     private Dictionary<uint, uint> _defaultFaceItemsByModel;
@@ -58,25 +56,14 @@ public class NpcManager : Singleton<NpcManager>
         return _templates;
     }
 
-    //public Merchants GetMerchantGoods(uint id)
-    //{
-    //    _merchantGoods.TryGetValue(id, out var goods);
-    //    if (goods == null) { return null; }
-    //    foreach (var g in goods)
-    //        if (g.ItemId == id)
-    //            return g;
-
-    //    return null;
-    //}
-
-    public List<Merchants> GetMerchantGoods(uint id)
+    public IReadOnlyList<Merchants> GetMerchantGoods(uint npcTemplateId)
     {
-        return _merchantGoods.TryGetValue(id, out var goods) ? goods : null;
+        return VendorGameData.Instance.GetMerchantGoods(npcTemplateId);
     }
 
-    public List<MerchantPacks> GetMerchantPacks(uint id)
+    public IReadOnlyList<MerchantPacks> GetMerchantPacks(uint packId)
     {
-        return _merchantPackGoods.TryGetValue(id, out var goods) ? goods : null;
+        return VendorGameData.Instance.GetMerchantPacks(packId);
     }
 
     private void ApplyExplicitCustomBodyParts(NpcTemplate template, TotalCharacterCustom custom)
@@ -404,8 +391,6 @@ public class NpcManager : Singleton<NpcManager>
             return;
 
         _templates = new Dictionary<uint, NpcTemplate>();
-        _merchantGoods = new Dictionary<uint, List<Merchants>>();
-        _merchantPackGoods = new Dictionary<uint, List<MerchantPacks>>();
         _tccLookup = new Dictionary<uint, List<uint>>();
         _totalCharacterCustoms = new Dictionary<uint, TotalCharacterCustom>();
         _itemBodyParts = new Dictionary<uint, Dictionary<uint, List<BodyPartTemplate>>>();
@@ -945,70 +930,13 @@ public class NpcManager : Singleton<NpcManager>
                 }
             }
 
-            Logger.Info("Loading merchant packs from legacy bootstrap database...");
-
-            // Merchant goods are not part of the target 1.8 client schema. This mechanic has
-            // not been migrated to the future server database yet, so keep its historical
-            // source explicit instead of accidentally querying the client database.
-            using (var merchantConnection = SQLite.CreateConnection())
-            {
-                using (var command = merchantConnection.CreateCommand())
-                {
-                    command.CommandText = "SELECT npc_id, item_id, grade_id, kind_id FROM merchants";
-                    command.Prepare();
-                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
-                    {
-                        while (reader.Read())
-                        {
-                            var template = new Merchants
-                            {
-                                NpcId = reader.GetUInt32("npc_id", 0),
-                                ItemId = reader.GetUInt32("item_id", 0),
-                                GradeId = reader.GetByte("grade_id", 0),
-                                KindId = reader.GetByte("kind_id", 0)
-                            };
-
-                            if (template.NpcId == 0 || template.ItemId == 0)
-                                continue;
-
-                            if (_merchantGoods.ContainsKey(template.NpcId))
-                                _merchantGoods[template.NpcId].Add(template);
-                            else
-                                _merchantGoods.TryAdd(template.NpcId, [template]);
-                        }
-                    }
-                }
-
-                using (var command = merchantConnection.CreateCommand())
-                {
-                    command.CommandText = "SELECT pack_id, item_id, grade_id, kind_id FROM merchant_packs";
-                    command.Prepare();
-                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
-                    {
-                        while (reader.Read())
-                        {
-                            var id = reader.GetUInt32("pack_id", 0);
-                            var template = new MerchantPacks(id)
-                            {
-                                ItemId = reader.GetUInt32("item_id", 0),
-                                GradeId = reader.GetByte("grade_id", 0),
-                                KindId = reader.GetByte("kind_id", 0)
-                            };
-
-                            if (id == 0 || template.ItemId == 0)
-                                continue;
-
-                            if (_merchantPackGoods.ContainsKey(id))
-                                _merchantPackGoods[id].Add(template);
-                            else
-                                _merchantPackGoods.TryAdd(id, [template]);
-                        }
-                    }
-                }
-            }
-
-            Logger.Info($"Loaded {_merchantGoods.Count} merchants");
-            Logger.Info($"Loaded {_merchantPackGoods.Count} merchant packs");
+            Logger.Info(
+                "Merchant catalogue ready from {0}: {1} NPCs/{2} goods, {3} packs/{4} goods",
+                SQLite.TargetClientDatabase,
+                VendorGameData.Instance.MerchantCount,
+                VendorGameData.Instance.MerchantGoodsCount,
+                VendorGameData.Instance.PackCount,
+                VendorGameData.Instance.PackGoodsCount);
             Logger.Info($"Loaded {_templates.Count} npc templates");
         }
 

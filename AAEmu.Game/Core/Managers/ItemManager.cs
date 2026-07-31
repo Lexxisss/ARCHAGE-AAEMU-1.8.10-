@@ -44,6 +44,7 @@ public class ItemManager : Singleton<ItemManager>
     private Dictionary<uint, AttributeModifiers> _modifiers;
     private Dictionary<uint, ItemTemplate> _templates;
     private Dictionary<uint, ItemDoodadTemplate> _itemDoodadTemplates;
+    private Dictionary<(uint itemId, ShopCurrencyType currency), (int price, int refund)> _shopPrices;
     private ItemConfig _config;
 
     // Grade Enchanting
@@ -85,6 +86,20 @@ public class ItemManager : Singleton<ItemManager>
     public ItemTemplate GetTemplate(uint id)
     {
         return _templates.TryGetValue(id, out var template) ? template : null;
+    }
+
+    public bool TryGetShopPrice(uint itemId, ShopCurrencyType currency, out int price, out int refund)
+    {
+        if (_shopPrices != null && _shopPrices.TryGetValue((itemId, currency), out var entry))
+        {
+            price = entry.price;
+            refund = entry.refund;
+            return true;
+        }
+
+        price = 0;
+        refund = 0;
+        return false;
     }
 
     public EquipItemSet GetEquippedItemSet(uint id)
@@ -334,44 +349,74 @@ public class ItemManager : Singleton<ItemManager>
     /// <returns>Returns false if the item could not be picked up.</returns>
     public bool TookLootDropItem(Character character, List<Item> lootDropItems, Item lootDropItem, int count)
     {
+        if (character == null || lootDropItems == null || lootDropItem == null)
+            return false;
+
         var objId = (uint)(lootDropItem.Id >> 32);
-
-        // Never trust the count the client sent. A zero or negative value made
-        // AcquireDefaultItem a no-op that still reported success, after which the drop was
-        // removed below - the item was destroyed without ever reaching the bag, which is
-        // why such a pickup stayed missing even across a relog.
-        var amountToTake = count <= 0 ? lootDropItem.Count : Math.Min(count, lootDropItem.Count);
-
-        if (lootDropItem.TemplateId == Item.Coins)
+        lock (lootDropItems)
+        lock (character.InventoryTransactionLock)
         {
-            character.AddMoney(SlotType.Inventory, amountToTake);
-        }
-        else
-        {
-            if (!character.Inventory.Bag.AcquireDefaultItem(ItemTaskType.Loot, lootDropItem.TemplateId,
-                amountToTake, lootDropItem.Grade))
+            if (!lootDropItems.Contains(lootDropItem))
             {
-                // character.SendErrorMessage(ErrorMessageType.BagFull);
-                character.SendPacket(new SCLootItemFailedPacket(ErrorMessageType.BagFull, lootDropItem.Id, lootDropItem.TemplateId));
+                Logger.Warn(
+                    "Loot transaction failed LootContainerId={0} LootItemIid={1} RequestedCount={2} FailureReason=loot_entry_missing",
+                    objId, lootDropItem.Id, count);
+                character.SendPacket(new SCLootItemFailedPacket(ErrorMessageType.UnknownItem, lootDropItem.Id, lootDropItem.TemplateId));
                 return false;
             }
-        }
 
-        // Only drop the entry once it is actually empty, otherwise a partial pickup
-        // silently threw away the rest of the stack.
-        lootDropItem.Count -= amountToTake;
-        if (lootDropItem.Count <= 0)
-            lootDropItems.Remove(lootDropItem);
-        character.SendPacket(new SCLootItemTookPacket(lootDropItem.TemplateId, lootDropItem.Id, amountToTake));
+            // Target CS 0x00D1 contract is iid:u64 + count:i32. Zero, negative and
+            // values above the available stack are invalid requests; never clamp a
+            // malformed client value into a destructive server-side operation.
+            if (count <= 0 || count > lootDropItem.Count)
+            {
+                Logger.Warn(
+                    "Loot transaction failed LootContainerId={0} LootItemIid={1} RequestedCount={2} AvailableCount={3} FailureReason=invalid_count",
+                    objId, lootDropItem.Id, count, lootDropItem.Count);
+                character.SendPacket(new SCLootItemFailedPacket(ErrorMessageType.ItemUpdateFail, lootDropItem.Id, lootDropItem.TemplateId));
+                return false;
+            }
 
-        if (lootDropItems.Count <= 0)
-        {
-            RemoveLootDropItems(objId);
-            character.BroadcastPacket(new SCLootableStatePacket(objId, false), true);
+            var amountToTake = count;
+            if (lootDropItem.TemplateId == Item.Coins)
+            {
+                if (!character.AddMoney(SlotType.Inventory, amountToTake, ItemTaskType.Loot))
+                {
+                    character.SendPacket(new SCLootItemFailedPacket(ErrorMessageType.LootItemCreate, lootDropItem.Id, lootDropItem.TemplateId));
+                    return false;
+                }
+            }
+            else
+            {
+                if (!character.Inventory.Bag.AcquireDefaultItem(
+                        ItemTaskType.Loot, lootDropItem.TemplateId, amountToTake, lootDropItem.Grade))
+                {
+                    Logger.Warn(
+                        "Loot transaction failed LootContainerId={0} LootItemIid={1} RequestedCount={2} AvailableCount={3} FailureReason=bag_full",
+                        objId, lootDropItem.Id, amountToTake, lootDropItem.Count);
+                    character.SendPacket(new SCLootItemFailedPacket(ErrorMessageType.BagFull, lootDropItem.Id, lootDropItem.TemplateId));
+                    return false;
+                }
+            }
+
+            lootDropItem.Count -= amountToTake;
+            if (lootDropItem.Count == 0)
+                lootDropItems.Remove(lootDropItem);
+
+            character.SendPacket(new SCLootItemTookPacket(lootDropItem.TemplateId, lootDropItem.Id, amountToTake));
+            Logger.Info(
+                "Loot transaction success LootContainerId={0} LootItemIid={1} RequestedCount={2} AvailableCountBefore={3} CreatedItemTemplateId={4} ItemAction=Create/AddStack SC010B=sent SC0164={5}",
+                objId, lootDropItem.Id, amountToTake, lootDropItem.Count + amountToTake, lootDropItem.TemplateId,
+                lootDropItem.TemplateId == Item.Coins ? "not_applicable" : "sent");
+
+            if (lootDropItems.Count == 0)
+            {
+                RemoveLootDropItems(objId);
+                character.BroadcastPacket(new SCLootableStatePacket(objId, false), true);
+            }
+            return true;
         }
-        return true;
     }
-
     public GradeDistributions GetGradeDistributions(byte id)
     {
         return _itemGradeDistributions.TryGetValue(id, out var distribution) ? distribution : null;
@@ -606,6 +651,7 @@ public class ItemManager : Singleton<ItemManager>
         _wearableSlots = new Dictionary<uint, WearableSlot>();
         _modifiers = new Dictionary<uint, AttributeModifiers>();
         _templates = new Dictionary<uint, ItemTemplate>();
+        _shopPrices = new Dictionary<(uint itemId, ShopCurrencyType currency), (int price, int refund)>();
         _enchantingCosts = new Dictionary<uint, EquipSlotEnchantingCost>();
         _gradesOrdered = new Dictionary<int, GradeTemplate>();
         _enchantingSupports = new Dictionary<uint, ItemGradeEnchantingSupport>();
@@ -1168,7 +1214,11 @@ public class ItemManager : Singleton<ItemManager>
                     {
                         var itemId = reader.GetUInt32("item_id");
                         var entry = (reader.GetInt32("price"), reader.GetInt32("refund"));
-                        switch (reader.GetByte("currency_id"))
+                        var currencyId = reader.GetByte("currency_id");
+                        if (currencyId <= (byte)ShopCurrencyType.SiegeShop)
+                            _shopPrices[(itemId, (ShopCurrencyType)currencyId)] = entry;
+
+                        switch (currencyId)
                         {
                             case (byte)ShopCurrencyType.Money:
                                 itemMoneyPrices[itemId] = entry;

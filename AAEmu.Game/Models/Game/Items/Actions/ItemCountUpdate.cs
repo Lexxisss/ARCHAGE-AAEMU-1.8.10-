@@ -2,19 +2,21 @@
 
 namespace AAEmu.Game.Models.Game.Items.Actions;
 
+/// <summary>
+/// Target 1.8.1.0 AddStack action for SCItemTaskSuccessPacket.
+/// Serializer: x2game.dll 0x39A8B920.
+/// </summary>
 public class ItemCountUpdate : ItemTask
 {
     private readonly Item _item;
-    private readonly int _count;
+    private readonly long _count;
 
     /// <summary>
-    /// Add or subtracts count from the item count of a given item
+    /// Adds or subtracts units from an existing item stack.
     /// </summary>
-    /// <param name="item">Item to update</param>
-    /// <param name="count">Amount to add or subtract</param>
     public ItemCountUpdate(Item item, int count)
     {
-        _type = ItemAction.AddStack; // 4
+        _type = ItemAction.AddStack;
         _item = item;
         _count = count;
     }
@@ -22,11 +24,8 @@ public class ItemCountUpdate : ItemTask
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
-        stream.Write((byte)_item.SlotType); // type
-        stream.Write((byte)_item.Slot);     // index
-        stream.Write(_item.Id);             // id
-        stream.Write(_count);               // amount
-        stream.Write(_item.TemplateId);     // type
+        stream.Write(_item.TemplateId); // type   : u32
+        stream.Write(_count);           // amount : i64
         return stream;
     }
 }

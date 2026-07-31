@@ -17,12 +17,13 @@ public class ItemUpdateSecurity : ItemTask
         _isUnsecureExcess = isUnsecureExcess;
         _isUnsecureSet = isUnsecureSet;
         _isUnpack = isUnpack;
-        _type = ItemAction.UpdateFlags; // 11
+        _type = ItemAction.UpdateFlags; // 12
     }
 
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
+        stream.Write((byte)0); // actionOwnerType
         stream.Write((byte)_item.SlotType); // type
         stream.Write((byte)_item.Slot);     // index
         stream.Write(_item.Id);             // id

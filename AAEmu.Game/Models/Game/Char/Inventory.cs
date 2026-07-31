@@ -590,14 +590,12 @@ public class Inventory
 
         // Actually execute what we need to do
         var itemTasks = new List<ItemTask>();
-        var moveEntries = new List<(SlotType fromType, byte fromSlot, ulong fromItemId, SlotType toType, byte toSlot, ulong toItemId)>();
         switch (action)
         {
             case SwapAction.doEquipInEmptySlot:
                 itemInTargetSlot.SlotType = sourceContainer.ContainerType;
                 itemInTargetSlot.Slot = fromSlot;
                 itemTasks.Add(new ItemMove(fromType, fromSlot, fromItemId, toType, toSlot, toItemId));
-                moveEntries.Add((fromType, fromSlot, fromItemId, toType, toSlot, toItemId));
                 if (targetContainer != sourceContainer)
                 {
                     sourceContainer.Items.Add(itemInTargetSlot);
@@ -625,7 +623,6 @@ public class Inventory
                 fromItem.SlotType = targetContainer.ContainerType;
                 fromItem.Slot = toSlot;
                 itemTasks.Add(new ItemMove(fromType, fromSlot, fromItem.Id, toType, toSlot, toItemId));
-                moveEntries.Add((fromType, fromSlot, fromItem.Id, toType, toSlot, toItemId));
                 if (targetContainer != sourceContainer)
                 {
                     sourceContainer.Items.Remove(fromItem);
@@ -656,7 +653,6 @@ public class Inventory
             case SwapAction.doSwap:
                 // Swap both item slots
                 itemTasks.Add(new ItemMove(fromType, fromSlot, fromItem.Id, toType, toSlot, itemInTargetSlot.Id));
-                moveEntries.Add((fromType, fromSlot, fromItem.Id, toType, toSlot, itemInTargetSlot.Id));
                 fromItem.SlotType = targetContainer.ContainerType;
                 fromItem.Slot = toSlot;
                 if (sourceContainer != targetContainer)
@@ -744,17 +740,12 @@ public class Inventory
 
         if (taskType != ItemTaskType.Invalid && itemTasks.Count > 0)
         {
-            if (moveEntries.Count == itemTasks.Count)
-            {
-                // Opcode 0x10B carries a single item change per packet on the target
-                // 1.8.1.0 client; every task here is a move/swap of one item pair.
-                foreach (var move in moveEntries)
-                    Owner.SendPacket(new SCItemMovedPacket(taskType, move.fromType, move.fromSlot, move.fromItemId, move.toType, move.toSlot, move.toItemId));
-            }
-            else
-            {
-                Owner.SendPacket(new SCItemTaskSuccessPacket(taskType, itemTasks, new List<ulong>()));
-            }
+            const int maxTasks = 30;
+            for (var offset = 0; offset < itemTasks.Count; offset += maxTasks)
+                Owner.SendPacket(new SCItemTaskSuccessPacket(
+                    taskType,
+                    itemTasks.Skip(offset).Take(maxTasks).ToList(),
+                    new List<ulong>()));
         }
 
         sourceContainer.ApplyBindRules(taskType);

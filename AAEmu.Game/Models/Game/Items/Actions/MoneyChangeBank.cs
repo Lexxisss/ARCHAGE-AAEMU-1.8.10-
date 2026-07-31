@@ -4,9 +4,9 @@ namespace AAEmu.Game.Models.Game.Items.Actions;
 
 public class MoneyChangeBank : ItemTask
 {
-    private readonly int _amount;
+    private readonly long _amount;
 
-    public MoneyChangeBank(int amount)
+    public MoneyChangeBank(long amount)
     {
         _type = ItemAction.ChangeBankMoneyAmount; // 2
         _amount = amount;
@@ -15,7 +15,7 @@ public class MoneyChangeBank : ItemTask
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
-        stream.Write(_amount); // amount
+        stream.Write(_amount); // i64 in target 1.8.1.0 serializer
         return stream;
     }
 }

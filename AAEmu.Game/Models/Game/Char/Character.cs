@@ -126,6 +126,7 @@ public partial class Character : Unit, ICharacter
 
     // public Item[] BuyBack { get; set; }
     public ItemContainer BuyBackItems { get; set; }
+    public object InventoryTransactionLock { get; } = new();
     public BondDoodad Bonding { get; set; }
     public CharacterQuests Quests { get; set; }
     public CharacterMails Mails { get; set; }
