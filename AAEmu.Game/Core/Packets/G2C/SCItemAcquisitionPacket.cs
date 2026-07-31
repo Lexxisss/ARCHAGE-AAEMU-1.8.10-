@@ -15,7 +15,7 @@ namespace AAEmu.Game.Core.Packets.G2C;
 public class SCItemAcquisitionPacket : GamePacket
 {
     private const byte ItemAcquisitionType = 1;
-    private const int MaxItems = byte.MaxValue;
+    private const int MaxItems = 15;
 
     private readonly string _characterName;
     private readonly IReadOnlyList<Item> _items;

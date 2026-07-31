@@ -1,31 +1,28 @@
-﻿using AAEmu.Commons.Network;
-
 namespace AAEmu.Game.Models.Game.Items.Actions;
 
 /// <summary>
-/// Target 1.8.1.0 AddStack action for SCItemTaskSuccessPacket.
-/// Serializer: x2game.dll 0x39A8B920.
+/// Adds or subtracts units from an existing item stack.
 /// </summary>
-public class ItemCountUpdate : ItemTask
+/// <remarks>
+/// This used to emit action 4 with a <c>templateId:u32, amount:i64</c> body. Action 4 does
+/// exist on this client, but it is a currency/resource path that never touches an inventory
+/// slot - it carries neither a slot nor an item id, so there is nothing for it to adjust.
+/// Every caller here means "change the count of this item in this slot", which is action 5
+/// with a signed delta.
+///
+/// That single mistake accounted for the stack split producing a wrong remainder, a merge
+/// leaving the source untouched, and a partial consume not decrementing: all of them route
+/// through this class.
+/// </remarks>
+public class ItemCountUpdate : ItemAdd
 {
-    private readonly Item _item;
-    private readonly long _count;
-
-    /// <summary>
-    /// Adds or subtracts units from an existing item stack.
-    /// </summary>
     public ItemCountUpdate(Item item, int count)
+        : base(item, count)
     {
-        _type = ItemAction.AddStack;
-        _item = item;
-        _count = count;
     }
 
-    public override PacketStream Write(PacketStream stream)
+    public ItemCountUpdate(Item item, int count, SlotType slotType, byte slot)
+        : base(item, count, slotType, slot)
     {
-        base.Write(stream);
-        stream.Write(_item.TemplateId); // type   : u32
-        stream.Write(_count);           // amount : i64
-        return stream;
     }
 }

@@ -73,16 +73,18 @@ public class SCItemTaskSuccessPacket : GamePacket
         foreach (var task in _tasks)
             stream.Write(task);
 
-        // Trailing block. Live captures of this client fix it at 42 bytes when no force
-        // removes are present:
-        //   a taskCount=0 packet is 45 bytes total, i.e. 3-byte header + 42;
-        //   a single Create is 65 = 3 + 20 (task) + 42;
-        //   a money AddStack is 55 = 3 + 10 + 42.
-        // Writing only the 22 bytes below left every 0x010B twenty bytes short, so the
-        // client hit the end of the packet while parsing and discarded it - which is why a
-        // looted item never repainted its slot until the player forced an inventory sort.
-        var trailingStart = stream.Count;
-
+        // Trailing block: 22 bytes when no force removes are present.
+        //
+        // We previously padded this to 42, because four independent packet lengths all
+        // resolved to that one constant. They did - but the extra 20 bytes belong to a
+        // transport envelope around the captured record, not to this serializer, and the
+        // same 20 bytes sit on all four:
+        //   no tasks              45 = 25 + 20
+        //   a 10-byte task        55 = 35 + 20
+        //   an action 5           65 = 45 + 20
+        //   action 5 + action 6  133 = 113 + 20
+        // The client parses to its own structure rather than to a declared body length, so
+        // the padding was harmless filler - not the reason anything began working.
         stream.Write((byte)_forceRemove.Count);   // forceRemoveCount : u8, max 30
         foreach (var remove in _forceRemove)
             stream.Write(remove);                 // forceRemoves[]   : u64
@@ -91,15 +93,6 @@ public class SCItemTaskSuccessPacket : GamePacket
         stream.Write(_lockItemSlotKey);           // lockItemSlotKey   : i32
         stream.Write(_queryResult);               // queryResult       : bool
         stream.Write(_flags);                     // 35 flag bits packed into u64
-
-        // Pad out to the observed block size, then the constant the captures always carry
-        // in the last four bytes.
-        const int trailingBlockSize = 42;
-        const int trailingConstantSize = 4;
-        var padding = trailingBlockSize - trailingConstantSize - (stream.Count - trailingStart);
-        if (padding > 0)
-            stream.Write(new byte[padding]);
-        stream.Write(0x01000000u);
 
         return stream;
     }

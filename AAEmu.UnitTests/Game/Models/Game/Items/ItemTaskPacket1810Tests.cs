@@ -45,28 +45,39 @@ public class ItemTaskPacket1810Tests
         Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 16));
     }
 
+    /// <summary>
+    /// A stack count change is action 5 with a signed delta against a slot, not action 4.
+    /// Action 4 does exist, but it carries neither a slot nor an item id - it is a currency
+    /// path and can never adjust an inventory slot.
+    /// </summary>
     [Fact]
-    public void AddStackUsesTemplateAndInt64Delta()
+    public void CountUpdateIsAStackDeltaAgainstItsSlot()
     {
         var stream = new PacketStream();
         new ItemCountUpdate(CreateItem(), -3).Write(stream);
         var bytes = stream.GetBytes();
 
-        Assert.Equal(14, bytes.Length);
-        Assert.Equal((byte)ItemAction.AddStack, bytes[0]);
-        Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 2));
-        Assert.Equal(-3L, BitConverter.ToInt64(bytes, 6));
+        Assert.Equal(20, bytes.Length);
+        Assert.Equal((byte)ItemAction.Create, bytes[0]);
+        Assert.Equal((byte)SlotType.Inventory, bytes[2]);
+        Assert.Equal(9, bytes[3]);
+        Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 4));
+        Assert.Equal(-3, BitConverter.ToInt32(bytes, 12));
+        Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 16));
     }
 
     /// <summary>
-    /// A packet carrying no tasks at all measures 45 bytes, which pins the header at 3 and
-    /// the trailing block at 42. A single action 5 is then 3 + 20 + 42 = 65.
-    /// The old expectation of 45 for a single action 5 came from mistaking the zero-task
-    /// packets for item ones, and left every 0x010B twenty bytes short on the wire.
+    /// The body is a 3-byte header plus a 22-byte trailing block, so a packet with no tasks
+    /// is 25 and a single action 5 is 25 + 20 = 45.
+    ///
+    /// The earlier expectations of 45 and 65 came from measured records that carry a
+    /// constant 20-byte transport envelope around this body. That envelope appeared
+    /// identically on every length measured, which is what made 42 look like the size of
+    /// the trailing block.
     /// </summary>
     [Theory]
-    [InlineData(0, 45)]
-    [InlineData(1, 65)]
+    [InlineData(0, 25)]
+    [InlineData(1, 45)]
     public void ItemTaskPacketMatchesMeasuredBodyLength(int taskCount, int expectedLength)
     {
         var tasks = new List<ItemTask>();
@@ -101,6 +112,30 @@ public class ItemTaskPacket1810Tests
         Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 8));
     }
 
+    /// <summary>
+    /// Emptying a slot is action 8. Action 7 shares both its serializer and its model helper
+    /// with action 6, so it only overwrites the item record of a slot that already exists -
+    /// it never unlinks or destroys one, which is what left the emptied slot drawn grey.
+    /// </summary>
+    [Fact]
+    public void RemoveUsesThePhysicalRemovalAction()
+    {
+        var stream = new PacketStream();
+        new ItemRemove(CreateItem()).Write(stream);
+        var bytes = stream.GetBytes();
+
+        Assert.Equal(36, bytes.Length);
+        Assert.Equal((byte)ItemAction.StoreRemove, bytes[0]);
+        Assert.Equal((byte)SlotType.Inventory, bytes[2]);
+        Assert.Equal(9, bytes[3]);
+        Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 4));
+        Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 24));
+    }
+
+    /// <summary>
+    /// Action 13 parses, but the client's task dispatcher maps it straight to "not applied",
+    /// so it can never clear a slot. Kept only to pin the layout.
+    /// </summary>
     [Fact]
     public void SeizeContainsOnlyInstanceIdAfterActionHeader()
     {

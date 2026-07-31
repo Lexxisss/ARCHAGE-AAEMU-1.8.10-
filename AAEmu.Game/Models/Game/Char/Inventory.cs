@@ -970,19 +970,42 @@ public class Inventory
         }
     }
 
+    /// <summary>
+    /// Sends a container's contents as 10-slot chunks.
+    /// </summary>
+    /// <remarks>
+    /// Every slot the client is allowed to use has to arrive in one of these chunks: the
+    /// 0x010B task actions all resolve a backing slot object first and silently do nothing
+    /// when it is missing, so a slot that was never announced here draws as empty and then
+    /// refuses whatever is dropped on it.
+    ///
+    /// This used to send <c>numItems / 10</c> chunks and copy a fixed 10 items at a time,
+    /// which dropped a trailing partial chunk outright and threw on a container whose list
+    /// was shorter than its declared slot count - aborting the remaining chunks with it.
+    /// Both left exactly that kind of dead slot, which is what the warehouse was showing.
+    /// </remarks>
     private void SendFragmentedInventory(SlotType slotType, byte numItems, Item[] bag)
     {
-        var tempItem = new Item[10];
+        const int slotsPerChunk = 10;
 
-        if (numItems % 10 != 0)
+        if (numItems % slotsPerChunk != 0)
             Logger.Warn($"SendFragmentedInventory: Inventory Size not a multiple of 10 ({numItems})");
         if (bag.Length != numItems)
             Logger.Warn($"SendFragmentedInventory: Inventory Size Mismatch; expected {numItems} got {bag.Length}");
 
-        for (byte chunk = 0; chunk < numItems / 10; chunk++)
+        var chunkCount = (numItems + slotsPerChunk - 1) / slotsPerChunk;
+        for (byte chunk = 0; chunk < chunkCount; chunk++)
         {
-            Array.Copy(bag, chunk * 10, tempItem, 0, 10);
-            Owner.SendPacket(new SCCharacterInvenContentsPacket(slotType, 1, chunk, tempItem));
+            var chunkItems = new Item[slotsPerChunk];
+            var startSlot = chunk * slotsPerChunk;
+            for (var i = 0; i < slotsPerChunk; i++)
+            {
+                var slot = startSlot + i;
+                if (slot < bag.Length)
+                    chunkItems[i] = bag[slot];
+            }
+
+            Owner.SendPacket(new SCCharacterInvenContentsPacket(slotType, 1, chunk, chunkItems));
         }
 
         SetInitialItemExpirationTimers(bag);
