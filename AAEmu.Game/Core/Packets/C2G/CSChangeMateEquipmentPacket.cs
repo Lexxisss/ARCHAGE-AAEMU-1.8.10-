@@ -15,11 +15,20 @@ public class CSChangeMateEquipmentPacket : GamePacket
     {
     }
 
+    /// <summary>
+    /// Request to change a pet's or mount's equipment.
+    /// </summary>
+    /// <remarks>
+    /// Header: <c>ownerPersistentId:i64, tl:u16, mateType:u32, bts:bool, num:u8</c>. The owner
+    /// id is 64 bits, not 32 - reading it short pulled the handle and everything after it off
+    /// the wrong bytes. The client clamps the record count to two here, one fewer than for a
+    /// ship.
+    /// </remarks>
     public override void Read(PacketStream stream)
     {
-        var characterId = stream.ReadUInt32();
+        var characterId = stream.ReadInt64();
         var tl = stream.ReadUInt16(); // mate tl
-        var passengerId = stream.ReadUInt32();
+        var passengerId = stream.ReadUInt32(); // mateType, generic label in the client
         var bts = stream.ReadBoolean();
         var num = stream.ReadByte();
 
