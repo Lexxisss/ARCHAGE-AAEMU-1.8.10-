@@ -131,7 +131,7 @@ public class HousingManager : Singleton<HousingManager>
         // var housingAreas = new Dictionary<uint, HousingAreas>();
         // var houseTaxes = new Dictionary<uint, HouseTax>();
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             Logger.Info("Loading Housing Information ...");
 
