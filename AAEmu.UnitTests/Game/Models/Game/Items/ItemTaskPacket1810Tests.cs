@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using AAEmu.Commons.Network;
@@ -30,18 +30,18 @@ public class ItemTaskPacket1810Tests
     public void CreateActionUsesCompactTargetLayout()
     {
         var stream = new PacketStream();
-        new ItemAdd(CreateItem()).Write(stream);
+        new ItemAdd(CreateItem(), -2).Write(stream);
         var bytes = stream.GetBytes();
 
         Assert.Equal(20, bytes.Length);
         Assert.Equal((byte)ItemAction.Create, bytes[0]);
-        // Captures pair Create with MoveItem in all 44 observed samples; UpdateOnly here
-        // is a pairing the client does not act on.
+        // Create pairs with MoveItem; UpdateOnly is a pairing the client does not act on.
         Assert.Equal((byte)ItemTaskLogType.MoveItem, bytes[1]);
         Assert.Equal((byte)SlotType.Inventory, bytes[2]);
         Assert.Equal(9, bytes[3]);
         Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 4));
-        Assert.Equal(7, BitConverter.ToInt32(bytes, 12));
+        // The amount is a signed delta, not the slot's new total.
+        Assert.Equal(-2, BitConverter.ToInt32(bytes, 12));
         Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 16));
     }
 
@@ -59,22 +59,19 @@ public class ItemTaskPacket1810Tests
     }
 
     /// <summary>
-    /// Lengths taken from live captures of this client (pcap-analysis op10B samples).
     /// A packet carrying no tasks at all measures 45 bytes, which pins the header at 3 and
-    /// the trailing block at 42. A single Create is then 3 + 20 + 42 = 65, and 65 is what
-    /// the live server actually sends when it hands an item over - the capture even shows
-    /// templateId 18791 x5 landing in a bag slot.
-    /// The old expectation of 45 for a single Create came from mistaking the zero-task
-    /// packets for Create packets, and left every 0x010B twenty bytes short on the wire.
+    /// the trailing block at 42. A single action 5 is then 3 + 20 + 42 = 65.
+    /// The old expectation of 45 for a single action 5 came from mistaking the zero-task
+    /// packets for item ones, and left every 0x010B twenty bytes short on the wire.
     /// </summary>
     [Theory]
     [InlineData(0, 45)]
     [InlineData(1, 65)]
-    public void CreateTaskPacketMatchesCapturedBodyLength(int taskCount, int expectedLength)
+    public void ItemTaskPacketMatchesMeasuredBodyLength(int taskCount, int expectedLength)
     {
         var tasks = new List<ItemTask>();
         for (var i = 0; i < taskCount; i++)
-            tasks.Add(new ItemAdd(CreateItem()));
+            tasks.Add(new ItemAdd(CreateItem(), 1));
 
         var packet = new SCItemTaskSuccessPacket(ItemTaskType.Loot, tasks, new List<ulong>());
         var stream = new PacketStream();
@@ -85,9 +82,8 @@ public class ItemTaskPacket1810Tests
     }
 
     /// <summary>
-    /// Verified against a live capture (op10B body 113): action 6 pairs with GainItem and
-    /// carries slotType, slot and the standard 64-byte item record. The capture decodes to
-    /// templateId 23633, id 16841771, count 1, so the field order is fixed by observation.
+    /// Action 6 pairs with GainItem and carries slotType, slot and the standard 64-byte item
+    /// record, starting with the template id.
     /// </summary>
     [Fact]
     public void GainActionCarriesTheFullItemRecord()

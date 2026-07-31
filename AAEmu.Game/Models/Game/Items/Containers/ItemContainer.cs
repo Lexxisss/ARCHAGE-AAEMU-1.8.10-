@@ -367,8 +367,10 @@ public class ItemContainer
             UpdateFreeSlotCount();
 
             // Note we use SlotType.None for things like the Item BuyBack Container. Make sure to manually handle the remove for these
+            // The item is arriving in a slot the client may not know about, so it needs the
+            // full record of action 6 rather than an amount adjustment.
             if (this.ContainerType != SlotType.None)
-                itemTasks.Add(new ItemAdd(item));
+                itemTasks.Add(new ItemGain(item));
 
             if (sourceContainer != this)
             {
@@ -484,7 +486,10 @@ public class ItemContainer
         var res = item._holdingContainer.Items.Remove(item);
         if (res && task != ItemTaskType.Invalid)
         {
-            item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(task, new List<ItemTask> { new ItemRemoveSlot(item) }, new List<ulong>()));
+            // Action 7 is the mirror of the action 6 used to introduce an item: slot plus the
+            // full record. Seize carries only an id, which left a consumed item on screen
+            // until the bag was rebuilt.
+            item._holdingContainer?.Owner?.SendPacket(new SCItemTaskSuccessPacket(task, new List<ItemTask> { new ItemRemove(item) }, new List<ulong>()));
         }
         if (res && releaseIdAsWell)
         {
@@ -535,7 +540,8 @@ public class ItemContainer
             if (preferredItem.Count > 0)
             {
                 Owner?.Inventory.OnConsumedItem(preferredItem, toRemove);
-                itemTasks.Add(new ItemCountUpdate(preferredItem, -toRemove));
+                // Same action as when a stack grows, with the delta negated.
+                itemTasks.Add(new ItemAdd(preferredItem, -toRemove));
                 touchedSlots.Add(preferredItem.Slot);
             }
             else
@@ -559,7 +565,7 @@ public class ItemContainer
                 if (i.Count > 0)
                 {
                     Owner?.Inventory.OnConsumedItem(i, toRemove);
-                    itemTasks.Add(new ItemCountUpdate(i, -toRemove));
+                    itemTasks.Add(new ItemAdd(i, -toRemove));
                     touchedSlots.Add(i.Slot);
                 }
                 else
@@ -778,11 +784,9 @@ public class ItemContainer
                 var addAmount = Math.Min(freeSpace, amountToAdd);
                 item.Count += addAmount;
                 amountToAdd -= addAmount;
-                // A slot the client already knows about is restated with its new total via
-                // action 5, not with a delta - a two-task packet observed on this client
-                // carries exactly that for a stack that grew, alongside an action 6 for a
-                // separate brand new item. Action 4 does not appear on this protocol at all.
-                itemTasks.Add(new ItemAdd(item));
+                // Action 5 adjusts a slot the client already knows about, and its amount is
+                // a signed delta rather than the new total.
+                itemTasks.Add(new ItemAdd(item, addAmount));
                 acquiredCounts.Add((item, addAmount, false));
                 updatedItems.Add(item);
             }

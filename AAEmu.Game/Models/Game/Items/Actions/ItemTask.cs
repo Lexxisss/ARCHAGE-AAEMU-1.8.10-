@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using AAEmu.Commons.Network;
 
@@ -23,7 +23,11 @@ public abstract class ItemTask : PacketMarshaler
     {
         { ItemAction.ChangeMoneyAmount, ItemTaskLogType.UpdateOnly },
         { ItemAction.Create, ItemTaskLogType.MoveItem },
-        { ItemAction.Take, ItemTaskLogType.GainItem }
+        { ItemAction.Take, ItemTaskLogType.GainItem },
+        // No direct observation for Remove, but it is the mirror of Take - both carry the
+        // full record, one introducing the item and one taking it away - and the 5.0 branch
+        // agrees on RemoveItem here, unlike the two pairings it gets wrong.
+        { ItemAction.Remove, ItemTaskLogType.RemoveItem }
     };
 
     protected ItemAction _type;
