@@ -78,7 +78,7 @@ public class WanderingSkillController : SkillController
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = 4;
+        moveType.ActorFlags = 0;     // gate word for the optional blocks only
         moveType.Flags = 4;
         moveType.DeltaMovement = new sbyte[3] { 0, 127, 0 };
         moveType.Stance = 0;

@@ -70,12 +70,12 @@ public class Nloc : ICommand
             moveType.RotationY = characterRot.Item2;
             moveType.RotationZ = characterRot.Item3;
 
-            moveType.ActorFlags = 5;
+            moveType.ActorFlags = 0;     // gate word for the optional blocks only; carries no walk/run meaning
             moveType.DeltaMovement = new sbyte[3];
             moveType.DeltaMovement[0] = 0;
             moveType.DeltaMovement[1] = 0;
             moveType.DeltaMovement[2] = 0;
-            moveType.Stance = 1; //combat=0, idle=1
+            moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
             moveType.Alertness = 0; //idle=0, combat=2
             moveType.Time += 50; // has to change all the time for normal motion.
 
