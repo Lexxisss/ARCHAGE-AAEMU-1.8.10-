@@ -22,6 +22,7 @@ public class CSWorldEntryReadyPacket : GamePacket
         Connection.SendPacket(new SCDetailedTimeOfDayPacket(TimeManager.Instance.GetTime()));
 
         var doodadCount = WorldManager.Instance.PublishProtocol1810CurrentRegionDoodads(Connection.ActiveChar);
+        Connection.ActiveChar?.Quests.RefreshQuestNotifier();
         Logger.Info(
             "World-ready signal received for characterId={0}; publishedDoodads={1}",
             Connection.ActiveChar?.Id ?? 0,

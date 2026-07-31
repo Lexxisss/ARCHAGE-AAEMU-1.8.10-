@@ -383,6 +383,7 @@ public partial class QuestManager : Singleton<QuestManager>, IQuestManager
             var template = new QuestComponent(_templates[questId]);
             template.Id = reader.GetUInt32("id");
             template.KindId = (QuestComponentKind)reader.GetByte("component_kind_id");
+            template.HideQuestMarker = reader.GetBoolean("hide_quest_marker", false);
             template.NextComponent = reader.GetUInt32("next_component", 0);
             template.NpcAiId = (QuestNpcAiName)reader.GetUInt32("npc_ai_id", 0);
             template.NpcId = reader.GetUInt32("npc_id", 0);
@@ -413,6 +414,10 @@ public partial class QuestManager : Singleton<QuestManager>, IQuestManager
             template.Id = reader.GetUInt32("id");
             template.Repeatable = reader.GetBoolean("repeatable", true);
             template.Level = reader.GetByte("level", 0);
+            template.MinLevel = reader.GetByte("min_level", 0);
+            template.MaxLevel = reader.GetByte("max_level", 0);
+            template.RaceMask = reader.GetByte("race", byte.MaxValue);
+            template.Name = reader.GetString("name", string.Empty);
             template.Selective = reader.GetBoolean("selective", true);
             template.Successive = reader.GetBoolean("successive", true);
             template.RestartOnFail = reader.GetBoolean("restart_on_fail", true);

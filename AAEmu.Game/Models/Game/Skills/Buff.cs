@@ -7,7 +7,6 @@ using AAEmu.Game.Models.Game.Skills.Buffs;
 using AAEmu.Game.Models.Game.Skills.Templates;
 using AAEmu.Game.Models.Game.Units;
 
-using NLog;
 
 namespace AAEmu.Game.Models.Game.Skills;
 
@@ -21,10 +20,14 @@ public enum EffectState
 
 public class Buff
 {
-    protected static Logger Logger => LogManager.GetCurrentClassLogger();
-
     private object _lock = new();
     private int _count;
+
+    /// <summary>
+    /// Last interpolation step used by LinearFunc. Dedicated derives this as
+    /// total duration divided by tick interval; the current step is Charge.
+    /// </summary>
+    public int DynamicModifierStepCount => Tick > 0 && Duration > 0 ? Math.Max(1, (int)(Duration / Tick)) : 0;
 
     public uint Index { get; set; }
     public Skill Skill { get; set; }
@@ -40,9 +43,16 @@ public class Buff
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public int Charge { get; set; }
-    public int Stack { get; set; } = 1;
+    public int StackCount { get; set; } = 1;
     public bool Passive { get; set; }
-    public ushort AbLevel { get; set; } // int in 1.2, ushort in 3+
+    /// <summary>Level of the unit that created the buff, frozen when BuffData is created.</summary>
+    public byte SourceLevel { get; set; }
+
+    /// <summary>Effective ability level used to scale the originating skill/effect.</summary>
+    public ushort SourceAbilityLevel { get; set; }
+
+    /// <summary>Skill template that created the buff; zero for item/system/aura buffs.</summary>
+    public uint SourceSkillId => Skill?.Template.Id ?? 0u;
     public BuffEvents Events { get; }
     public BuffTriggersHandler Triggers { get; }
     public Dictionary<uint, uint> saveFactions { get; set; }
@@ -56,7 +66,8 @@ public class Buff
         Skill = skill;
         StartTime = time;
         EndTime = DateTime.MinValue;
-        AbLevel = 1;
+        SourceLevel = Caster?.Level ?? (byte)0;
+        SourceAbilityLevel = 1;
         Events = new BuffEvents();
         Triggers = new BuffTriggersHandler(this);
         saveFactions = new Dictionary<uint, uint>();
@@ -66,7 +77,7 @@ public class Buff
     {
         Template.Start(Caster, Owner, this);
         if (Duration == 0)
-            Duration = Template.GetDuration(AbLevel);
+            Duration = Template.GetDuration(SourceAbilityLevel);
         if (StartTime == DateTime.MinValue)
         {
             StartTime = DateTime.UtcNow;
@@ -74,7 +85,6 @@ public class Buff
         }
 
         Tick = Template.GetTick();
-
         if (Tick > 0)
         {
             var time = GetTimeLeft();
@@ -99,7 +109,7 @@ public class Buff
                     Template.Start(Caster, Owner, this);
 
                     if (Duration == 0)
-                        Duration = Template.GetDuration(AbLevel);
+                        Duration = Template.GetDuration(SourceAbilityLevel);
                     if (StartTime == DateTime.MinValue)
                     {
                         StartTime = DateTime.UtcNow;
@@ -107,8 +117,7 @@ public class Buff
                     }
 
                     Tick = Template.GetTick();
-
-                    if (Tick > 0)
+                                if (Tick > 0)
                     {
                         var time = GetTimeLeft();
                         if (time > 0)
@@ -122,7 +131,6 @@ public class Buff
 
                     if (Template.FactionId > 0 && Owner is Unit owner)
                     {
-                        Logger.Info($"Buff: buff={Template.BuffId}:{Index}, owner={owner.TemplateId}:{owner.ObjId}");
                         owner.SetFaction(Template.FactionId);
                     }
                     return;

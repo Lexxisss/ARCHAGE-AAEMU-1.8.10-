@@ -85,6 +85,12 @@ public class SkillTemplate
     public bool LevelRuleNoConsideration { get; set; }
     public bool UseWeaponCooldownTime { get; set; }
     public int CombatDiceId { get; set; }
+    public uint CombatResourceId { get; set; }
+    public int MinCombatResource { get; set; }
+    public int MaxCombatResource { get; set; }
+    public bool CheckObstacle { get; set; }
+    public float PitchAngle { get; set; }
+    public bool ValidHeightEdgeToEdge { get; set; }
     public int CustomGcd { get; set; }
     public bool CancelOngoingBuffs { get; set; }
     public uint CancelOngoingBuffExceptionTagId { get; set; }

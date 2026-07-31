@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Models.Game.AI.Enums;
+using AAEmu.Game.Models.Game.Formulas;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Skills.Buffs;
@@ -63,6 +65,8 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
     private Dictionary<uint, SkillReagent> _skillReagents;
     private Dictionary<uint, SkillProduct> _skillProducts;
     private Dictionary<uint, SelectiveItems> _selectiveItems;
+    private Dictionary<uint, CombatResourceTemplate> _combatResources;
+    private Dictionary<byte, CombatResourceGroupTemplate> _combatResourceGroups;
     // private HashSet<ushort> _skillIds = new();
     // private ushort _skillIdIndex = 1;
 
@@ -99,6 +103,30 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
         }
     }
     */
+
+    public CombatResourceTemplate GetCombatResourceTemplate(uint id)
+    {
+        return _combatResources != null && _combatResources.TryGetValue(id, out var template) ? template : null;
+    }
+
+    public IReadOnlyCollection<CombatResourceTemplate> GetCombatResourceTemplates()
+    {
+        if (_combatResources == null)
+            return Array.Empty<CombatResourceTemplate>();
+        return _combatResources.Values.ToArray();
+    }
+
+    public CombatResourceGroupTemplate GetCombatResourceGroup(byte abilityId)
+    {
+        return _combatResourceGroups != null && _combatResourceGroups.TryGetValue(abilityId, out var group) ? group : null;
+    }
+
+    public uint ResolveCombatResourceId(SkillTemplate skill, uint explicitResourceId = 0)
+    {
+        if (explicitResourceId != 0)
+            return explicitResourceId;
+        return GetCombatResourceGroup(skill?.AbilityId ?? 0)?.CombatResource1Id ?? 0;
+    }
 
     public SkillTemplate GetSkillTemplate(uint id)
     {
@@ -312,6 +340,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
         _effects.Add("CinemaEffect", new Dictionary<uint, EffectTemplate>());
         _effects.Add("CleanupUccEffect", new Dictionary<uint, EffectTemplate>());
         _effects.Add("ConversionEffect", new Dictionary<uint, EffectTemplate>());
+        _effects.Add("CombatResourceEffect", new Dictionary<uint, EffectTemplate>());
         _effects.Add("CraftEffect", new Dictionary<uint, EffectTemplate>());
         _effects.Add("DamageEffect", new Dictionary<uint, EffectTemplate>());
         _effects.Add("DispelEffect", new Dictionary<uint, EffectTemplate>());
@@ -362,10 +391,76 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
         _skillReagents = new Dictionary<uint, SkillReagent>();
         _skillProducts = new Dictionary<uint, SkillProduct>();
         _selectiveItems = new Dictionary<uint, SelectiveItems>();
+        _combatResources = new Dictionary<uint, CombatResourceTemplate>();
+        _combatResourceGroups = new Dictionary<byte, CombatResourceGroupTemplate>();
 
         using (var connection = SQLite.CreateSkillConnection())
         {
             Logger.Info("Loading skills...");
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM combat_resources";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new CombatResourceTemplate
+                    {
+                        Id = reader.GetUInt32("id"),
+                        Name = reader.GetString("name"),
+                        BuffId = reader.GetUInt32("buff_id", 0),
+                        DefaultPoint = reader.GetInt64("default_point"),
+                        MaxPoint = reader.GetInt64("max"),
+                        RecoveryCycle = reader.GetInt32("recovery_cycle"),
+                        CombatRecoveryAmount = reader.GetInt64("combat_recovery_amount"),
+                        PeaceRecoveryAmount = reader.GetInt64("peace_recovery_amount"),
+                        EtcRecoveryAmount = reader.GetInt64("etc_recovery_amount"),
+                        EtcRecoveryStateId = reader.GetUInt32("etc_recovery_state_id", 0),
+                        SendTypeId = reader.GetUInt32("resouece_send_type_id", 0),
+                        ResourceBuffConditionId = reader.GetUInt32("resource_buff_condition_id", 0)
+                    };
+                    _combatResources[template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table combat_resources is missing; combat resources are disabled.");
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM combat_resource_groups";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new CombatResourceGroupTemplate
+                    {
+                        Id = reader.GetUInt32("id"),
+                        AbilityId = reader.GetByte("ability_id"),
+                        CombatResource1Id = reader.GetUInt32("combat_resource_1_id", 0),
+                        CombatResource2Id = reader.GetUInt32("combat_resource_2_id", 0),
+                        CombatResource1UiId = reader.GetUInt32("combat_resource_1_ui_id", 0),
+                        CombatResource2UiId = reader.GetUInt32("combat_resource_2_ui_id", 0),
+                        DependentResource1 = reader.GetBoolean("dependent_resource1", true),
+                        DependentResource2 = reader.GetBoolean("dependent_resource2", true),
+                        ChangeCombatResource1ConditionId = reader.GetUInt32("change_combat_resource_1_condition_id", 0),
+                        ChangeCombatResource2ConditionId = reader.GetUInt32("change_combat_resource_2_condition_id", 0),
+                        ChangeCombatResource1Id = reader.GetUInt32("change_combat_resource_1_id", 0),
+                        ChangeCombatResource2Id = reader.GetUInt32("change_combat_resource_2_id", 0),
+                        ShowUpdateTimeCombatResource = reader.GetInt32("show_update_time_combat_resource"),
+                        ShowUpdateTimeTransformCombatResource = reader.GetInt32("show_update_time_transform_combat_resource")
+                    };
+                    _combatResourceGroups[template.AbilityId] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table combat_resource_groups is missing; implicit resource mapping is disabled.");
+            }
+
             try {
             using (var command = connection.CreateCommand())
             {
@@ -460,6 +555,12 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                         template.LevelRuleNoConsideration = reader.GetBoolean("level_rule_no_consideration", true);
                         template.UseWeaponCooldownTime = reader.GetBoolean("use_weapon_cooldown_time", true);
                         template.CombatDiceId = reader.GetInt32("combat_dice_id");
+                        template.CombatResourceId = reader.GetUInt32("combat_resource_id", 0);
+                        template.MinCombatResource = reader.GetInt32("min_combat_resource");
+                        template.MaxCombatResource = reader.GetInt32("max_combat_resource");
+                        template.CheckObstacle = reader.GetBoolean("check_obstacle", true);
+                        template.PitchAngle = reader.GetFloat("pitch_angle");
+                        template.ValidHeightEdgeToEdge = reader.GetBoolean("valid_height_edge_to_edge", true);
                         template.CustomGcd = reader.GetInt32("custom_gcd");
                         template.CancelOngoingBuffs = reader.GetBoolean("cancel_ongoing_buffs", true);
                         template.CancelOngoingBuffExceptionTagId = reader.GetUInt32("cancel_ongoing_buff_exception_tag_id", 0);
@@ -752,8 +853,8 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                         if (_buffs.TryGetValue(buffId, out var buff))
                             template.Buff = buff;
                         template.Chance = reader.GetInt32("chance");
-                        template.Stack = reader.GetInt32("stack");
-                        template.AbLevel = reader.GetInt32("ab_level");
+                        template.InitialStackCount = reader.GetInt32("stack");
+                        template.SourceAbilityLevelOverride = reader.GetInt32("ab_level");
                         _effects["BuffEffect"].Add(template.Id, template);
                     }
                 }
@@ -814,34 +915,89 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                 }
             }
             } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
-            try {
-            using (var command = connection.CreateCommand())
+            try
             {
-                command.CommandText = "SELECT * FROM dynamic_unit_modifiers";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using (var command = connection.CreateCommand())
                 {
-                    while (reader.Read())
+                    command.CommandText = @"
+SELECT dum.id, dum.buff_id, dum.func_type, dum.func_id,
+       dum.unit_attribute_id, dum.unit_modifier_type_id,
+       lf.start_value AS linear_start_value, lf.end_value AS linear_end_value,
+       mf.value_list AS manual_value_list,
+       df.attribute_id AS dynamic_attribute_id, df.value AS dynamic_scale,
+       ff.formula AS formula_text
+FROM dynamic_unit_modifiers dum
+LEFT JOIN linear_funcs lf ON dum.func_type = 'LinearFunc' AND lf.id = dum.func_id
+LEFT JOIN manual_funcs mf ON dum.func_type = 'ManualFunc' AND mf.id = dum.func_id
+LEFT JOIN dynamic_funcs df ON dum.func_type = 'DynamicFunc' AND df.id = dum.func_id
+LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func_id";
+                    command.Prepare();
+                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                     {
-                        var buffId = reader.GetUInt32("buff_id");
-                        if (_buffs.TryGetValue(buffId, out var buff))
+                        while (reader.Read())
                         {
-                            var template = new DynamicBonusTemplate();
-                            template.Attribute = (UnitAttribute)reader.GetByte("unit_attribute_id");
-                            template.ModifierType = (UnitModifierType)reader.GetByte("unit_modifier_type_id");
-                            template.FuncId = reader.GetUInt32("func_id");
-                            template.FuncType = reader.GetString("func_type");
+                            var buffId = reader.GetUInt32("buff_id");
+                            if (!_buffs.TryGetValue(buffId, out var buff))
+                            {
+                                Logger.Warn("Dynamic modifier {0} references missing buff {1}",
+                                    reader.GetUInt32("id"), buffId);
+                                continue;
+                            }
+
+                            var functionName = reader.GetString("func_type");
+                            var template = new DynamicBonusTemplate
+                            {
+                                Id = reader.GetUInt32("id"),
+                                Attribute = (UnitAttribute)reader.GetByte("unit_attribute_id"),
+                                ModifierType = (UnitModifierType)reader.GetByte("unit_modifier_type_id"),
+                                FunctionId = reader.GetUInt32("func_id"),
+                                FunctionType = functionName switch
+                                {
+                                    "LinearFunc" => DynamicBonusFunctionType.Linear,
+                                    "ManualFunc" => DynamicBonusFunctionType.Manual,
+                                    "DynamicFunc" => DynamicBonusFunctionType.DynamicAttribute,
+                                    "FormulaFunc" => DynamicBonusFunctionType.Formula,
+                                    _ => throw new InvalidOperationException($"Unknown dynamic modifier function '{functionName}'")
+                                },
+                                LinearStartValue = reader.GetInt32("linear_start_value"),
+                                LinearEndValue = reader.GetInt32("linear_end_value"),
+                                SourceAttribute = (UnitAttribute)reader.GetByte("dynamic_attribute_id"),
+                                DynamicScale = reader.GetInt32("dynamic_scale")
+                            };
+
+                            var manualValues = reader.GetString("manual_value_list")
+                                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                .Select(ParseNullableInt32)
+                                .ToArray();
+                            template.ManualValues = manualValues;
+
+                            var formulaText = reader.GetString("formula_text");
+                            if (!string.IsNullOrWhiteSpace(formulaText))
+                            {
+                                var formula = new Formula
+                                {
+                                    Id = template.FunctionId,
+                                    TextFormula = formulaText
+                                };
+                                if (formula.Prepare())
+                                    template.Formula = formula;
+
+                                template.FormulaAttributeIds = Regex.Matches(formulaText, @"\battr_(\d+)\b")
+                                    .Cast<Match>()
+                                    .Select(match => byte.TryParse(match.Groups[1].Value, out var id) ? id : (byte)0)
+                                    .Distinct()
+                                    .ToArray();
+                            }
+
                             buff.DynamicBonuses.Add(template);
-                        }
-                        else
-                        {
-                            // Обработка случая, когда template не найден
-                            Logger.Warn($"Template for buffId {buffId} not found.");
                         }
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Dynamic modifier tables missing, skipping dynamic unit modifiers.");
+            }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1706,6 +1862,31 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                 }
             }
             } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM combat_resource_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new CombatResourceEffect
+                    {
+                        Id = reader.GetUInt32("id"),
+                        Chance = reader.GetInt32("chance"),
+                        CombatResourceId = reader.GetUInt32("combat_resource_id", 0),
+                        MinCombatResource = reader.GetInt32("min_combat_resource"),
+                        MaxCombatResource = reader.GetInt32("max_combat_resource"),
+                        ResetRemainTime = reader.GetBoolean("reset_remain_time", true)
+                    };
+                    _effects["CombatResourceEffect"][template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table combat_resource_effects is missing; resource effects are disabled.");
+            }
 
             try {
             using (var command = connection.CreateCommand())

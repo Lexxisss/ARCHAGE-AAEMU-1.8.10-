@@ -170,6 +170,7 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
     /// <param name="unit"></param>
     private static void RegenTick(Unit unit)
     {
+        unit.RegenerateCombatResources();
         unit.Regenerate();
     }
 
@@ -1583,6 +1584,8 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
             var temp = doodads.GetRange(i, count).ToArray();
             character.SendPacket(new SCDoodadsCreatedPacket(temp));
         }
+
+        character.Quests.RefreshQuestNotifier();
     }
 
     public List<Character> GetAllCharacters()

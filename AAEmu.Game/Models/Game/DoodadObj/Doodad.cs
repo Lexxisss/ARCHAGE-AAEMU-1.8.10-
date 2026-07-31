@@ -564,10 +564,19 @@ public class Doodad : BaseUnit
             Logger.Trace($"DoChangePhase: TemplateId {TemplateId}, ObjId {ObjId}, nextPhase {nextPhase}");
         }
 
+        var hadQuestFunction = HasQuestFunction();
         var stop = DoPhaseFuncs(caster, ref nextPhase);
 
         // the phase change packet call must be after the phase functions to have the correct FuncGroupId in the packet
         BroadcastPacket(new SCDoodadPhaseChangedPacket(this), true); // change the phase to display doodad
+
+        // Quest markers are selected locally by the target client from the current Doodad func group.
+        // Force the client to recalculate after entering or leaving a quest-bearing group.
+        if (hadQuestFunction || HasQuestFunction())
+        {
+            foreach (var nearbyCharacter in WorldManager.GetAround<Character>(this))
+                nearbyCharacter.Quests.RefreshQuestNotifier();
+        }
 
         // Doodad data/runtime remains independent. Only publish a successful phase change to the quest runtime.
         if (!stop && caster is Character questCharacter)
@@ -645,10 +654,17 @@ public class Doodad : BaseUnit
         }
     }
 
+    private bool HasQuestFunction()
+    {
+        return CurrentFuncs?.Any(x => x.FuncType == nameof(DoodadFuncQuest)) == true;
+    }
+
     public override void AddVisibleObject(Character character)
     {
         character.SendPacket(new SCDoodadCreatedPacket(this));
         base.AddVisibleObject(character);
+        if (HasQuestFunction())
+            character.Quests.RefreshQuestNotifier();
     }
 
     public override void RemoveVisibleObject(Character character)

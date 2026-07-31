@@ -46,6 +46,7 @@ public class CSStartInteractionPacket : GamePacket
 
         if (doodad != null)
         {
+            Connection.ActiveChar.Quests.LogDoodadQuestMarkerCandidates(doodad);
             var interactions = DoodadManager.Instance.GetInteractionSkills(doodad.FuncGroupId);
             if (interactions.Length == 0)
             {

@@ -278,7 +278,7 @@ public class Buffs : IBuffs
                 _toleranceCounters[buffTolerance.Id] = btc;
             }
 
-            buff.Duration = buff.Template.GetDuration(buff.AbLevel);
+            buff.Duration = buff.Template.GetDuration(buff.SourceAbilityLevel);
             buff.Duration = (int)buff.Caster.BuffModifiersCache.ApplyModifiers(buff.Template, BuffAttribute.Duration, buff.Duration);
             buff.Duration = (int)buff.Owner.BuffModifiersCache.ApplyModifiers(buff.Template, BuffAttribute.InDuration, buff.Duration);
 

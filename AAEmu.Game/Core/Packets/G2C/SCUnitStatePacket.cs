@@ -759,7 +759,7 @@ public class SCUnitStatePacket : GamePacket
 
         // Group 3 is the template identity and stack. This exact third group
         // is what was missing from the previous generated SCUnitState.
-        stream.WritePisc(buff.Template.BuffId, Math.Max(1, buff.Stack), 0, 0);
+        stream.WritePisc(buff.Template.BuffId, Math.Max(1, buff.StackCount), 0, 0);
     }
 
     #region CharacterInfo_3EB0

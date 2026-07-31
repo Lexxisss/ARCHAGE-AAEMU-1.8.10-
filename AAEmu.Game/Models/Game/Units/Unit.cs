@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 
@@ -30,12 +31,16 @@ using AAEmu.Game.Models.Tasks;
 using AAEmu.Game.Models.Tasks.Skills;
 using AAEmu.Game.Utils;
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace AAEmu.Game.Models.Game.Units;
 
 public class Unit : BaseUnit, IUnit
 {
+    [ThreadStatic]
+    private static Dictionary<UnitAttribute, double> _activeBonusBaseValues;
+
+    private readonly object _combatResourceLock = new();
+    private readonly Dictionary<uint, CombatResourceState> _combatResources = new();
+
     public virtual UnitTypeFlag TypeFlag { get; } = UnitTypeFlag.None;
 
     public virtual UnitEvents Events { get; }
@@ -66,6 +71,9 @@ public class Unit : BaseUnit, IUnit
         parameters["level"] = Level;
         parameters["heir_level"] = 0;
     }
+
+    /// <summary>Current equipment score used by FormulaFunc expressions.</summary>
+    public virtual double GetGearScore() => 0d;
 
     public int Hp { get; set; }
     public int HighAbilityRsc { get; set; }
@@ -666,14 +674,132 @@ public class Unit : BaseUnit, IUnit
 
     public double CalculateWithBonuses(double value, UnitAttribute attr)
     {
-        foreach (var bonus in GetBonuses(attr))
+        _activeBonusBaseValues ??= new Dictionary<UnitAttribute, double>();
+        var hadPrevious = _activeBonusBaseValues.TryGetValue(attr, out var previousValue);
+        try
         {
-            if (bonus.Template.ModifierType == UnitModifierType.Percent)
-                value += (value * bonus.Value / 100f);
-            else
-                value += bonus.Value;
+            foreach (var bonus in GetBonuses(attr))
+            {
+                _activeBonusBaseValues[attr] = value;
+                var bonusValue = bonus.Value;
+                if (bonus.Template.ModifierType == UnitModifierType.Percent)
+                    value += value * bonusValue / 100f;
+                else
+                    value += bonusValue;
+            }
+            return value;
         }
-        return value;
+        finally
+        {
+            if (hadPrevious)
+                _activeBonusBaseValues[attr] = previousValue;
+            else
+                _activeBonusBaseValues.Remove(attr);
+        }
+    }
+
+    public long GetCombatResource(uint resourceId)
+    {
+        if (resourceId == 0)
+            return 0;
+
+        lock (_combatResourceLock)
+            return GetOrCreateCombatResourceState(resourceId).Point;
+    }
+
+    public bool HasCombatResource(uint resourceId, long minimum, long maximum)
+    {
+        var point = GetCombatResource(resourceId);
+        if (point < minimum)
+            return false;
+        return maximum <= 0 || point <= maximum;
+    }
+
+    public long SetCombatResource(uint resourceId, long point, bool resetRemainTime = false, bool broadcast = true)
+    {
+        var template = SkillManager.Instance.GetCombatResourceTemplate(resourceId);
+        if (template == null)
+            return 0;
+
+        CombatResourceState state;
+        long clamped;
+        lock (_combatResourceLock)
+        {
+            state = GetOrCreateCombatResourceState(resourceId);
+            clamped = Math.Clamp(point, 0L, Math.Max(0L, template.MaxPoint));
+            if (state.Point == clamped && !resetRemainTime)
+                return state.Point;
+
+            state.Point = clamped;
+            if (resetRemainTime)
+                state.LastRecoveryTime = DateTime.UtcNow;
+            state.LastUpdateTime = unchecked((uint)Environment.TickCount64);
+        }
+
+        if (broadcast && ObjId != 0)
+            BroadcastPacket(new SCCombatResourcePointPacket(ObjId, resourceId, clamped, state.LastUpdateTime), true);
+        return clamped;
+    }
+
+    public long AddCombatResource(uint resourceId, long amount, bool resetRemainTime = false)
+    {
+        var current = GetCombatResource(resourceId);
+        return SetCombatResource(resourceId, current + amount, resetRemainTime);
+    }
+
+    public void RegenerateCombatResources()
+    {
+        uint[] activeResourceIds;
+        lock (_combatResourceLock)
+            activeResourceIds = _combatResources.Keys.ToArray();
+
+        if (activeResourceIds.Length == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        foreach (var resourceId in activeResourceIds)
+        {
+            var template = SkillManager.Instance.GetCombatResourceTemplate(resourceId);
+            if (template == null || template.RecoveryCycle <= 0)
+                continue;
+
+            long amount;
+            long cycles;
+            lock (_combatResourceLock)
+            {
+                if (!_combatResources.TryGetValue(resourceId, out var state))
+                    continue;
+
+                var elapsedMs = (long)(now - state.LastRecoveryTime).TotalMilliseconds;
+                cycles = elapsedMs / template.RecoveryCycle;
+                if (cycles <= 0)
+                    continue;
+
+                amount = IsInBattle ? template.CombatRecoveryAmount : template.PeaceRecoveryAmount;
+                // EtcRecoveryAmount is tied to EtcRecoveryStateId. This branch has no
+                // universal state API, so it is intentionally not merged into peace recovery.
+                state.LastRecoveryTime = state.LastRecoveryTime.AddMilliseconds(cycles * template.RecoveryCycle);
+            }
+
+            if (amount != 0)
+                AddCombatResource(resourceId, amount * cycles);
+        }
+    }
+
+    private CombatResourceState GetOrCreateCombatResourceState(uint resourceId)
+    {
+        if (_combatResources.TryGetValue(resourceId, out var state))
+            return state;
+
+        var template = SkillManager.Instance.GetCombatResourceTemplate(resourceId);
+        state = new CombatResourceState
+        {
+            Point = template?.DefaultPoint ?? 0,
+            LastRecoveryTime = DateTime.UtcNow,
+            LastUpdateTime = unchecked((uint)Environment.TickCount64)
+        };
+        _combatResources[resourceId] = state;
+        return state;
     }
 
     public void SendPacket(GamePacket packet)
@@ -754,6 +880,32 @@ public class Unit : BaseUnit, IUnit
                 return ret;
         }
         return defaultVal;
+    }
+
+    public double GetAttributeNumeric(UnitAttribute attr)
+    {
+        // FormulaFunc may refer to the attribute currently being calculated. Dedicated
+        // evaluates that reference against the pre-modifier value, not recursively.
+        if (_activeBonusBaseValues != null && _activeBonusBaseValues.TryGetValue(attr, out var baseValue))
+            return baseValue;
+
+        var property = GetType().GetProperties()
+            .Where(o => o.GetIndexParameters().Length == 0)
+            .FirstOrDefault(o => o.GetCustomAttributes(typeof(UnitAttributeAttribute), true)
+                .OfType<UnitAttributeAttribute>()
+                .Any(a => a.Attributes.Contains(attr)));
+        if (property == null)
+            return 0d;
+
+        try
+        {
+            var rawValue = property.GetValue(this);
+            return rawValue == null ? 0d : Convert.ToDouble(rawValue, CultureInfo.InvariantCulture);
+        }
+        catch (Exception)
+        {
+            return 0d;
+        }
     }
 
     public string GetAttribute(uint attr) => GetAttribute((UnitAttribute)attr);

@@ -9,6 +9,10 @@ public class QuestTemplate : IQuestTemplate
     public uint Id { get; set; }
     public bool Repeatable { get; set; }
     public byte Level { get; set; }
+    public byte MinLevel { get; set; }
+    public byte MaxLevel { get; set; }
+    public byte RaceMask { get; set; } = byte.MaxValue;
+    public string Name { get; set; } = string.Empty;
     public bool Selective { get; set; }
     public bool Successive { get; set; }
     public bool RestartOnFail { get; set; }

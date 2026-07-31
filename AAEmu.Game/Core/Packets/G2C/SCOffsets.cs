@@ -117,7 +117,7 @@ public static class SCOffsets
     public const ushort SCSetUnitOfflinePacket = 0x0EC;
     public const ushort SCFollowAskPacket = 0x276;
     public const ushort SCFollowRespPacket = 0x212;
-    public const ushort SCSkillControllerStatePacket = 0x1C1;
+    public const ushort SCSkillControllerStatePacket = 0x1C1; // confirmed in G:\Work target_sc_packets_full_v5_RU.txt
     public const ushort SCActiveWeaponChangedPacket = 0x36F;
     public const ushort SCUnitNameChangedPacket = 0x1EF;
     public const ushort SCUnitDeathPacket = 0x2E4;
@@ -156,6 +156,7 @@ public static class SCOffsets
     public const ushort SCCombatEngagedPacket = 0x253;
     public const ushort SCCombatClearedPacket = 0x12D;
     public const ushort SCCombatFirstHitPacket = 0x0BD;
+    public const ushort SCCombatResourcePointPacket = 0x304; // target 1.8.1.0, bc/type/int64 point/updateTime
     public const ushort SCDumpCombatStatPacket = 0x245;
     public const ushort SCDuelChallengedPacket = 0x2C5;
     public const ushort SCDuelStartCountdownPacket = 0x127;
@@ -956,7 +957,6 @@ public static class SCOffsets
     public const ushort SCTrialAudienceJoinedPacket = 0xfff;
     public const ushort SCTrialAudienceLeftPacket = 0xfff;
     //public const ushort SCAuctionLowestPricePacket = 0xfff; // SCAuctionPacket
-    public const ushort SCSkillUpgradedPacket = 0xfff;
     public const ushort SCTrialCancledPacket = 0xfff;
     public const ushort SCExpeditionRoleChangedPacket = 0xfff;
     //public const ushort SCFactionListPacket = 0xfff; // SCSystemFactionListPacket
