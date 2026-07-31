@@ -545,8 +545,8 @@ public class HousingManager : Singleton<HousingManager>
                 totalTaxAmountDue, // Amount Due
                 house.ProtectionEndDate,
                 requiresPayment,
-                weeksWithoutPay,  // TODO: do proper calculation ?
-                -1,
+                (byte)Math.Clamp(weeksWithoutPay, 0, byte.MaxValue),  // TODO: do proper calculation ?
+                0,   // weeksPrepay: a single byte on the wire, so -1 is not expressible here
                 house.Template.HeavyTax
             )
         );
@@ -563,10 +563,9 @@ public class HousingManager : Singleton<HousingManager>
     /// <param name="zRot"></param>
     /// <param name="itemId"></param>
     /// <param name="moneyAmount"></param>
-    /// <param name="ht"></param>
-    /// <param name="autoUseAaPoint"></param>
+    /// <param name="ht">Carried through from the request; its exact meaning is unresolved.</param>
     public void Build(GameConnection connection, uint designId, float posX, float posY, float posZ, float zRot,
-        ulong itemId, int moneyAmount, int ht, bool autoUseAaPoint)
+        ulong itemId, long moneyAmount, int ht)
     {
         // TODO validate house by range...
         // TODO remove itemId

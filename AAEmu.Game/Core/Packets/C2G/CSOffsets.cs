@@ -366,8 +366,8 @@ public static class CSOffsets
     public const ushort off_3A1342F8 = 0x0F2;
     public const ushort off_3A134308 = 0x202;
     public const ushort CSListMailPacket = 0x0C3;
-    public const ushort CSListMailContinuePacket = 0x038;
-    public const ushort CSReadMailPacket = 0x030;
+    public const ushort CSListMailContinuePacket = 0x07E;
+    public const ushort CSReadMailPacket = 0x19D;
     public const ushort CSTakeAttachmentMoneyPacket = 0x1CE;
     public const ushort CSTakeAttachmentSequentiallyPacket = 0x17D;
     public const ushort off_3A1348CC = 0x015;
@@ -490,7 +490,7 @@ public static class CSOffsets
 
     // эти опкоды для версии 3030 отсутствуют в x2game.dll
     public const ushort CSAcceptCheatQuestContextPacket = 0xfff;
-    public const ushort CSAllowHousingRecoverPacket = 0xfff;
+    public const ushort CSAllowHousingRecoverPacket = 0x189;
     //public const ushort CSBidAuctionPacket = 0xfff;
     public const ushort CSBuyCoinItemPacket = 0xfff;
     public const ushort CSBuySpecialtyItemPacket = 0xfff;
@@ -526,22 +526,22 @@ public static class CSOffsets
     public const ushort CSSetupSecondPasswordPacket = 0xfff; // CSSetupSecondPassword
     public const ushort CSSpecialtyRecordLoadPacket = 0xfff;
     public const ushort CSTakedownTradeItemPacket = 0xfff;
-    public const ushort CSUpdateDominionTaxRatePacket = 0xfff;
+    public const ushort CSUpdateDominionTaxRatePacket = 0x203;
     public const ushort CSUpdateNationalTaxRatePacket = 0xfff;
     public const ushort CSPayChargeMoneyPacket = 0xfff;
     public const ushort CSPerpayHouseTaxPacket = 0xfff;
     public const ushort CSRankCharacterPacket = 0xfff;
-    public const ushort CSRequestHouseTaxPacket = 0xfff;
+    public const ushort CSRequestHouseTaxPacket = 0x20F;
     public const ushort CSRequestSpecialtyCurrentPacket = 0xfff;
     public const ushort CSResetSkillsPacket = 0x05D; // target x2game.dll constructor
     public const ushort CSResurrectCharacterPacket = 0xfff;
     public const ushort CSRollDicePacket = 0xfff;
     public const ushort CSSecurityReportPacket = 0x08A; // target 10.8 x2game.dll [confirmed_serializer]
     public const ushort CSSelectInteractionExPacket = 0x013; // target 10.8 x2game.dll
-    public const ushort CSSellHouseCancelPacket = 0xfff;
-    public const ushort CSSellHousePacket = 0xfff;
+    public const ushort CSSellHouseCancelPacket = 0x0AE;
+    public const ushort CSSellHousePacket = 0x03F;
     public const ushort CSSendChatMessagePacket = 0x027; // target 10.8 x2game.dll
-    public const ushort CSSendMailPacket = 0xfff;
+    public const ushort CSSendMailPacket = 0x099;
     public const ushort CSSetCraftingPayPacket = 0xfff;
     public const ushort CSSetForceAttackPacket = 0xfff;
     public const ushort CSTeleportEndedPacket = 0xfff;
@@ -557,11 +557,11 @@ public static class CSOffsets
     public const ushort CSFactionKickToOriginPacket = 0xfff;
     public const ushort CSDeleteFriendPacket = 0xfff;
     public const ushort CSConvertToRaidTeamPacket = 0xfff;
-    public const ushort CSCreateHousePacket = 0xfff;
+    public const ushort CSCreateHousePacket = 0x055;
     public const ushort CSLeaveBeautyShopPacket = 0xfff;
-    public const ushort CSConstructHouseTaxPacket = 0xfff;
+    public const ushort CSConstructHouseTaxPacket = 0x1E4;
     public const ushort CSAllowRecoverPacket = 0xfff;
-    public const ushort CSBuyHousePacket = 0xfff;
+    public const ushort CSBuyHousePacket = 0x064;
     public const ushort CSDiscardSlavePacket = 0xfff;
     public const ushort CSDetachFromDoodadPacket = 0xfff;
     public const ushort CSLeaveInstantGamePacket = 0xfff;

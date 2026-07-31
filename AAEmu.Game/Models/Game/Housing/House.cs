@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using AAEmu.Commons.Network;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
@@ -53,6 +54,9 @@ public sealed class House : Unit
     public int ExpandedDecoLimit { get => _expandedDecoLimit; set { _expandedDecoLimit = value; _isDirty = true; } }
     public int PayMoneyAmount { get => _payMoneyAmount; set { _payMoneyAmount = value; _isDirty = true; } }
     public bool IsPublic { get => _isPublic; set { _isPublic = value; _isDirty = true; } }
+
+    /// <summary>Part of the state block; we have nothing driving it yet.</summary>
+    public bool IsBoundButler { get; set; }
     public new uint TemplateId { get => _templateId; set { _templateId = value; _isDirty = true; } }
     public HousingTemplate Template
     {
@@ -293,37 +297,83 @@ public sealed class House : Unit
         return true;
     }
 
+    /// <summary>Number of UCC decoration slots the state block always carries.</summary>
+    private const int UccSlotCount = 5;
+
+    /// <summary>
+    /// Number of trailing world positions the state block always carries. Their purpose is
+    /// not established, but they are part of the fixed payload and omitting them truncates it.
+    /// </summary>
+    private const int TrailingPositionCount = 2;
+
+    /// <summary>
+    /// Writes the house state block.
+    /// </summary>
+    /// <remarks>
+    /// Three things were wrong here, each shifting everything after it:
+    ///
+    /// The variable-width block is a single value, not four. Build progress does not live in
+    /// this packet at all - it has its own message carrying allstep and curstep - so packing
+    /// the step counters and the payment amount in alongside the template id displaced the
+    /// rest of the payload. A 64-bit money amount follows the packed value and was missing.
+    ///
+    /// The three id fields are 64 bits on the wire while the model holds them as 32. Writing
+    /// them at their model width lost four bytes each.
+    ///
+    /// The block did not end at isPublic. A bound-butler flag, another int, five UCC
+    /// decoration records and two world positions follow it.
+    /// </remarks>
     public PacketStream Write(PacketStream stream)
     {
         var ownerName = NameManager.Instance.GetCharacterName(OwnerId);
         var sellToPlayerName = NameManager.Instance.GetCharacterName(SellToPlayerId);
 
-        stream.Write(TlId);             // tl
-        stream.Write(Id);               // dbId
-        stream.WriteBc(ObjId);          // bc
+        stream.Write(TlId);                    // tl              : u32
+        stream.Write(Id);                      // dbId            : i32
+        stream.WriteBc(ObjId);                 // bc              : 3 bytes, the handler's lookup key
 
-        if (CurrentStep == -1)
-            stream.WritePisc(TemplateId, 0, 0, 0);
-        else
-            stream.WritePisc(TemplateId, AllAction, CurrentAction, PayMoneyAmount);
+        stream.WritePisc(TemplateId);          // pish : u8, then the value at its own width
+        stream.Write((long)PayMoneyAmount);    // moneyAmount     : i64
+        stream.Write(Ht);                      // ht              : i32
+        stream.Write((long)CoOwnerId);         // type0           : i64
+        stream.Write((long)OwnerId);           // type1           : i64
+        stream.Write(ownerName ?? "");         // owner           : string, max 128
+        stream.Write(AccountId);               // accountId       : u64
+        stream.Write((byte)Permission);        // permission      : u8, 0 owner / 1 expedition / 2 all / 3 family
+        WriteWorldPosition(stream, Transform.World.Position);
+        stream.Write(Name ?? "");              // house           : string, max 128
+        stream.Write(AllowRecover);            // allowRecover    : bool
+        stream.Write((long)SellToPlayerId);    // saleType/id     : i64
+        stream.Write(sellToPlayerName ?? "");  // sellToName      : string, max 128
+        stream.Write(ExpandedDecoLimit);       // expandedDecoLimit : i32
+        stream.Write((int)Template.MainModelId); // type2         : i32
+        stream.Write(IsPublic);                // isPublic        : bool
+        stream.Write(IsBoundButler);           // isBoundButler   : bool
+        stream.Write(0);                       // type3           : i32, meaning unresolved
 
-        stream.Write(Ht);                     // ht
-        stream.Write(CoOwnerId);              // type(id)
-        stream.Write(OwnerId);                // type(id)
-        stream.Write(ownerName ?? "");
-        stream.Write(AccountId);              // accountId
-        stream.Write((byte)Permission);       // permission
-        stream.Write(Helpers.ConvertLongX(Transform.World.Position.X));
-        stream.Write(Helpers.ConvertLongY(Transform.World.Position.Y));
-        stream.Write(Transform.World.Position.Z);
-        stream.Write(Name);                   // house // TODO max length 128
-        stream.Write(AllowRecover);           // allowRecover
-        stream.Write(SellToPlayerId);         // type(id)
-        stream.Write(sellToPlayerName ?? ""); // sellToName
-        stream.Write(ExpandedDecoLimit);      // expandedDecoLimit
-        stream.Write(Template.MainModelId);   // model_id (type) не точно!
-        stream.Write(IsPublic);               // isPublic
+        for (var i = 0; i < UccSlotCount; i++)
+        {
+            stream.Write(Id);                  // houseId         : i32
+            stream.Write(0L);                  // type            : i64
+            stream.Write(0);                   // ucc_kind        : i32
+            stream.Write(0);                   // ucc_position    : i32
+        }
+
+        for (var i = 0; i < TrailingPositionCount; i++)
+            WriteWorldPosition(stream, Vector3.Zero);
+
         return stream;
+    }
+
+    /// <summary>
+    /// The 20-byte world position this subsystem uses: <c>i64 x, i64 y, f32 z</c>. It is not
+    /// the ordinary three-float vector.
+    /// </summary>
+    private static void WriteWorldPosition(PacketStream stream, Vector3 position)
+    {
+        stream.Write(Helpers.ConvertLongX(position.X));
+        stream.Write(Helpers.ConvertLongY(position.Y));
+        stream.Write(position.Z);
     }
 
     public void OnDeath(object sender, EventArgs args)
