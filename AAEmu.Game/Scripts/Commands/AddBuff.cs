@@ -94,10 +94,10 @@ public class AddBuff : ICommand
             return;
         }
 
-        ushort abLevel = 1;
+        ushort sourceAbilityLevel = 1;
         if (args.Length > firstArg + 1)
-            if (!ushort.TryParse(args[firstArg + 1], out abLevel))
-                abLevel = 1;
+            if (!ushort.TryParse(args[firstArg + 1], out sourceAbilityLevel))
+                sourceAbilityLevel = 1;
 
         uint buffId = (uint)Math.Abs(buffIdInt);
 
@@ -117,7 +117,7 @@ public class AddBuff : ICommand
 
             var newBuff = new Buff(targetUnit, sourceUnit, casterObj, buffTemplate, null, System.DateTime.UtcNow)
             {
-                AbLevel = abLevel
+                SourceAbilityLevel = sourceAbilityLevel
             };
             targetUnit.Buffs.AddBuff(newBuff);
         }

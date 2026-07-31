@@ -8,6 +8,10 @@ public interface IQuestTemplate
     uint Id { get; set; }
     bool LetItDone { get; set; }
     byte Level { get; set; }
+    byte MinLevel { get; set; }
+    byte MaxLevel { get; set; }
+    byte RaceMask { get; set; }
+    string Name { get; set; }
     bool Repeatable { get; set; }
     bool RestartOnFail { get; set; }
     bool Selective { get; set; }

@@ -179,44 +179,66 @@ public class BuffTemplate
             return; //TODO send error?
         if (target.Buffs.CheckBuffImmune(Id))
             return; //TODO  error of immune?
-        ushort abLevel = 1;
-        if (caster is Character character)
+        var originatingSkill = source?.Skill ?? source?.SourceBuff?.Skill;
+        ushort sourceAbilityLevel = source?.SourceBuff?.SourceAbilityLevel ?? 1;
+        if (source?.SourceBuff == null && source?.Skill != null)
         {
-            if (source.Skill != null)
+            var skillTemplate = source.Skill.Template;
+            if (caster is Character character)
             {
-                var template = source.Skill.Template;
-                var abilityLevel = character.GetAbLevel((AbilityType)source.Skill.Template.AbilityId);
-                if (template.LevelStep != 0)
-                    abLevel = (ushort)((abilityLevel / template.LevelStep) * template.LevelStep);
-                else
-                    abLevel = (ushort)template.AbilityLevel;
+                var abilityLevel = character.GetAbLevel((AbilityType)skillTemplate.AbilityId);
+                sourceAbilityLevel = skillTemplate.LevelStep != 0
+                    ? (ushort)((abilityLevel / skillTemplate.LevelStep) * skillTemplate.LevelStep)
+                    : (ushort)skillTemplate.AbilityLevel;
 
-                //Dont allow lower than minimum ablevel for skill or infinite debuffs can happen
-                abLevel = (ushort)Math.Max(template.AbilityLevel, abLevel);
+                // Do not allow lower than the skill's minimum ability level; otherwise
+                // duration formulas can produce zero or effectively infinite debuffs.
+                sourceAbilityLevel = (ushort)Math.Max(skillTemplate.AbilityLevel, sourceAbilityLevel);
             }
-            else if (source.Buff != null)
+            else
             {
-                //not sure?
+                sourceAbilityLevel = (ushort)Math.Max(1, skillTemplate.AbilityLevel);
             }
         }
-        else
+
+        target.Buffs.AddBuff(new Buff(target, caster, casterObj, this, originatingSkill, time)
         {
-            if (source.Skill != null)
-            {
-                abLevel = (ushort)source.Skill.Template.AbilityLevel;
-            }
-        }
-        target.Buffs.AddBuff(new Buff(target, caster, casterObj, this, source?.Skill, time) { AbLevel = abLevel });
+            SourceLevel = source?.SourceBuff?.SourceLevel ?? (caster as Unit)?.Level ?? (byte)0,
+            SourceAbilityLevel = sourceAbilityLevel
+        });
     }
 
     public void Start(BaseUnit caster, BaseUnit owner, Buff buff)
     {
         foreach (var template in Bonuses)
         {
-            var bonus = new Bonus();
-            bonus.Template = template;
-            bonus.Value = (int)Math.Round(template.Value + (template.LinearLevelBonus * (buff.AbLevel / 100f)));
+            var bonus = new Bonus
+            {
+                Template = template,
+                Value = (int)Math.Round(template.Value + (template.LinearLevelBonus * (buff.SourceAbilityLevel / 100f)))
+            };
             owner.AddBonus(buff.Index, bonus);
+        }
+
+        if (owner is Unit unit)
+        {
+            foreach (var dynamicTemplate in DynamicBonuses)
+            {
+                // Keep a normal BonusTemplate facade so all existing attribute
+                // calculations can consume static and dynamic modifiers uniformly.
+                var bonus = new Bonus
+                {
+                    Template = new BonusTemplate
+                    {
+                        Attribute = dynamicTemplate.Attribute,
+                        ModifierType = dynamicTemplate.ModifierType
+                    },
+                    DynamicTemplate = dynamicTemplate,
+                    Owner = unit,
+                    SourceBuff = buff
+                };
+                owner.AddBonus(buff.Index, bonus);
+            }
         }
 
         if (buff.Charge == 0)
@@ -276,7 +298,7 @@ public class BuffTemplate
             }
             var targetObj = new SkillCastUnitTarget(owner.ObjId);
             var skillObj = new SkillObject(); // TODO ?
-            eff.Apply(caster, buff.SkillCaster, owner, targetObj, new CastBuff(buff), new EffectSource(this), skillObj, DateTime.UtcNow);
+            eff.Apply(caster, buff.SkillCaster, owner, targetObj, new CastBuff(buff), new EffectSource(buff), skillObj, DateTime.UtcNow);
         }
     }
 
@@ -318,7 +340,7 @@ public class BuffTemplate
                         continue;
 
                     var targetObj = new SkillCastUnitTarget(trg.ObjId);
-                    eff.Apply(source, buff.SkillCaster, trg, targetObj, new CastBuff(buff), new EffectSource(this), skillObj, DateTime.UtcNow);
+                    eff.Apply(source, buff.SkillCaster, trg, targetObj, new CastBuff(buff), new EffectSource(buff), skillObj, DateTime.UtcNow);
                 }
             }
         }
@@ -327,6 +349,8 @@ public class BuffTemplate
     public void Dispel(BaseUnit caster, BaseUnit owner, Buff buff, bool replaced = false)
     {
         foreach (var template in Bonuses)
+            owner.RemoveBonus(buff.Index, template.Attribute);
+        foreach (var template in DynamicBonuses)
             owner.RemoveBonus(buff.Index, template.Attribute);
         var requiringBuffs = owner.Buffs.GetBuffsRequiring(buff.Template.Id);
         foreach (var requiringBuff in requiringBuffs.ToList())
@@ -347,14 +371,14 @@ public class BuffTemplate
         }
     }
 
-    public void WriteData(PacketStream stream, uint abLevel)
+    public void WriteData(PacketStream stream, uint sourceAbilityLevel)
     {
-        stream.WritePisc(0, GetDuration(abLevel) / 10, 0, (long)(Tick / 10)); // unk, Duration, unk / 10, Tick
+        stream.WritePisc(0, GetDuration(sourceAbilityLevel) / 10, 0, (long)(Tick / 10)); // unk, Duration, unk / 10, Tick
     }
 
-    public int GetDuration(uint abLevel)
+    public int GetDuration(uint sourceAbilityLevel)
     {
-        return Math.Max(0, (LevelDuration * (int)abLevel) + Duration);
+        return Math.Max(0, (LevelDuration * (int)sourceAbilityLevel) + Duration);
     }
 
     public double GetTick()

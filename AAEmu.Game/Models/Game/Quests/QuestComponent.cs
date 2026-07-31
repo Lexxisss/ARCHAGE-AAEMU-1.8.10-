@@ -16,6 +16,7 @@ public class QuestComponent : IQuestComponent
 {
     public uint Id { get; set; }
     public QuestComponentKind KindId { get; set; }
+    public bool HideQuestMarker { get; set; }
     public QuestTemplate QuestTemplate { get; }
     public List<QuestActTemplate> ActTemplates { get; set; } = new();
     public List<IQuestAct> Acts { get; set; } = new();

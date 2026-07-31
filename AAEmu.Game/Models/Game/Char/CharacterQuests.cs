@@ -6,10 +6,12 @@ using System.Linq;
 
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.Id;
+using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Crafts;
 using AAEmu.Game.Models.Game.DoodadObj;
+using AAEmu.Game.Models.Game.DoodadObj.Funcs;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Quests;
@@ -748,6 +750,103 @@ public partial class CharacterQuests
         if (!CompletedQuests.ContainsKey(completeId))
             return false;
         return CompletedQuests[completeId].Body[(int)(questId - completeId * 64)];
+    }
+
+    public bool CanDisplayDoodadQuestMarker(Doodad doodad, DoodadFuncQuest questFunc,
+        out uint componentId, out string reason)
+    {
+        componentId = 0;
+        if (doodad == null || questFunc == null)
+        {
+            reason = "missing-doodad-or-quest-function";
+            return false;
+        }
+
+        var template = QuestManager.Instance.GetTemplate(questFunc.QuestId);
+        if (template == null)
+        {
+            reason = "quest-template-not-loaded";
+            return false;
+        }
+
+        if (questFunc.QuestKindId == 1)
+        {
+            if (ActiveQuests.ContainsKey(questFunc.QuestId))
+            {
+                reason = "quest-already-active";
+                return false;
+            }
+
+            if (HasQuestCompleted(questFunc.QuestId) && !template.Repeatable)
+            {
+                reason = "quest-completed-and-not-repeatable";
+                return false;
+            }
+
+            var probe = new Quest(template)
+            {
+                Owner = Owner
+            };
+            return probe.CanStartFromDoodad(doodad.ObjId, doodad.TemplateId, out componentId, out reason);
+        }
+
+        if (questFunc.QuestKindId == 2)
+        {
+            if (!ActiveQuests.TryGetValue(questFunc.QuestId, out var activeQuest))
+            {
+                reason = "quest-is-not-active";
+                return false;
+            }
+
+            return activeQuest.CanReportAtDoodad(doodad.ObjId, doodad.TemplateId, out componentId, out reason);
+        }
+
+        reason = $"unsupported-quest-kind-{questFunc.QuestKindId}";
+        return false;
+    }
+
+    public void LogDoodadQuestMarkerCandidates(Doodad doodad)
+    {
+        if (doodad == null)
+            return;
+
+        var currentFuncs = DoodadManager.Instance.GetFuncsForGroup(doodad.FuncGroupId);
+        var questFuncs = currentFuncs
+            .Where(x => x.FuncType == nameof(DoodadFuncQuest))
+            .Select(x => DoodadManager.Instance.GetFuncTemplate(x.FuncId, x.FuncType))
+            .OfType<DoodadFuncQuest>()
+            .ToArray();
+
+        var configuredQuestGroups = doodad.Template?.FuncGroups
+            .SelectMany(group => DoodadManager.Instance.GetFuncsForGroup(group.Id)
+                .Where(x => x.FuncType == nameof(DoodadFuncQuest))
+                .Select(x => new
+                {
+                    Group = group,
+                    Quest = DoodadManager.Instance.GetFuncTemplate(x.FuncId, x.FuncType) as DoodadFuncQuest
+                }))
+            .Where(x => x.Quest != null)
+            .Select(x => $"{x.Group.Id}/{x.Group.GroupKindId}:q{x.Quest.QuestId}:k{x.Quest.QuestKindId}")
+            .ToArray() ?? Array.Empty<string>();
+
+        if (questFuncs.Length == 0)
+        {
+            Logger.Warn(
+                "Doodad quest marker diagnostic: char={0}:{1} level={2} race={3}, doodad={4}:{5}, currentGroup={6}, currentGroupHasQuest=False, configuredQuestGroups=[{7}]",
+                Owner.Name, Owner.Id, Owner.Level, Owner.Race, doodad.TemplateId, doodad.ObjId, doodad.FuncGroupId,
+                string.Join(",", configuredQuestGroups));
+            return;
+        }
+
+        foreach (var questFunc in questFuncs)
+        {
+            var available = CanDisplayDoodadQuestMarker(doodad, questFunc, out var componentId, out var reason);
+            Logger.Warn(
+                "Doodad quest marker diagnostic: char={0}:{1} level={2} race={3}, doodad={4}:{5}, currentGroup={6}, quest={7}, kind={8}, component={9}, available={10}, reason={11}, configuredQuestGroups=[{12}]",
+                Owner.Name, Owner.Id, Owner.Level, Owner.Race, doodad.TemplateId, doodad.ObjId, doodad.FuncGroupId,
+                questFunc.QuestId, questFunc.QuestKindId, componentId, available, reason,
+                string.Join(",", configuredQuestGroups));
+        }
     }
 
     public void RefreshQuestNotifier()

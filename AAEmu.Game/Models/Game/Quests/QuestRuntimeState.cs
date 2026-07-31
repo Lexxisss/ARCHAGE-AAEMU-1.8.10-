@@ -63,6 +63,13 @@ public partial class Quest
             if (Template == null || Owner == null)
                 return false;
 
+            if (!forcibly && !ValidateContextRequirements(out var contextReason))
+            {
+                Logger.Warn("Quest {0}: context requirements failed for {1}: {2}",
+                    TemplateId, Owner.Name, contextReason);
+                return false;
+            }
+
             _runtimeActProgress.Clear();
             _runtimeCompletedComponents.Clear();
             _objectiveComponentId = 0;
@@ -133,21 +140,190 @@ public partial class Quest
         }
     }
 
-    private QuestComponent FindStartComponent(bool forcibly)
+    public bool CanStartFromDoodad(uint sourceObjectId, uint sourceTemplateId, out uint componentId, out string reason)
+    {
+        lock (_runtimeLock)
+        {
+            componentId = 0;
+            reason = null;
+            if (Template == null || Owner == null)
+            {
+                reason = "missing-template-or-owner";
+                return false;
+            }
+
+            if (!ValidateContextRequirements(out reason))
+                return false;
+
+            var previousAcceptorType = QuestAcceptorType;
+            var previousSourceObjectId = _acceptedSourceObjectId;
+            var previousSourceTemplateId = _acceptedSourceTemplateId;
+            try
+            {
+                QuestAcceptorType = QuestAcceptorType.Doodad;
+                _acceptedSourceObjectId = sourceObjectId;
+                _acceptedSourceTemplateId = sourceTemplateId;
+
+                foreach (var component in GetStartComponents())
+                {
+                    if (component.HideQuestMarker)
+                    {
+                        reason = $"component-{component.Id}-hide_quest_marker";
+                        continue;
+                    }
+
+                    var doodadActs = component.Acts.OfType<QuestAct>()
+                        .Where(x => x.DetailType == "QuestActConAcceptDoodad")
+                        .OrderBy(x => x.Id)
+                        .ToArray();
+                    if (doodadActs.Length == 0)
+                    {
+                        reason = $"component-{component.Id}-has-no-accept-doodad-act";
+                        continue;
+                    }
+
+                    var sourceMatches = doodadActs.Any(act =>
+                    {
+                        var expectedTemplateId = act.Definition?.GetUInt32("doodad_id") ?? 0;
+                        return expectedTemplateId == 0 || expectedTemplateId == sourceTemplateId;
+                    });
+                    if (!sourceMatches)
+                    {
+                        var expected = string.Join(",", doodadActs
+                            .Select(x => x.Definition?.GetUInt32("doodad_id") ?? 0)
+                            .Distinct());
+                        reason = $"component-{component.Id}-accept-doodad-mismatch(expected={expected},actual={sourceTemplateId})";
+                        continue;
+                    }
+
+                    if (!ValidateAcceptComponent(component, out reason))
+                        continue;
+
+                    componentId = component.Id;
+                    reason = $"available-start-component-{component.Id}";
+                    return true;
+                }
+
+                reason ??= "no-visible-start-component";
+                return false;
+            }
+            finally
+            {
+                QuestAcceptorType = previousAcceptorType;
+                _acceptedSourceObjectId = previousSourceObjectId;
+                _acceptedSourceTemplateId = previousSourceTemplateId;
+            }
+        }
+    }
+
+    public bool CanReportAtDoodad(uint sourceObjectId, uint sourceTemplateId, out uint componentId, out string reason)
+    {
+        lock (_runtimeLock)
+        {
+            componentId = 0;
+            reason = null;
+            if (Status != QuestStatus.Ready)
+            {
+                reason = $"quest-status-{Status}";
+                return false;
+            }
+
+            var components = Template.GetComponents(QuestComponentKind.Ready)
+                .Where(x => CurrentComponentId == 0 || x.Id == CurrentComponentId)
+                .OrderBy(x => x.Id)
+                .ToArray();
+            if (components.Length == 0)
+            {
+                reason = "no-current-ready-component";
+                return false;
+            }
+
+            foreach (var component in components)
+            {
+                if (component.HideQuestMarker)
+                {
+                    reason = $"component-{component.Id}-hide_quest_marker";
+                    continue;
+                }
+
+                var reportActs = component.Acts.OfType<QuestAct>()
+                    .Where(x => x.DetailType == "QuestActConReportDoodad")
+                    .OrderBy(x => x.Id)
+                    .ToArray();
+                if (reportActs.Length == 0)
+                {
+                    reason = $"component-{component.Id}-has-no-report-doodad-act";
+                    continue;
+                }
+
+                if (!reportActs.Any(x => x.Definition?.GetUInt32("doodad_id") == sourceTemplateId))
+                {
+                    var expected = string.Join(",", reportActs
+                        .Select(x => x.Definition?.GetUInt32("doodad_id") ?? 0)
+                        .Distinct());
+                    reason = $"component-{component.Id}-report-doodad-mismatch(expected={expected},actual={sourceTemplateId})";
+                    continue;
+                }
+
+                componentId = component.Id;
+                reason = $"available-ready-component-{component.Id}";
+                return true;
+            }
+
+            reason ??= "no-visible-ready-component";
+            return false;
+        }
+    }
+
+    private bool ValidateContextRequirements(out string reason)
+    {
+        if (Template.MinLevel > 0 && Owner.Level < Template.MinLevel)
+        {
+            reason = $"level-{Owner.Level}-below-min-{Template.MinLevel}";
+            return false;
+        }
+
+        if (Template.MaxLevel > 0 && Owner.Level > Template.MaxLevel)
+        {
+            reason = $"level-{Owner.Level}-above-max-{Template.MaxLevel}";
+            return false;
+        }
+
+        var raceMask = Template.RaceMask;
+        if (raceMask is not (0 or byte.MaxValue))
+        {
+            var race = (int)Owner.Race;
+            if (race <= 0 || race > 8)
+            {
+                reason = $"race-{Owner.Race}-has-no-mask-bit";
+                return false;
+            }
+
+            var raceBit = 1 << (race - 1);
+            if ((raceMask & raceBit) == 0)
+            {
+                reason = $"race-{Owner.Race}-not-in-mask-0x{raceMask:X2}";
+                return false;
+            }
+        }
+
+        reason = "context-requirements-ok";
+        return true;
+    }
+
+    private QuestComponent[] GetStartComponents()
     {
         var starts = Template.Components.Values
             .Where(x => x.KindId is QuestComponentKind.None or QuestComponentKind.Start)
             .OrderBy(x => x.KindId)
             .ThenBy(x => x.Id)
             .ToArray();
+        return starts.Length == 0 ? GetRootComponents() : starts;
+    }
 
-        if (starts.Length == 0)
-        {
-            var roots = GetRootComponents();
-            return roots.FirstOrDefault(x => forcibly || ValidateAcceptComponent(x));
-        }
-
-        return starts.FirstOrDefault(x => forcibly || ValidateAcceptComponent(x));
+    private QuestComponent FindStartComponent(bool forcibly)
+    {
+        return GetStartComponents().FirstOrDefault(x => forcibly || ValidateAcceptComponent(x));
     }
 
     private QuestComponent[] GetRootComponents()
@@ -163,18 +339,42 @@ public partial class Quest
             .ToArray();
     }
 
-    private bool ValidateAcceptComponent(QuestComponent component)
+    private bool ValidateAcceptComponent(QuestComponent component) => ValidateAcceptComponent(component, out _);
+
+    private bool ValidateAcceptComponent(QuestComponent component, out string reason)
     {
         var acts = component.Acts.OfType<QuestAct>().OrderBy(x => x.Id).ToArray();
         var acceptActs = acts.Where(x => x.DetailType.StartsWith("QuestActConAccept", StringComparison.Ordinal)).ToArray();
         if (acceptActs.Length == 0)
+        {
+            reason = $"component-{component.Id}-has-no-accept-conditions";
             return true;
+        }
 
         var sourceActs = acceptActs.Where(IsSourceAcceptAct).ToArray();
         var conditionActs = acceptActs.Where(x => !IsSourceAcceptAct(x)).ToArray();
-        if (conditionActs.Any(x => !EvaluateAcceptAct(x)))
+        foreach (var conditionAct in conditionActs)
+        {
+            if (EvaluateAcceptAct(conditionAct))
+                continue;
+            reason = $"component-{component.Id}-condition-{conditionAct.Id}-{conditionAct.DetailType}-failed";
             return false;
-        return sourceActs.Length == 0 || sourceActs.Any(EvaluateAcceptAct);
+        }
+
+        if (sourceActs.Length == 0)
+        {
+            reason = $"component-{component.Id}-conditions-ok-no-source-act";
+            return true;
+        }
+
+        if (sourceActs.Any(EvaluateAcceptAct))
+        {
+            reason = $"component-{component.Id}-accept-source-ok";
+            return true;
+        }
+
+        reason = $"component-{component.Id}-source-condition-failed";
+        return false;
     }
 
     private static bool IsSourceAcceptAct(QuestAct act) => act.DetailType is

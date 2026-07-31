@@ -168,6 +168,14 @@ public class Skill
         // Check initial mana cost
         if (ManaCost(unit) > unit.Mp)
             return SkillResult.LackMana;
+        // Skills may require the source to be inside a combat-resource range.
+        // An id of zero uses the primary resource of the skill's ability group.
+        if (Template.CombatResourceId != 0 || Template.MinCombatResource != 0 || Template.MaxCombatResource != 0)
+        {
+            var combatResourceId = SkillManager.Instance.ResolveCombatResourceId(Template, Template.CombatResourceId);
+            if (combatResourceId == 0 || !unit.HasCombatResource(combatResourceId, Template.MinCombatResource, Template.MaxCombatResource))
+                return SkillResult.LackCombatResource;
+        }
 
         // Get a TlId for this skill
         TlId = SkillTlIdManager.GetNextId(caster);
@@ -776,9 +784,6 @@ public class Skill
             doodad.Spawn();
         }
 
-        Logger.Debug(
-            "SkillLifecycle CHANNEL_FIRE skill={0}, tl={1}, caster={2}, target={3}, channelMs={4}, fireAnim={5}",
-            Id, TlId, caster.ObjId, target.ObjId, Template.ChannelingTime, Template.FireAnimId);
         caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
         unit.SkillTask = new EndChannelingTask(this, caster, casterCaster, target, targetCaster, skillObject, doodad);
         TaskManager.Instance.Schedule(unit.SkillTask, TimeSpan.FromMilliseconds(Template.ChannelingTime));
@@ -836,16 +841,54 @@ public class Skill
             ComputedDelay = totalDelay
         }, true);
 
-        if (totalDelay > 0)
+        var hasFireEffects = Template.Effects.Any(effect => effect.ExecuteEffectOnFire);
+        var hasImpactEffects = Template.Effects.Any(effect => !effect.ExecuteEffectOnFire);
+
+        // execute_effect_on_fire is a timing partition, not a second complete
+        // execution pass. Global reagents/products/ItemUse are processed exactly once.
+        if (hasFireEffects)
+            ApplyEffects(caster, casterCaster, target, targetCaster, skillObject, true, !hasImpactEffects);
+
+        if (hasImpactEffects && totalDelay > 0)
         {
-            var thisSkillTask = new ApplySkillTask(this, caster, casterCaster, target, targetCaster, skillObject);
+            var thisSkillTask = new ApplySkillTask(this, caster, casterCaster, target, targetCaster, skillObject, false, true);
             TaskManager.Instance.Schedule(thisSkillTask, TimeSpan.FromMilliseconds(totalDelay));
         }
         else
         {
-            ApplyEffects(caster, casterCaster, target, targetCaster, skillObject);
+            if (hasImpactEffects)
+                ApplyEffects(caster, casterCaster, target, targetCaster, skillObject, false, true);
+            else if (!hasFireEffects)
+                // Preserve reagent/product/ItemUse handling for utility skills that
+                // intentionally have no skill_effect relation.
+                ApplyEffects(caster, casterCaster, target, targetCaster, skillObject, false, true);
             EndSkill(caster);
         }
+    }
+
+    private bool MatchesCombatResourceRange(Unit source, BaseUnit target, SkillEffect effect)
+    {
+        if (effect.StartCombatResource == 0 && effect.EndCombatResource == 0 && effect.TargetCombatResourceId == 0)
+            return true;
+
+        Unit resourceOwner;
+        uint resourceId;
+        if (effect.TargetCombatResourceId != 0)
+        {
+            resourceOwner = target as Unit;
+            resourceId = effect.TargetCombatResourceId;
+        }
+        else
+        {
+            resourceOwner = source;
+            resourceId = SkillManager.Instance.ResolveCombatResourceId(Template);
+        }
+
+        if (resourceOwner == null || resourceId == 0)
+            return false;
+
+        var value = resourceOwner.GetCombatResource(resourceId);
+        return value >= effect.StartCombatResource && value <= effect.EndCombatResource;
     }
 
     private IEnumerable<BaseUnit> FilterAoeUnits(BaseUnit caster, IEnumerable<BaseUnit> units)
@@ -854,7 +897,8 @@ public class Skill
         return units;
     }
 
-    public void ApplyEffects(BaseUnit caster, SkillCaster casterCaster, BaseUnit targetSelf, SkillCastTarget targetCaster, SkillObject skillObject)
+    public void ApplyEffects(BaseUnit caster, SkillCaster casterCaster, BaseUnit targetSelf, SkillCastTarget targetCaster, SkillObject skillObject,
+        bool executeOnFireStage = false, bool processOneShotSideEffects = true)
     {
         if (caster is not Unit unit)
             return;
@@ -922,6 +966,8 @@ public class Skill
         var effectsToApply = new List<(BaseUnit target, SkillEffect effect)>(targets.Count * Template.Effects.Count);
         foreach (var effect in Template.Effects)
         {
+            if (effect.ExecuteEffectOnFire != executeOnFireStage)
+                continue;
             var effectedTargets = new List<BaseUnit>();
             switch (effect.ApplicationMethod)
             {
@@ -1012,6 +1058,9 @@ public class Skill
                     continue;
                 }
 
+                if (!MatchesCombatResourceRange(unit, target, effect))
+                    continue;
+
                 if (effect.Chance <= 0 || (effect.Chance < 100 && Rand.Next(100) >= effect.Chance))
                 {
                     continue;
@@ -1095,7 +1144,7 @@ public class Skill
         //This will handle all items with a reagent/product
         var reagents = SkillManager.Instance.GetSkillReagentsBySkillId(Template.Id);
         var skillProducts = SkillManager.Instance.GetSkillProductsBySkillId(Template.Id);
-        if (reagents.Count > 0 || skillProducts.Count > 0)
+        if (processOneShotSideEffects && (reagents.Count > 0 || skillProducts.Count > 0))
         {
             if (player != null)
             {
@@ -1179,7 +1228,7 @@ public class Skill
 
         // TODO Call OnItemUse() moved to the ApplyEffects() method from the effects and add trigger ConditionChance;
         // If the probability of passing the effect is greater than the chance, then run the check on the use of the item for the quest
-        if (casterCaster is SkillItem skillItem && unit.ConditionChance)
+        if (processOneShotSideEffects && casterCaster is SkillItem skillItem && unit.ConditionChance)
         {
             if (player == null)
                 return;

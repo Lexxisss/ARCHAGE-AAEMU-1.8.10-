@@ -25,7 +25,7 @@ public class SCBuffUpdatedPacket : GamePacket
     {
         stream.WriteBc(_buff.Owner.ObjId);       // targetId
         stream.Write(_buff.Index);               // buffId (runtime buff index)
-        stream.Write(_buff.Stack);               // stack
+        stream.Write(_buff.StackCount);               // stack
         stream.Write(_buff.Charge);              // charged
         stream.Write(_buff.GetTimeElapsed());    // elapsedTime
         stream.Write(_reason);                   // 1 in initial visibility captures
