@@ -23,7 +23,8 @@ public class SCCharacterDeleteResponsePacket : GamePacket
 
     public override PacketStream Write(PacketStream stream)
     {
-            stream.Write(_characterId);
+            // Verified against the target client: the id is 8 bytes wide here, not 4.
+            stream.Write((ulong)_characterId);
             stream.Write(_status);
             stream.Write(_deleteRequestedTime);
             stream.Write(_deleteDelay);
