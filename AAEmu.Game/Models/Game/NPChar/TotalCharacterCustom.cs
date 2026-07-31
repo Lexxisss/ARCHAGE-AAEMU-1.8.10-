@@ -12,6 +12,11 @@ public class TotalCharacterCustom
     public uint BodyId { get; set; }
     public uint TailId { get; set; }
     public uint WingId { get; set; }
+    public uint WingColor { get; set; }
+    public byte WingScale { get; set; } = 100;
+    public sbyte WingOffsetX { get; set; }
+    public sbyte WingOffsetY { get; set; }
+    public sbyte WingOffsetZ { get; set; }
     public uint BodyNormalMapId { get; set; }
     public float BodyNormalMapWeight { get; set; }
     public uint DefaultHairColor { get; set; }
@@ -53,6 +58,6 @@ public class TotalCharacterCustom
 
     public TotalCharacterCustom()
     {
-        Modifier = new byte[0];
+        Modifier = new byte[128];
     }
 }

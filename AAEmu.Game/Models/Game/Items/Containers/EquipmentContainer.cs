@@ -10,8 +10,10 @@ public class EquipmentContainer : ItemContainer
 {
     public EquipmentContainer(uint ownerId, SlotType containerType, bool createWithNewId) : base(ownerId, containerType, createWithNewId)
     {
-        // Fancy way of getting the last enum value + 1 for equipment slots
-        ContainerSize = (int)(Enum.GetValues(typeof(EquipmentItemSlot)).Cast<EquipmentItemSlot>().Max()) + 1;
+        // Target 10.8.1 SCUnitState equipment uses a 35-bit logical slot
+        // range inside a uint64 mask. Keep the full range even when most
+        // server-side enum names are not populated.
+        ContainerSize = 35;
     }
 
     public static List<EquipmentItemSlot> GetAllowedGearSlots(EquipmentItemSlotType slotTypeId)

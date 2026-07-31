@@ -27,3 +27,12 @@ publish/
 .claude/
 *.patch
 *.zip
+
+# Reverse-engineering material: analysis bundles, disassembly listings and
+# vendor reports. Kept locally, never committed.
+*_reverse_bundle/
+*_review_bundle/
+*.asm
+SC0133_NPC_REVERSE_VERIFIED.md
+AAEmu_1.8.1.0_SC0133_NPC.patch
+AAEmu_SC0133_NPC_DRAFT.patch

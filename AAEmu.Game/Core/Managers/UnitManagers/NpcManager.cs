@@ -422,6 +422,11 @@ public class NpcManager : Singleton<NpcManager>
                         custom.BodyId = reader.GetUInt32("body_id", 0);
                         custom.TailId = reader.GetUInt32("tail_id", 0);
                         custom.WingId = reader.GetUInt32("wing_id", 0);
+                        custom.WingColor = reader.GetUInt32("wing_color", 0);
+                        custom.WingScale = reader.GetByte("wing_scale", 100);
+                        custom.WingOffsetX = checked((sbyte)reader.GetInt32("wing_offset_x", 0));
+                        custom.WingOffsetY = checked((sbyte)reader.GetInt32("wing_offset_y", 0));
+                        custom.WingOffsetZ = checked((sbyte)reader.GetInt32("wing_offset_z", 0));
                         custom.BodyNormalMapId = reader.GetUInt32("body_normal_map_id", 0);
                         custom.BodyNormalMapWeight = reader.GetFloat("body_normal_map_weight", 0f);
                         custom.DefaultHairColor = reader.GetUInt32("default_hair_color", 0);
@@ -449,15 +454,22 @@ public class NpcManager : Singleton<NpcManager>
                         custom.LeftPupilColor = reader.GetUInt32("left_pupil_color", 0);
                         custom.RightPupilColor = reader.GetUInt32("right_pupil_color", 0);
                         custom.EyebrowColor = reader.GetUInt32("eyebrow_color", 0);
-                        // The 1.8 client stores the complete 128-byte facial/body
-                        // morph block here. Sending an empty byte array makes the
-                        // client fall back to placeholder custom materials (the
-                        // visible TEST skin) and loses the NPC's head geometry.
-                        // All target rows currently contain exactly 128 bytes, but
-                        // keep the guard so malformed future data cannot corrupt
-                        // the variable-length FaceModel field in SCUnitState.
-                        if (!reader.IsDBNull("modifier") && reader.GetValue("modifier") is byte[] modifierBlob && modifierBlob.Length == 128)
-                            custom.Modifier = modifierBlob;
+                        // The target wire field is always a length-prefixed
+                        // 128-byte morph array. Normalize malformed rows here so
+                        // they cannot shift the visual-race/wing tail.
+                        if (!reader.IsDBNull("modifier") && reader.GetValue("modifier") is byte[] modifierBlob)
+                        {
+                            if (modifierBlob.Length == 128)
+                                custom.Modifier = modifierBlob;
+                            else
+                            {
+                                custom.Modifier = new byte[128];
+                                Array.Copy(modifierBlob, custom.Modifier, Math.Min(modifierBlob.Length, custom.Modifier.Length));
+                                Logger.Warn(
+                                    "Normalized total_character_customs modifier: id={0}, sourceLength={1}, targetLength=128",
+                                    custom.Id, modifierBlob.Length);
+                            }
+                        }
                         custom.OwnerTypeId = reader.GetUInt32("owner_type_id", 0);
                         custom.FaceMovableDecalWeight = reader.GetFloat("face_movable_decal_weight", 0f);
                         custom.FaceFixedDecalAsset0Weight = reader.GetFloat("face_fixed_decal_asset_0_weight", 0f);
@@ -468,25 +480,6 @@ public class NpcManager : Singleton<NpcManager>
                         custom.FaceFixedDecalAsset5Weight = reader.GetFloat("face_fixed_decal_asset_5_weight", 0f);
                         custom.FaceNormalMapWeight = reader.GetFloat("face_normal_map_weight", 0f);
                         custom.DecoColor = reader.GetUInt32("deco_color", 0);
-
-                        custom.Name = string.Empty; // Client 1.8 has no localized/server name column.
-                        custom.NpcOnly = reader.GetBoolean("npcOnly", true);
-                        custom.OwnerTypeId = reader.GetUInt32("owner_type_id", 0);
-
-                        // 3030 old
-                        //reader.GetBytes("modifier", 0, custom.Modifier, 0, 128);
-                        // 3030 new
-                        //var blob = (string)reader.GetValue("modifier");
-                        //if (blob != null)
-                        //{
-                        //    custom.Modifier = Helpers.StringToByteArray(blob);
-                        //}
-                        if (!reader.IsDBNull("modifier"))
-                        {
-                            var blob = reader.GetValue("modifier");
-                            if (blob is byte[] modifier)
-                                custom.Modifier = modifier;
-                        }
 
                         _totalCharacterCustoms.Add(custom.Id, custom);
                     }
@@ -854,7 +847,11 @@ public class NpcManager : Singleton<NpcManager>
                             template.ModelParams.Face.NormalMapWeight = tc.FaceNormalMapWeight;
                             template.ModelParams.Face.DecoColor = tc.DecoColor;
                             template.ModelParams.Face.Modifier = tc.Modifier;
-                            // reader2.GetBytes("modifier", 0, template.ModelParams.Face.Modifier, 0, 128);
+                            template.ModelParams.Face.WingColor = tc.WingColor;
+                            template.ModelParams.Face.WingScale = tc.WingScale;
+                            template.ModelParams.Face.WingOffsetX = tc.WingOffsetX;
+                            template.ModelParams.Face.WingOffsetY = tc.WingOffsetY;
+                            template.ModelParams.Face.WingOffsetZ = tc.WingOffsetZ;
 
                             template.Name = tc.Name;
                             template.NpcOnly = tc.NpcOnly;
