@@ -44,6 +44,7 @@ public class FishingLoot : SpecialEffectAction
         if ((pack == null) || (pack.Loots.Count <= 0))
             return;
 
-        pack.GiveLootPack(character, ItemTaskType.SkillEffectGainItem);
+        var generatedList = pack.GeneratePackNew(character, ActabilityType.Fishing);
+        pack.GiveLootPack(character, ItemTaskType.SkillEffectGainItem, generatedList);
     }
 }

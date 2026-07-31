@@ -8,7 +8,7 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCCharacterStatePacket : GamePacket
 {
-    private const int Protocol1810AbilityCount = 31;
+    private const int Protocol1810AbilityCount = 30;
     private const int Protocol1810ReservedTailLength = 74;
 
     private readonly Character _character;

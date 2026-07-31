@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Packets;
@@ -11,11 +11,13 @@ namespace AAEmu.Game.Models.Game.Skills.Plots;
 
 public class PlotEventEffect
 {
+    public int Id { get; set; }
+    public string ActualType { get; set; }
+    public uint ActualId { get; set; }
+    public uint EventId { get; set; }
     public int Position { get; set; }
     public PlotEffectSource SourceId { get; set; }
     public PlotEffectTarget TargetId { get; set; }
-    public uint ActualId { get; set; }
-    public string ActualType { get; set; }
 
     public void ApplyEffect(PlotState state, PlotTargetInfo targetInfo, PlotEventTemplate evt, ref byte flag, bool channeled = false, CompressedGamePackets gamePackets = null)
     {
@@ -23,7 +25,7 @@ public class PlotEventEffect
 
         var buffEffect = template as BuffEffect;
         if (buffEffect != null)
-            flag = 6; //idk what this does?  
+            flag = 6; //idk what this does?
 
         BaseUnit source;
         switch (SourceId)

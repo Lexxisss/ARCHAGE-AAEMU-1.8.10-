@@ -158,108 +158,116 @@ public class CharacterManager : Singleton<CharacterManager>
                 }
             }
 
-            using (var command = connection.CreateCommand())
+            // Starting-item tables (character_supplies/character_equip_packs/equip_pack_cloths/
+            // equip_pack_weapons) come from the target client database, not the stale compact.sqlite3.
+            // character_equip_packs lost its `ability_id` column in the target DB (replaced by a
+            // descriptive `name` string); its `id` column still runs 1..14 in the same order as the
+            // old ability_id values, so `id` is used as the ability_id directly.
+            using (var startingItemsConnection = SQLite.CreateConnection("Data", SQLite.TargetClientDatabase))
             {
-                command.CommandText = "SELECT * FROM character_supplies";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using (var command = startingItemsConnection.CreateCommand())
                 {
-                    while (reader.Read())
+                    command.CommandText = "SELECT * FROM character_supplies";
+                    command.Prepare();
+                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                     {
-                        var ability = reader.GetByte("ability_id");
-                        var item = new AbilitySupplyItem
+                        while (reader.Read())
                         {
-                            Id = reader.GetUInt32("item_id"),
-                            Amount = reader.GetInt32("amount"),
-                            Grade = reader.GetByte("grade_id")
-                        };
+                            var ability = reader.GetByte("ability_id");
+                            var item = new AbilitySupplyItem
+                            {
+                                Id = reader.GetUInt32("item_id"),
+                                Amount = reader.GetInt32("amount"),
+                                Grade = reader.GetByte("grade_id")
+                            };
 
-                        if (!_abilityItems.ContainsKey(ability))
-                            _abilityItems.Add(ability, new AbilityItems());
-                        _abilityItems[ability].Supplies.Add(item);
+                            if (!_abilityItems.ContainsKey(ability))
+                                _abilityItems.Add(ability, new AbilityItems());
+                            _abilityItems[ability].Supplies.Add(item);
+                        }
                     }
                 }
-            }
 
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = "SELECT * FROM character_equip_packs";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using (var command = startingItemsConnection.CreateCommand())
                 {
-                    while (reader.Read())
+                    command.CommandText = "SELECT * FROM character_equip_packs";
+                    command.Prepare();
+                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                     {
-                        var ability = reader.GetByte("ability_id");
-                        var template = new AbilityItems { Ability = ability, Items = new EquipItemsTemplate() };
-                        var clothPack = reader.GetUInt32("newbie_cloth_pack_id", 0);
-                        var weaponPack = reader.GetUInt32("newbie_weapon_pack_id", 0);
-                        if (clothPack > 0)
+                        while (reader.Read())
                         {
-                            using (var command2 = connection.CreateCommand())
+                            var ability = reader.GetByte("id");
+                            var template = new AbilityItems { Ability = ability, Items = new EquipItemsTemplate() };
+                            var clothPack = reader.GetUInt32("newbie_cloth_pack_id", 0);
+                            var weaponPack = reader.GetUInt32("newbie_weapon_pack_id", 0);
+                            if (clothPack > 0)
                             {
-                                command2.CommandText = "SELECT * FROM equip_pack_cloths WHERE id=@id";
-                                command2.Parameters.AddWithValue("id", clothPack);
-                                command2.Prepare();
-                                using (var reader2 = new SQLiteWrapperReader(command2.ExecuteReader()))
+                                using (var command2 = startingItemsConnection.CreateCommand())
                                 {
-                                    while (reader2.Read())
+                                    command2.CommandText = "SELECT * FROM equip_pack_cloths WHERE id=@id";
+                                    command2.Parameters.AddWithValue("id", clothPack);
+                                    command2.Prepare();
+                                    using (var reader2 = new SQLiteWrapperReader(command2.ExecuteReader()))
                                     {
-                                        template.Items.Headgear = reader2.GetUInt32("headgear_id");
-                                        template.Items.HeadgearGrade = reader2.GetByte("headgear_grade_id");
-                                        template.Items.Necklace = reader2.GetUInt32("necklace_id");
-                                        template.Items.NecklaceGrade = reader2.GetByte("necklace_grade_id");
-                                        template.Items.Shirt = reader2.GetUInt32("shirt_id");
-                                        template.Items.ShirtGrade = reader2.GetByte("shirt_grade_id");
-                                        template.Items.Belt = reader2.GetUInt32("belt_id");
-                                        template.Items.BeltGrade = reader2.GetByte("belt_grade_id");
-                                        template.Items.Pants = reader2.GetUInt32("pants_id");
-                                        template.Items.PantsGrade = reader2.GetByte("pants_grade_id");
-                                        template.Items.Gloves = reader2.GetUInt32("glove_id");
-                                        template.Items.GlovesGrade = reader2.GetByte("glove_grade_id");
-                                        template.Items.Shoes = reader2.GetUInt32("shoes_id");
-                                        template.Items.ShoesGrade = reader2.GetByte("shoes_grade_id");
-                                        template.Items.Bracelet = reader2.GetUInt32("bracelet_id");
-                                        template.Items.BraceletGrade = reader2.GetByte("bracelet_grade_id");
-                                        template.Items.Back = reader2.GetUInt32("back_id");
-                                        template.Items.BackGrade = reader2.GetByte("back_grade_id");
-                                        template.Items.Cosplay = reader2.GetUInt32("cosplay_id");
-                                        template.Items.CosplayGrade = reader2.GetByte("cosplay_grade_id");
-                                        template.Items.Undershirts = reader2.GetUInt32("undershirt_id");
-                                        template.Items.UndershirtsGrade = reader2.GetByte("undershirt_grade_id");
-                                        template.Items.Underpants = reader2.GetUInt32("underpants_id");
-                                        template.Items.UnderpantsGrade = reader2.GetByte("underpants_grade_id");
-                                        template.Items.Stabilizer = reader2.GetUInt32("stabilizer_id");
-                                        template.Items.StabilizerGrade = reader2.GetByte("stabilizer_grade_id");
+                                        while (reader2.Read())
+                                        {
+                                            template.Items.Headgear = reader2.GetUInt32("headgear_id");
+                                            template.Items.HeadgearGrade = reader2.GetByte("headgear_grade_id");
+                                            template.Items.Necklace = reader2.GetUInt32("necklace_id");
+                                            template.Items.NecklaceGrade = reader2.GetByte("necklace_grade_id");
+                                            template.Items.Shirt = reader2.GetUInt32("shirt_id");
+                                            template.Items.ShirtGrade = reader2.GetByte("shirt_grade_id");
+                                            template.Items.Belt = reader2.GetUInt32("belt_id");
+                                            template.Items.BeltGrade = reader2.GetByte("belt_grade_id");
+                                            template.Items.Pants = reader2.GetUInt32("pants_id");
+                                            template.Items.PantsGrade = reader2.GetByte("pants_grade_id");
+                                            template.Items.Gloves = reader2.GetUInt32("glove_id");
+                                            template.Items.GlovesGrade = reader2.GetByte("glove_grade_id");
+                                            template.Items.Shoes = reader2.GetUInt32("shoes_id");
+                                            template.Items.ShoesGrade = reader2.GetByte("shoes_grade_id");
+                                            template.Items.Bracelet = reader2.GetUInt32("bracelet_id");
+                                            template.Items.BraceletGrade = reader2.GetByte("bracelet_grade_id");
+                                            template.Items.Back = reader2.GetUInt32("back_id");
+                                            template.Items.BackGrade = reader2.GetByte("back_grade_id");
+                                            template.Items.Cosplay = reader2.GetUInt32("cosplay_id");
+                                            template.Items.CosplayGrade = reader2.GetByte("cosplay_grade_id");
+                                            template.Items.Undershirts = reader2.GetUInt32("undershirt_id");
+                                            template.Items.UndershirtsGrade = reader2.GetByte("undershirt_grade_id");
+                                            template.Items.Underpants = reader2.GetUInt32("underpants_id");
+                                            template.Items.UnderpantsGrade = reader2.GetByte("underpants_grade_id");
+                                            template.Items.Stabilizer = reader2.GetUInt32("stabilizer_id");
+                                            template.Items.StabilizerGrade = reader2.GetByte("stabilizer_grade_id");
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (weaponPack > 0)
-                        {
-                            using (var command2 = connection.CreateCommand())
+                            if (weaponPack > 0)
                             {
-                                command2.CommandText = "SELECT * FROM equip_pack_weapons WHERE id=@id";
-                                command2.Parameters.AddWithValue("id", weaponPack);
-                                command2.Prepare();
-                                using (var reader2 = new SQLiteWrapperReader(command2.ExecuteReader()))
+                                using (var command2 = startingItemsConnection.CreateCommand())
                                 {
-                                    while (reader2.Read())
+                                    command2.CommandText = "SELECT * FROM equip_pack_weapons WHERE id=@id";
+                                    command2.Parameters.AddWithValue("id", weaponPack);
+                                    command2.Prepare();
+                                    using (var reader2 = new SQLiteWrapperReader(command2.ExecuteReader()))
                                     {
-                                        template.Items.Mainhand = reader2.GetUInt32("mainhand_id");
-                                        template.Items.MainhandGrade = reader2.GetByte("mainhand_grade_id");
-                                        template.Items.Offhand = reader2.GetUInt32("offhand_id");
-                                        template.Items.OffhandGrade = reader2.GetByte("offhand_grade_id");
-                                        template.Items.Ranged = reader2.GetUInt32("ranged_id");
-                                        template.Items.RangedGrade = reader2.GetByte("ranged_grade_id");
-                                        template.Items.Musical = reader2.GetUInt32("musical_id");
-                                        template.Items.MusicalGrade = reader2.GetByte("musical_grade_id");
+                                        while (reader2.Read())
+                                        {
+                                            template.Items.Mainhand = reader2.GetUInt32("mainhand_id");
+                                            template.Items.MainhandGrade = reader2.GetByte("mainhand_grade_id");
+                                            template.Items.Offhand = reader2.GetUInt32("offhand_id");
+                                            template.Items.OffhandGrade = reader2.GetByte("offhand_grade_id");
+                                            template.Items.Ranged = reader2.GetUInt32("ranged_id");
+                                            template.Items.RangedGrade = reader2.GetByte("ranged_grade_id");
+                                            template.Items.Musical = reader2.GetUInt32("musical_id");
+                                            template.Items.MusicalGrade = reader2.GetByte("musical_grade_id");
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        _abilityItems.Add(template.Ability, template);
+                            _abilityItems.Add(template.Ability, template);
+                        }
                     }
                 }
             }
@@ -305,63 +313,73 @@ public class CharacterManager : Singleton<CharacterManager>
                 }
             }
 
-            using (var command = connection.CreateCommand())
+            // actability_groups/expert_limits/expand_expert_limits come from the current target
+            // client database, not the stale compact.sqlite3 (which is from an older client build).
+            using (var actabilityConnection = SQLite.CreateConnection("Data", SQLite.TargetClientDatabase))
             {
-                command.CommandText = "SELECT * FROM actability_groups";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using (var command = actabilityConnection.CreateCommand())
                 {
-                    while (reader.Read())
+                    command.CommandText = "SELECT * FROM actability_groups";
+                    command.Prepare();
+                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                     {
-                        var template = new ActabilityTemplate();
-                        template.Id = reader.GetUInt32("id");
-                        template.Name = reader.GetString("name");
-                        template.UnitAttributeId = reader.GetInt32("unit_attr_id");
-                        _actabilities.Add(template.Id, template);
+                        while (reader.Read())
+                        {
+                            var template = new ActabilityTemplate();
+                            template.Id = reader.GetUInt32("id");
+                            template.Name = reader.GetString("name");
+                            template.UnitAttributeId = reader.GetInt32("unit_attr_id");
+                            _actabilities.Add(template.Id, template);
+                        }
                     }
                 }
-            }
 
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = "SELECT * FROM expert_limits ORDER BY up_limit ASC";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using (var command = actabilityConnection.CreateCommand())
                 {
-                    var step = 0;
-                    while (reader.Read())
+                    // 1.8.1.0-Kakao-KR.sqlite adds a `use_language_type` row (id 32, "언어 구사") that is
+                    // the single-tier progression used for language actabilities, not another step of the
+                    // regular 31-tier profession track. It shares up_limit=20000 with step 2 ("수습공"), so
+                    // if it isn't excluded here it lands in the sequential step index and shifts every
+                    // profession tier above it by one. compact.sqlite3 never had this row/column at all.
+                    command.CommandText = "SELECT * FROM expert_limits WHERE IFNULL(use_language_type, 0) = 0 ORDER BY up_limit ASC";
+                    command.Prepare();
+                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                     {
-                        var template = new ExpertLimit();
-                        template.Id = reader.GetUInt32("id");
-                        template.UpLimit = reader.GetInt32("up_limit");
-                        template.ExpertLimitCount = reader.GetByte("expert_limit");
-                        template.Advantage = reader.GetInt32("advantage");
-                        template.CastAdvantage = reader.GetInt32("cast_adv");
-                        template.UpCurrencyId = reader.GetUInt32("up_currency_id", 0);
-                        template.UpPrice = reader.GetInt32("up_price");
-                        template.DownCurrencyId = reader.GetUInt32("down_currency_id", 0);
-                        template.DownPrice = reader.GetInt32("down_price");
-                        _expertLimits.Add(step++, template);
+                        var step = 0;
+                        while (reader.Read())
+                        {
+                            var template = new ExpertLimit();
+                            template.Id = reader.GetUInt32("id");
+                            template.UpLimit = reader.GetInt32("up_limit");
+                            template.ExpertLimitCount = reader.GetByte("expert_limit");
+                            template.Advantage = reader.GetInt32("advantage");
+                            template.CastAdvantage = reader.GetInt32("cast_adv");
+                            template.UpCurrencyId = reader.GetUInt32("up_currency_id", 0);
+                            template.UpPrice = reader.GetInt32("up_price");
+                            template.DownCurrencyId = reader.GetUInt32("down_currency_id", 0);
+                            template.DownPrice = reader.GetInt32("down_price");
+                            _expertLimits.Add(step++, template);
+                        }
                     }
                 }
-            }
 
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = "SELECT * FROM expand_expert_limits ORDER BY expand_count ASC";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using (var command = actabilityConnection.CreateCommand())
                 {
-                    var step = 0;
-                    while (reader.Read())
+                    command.CommandText = "SELECT * FROM expand_expert_limits ORDER BY expand_count ASC";
+                    command.Prepare();
+                    using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                     {
-                        var template = new ExpandExpertLimit();
-                        //template.Id = reader.GetUInt32("id"); // there is no such field in the database for version 3.0.3.0
-                        template.ExpandCount = reader.GetByte("expand_count");
-                        template.LifePoint = reader.GetInt32("life_point");
-                        template.ItemId = reader.GetUInt32("item_id", 0);
-                        template.ItemCount = reader.GetInt32("item_count");
-                        _expandExpertLimits.Add(step++, template);
+                        var step = 0;
+                        while (reader.Read())
+                        {
+                            var template = new ExpandExpertLimit();
+                            //template.Id = reader.GetUInt32("id"); // there is no such field in the database for version 3.0.3.0
+                            template.ExpandCount = reader.GetByte("expand_count");
+                            template.LifePoint = reader.GetInt32("life_point");
+                            template.ItemId = reader.GetUInt32("item_id", 0);
+                            template.ItemCount = reader.GetInt32("item_count");
+                            _expandExpertLimits.Add(step++, template);
+                        }
                     }
                 }
             }

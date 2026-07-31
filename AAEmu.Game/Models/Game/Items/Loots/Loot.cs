@@ -13,6 +13,7 @@ public class Loot : IComparable<Loot>
     public uint LootPackId { get; set; }
     public byte GradeId { get; set; }
     public bool AlwaysDrop { get; set; }
+    public bool MsgToWorld { get; set; }
 
     /// <summary>
     /// To sort an array

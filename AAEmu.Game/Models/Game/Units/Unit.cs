@@ -664,7 +664,7 @@ public class Unit : BaseUnit, IUnit
         return result;
     }
 
-    protected double CalculateWithBonuses(double value, UnitAttribute attr)
+    public double CalculateWithBonuses(double value, UnitAttribute attr)
     {
         foreach (var bonus in GetBonuses(attr))
         {

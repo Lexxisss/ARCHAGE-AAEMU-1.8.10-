@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-
-using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Packets;
 using AAEmu.Game.Core.Packets.G2C;
@@ -28,11 +26,11 @@ public class PlotTree
         PlotId = plotId;
     }
 
-    public async Task Execute(PlotState state)
+    public async Task ExecuteAsync(PlotState state)
     {
         var treeWatch = new Stopwatch();
         treeWatch.Start();
-        Logger.Trace("Executing plot tree with ID {0}", PlotId);
+        Logger.Trace($"Executing plot tree with ID {PlotId}");
         try
         {
             var stopWatch = new Stopwatch();
@@ -42,42 +40,41 @@ public class PlotTree
             var executeQueue = new Queue<(PlotNode node, PlotTargetInfo targetInfo)>();
 
             queue.Enqueue((RootNode, DateTime.UtcNow, new PlotTargetInfo(state)));
-
+            byte lastEvent = 1;
             while (queue.Count > 0)
             {
-                var nodewatch = new Stopwatch();
-                nodewatch.Start();
+                var nodeWatch = new Stopwatch();
+                nodeWatch.Start();
+                var item = queue.Dequeue();
+                var now = DateTime.UtcNow;
+                var node = item.node;
+                if (state.IsChanneling && state.ChannelingFinishRequested())
+                {
+                    HandleChannelingFinish(node, state, queue, item);
+                    lastEvent = 0;
+                    continue;
+                }
                 if (state.CancellationRequested())
                 {
                     if (state.IsCasting)
                     {
-                        state.Caster.BroadcastPacket(
-                            new SCPlotCastingStoppedPacket(state.ActiveSkill.TlId, 0, 1),
-                            true
-                        );
-                        state.Caster.BroadcastPacket(
-                            new SCPlotChannelingStoppedPacket(state.ActiveSkill.TlId, 0, 1),
-                            true
-                        );
+                        state.Caster.BroadcastPacket(new SCPlotCastingStoppedPacket(state.ActiveSkill.TlId, 0, lastEvent), true);
+                        state.Caster.BroadcastPacket(new SCPlotChannelingStoppedPacket(state.ActiveSkill.TlId, 0, 1), true);
                     }
 
                     DoPlotEnd(state);
                     return;
                 }
-                var item = queue.Dequeue();
-                var now = DateTime.UtcNow;
-                var node = item.node;
 
                 if (now >= item.timestamp)
                 {
-                    if (state.Tickets.ContainsKey(node.Event.Id))
-                        state.Tickets[node.Event.Id]++;
+                    if (state.Tickets.TryGetValue(node.Event.Id, out var value))
+                        state.Tickets[node.Event.Id] = ++value;
                     else
                         state.Tickets.TryAdd(node.Event.Id, 1);
 
                     //Check if we hit max tickets
-                    if (state.Tickets[node.Event.Id] > node.Event.Tickets
-                        && node.Event.Tickets > 1)
+                    if (state.Tickets[node.Event.Id] > node.Event.Tickets && node.Event.Tickets > 1)
                     {
                         continue;
                     }
@@ -103,25 +100,13 @@ public class PlotTree
                                 foreach (var target in item.targetInfo.EffectedTargets)
                                 {
                                     var targetInfo = new PlotTargetInfo(item.targetInfo.Source, target);
-                                    queue.Enqueue(
-                                        (
-                                        child,
-                                        now.AddMilliseconds(child.ComputeDelayMs(state, targetInfo)),
-                                        targetInfo
-                                        )
-                                    );
+                                    queue.Enqueue((child, now.AddMilliseconds(child.ComputeDelayMs(state, targetInfo)), targetInfo));
                                 }
                             }
                             else
                             {
                                 var targetInfo = new PlotTargetInfo(item.targetInfo.Source, item.targetInfo.Target);
-                                queue.Enqueue(
-                                    (
-                                    child,
-                                    now.AddMilliseconds(child.ComputeDelayMs(state, targetInfo)),
-                                    targetInfo
-                                    )
-                                );
+                                queue.Enqueue((child, now.AddMilliseconds(child.ComputeDelayMs(state, targetInfo)), targetInfo));
                             }
                         }
                     }
@@ -137,14 +122,14 @@ public class PlotTree
                     var delay = (int)queue.Min(o => (o.timestamp - DateTime.UtcNow).TotalMilliseconds);
                     delay = Math.Max(delay, 0);
 
-                    //await Task.Delay(delay).ConfigureAwait(false);
+                    // await Task.Delay(delay).ConfigureAwait(false);
                     if (delay > 0)
                         await Task.Delay(15).ConfigureAwait(false);
 
                 }
 
-                if (nodewatch.ElapsedMilliseconds > 100)
-                    Logger.Trace($"Event:{node.Event.Id} Took {nodewatch.ElapsedMilliseconds} to finish.");
+                if (nodeWatch.ElapsedMilliseconds > 100)
+                    Logger.Trace($"Event:{node.Event.Id} Took {nodeWatch.ElapsedMilliseconds} to finish.");
             }
 
             FlushExecutionQueue(executeQueue, state);
@@ -155,7 +140,76 @@ public class PlotTree
         }
 
         DoPlotEnd(state);
-        Logger.Trace("Tree with ID {0} has finished executing took {1}ms", PlotId, treeWatch.ElapsedMilliseconds);
+        Logger.Trace($"Tree with ID {PlotId} has finished executing took {treeWatch.ElapsedMilliseconds}ms");
+    }
+
+    private void HandleChannelingFinish(PlotNode node, PlotState state, Queue<(PlotNode node, DateTime timestamp, PlotTargetInfo targetInfo)> queue, (PlotNode node, DateTime timestamp, PlotTargetInfo targetInfo) item)
+    {
+        if (node == null || state == null || queue == null || item.targetInfo == null)
+        {
+            Logger.Error($"Plot {PlotId}: Invalid arguments passed to HandleChannelingFinish.");
+            return;
+        }
+
+        // Stop all active channeling or casting nodes
+        EndPlotChannel(state);
+
+        // Check if ParentNextEvent is null
+        if (node.ParentNextEvent == null)
+        {
+            return;
+        }
+
+        // Determine the correct node to trigger
+        if (node.ParentNextEvent.Channeling)
+        {
+            // Reset channeling state
+            state.PermitChanneling();
+
+            // Execute the correct node fully before moving to children
+            node.Execute(state, item.targetInfo);
+
+            // Use a HashSet to track unique node IDs already in the queue
+            var queuedNodeIds = new HashSet<uint>(queue.Select(q => q.node.Event.Id));
+
+            // Only enqueue children after the current node is executed
+            foreach (var child in node.Children ?? Enumerable.Empty<PlotNode>())
+            {
+                if (child == null || child.Event == null)
+                {
+                    Logger.Warn($"Plot {PlotId}: Skipping null child or child with null Event.");
+                    continue;
+                }
+
+                // Check if the child node's Event.Id is already in the queue
+                if (!queuedNodeIds.Contains(child.Event.Id))
+                {
+                    if (child.ParentNextEvent?.PerTarget ?? false)
+                    {
+                        foreach (var target in item.targetInfo.EffectedTargets)
+                        {
+                            var targetInfo = new PlotTargetInfo(item.targetInfo.Source, target);
+                            queue.Enqueue((child, DateTime.UtcNow, targetInfo));
+                            queuedNodeIds.Add(child.Event.Id); // Mark this node as queued
+                        }
+                    }
+                    else
+                    {
+                        var targetInfo = new PlotTargetInfo(item.targetInfo.Source, item.targetInfo.Target);
+                        queue.Enqueue((child, DateTime.UtcNow, targetInfo));
+                        queuedNodeIds.Add(child.Event.Id); // Mark this node as queued
+                    }
+                }
+                else
+                {
+                    //Logger.Debug($"Plot {PlotId}: Child node {child.Event.Id} is already in the queue. Skipping.");
+                }
+            }
+        }
+        else
+        {
+            //Logger.Debug($"Plot {PlotId}: No channeling node to transition to.");
+        }
     }
 
     private static void FlushExecutionQueue(Queue<(PlotNode node, PlotTargetInfo targetInfo)> executeQueue, PlotState state)
@@ -173,9 +227,9 @@ public class PlotTree
 
     private static void EndPlotChannel(PlotState state)
     {
-        foreach (var pair in state.ChanneledBuffs)
+        foreach (var (unit, buffId) in state.ChanneledBuffs)
         {
-            pair.unit.Buffs.RemoveBuff(pair.buffId);
+            unit.Buffs.RemoveBuff(buffId);
         }
     }
 
@@ -186,13 +240,13 @@ public class PlotTree
 
         state.Caster?.Cooldowns.AddCooldown(state.ActiveSkill.Template.Id, (uint)state.ActiveSkill.Template.CooldownTime);
 
-        if (state.Caster is Character character && character.IgnoreSkillCooldowns)
+        if (state.Caster is Character { IgnoreSkillCooldowns: true } character)
             character.ResetSkillCooldown(state.ActiveSkill.Template.Id, false);
 
         // Maybe always do this on end of plot?
         // Should we check if it was a channeled skill?
         if (state.CancellationRequested())
-            state.Caster?.Events.OnChannelingCancel(state.ActiveSkill, new OnChannelingCancelArgs { });
+            state.Caster?.Events.OnChannelingCancel(state.ActiveSkill, new OnChannelingCancelArgs());
 
         SkillTlIdManager.ReleaseId(state.ActiveSkill.TlId);
         state.ActiveSkill.TlId = 0;

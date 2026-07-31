@@ -9,6 +9,7 @@ public class LootGroups : IComparable<LootGroups>
     public uint GroupNo { get; set; }
     public uint DropRate { get; set; }
     public byte ItemGradeDistributionId { get; set; }
+    public uint ZoneGroupId { get; set; }
 
     /// <summary>
     /// To sort an array 

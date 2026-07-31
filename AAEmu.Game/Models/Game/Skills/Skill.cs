@@ -188,9 +188,16 @@ public class Skill
             var provisionalCooldown = Template.CooldownTime > 0 ? (int)Template.CooldownTime : Math.Max(Template.CastingTime, 250);
             unit.Cooldowns.AddCooldown(Template.Id, (uint)provisionalCooldown);
 
-            Task.Run(() => Template.Plot.Run(caster, casterCaster, target, targetCaster, skillObject, this));
+            Task.Run(() => Template.Plot.RunAsync(caster, casterCaster, target, targetCaster, skillObject, this));
             if (Template.PlotOnly)
+            {
+                // Plot-only skills return here and never reach ScheduleEffects/StartChanneling
+                // below, which are the only two places that broadcast SCSkillFiredPacket - so
+                // the caster's cast/swing animation was never sent for any plot-only skill,
+                // even though the plot itself resolves damage correctly. Broadcast it here too.
+                caster.BroadcastPacket(new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
                 return SkillResult.Success;
+            }
         }
 
         // Check if target is within range
@@ -557,7 +564,7 @@ public class Skill
         if (caster is not Unit unit) { return; }
         var player = caster as Character;
 
-        if (caster is Npc && Template.SkillControllerId != 0)
+        if (Template.SkillControllerId != 0)
         {
             var controllerTemplate = SkillManager.Instance.GetEffectTemplate(
                 Template.SkillControllerId,

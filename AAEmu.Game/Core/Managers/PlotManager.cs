@@ -41,7 +41,11 @@ public class PlotManager : Singleton<PlotManager>
         _eventTemplates = new Dictionary<uint, PlotEventTemplate>();
         _conditions = new Dictionary<uint, PlotCondition>();
         //_aoeConditions = new Dictionary<uint, PlotAoeCondition>();
-        using (var connection = SQLite.CreateConnection())
+
+        // Plot data (plots/plot_events/plot_conditions/plot_event_conditions/plot_aoe_conditions/
+        // plot_effects/plot_next_events) lives only in the target client database, not the stale
+        // compact.sqlite3 (roughly half the row count of the target DB for every one of these tables).
+        using (var connection = SQLite.CreateConnection("Data", SQLite.TargetClientDatabase))
         {
             Logger.Info("Loading plots...");
             using (var command = connection.CreateCommand())
@@ -86,8 +90,15 @@ public class PlotManager : Singleton<PlotManager>
                         template.TargetUpdateMethodParam7 = reader.GetInt32("target_update_method_param7");
                         template.TargetUpdateMethodParam8 = reader.GetInt32("target_update_method_param8");
                         template.TargetUpdateMethodParam9 = reader.GetInt32("target_update_method_param9");
+                        template.TargetUpdateMethodParam10 = reader.GetInt32("target_update_method_param10", 0);
+                        template.TargetUpdateMethodParam11 = reader.GetInt32("target_update_method_param11", 0);
                         template.Tickets = reader.GetInt32("tickets");
                         template.AoeDiminishing = reader.GetBoolean("aoe_diminishing", true);
+                        template.Name = reader.GetString("name", string.Empty);
+                        template.OnlyDieUnit = reader.GetBoolean("only_die_unit", true);
+                        template.OnlyMyPet = reader.GetBoolean("only_my_pet", true);
+                        template.OnlyMySlave = reader.GetBoolean("only_my_slave", true);
+                        template.OnlyPetOwner = reader.GetBoolean("only_pet_owner", true);
                         _eventTemplates.Add(template.Id, template);
 
                         if (template.Position == 1 && _plots.TryGetValue(template.PlotId, out var plot))
@@ -107,10 +118,13 @@ public class PlotManager : Singleton<PlotManager>
                         var template = new PlotCondition();
                         template.Id = reader.GetUInt32("id");
                         template.NotCondition = reader.GetBoolean("not_condition", true);
-                        template.Kind = (PlotConditionType)reader.GetInt32("kind_id");
+                        template.OrUnitReqs = reader.GetBoolean("or_unit_reqs", true);
+                        template.KindId = reader.GetInt32("kind_id");
+                        template.Kind = (PlotConditionType)template.KindId;
                         template.Param1 = reader.GetInt32("param1");
                         template.Param2 = reader.GetInt32("param2");
                         template.Param3 = reader.GetInt32("param3");
+                        template.Param4 = reader.GetInt32("param4", 0);
                         _conditions.Add(template.Id, template);
                     }
                 }
@@ -127,12 +141,16 @@ public class PlotManager : Singleton<PlotManager>
                         var id = reader.GetUInt32("event_id");
                         var condId = reader.GetUInt32("condition_id");
                         var template = new PlotEventCondition();
+                        template.Id = reader.GetInt32("id", 0);
+                        template.ConditionId = condId;
+                        template.EventId = id;
                         template.Condition = _conditions[condId];
                         template.Position = reader.GetInt32("position");
                         template.SourceId = (PlotEffectSource)reader.GetInt32("source_id");
                         template.TargetId = (PlotEffectTarget)reader.GetInt32("target_id");
-                        // TODO 1.2 // template.NotifyFailure = reader.GetBoolean("notify_failure", true);
+                        template.NotifyFailure = reader.GetBoolean("notify_failure", true);
                         var plotEvent = _eventTemplates[id];
+                        template.Event = plotEvent;
                         if (plotEvent.Conditions.Count > 0)
                         {
                             var res = false;
@@ -164,6 +182,9 @@ public class PlotManager : Singleton<PlotManager>
                         var id = reader.GetUInt32("event_id");
                         var condId = reader.GetUInt32("condition_id");
                         var template = new PlotAoeCondition();
+                        template.Id = reader.GetUInt32("id", 0);
+                        template.ConditionId = condId;
+                        template.EventId = id;
                         template.Condition = _conditions[condId];
                         template.Position = reader.GetInt32("position");
                         var plotEvent = _eventTemplates[id];
@@ -197,6 +218,8 @@ public class PlotManager : Singleton<PlotManager>
                     {
                         var id = reader.GetUInt32("event_id");
                         var template = new PlotEventEffect();
+                        template.Id = reader.GetInt32("id", 0);
+                        template.EventId = id;
                         template.Position = reader.GetInt32("position");
                         template.SourceId = (PlotEffectSource)reader.GetInt32("source_id");
                         template.TargetId = (PlotEffectTarget)reader.GetInt32("target_id");
@@ -235,6 +258,8 @@ public class PlotManager : Singleton<PlotManager>
                         var id = reader.GetUInt32("event_id");
                         var nextId = reader.GetUInt32("next_event_id");
                         template.Id = reader.GetUInt32("id");
+                        template.EventId = id;
+                        template.NextEventId = nextId;
                         template.Event = _eventTemplates[nextId];
                         template.Position = reader.GetInt32("position");
                         template.PerTarget = reader.GetBoolean("per_target", true);
@@ -243,12 +268,15 @@ public class PlotManager : Singleton<PlotManager>
                         template.Speed = reader.GetInt32("speed");
                         template.Channeling = reader.GetBoolean("channeling", true);
                         template.CastingInc = reader.GetInt32("casting_inc");
+                        template.CastingUseable = reader.GetBoolean("casting_useable", true);
                         template.AddAnimCsTime = reader.GetBoolean("add_anim_cs_time", true);
                         template.CastingDelayable = reader.GetBoolean("casting_delayable", true);
                         template.CastingCancelable = reader.GetBoolean("casting_cancelable", true);
                         template.CancelOnBigHit = reader.GetBoolean("cancel_on_big_hit", true);
+                        template.CombatResource = reader.GetBoolean("combat_resource", true);
                         template.UseExeTime = reader.GetBoolean("use_exe_time", true);
                         template.Fail = reader.GetBoolean("fail", true);
+                        template.Weight = reader.GetInt32("weight", 0);
                         var plotEvent = _eventTemplates[id];
                         if (plotEvent.NextEvents.Count > 0)
                         {
