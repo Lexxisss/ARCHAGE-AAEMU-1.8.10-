@@ -492,18 +492,20 @@ public class Unit : BaseUnit, IUnit
             //killer.StartRegen();
             killer.BroadcastPacket(new SCTargetChangedPacket(killer.ObjId, 0), true);
 
+            // Leaving combat is not a reason to take someone's pet away. This used to despawn
+            // every active mate here, which also swallowed the kill reward: Npc.DoDie calls
+            // into this first and only then hands experience to the active mates, so by then
+            // there were none left and neither the experience nor its message arrived.
             if (killer is Character character)
             {
                 StopAutoSkill(character);
                 character.IsInBattle = false; // we need the character to be "not in battle"
-                DespawMate(character);
             }
             else if (((Unit)killer).CurrentTarget is Character character2)
             {
                 StopAutoSkill(character2);
                 character2.IsInBattle = false; // we need the character to be "not in battle"
                 character2.DeadTime = DateTime.UtcNow;
-                DespawMate(character2);
             }
 
             ((Unit)killer).CurrentTarget = null;
