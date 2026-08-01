@@ -113,18 +113,22 @@ public class SCUnitStatePacket : GamePacket
                 stream.Write(0L);              // type(id), uint64 in target
                 stream.Write((byte)0);        // clientDriven
                 break;
-            // Ships and land vehicles. The owner is identified twice on purpose: by the
-            // persistent character id, which the client compares against its own to decide
-            // whether this is the local player's vehicle, and by the runtime object id, which
-            // the slave manager uses for the relationship itself.
+            // Ships and land vehicles. The branch names the vehicle first - its own persistent
+            // id and its own handle - and only then the character who owns it.
+            //
+            // Both used to be filled with the owner: the summoner's persistent id where the
+            // vehicle's belongs, the summoner's object id truncated to sixteen bits where the
+            // handle belongs, and a zero where the owner actually goes. A vehicle whose owner
+            // reads as nobody still appears in the world, but the client never registers it as
+            // locally controlled, which is what stops it being driven.
             case BaseUnitType.Slave:
                 var slave = (Slave)_unit;
-                stream.Write((long)(slave.Summoner?.Id ?? 0u));    // masterId            : i64
-                WriteMasterUnitId(stream, slave.Summoner?.ObjId ?? 0); // masterUnitId    : u16
-                stream.Write(slave.TemplateId);                    // slaveTemplateId     : u32
-                stream.Write(0L);                                  // unknownPersistentId : i64
+                stream.Write((long)slave.Id);                      // slaveId           : i64
+                stream.Write(slave.TlId);                          // tl                : u16
+                stream.Write(slave.TemplateId);                    // slaveTemplateId   : u32
+                stream.Write((long)(slave.Summoner?.Id ?? 0u));    // masterId          : i64
                 stream.Write((byte)(slave.Summoner?.Transform.WorldId ?? 0)); // masterWorldId : u8
-                stream.Write(slave.TemplateId);                    // visualSlaveDescId   : u32
+                stream.Write(slave.TemplateId);                    // visualSlaveDescId : u32
                 break;                                             // 28 bytes with the discriminator
             case BaseUnitType.Housing:
                 var house = (House)_unit;
@@ -1410,26 +1414,6 @@ public class SCUnitStatePacket : GamePacket
         return validFlags;
     }
 
-
-    /// <summary>
-    /// The owner link inside the mate and slave <c>BaseUnitType</c> branches.
-    /// </summary>
-    /// <remarks>
-    /// Two bytes, not three. Every other unit id in this packet is the fixed three-byte compact
-    /// form, but this one field goes through the client's 16-bit handle primitive, and its
-    /// storage keeps only the low sixteen bits. Written three bytes wide it pushed the owner
-    /// name, the position and everything after them one byte along, which is what made a
-    /// summoned vehicle take the client down with it.
-    ///
-    /// Object ids here are allocated well past 65535, so the value that arrives is the truncated
-    /// one. Getting the owner wrong does not stop the object appearing - the client keeps it as
-    /// somebody else's - so if a summoned mount or vehicle shows up but refuses to be yours,
-    /// this is the field to look at, and the question is which id space the client means.
-    /// </remarks>
-    private static void WriteMasterUnitId(PacketStream stream, uint ownerObjId)
-    {
-        stream.Write((ushort)ownerObjId);
-    }
 
     private static void WriteProtocol1810Position(PacketStream stream, Vector3 position)
     {

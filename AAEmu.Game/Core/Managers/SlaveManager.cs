@@ -210,8 +210,22 @@ public class SlaveManager : Singleton<SlaveManager>
         lock (_slaveListLock)
             slave = _tlSlaves.FirstOrDefault(x => x.Value.ObjId == objId).Value;
         //var slave = GetActiveSlaveByObjId(objId);
-        if ((slave == null) || (slave.AttachedCharacters.ContainsKey(attachPoint)))
+        if (slave == null)
+        {
+            Logger.Warn($"BindSlave: no slave with objId {objId} for {character.Name} ({character.ObjId})");
             return;
+        }
+
+        // A refusal here is invisible from the outside: the client asked to sit down, got nothing
+        // back, and goes on believing it is standing while the seat is held on this side. Nobody
+        // then asks to get up from a seat they do not think they occupy, so the seat stays taken
+        // for good. That deserves to say so in the log.
+        if (slave.AttachedCharacters.TryGetValue(attachPoint, out var seatedCharacter))
+        {
+            Logger.Warn($"BindSlave: {attachPoint} of slave {slave.Name} ({slave.ObjId}) is already held by " +
+                        $"{seatedCharacter?.Name} ({seatedCharacter?.ObjId}), refusing {character.Name} ({character.ObjId})");
+            return;
+        }
 
         character.BroadcastPacket(new SCUnitAttachedPacket(character.ObjId, attachPoint, bondKind, objId), true);
         character.AttachedPoint = attachPoint;
