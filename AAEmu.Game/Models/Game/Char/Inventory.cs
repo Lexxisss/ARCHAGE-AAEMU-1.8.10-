@@ -687,42 +687,19 @@ public class Inventory
             itemInTargetSlot.OwnerId = targetContainer?.OwnerId ?? 0;
 
         // Handle Equipment Broadcasting
-        var mates = MateManager.Instance.GetActiveMates(Owner.ObjId);
+        //
+        // Only the player's own gear is announced here. A mate has its own message for this,
+        // sent by the handler that serves the request, and the mate family owns a whole set of
+        // them - changed, flags changed, expired. What used to go out instead was the generic
+        // unit message carrying a mate's object id, built from the *player's* equipment
+        // container, at a slot number taken from one side of the move and an item from the
+        // other, once per active mate rather than for the one that was actually touched. There
+        // was no combination of those that described anything real.
         if (fromType == SlotType.Equipment)
-        {
             Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, fromSlot, Equipment.GetItemBySlot(fromSlot)), false);
-        }
-        else
-        {
-            if (mates != null)
-            {
-                foreach (var mate in mates)
-                {
-                    if (mate is not null && fromType == SlotType.EquipmentMate)
-                    {
-                        Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(mate.ObjId, fromSlot, Equipment.GetItemBySlot(toSlot)), true);
-                    }
-                }
-            }
-        }
 
         if (toType == SlotType.Equipment)
-        {
             Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, toSlot, Equipment.GetItemBySlot(toSlot)), false);
-        }
-        else
-        {
-            if (mates != null)
-            {
-                foreach (var mate in mates)
-                {
-                    if (mate is not null && toType == SlotType.EquipmentMate)
-                    {
-                        Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(mate.ObjId, toSlot, fromItem), true);
-                    }
-                }
-            }
-        }
 
         // Send ItemContainer events
         if (sourceContainer != targetContainer)
