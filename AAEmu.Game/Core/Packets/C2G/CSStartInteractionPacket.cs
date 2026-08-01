@@ -3,6 +3,7 @@ using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.Models.Game.Housing;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.StaticValues;
 
@@ -129,6 +130,52 @@ public class CSStartInteractionPacket : GamePacket
         }
 
         var unit = WorldManager.Instance.GetUnit(targetObjId);
+
+        // A building under construction is not a doodad and has no func group: what it offers is
+        // the contribution skill its current stage asks for. Without this the player could reach
+        // a foundation but was never offered anything to do with it, so nothing could ever be
+        // built. A finished building offers nothing here - what it has instead is its own doors,
+        // chests and name plaque, which are doodads and take the path above.
+        if (unit is House house)
+        {
+            Connection.ClearDoodadInteraction();
+
+            var buildSkillId = house.ActiveBuildSkillId;
+            if (buildSkillId == 0)
+            {
+                Logger.Info(
+                    "House interaction: nothing to contribute, objId={0}, design={1}, step={2}",
+                    house.ObjId,
+                    house.TemplateId,
+                    house.CurrentStep);
+
+                Connection.ActiveChar.SendPacket(new SCCancelWorldInteractionPacket(sourceObjId, targetObjId));
+                return;
+            }
+
+            if (sourceObjId == 0)
+                sourceObjId = Connection.ActiveChar.ObjId;
+
+            Logger.Info(
+                "House interaction: objId={0}, design={1}, step={2}, action={3}/{4}, skill={5}",
+                house.ObjId,
+                house.TemplateId,
+                house.CurrentStep,
+                house.CurrentAction,
+                house.AllAction,
+                buildSkillId);
+
+            Connection.ActiveChar.SendPacket(new SCWorldInteractionSkillListPacket(
+                targetObjId,
+                sourceObjId,
+                extraInfo,
+                pickId,
+                mouseButton,
+                modifierKeys,
+                new[] { buildSkillId }));
+            return;
+        }
+
         if (unit is Mate)
         {
             Connection.ActiveChar.SendPacket(new SCNpcInteractionSkillListPacket(

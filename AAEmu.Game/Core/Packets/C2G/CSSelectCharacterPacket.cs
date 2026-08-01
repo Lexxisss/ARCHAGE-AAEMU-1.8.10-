@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 
 using AAEmu.Commons.Network;
@@ -87,9 +87,22 @@ public class CSSelectCharacterPacket : GamePacket
             Connection.ActiveChar.Friends.Send();
             Connection.ActiveChar.Blocked.Send();
 
-            foreach (var house in houses)
+            // The crafting window builds its pinned list from this and from nothing else, so a
+            // player who pinned anything sees an empty list until it arrives.
+            Connection.ActiveChar.FavoriteCrafts.Send();
+
+            // The owned-house summary. This used to go out as one message per building, which
+            // does not exist in this client - it was a leftover from an older version and
+            // carried a placeholder opcode. The target sends this summary instead, and the
+            // client caps it at twenty records, so larger sets are split across messages.
+            // Nothing to announce when the player owns nothing - an empty summary tells the
+            // client only that it has no buildings, which it already assumes.
+            var ownedHouses = houses.ToList();
+            for (var offset = 0; offset < ownedHouses.Count; offset += SCHouseDataPacket.MaxRecords)
             {
-                Connection.SendPacket(new SCMyHousePacket(house));
+                var chunk = ownedHouses.GetRange(offset,
+                    Math.Min(SCHouseDataPacket.MaxRecords, ownedHouses.Count - offset));
+                Connection.SendPacket(new SCHouseDataPacket(chunk));
             }
 
             foreach (var conflict in ZoneManager.Instance.GetConflicts())
