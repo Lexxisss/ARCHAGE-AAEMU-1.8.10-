@@ -4,6 +4,7 @@ using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.Models.Game;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
 
@@ -46,6 +47,17 @@ public class CSChangeMateEquipmentPacket : GamePacket
         var invItems = new (SlotType, byte, Item)[num];
         var equipItems = new (SlotType, byte, Item)[num];
         var character = Connection.ActiveChar;
+
+        // The reply is one set carrying every record of the request, the same way the slave one
+        // does. It used to be one message per record with the count written as a constant one,
+        // which is only ever right for a request that carried a single change.
+        var reply = new MateEquipment
+        {
+            OwnerPersistentId = characterId,
+            Tl = tl,
+            MateType = passengerId,
+            Bts = bts
+        };
 
         for (var i = 0; i < num; i++)
         {
@@ -99,8 +111,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, character.Inventory.Bag, mate.Equipment, invItems[i].Item3.Id, invItems[i].Item1, invItems[i].Item2, 0, equipItems[i].Item1, equipItems[i].Item2))
                     {
-                        SendEquipmentChanged(equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2),
-                            tl, characterId, passengerId, bts);
+                        AddChange(reply, equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2));
 
                         var tasks = new List<ItemTask>
                         {
@@ -125,8 +136,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, mate.Equipment, character.Inventory.Bag, equipItems[i].Item3.Id, equipItems[i].Item1, equipItems[i].Item2, 0, invItems[i].Item1, invItems[i].Item2))
                     {
-                        SendEquipmentChanged(equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2),
-                            tl, characterId, passengerId, bts);
+                        AddChange(reply, equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2));
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
                             [
@@ -138,10 +148,13 @@ public class CSChangeMateEquipmentPacket : GamePacket
                 }
             }
         }
+
+        if (reply.Changes.Count > 0)
+            Connection.SendPacket(new SCMateEquipmentChangedPacket(reply, true));
     }
 
     /// <summary>
-    /// Confirms one equipment change to the client that asked for it.
+    /// Records one applied change in the reply set.
     /// </summary>
     /// <remarks>
     /// The request and the reply share a structure but not a subject. The request is a move:
@@ -154,21 +167,21 @@ public class CSChangeMateEquipmentPacket : GamePacket
     /// for this packet are only the two mate ones: an unsupported kind never reaches the apply
     /// path, and what the client is left showing is exactly what it showed before.
     /// </remarks>
-    private void SendEquipmentChanged(
-        (SlotType type, byte slot, Item item) mateSlot,
-        Item before,
-        Item after,
-        ushort tl,
-        long characterId,
-        uint passengerId,
-        bool bts)
+    private static void AddChange(MateEquipment reply, (SlotType type, byte slot, Item item) mateSlot,
+        Item before, Item after)
     {
-        Logger.Debug($"ChangeMateEquipment reply: ({mateSlot.type}:{mateSlot.slot}) " +
+        Logger.Debug($"ChangeMateEquipment reply record: ({mateSlot.type}:{mateSlot.slot}) " +
                      $"before=tpl {before?.TemplateId ?? 0}, after=tpl {after?.TemplateId ?? 0}");
 
-        Connection.SendPacket(new SCMateEquipmentChangedPacket(
-            (mateSlot.type, mateSlot.slot, before),
-            (mateSlot.type, mateSlot.slot, after),
-            tl, characterId, passengerId, bts));
+        reply.Changes.Add(new MateEquipmentDelta
+        {
+            Before = before,
+            After = after,
+            SourceType = mateSlot.type,
+            SourceIndex = mateSlot.slot,
+            DestType = mateSlot.type,
+            DestIndex = mateSlot.slot,
+            ExpireTime = 0
+        });
     }
 }
