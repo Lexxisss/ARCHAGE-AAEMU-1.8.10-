@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -16,6 +17,7 @@ using AAEmu.Game.Models.Game.Items.Actions;
 using AAEmu.Game.Models.Game.Mate;
 using AAEmu.Game.Models.Game.Skills.Buffs;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Models.Tasks.Mate;
 using AAEmu.Game.Utils.DB;
 
 using NLog;
@@ -370,6 +372,14 @@ public class MateManager : Singleton<MateManager>
         owner.SendPacket(new SCMateSpawnedPacket(mate));
         mate.Spawn();
 
+        // From here on the animal walks after its owner on its own. Nothing did this before, so a
+        // summoned mate simply stood where it was put.
+        mate.MateFollowTask = new MateFollowTask(mate);
+        TaskManager.Instance.Schedule(
+            mate.MateFollowTask,
+            TimeSpan.FromMilliseconds(MateFollowTask.TickIntervalMs),
+            TimeSpan.FromMilliseconds(MateFollowTask.TickIntervalMs));
+
         // Mirrors the ten fixed slots of SCMateSpawned so the log says exactly what the client
         // was handed, padding included. Two mates from different templates must not end up with
         // the same list here - if they do, the fault is on this side of the wire.
@@ -407,6 +417,7 @@ public class MateManager : Singleton<MateManager>
         UnMountMate(mateInfo);
 
         mateInfo.StopUpdateXp();
+        mateInfo.StopFollowing();
 
         for (var i = 0; i < _activeMates[owner.ObjId].Count; i++)
         {
@@ -430,6 +441,8 @@ public class MateManager : Singleton<MateManager>
         if (mateInfo == null) return;
 
         UnMountMate(mateInfo);
+
+        mateInfo.StopFollowing();
 
         for (var i = 0; i < _activeMates[owner.ObjId].Count; i++)
         {
