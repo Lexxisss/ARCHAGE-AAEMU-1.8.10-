@@ -14,7 +14,7 @@ public class CSDecorateHousePacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var houseTlId = stream.ReadUInt16();
+        var houseTlId = (ushort)stream.ReadUInt32(); // the handle is 32 bits on the wire; ours is 16
         var designId = stream.ReadUInt32();
         var x = stream.ReadSingle();
         var y = stream.ReadSingle();

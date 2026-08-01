@@ -12,7 +12,7 @@ public class CSRequestHouseTaxPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var tl = stream.ReadUInt16(); // houseId
+        var tl = (ushort)stream.ReadUInt32(); // the handle is 32 bits on the wire; ours is 16 // houseId
         var objId = stream.ReadBc();
 
         Logger.Debug($"RequestHouseTax, Tl: {tl}, objId: {objId}");

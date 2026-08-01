@@ -12,8 +12,8 @@ public class CSBuyHousePacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var tl = stream.ReadUInt16();
-        var moneyAmount = stream.ReadUInt32();
+        var tl = (ushort)stream.ReadUInt32(); // the handle is 32 bits on the wire; ours is 16
+        var moneyAmount = (uint)stream.ReadInt64(); // 64 bits on the wire
 
         HousingManager.Instance.BuyHouse(tl, moneyAmount, Connection.ActiveChar);
     }

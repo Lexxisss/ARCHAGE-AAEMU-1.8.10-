@@ -5,9 +5,9 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCHouseRemovedPacket : GamePacket
 {
-    private readonly ushort _tl;
+    private readonly uint _tl;
 
-    public SCHouseRemovedPacket(ushort tl) : base(SCOffsets.SCHouseRemovedPacket, 5)
+    public SCHouseRemovedPacket(uint tl) : base(SCOffsets.SCHouseRemovedPacket, 5)
     {
         _tl = tl;
     }

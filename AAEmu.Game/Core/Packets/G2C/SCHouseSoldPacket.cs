@@ -5,14 +5,14 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCHouseSoldPacket : GamePacket
 {
-    private readonly ushort _tl;
-    private readonly uint _unkId;
-    private readonly uint _unk2Id;
+    private readonly uint _tl;
+    private readonly long _unkId;
+    private readonly long _unk2Id;
     private readonly ulong _newOwnerAcc;
     private readonly string _ownerName;
     private readonly string _houseName;
 
-    public SCHouseSoldPacket(ushort tl, uint unkId, uint unk2Id, ulong newOwnerAcc, string ownerName, string houseName) : base(SCOffsets.SCHouseSoldPacket, 5)
+    public SCHouseSoldPacket(uint tl, long unkId, long unk2Id, ulong newOwnerAcc, string ownerName, string houseName) : base(SCOffsets.SCHouseSoldPacket, 5)
     {
         _tl = tl;
         _unkId = unkId;
