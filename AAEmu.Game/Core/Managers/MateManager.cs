@@ -379,6 +379,17 @@ public class MateManager : Singleton<MateManager>
 
         Logger.Debug($"Mount spawned: ownerObjId={owner.ObjId}, tlId={mate.TlId}, mateObjId={mate.ObjId}, " +
                      $"npcId={mate.TemplateId}, mateType={mate.MateType}, skills=[{string.Join(", ", wireSkills)}]");
+
+        // What the mate is actually wearing at the moment it goes out. An empty list here means
+        // the gear never reached the container and there is no point looking at the unit state.
+        var worn = mate.Equipment?.GetSlottedItemsList() ?? [];
+        var wornText = string.Join(", ", worn
+            .Select((wornItem, slot) => (wornItem, slot))
+            .Where(entry => entry.wornItem != null)
+            .Select(entry => $"{(EquipmentItemSlot)entry.slot}({entry.slot})=tpl {entry.wornItem.TemplateId}/id {entry.wornItem.Id}"));
+
+        Logger.Debug($"Mount equipment: mateId={mate.Id}, containerId={mate.Equipment?.ContainerId}, " +
+                     $"mateIdOnContainer={mate.Equipment?.MateId}, worn=[{wornText}]");
     }
 
     public void RemoveActiveMateAndDespawn(Character owner, uint tlId)

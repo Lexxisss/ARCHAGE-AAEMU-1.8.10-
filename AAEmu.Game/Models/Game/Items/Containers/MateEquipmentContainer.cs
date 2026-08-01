@@ -15,43 +15,26 @@ public class MateEquipmentContainer : EquipmentContainer
 
     public override void OnEnterContainer(Item item, ItemContainer lastContainer)
     {
-        Logger.Debug("mate OnEnterContainer");
+        Logger.Debug($"mate OnEnterContainer: mateId={MateId}, slot={item?.Slot}, template={item?.TemplateId}, itemId={item?.Id}");
         base.OnEnterContainer(item, lastContainer);
-
-        if (Owner == null)
-            return;
-
-        var mates = MateManager.Instance.GetActiveMates(Owner.ObjId);
-        if (mates != null)
-        {
-            foreach (var mate in mates)
-            {
-                if (mate == null) continue;
-
-                //mate.UpdateGearBonuses(item, null);
-                //Owner?.MatesUpdateGearBonuses(item, null);
-            }
-        }
     }
 
     public override void OnLeaveContainer(Item item, ItemContainer newContainer)
     {
-        Logger.Debug("mate OnLeaveContainer");
-
+        Logger.Debug($"mate OnLeaveContainer: mateId={MateId}, slot={item?.Slot}, template={item?.TemplateId}, itemId={item?.Id}");
         base.OnLeaveContainer(item, newContainer);
+    }
 
-        if (Owner == null)
-            return;
-
-        var mates = MateManager.Instance.GetActiveMates(Owner.ObjId);
-        if (mates != null)
-        {
-            foreach (var mate in mates)
-            {
-                if (mate == null) continue;
-
-                //mate.UpdateGearBonuses(null, item);
-            }
-        }
+    /// <summary>
+    /// A mate's gear belongs to the mate, not to the player who owns the container.
+    /// </summary>
+    /// <remarks>
+    /// The inherited behaviour recalculated the *player's* gear bonuses, so putting a saddle on
+    /// a mount refreshed the rider's own equipment buffs and gave the mount nothing. Mates have
+    /// no stat pipeline of their own yet, so for now the honest thing is to apply the change to
+    /// nobody: wrong bonuses on the wrong unit are worse than none.
+    /// </remarks>
+    protected override void ApplyGearBonuses(Item itemAdded, Item itemRemoved)
+    {
     }
 }
