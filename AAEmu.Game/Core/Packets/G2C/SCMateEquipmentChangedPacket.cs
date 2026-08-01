@@ -4,6 +4,16 @@ using AAEmu.Game.Models.Game.Items;
 
 namespace AAEmu.Game.Core.Packets.G2C;
 
+/// <summary>
+/// Confirms a change to a mate's equipment.
+/// </summary>
+/// <remarks>
+/// A record is an equipment delta followed by an expiry time, laid out exactly as in the
+/// request: two item records, then the source and destination type/index pairs. The two item
+/// records are the affected mate slot before and after the change - not the source item and the
+/// destination item. Sending that pair the other way round leaves the client's slot untouched,
+/// because it is being told the change ran in the opposite direction.
+/// </remarks>
 public class SCMateEquipmentChangedPacket : GamePacket
 {
     private readonly ushort _tlId;
