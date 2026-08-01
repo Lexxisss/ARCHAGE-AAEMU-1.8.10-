@@ -970,4 +970,63 @@
     //NotEnoughItemType = 995,
     //UseItemType = 996,
     //InvalidSlaveFollowCondition = 997
+
+    // Target housing/butler error values above 1000; the enum previously stopped short of them.
+    /// <summary>Target text <c>not_change_raid_recruit_owner</c>.</summary>
+    NotChangeRaidRecruitOwner = 1000,
+    /// <summary>Target text <c>target_not_raid_owner</c>.</summary>
+    TargetNotRaidOwner = 1009,
+    /// <summary>Target text <c>zone_permission_with_instance</c>.</summary>
+    ZonePermissionWithInstance = 1067,
+    /// <summary>Target text <c>squad_permission_denied</c>.</summary>
+    SquadPermissionDenied = 1071,
+    /// <summary>Target text <c>faction_cannot_immigrate_to_pirate_as_faction_owner</c>.</summary>
+    FactionCannotImmigrateToPirateAsFactionOwner = 1085,
+    /// <summary>Target text <c>cannot_detach_from_doodad_instrument</c>.</summary>
+    CannotDetachFromDoodadInstrument = 1118,
+    /// <summary>Target text <c>blocked_doodad</c>.</summary>
+    BlockedDoodad = 1143,
+    /// <summary>Target text <c>fail_house_task_because_butler</c>.</summary>
+    FailHouseTaskBecauseButler = 1156,
+    /// <summary>Target text <c>fail_bind_butler_because_house</c>.</summary>
+    FailBindButlerBecauseHouse = 1157,
+    /// <summary>Target text <c>house_cannot_sell_because_butler</c>.</summary>
+    HouseCannotSellBecauseButler = 1164,
+    /// <summary>Target text <c>not_enough_butler_garden_size</c>.</summary>
+    NotEnoughButlerGardenSize = 1175,
+    /// <summary>Target text <c>fail_bind_butler_because_tax</c>.</summary>
+    FailBindButlerBecauseTax = 1181,
+    /// <summary>Target text <c>fail_bind_butler_because_sale_house</c>.</summary>
+    FailBindButlerBecauseSaleHouse = 1182,
+    /// <summary>Target text <c>fail_bind_butler_because_demolish_house</c>.</summary>
+    FailBindButlerBecauseDemolishHouse = 1183,
+    /// <summary>Target text <c>content_roster_not_usable_owner</c>.</summary>
+    ContentRosterNotUsableOwner = 1204,
+    /// <summary>Target text <c>house_package_demolish_failed_seal_changed</c>.</summary>
+    HousePackageDemolishFailedSealChanged = 1217,
+    /// <summary>Target text <c>house_cannot_prepay_archelife</c>.</summary>
+    HouseCannotPrepayArchelife = 1232,
+    /// <summary>Target text <c>special_resurrection_zone_permission</c>.</summary>
+    SpecialResurrectionZonePermission = 1238,
+    /// <summary>Target text <c>party_duel_owner_invalid</c>.</summary>
+    PartyDuelOwnerInvalid = 1243,
+    /// <summary>Target text <c>party_duel_owner_invalid_other</c>.</summary>
+    PartyDuelOwnerInvalidOther = 1244,
+    /// <summary>Target text <c>housing_count_limit_in_account</c>.</summary>
+    HousingCountLimitInAccount = 1289,
+    /// <summary>Target text <c>expedition_house_limit_exceeded</c>.</summary>
+    ExpeditionHouseLimitExceeded = 1292,
+    /// <summary>Target text <c>house_cannot_decorate_expedition</c>.</summary>
+    HouseCannotDecorateExpedition = 1293,
+    /// <summary>Target text <c>house_cannot_decorate_not_expedition</c>.</summary>
+    HouseCannotDecorateNotExpedition = 1294,
+    /// <summary>Target text <c>expedition_house_not_exist</c>.</summary>
+    ExpeditionHouseNotExist = 1295,
+    /// <summary>Target text <c>expedition_dismiss_has_house</c>.</summary>
+    ExpeditionDismissHasHouse = 1298,
+    /// <summary>Target text <c>sqaud_expedition_policy_permission_denied</c>.</summary>
+    SqaudExpeditionPolicyPermissionDenied = 1323,
+
+    /// <summary>Target value 0x3F3: the explicit refusal for turning an already placed building.</summary>
+    HouseCannotRotate = 1011
 }

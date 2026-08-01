@@ -90,8 +90,23 @@ public class GameConnection
         // AddAttribute("gmFlag", true);
     }
 
+    /// <summary>Placeholder carried by packet classes whose real opcode is not yet recovered.</summary>
+    private const ushort UnknownOpcode = 0xFFF;
+
     public void SendPacket(GamePacket packet)
     {
+        // Sixty-five packet classes still carry the placeholder opcode. Encoding one throws,
+        // and because they are sent from the middle of ordinary work - placing a building,
+        // summoning a vehicle - that throw took the whole operation down with it and left the
+        // result half-applied: the building appeared and vanished again. Skip it loudly
+        // instead. A message we cannot address yet is a gap, not a reason to abandon what has
+        // already been done.
+        if (packet != null && packet.TypeId == UnknownOpcode)
+        {
+            Logger.Warn("Not sending {0}: its opcode is still unknown", packet.GetType().Name);
+            return;
+        }
+
         lock (WriteLock)
         {
             packet.Connection = this;

@@ -94,7 +94,7 @@ public class CraftEffect : EffectTemplate
                 case WorldInteractionGroup.Building when target is House house:
                     // Get the house's current build step
                     var currentStep =
-                        (house.CurrentAction >= 0) && (house.CurrentStep < house.Template.BuildSteps.Count)
+                        (house.CurrentStep >= 0) && (house.CurrentStep < house.Template.BuildSteps.Count)
                             ? house.Template.BuildSteps[house.CurrentStep]
                             : null;
 
@@ -107,6 +107,8 @@ public class CraftEffect : EffectTemplate
                     }
                     else
                     {
+                        var stepBefore = house.CurrentStep;
+
                         // When done, set step to -1
                         if (house.Template.BuildSteps.Count == 0)
                             house.CurrentStep = -1;
@@ -131,6 +133,17 @@ public class CraftEffect : EffectTemplate
                             foreach (var doodad in doodads)
                                 doodad.Spawn();
                         }
+
+                        // Every stage the building passes swaps the model it is drawn with, and
+                        // the build progress message does not carry one. The client applies the
+                        // progress to the scene object it already has, so the state has to follow
+                        // it, not precede it. Without this the building keeps the scaffolding it
+                        // was last announced with until something else resends its state.
+                        //
+                        // Respawning the object instead is not an option: the spawn message is
+                        // ignored outright for an object the client already knows.
+                        if (house.CurrentStep != stepBefore)
+                            house.BroadcastPacket(new SCHouseStatePacket(house), true);
                     }
                     break;
                 default:

@@ -105,7 +105,10 @@ public class GameNetwork : Singleton<GameNetwork>
         //RegisterPacket(CSOffsets.CSUnknown0x5ePacket, 5, typeof(CSUnknown0x5ePacket));
         //RegisterPacket(CSOffsets.CSBagHandleSelectiveItemsPacket, 5, typeof(CSBagHandleSelectiveItemsPacket));
         RegisterPacket(CSOffsets.CSSkillControllerStatePacket, 5, typeof(CSSkillControllerStatePacket));
+        // Mounting and dismounting are two packet classes that happen to share one serializer,
+        // so they cannot be told apart by payload shape - only by their own send sites.
         RegisterPacket(CSOffsets.CSMountMatePacket, 5, typeof(CSMountMatePacket));
+        RegisterPacket(CSOffsets.CSUnMountMatePacket, 5, typeof(CSUnMountMatePacket));
         RegisterPacket(CSOffsets.CSLeaveWorldPacket, 5, typeof(CSLeaveWorldPacket));
         RegisterPacket(CSOffsets.CSCancelLeaveWorldPacket, 5, typeof(CSCancelLeaveWorldPacket));
         RegisterPacket(CSOffsets.CSRequestSpecialtyCurrentPacket, 5, typeof(CSRequestSpecialtyCurrentPacket));
@@ -252,7 +255,7 @@ public class GameNetwork : Singleton<GameNetwork>
         RegisterPacket(CSOffsets.CSDecorateHousePacket, 5, typeof(CSDecorateHousePacket));
         RegisterPacket(CSOffsets.CSSellHousePacket, 5, typeof(CSSellHousePacket));
         RegisterPacket(CSOffsets.CSBuyHousePacket, 5, typeof(CSBuyHousePacket));
-        //RegisterPacket(CSOffsets.CSRotateHousePacket, 5, typeof(CSRotateHousePacket));
+        RegisterPacket(CSOffsets.CSRotateHousePacket, 5, typeof(CSRotateHousePacket));
         RegisterPacket(CSOffsets.CSRemoveMatePacket, 5, typeof(CSRemoveMatePacket));
         RegisterPacket(CSOffsets.CSChangeMateTargetPacket, 5, typeof(CSChangeMateTargetPacket));
         RegisterPacket(CSOffsets.CSChangeMateUserStatePacket, 5, typeof(CSChangeMateUserStatePacket));
@@ -366,6 +369,7 @@ public class GameNetwork : Singleton<GameNetwork>
         //RegisterPacket(CSOffsets.CSAuctionCancelPacket, 5, typeof(CSAuctionCancelPacket));
         //RegisterPacket(CSOffsets.CSAuctionBidPacket, 5, typeof(CSAuctionBidPacket));
         RegisterPacket(CSOffsets.CSExecuteCraftPacket, 5, typeof(CSExecuteCraftPacket));
+        RegisterPacket(CSOffsets.CSUpdateFavoriteCraftsPacket, 5, typeof(CSUpdateFavoriteCraftsPacket));
         RegisterPacket(CSOffsets.CSSetLpManageCharacterPacket, 5, typeof(CSSetLpManageCharacterPacket));
         RegisterPacket(CSOffsets.CSSetCraftingPayPacket, 5, typeof(CSSetCraftingPayPacket));
         RegisterPacket(CSOffsets.CSDestroyItemPacket, 5, typeof(CSDestroyItemPacket));
