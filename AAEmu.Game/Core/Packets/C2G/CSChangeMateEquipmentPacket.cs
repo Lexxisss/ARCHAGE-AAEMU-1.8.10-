@@ -80,17 +80,26 @@ public class CSChangeMateEquipmentPacket : GamePacket
             Logger.Debug($"FROM: ({invItems[i].Item1}:{invItems[i].Item2}) TO ({equipItems[i].Item1}:{equipItems[i].Item2}) ITEMS: {invItems[i].Item3?.Id}, {equipItems[i].Item3?.Id}, EQUIP: {isEquip}");
             Logger.Debug($"ChangeMateEquipment request records: first=tpl {requestedFirst}, second=tpl {requestedSecond}");
 
+            // Gear moving on or off a mate is a move between two slots, and the client is told so.
+            // It used to be announced as a destruction: the item was handed to the mate and then,
+            // in the very next message, the client was asked to drop that same object from its
+            // slot and id registries. Nothing referring to it could survive that, which is why the
+            // saddle only ever showed up on the next summon, when the whole mate was described
+            // again. Taking gear off announced nothing at all, so the bag never got it back.
             if (isEquip)
             {
                 if (invItems[i].Item3 != null)
                 {
-                    var itemTasks = new List<ItemTask>();
-                    itemTasks.Add(new ItemRemove(invItems[i].Item3));
+                    var movedItemId = invItems[i].Item3.Id;
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, character.Inventory.Bag, mate.Equipment, invItems[i].Item3.Id, invItems[i].Item1, invItems[i].Item2, 0, equipItems[i].Item1, equipItems[i].Item2))
                     {
                         SendEquipmentChanged(invItems[i], equipItems[i], mate, slotBefore, tl, characterId, passengerId, bts);
-                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.Destroy, itemTasks, new List<ulong>()));
+                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
+                            [new ItemMove(
+                                invItems[i].Item1, invItems[i].Item2, movedItemId,
+                                equipItems[i].Item1, equipItems[i].Item2, slotBefore?.Id ?? 0)],
+                            []));
                     }
                 }
             }
@@ -98,9 +107,17 @@ public class CSChangeMateEquipmentPacket : GamePacket
             {
                 if (equipItems[i].Item3 != null)
                 {
+                    var movedItemId = equipItems[i].Item3.Id;
+                    var bagSlotBefore = invItems[i].Item3;
+
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, mate.Equipment, character.Inventory.Bag, equipItems[i].Item3.Id, equipItems[i].Item1, equipItems[i].Item2, 0, invItems[i].Item1, invItems[i].Item2))
                     {
                         SendEquipmentChanged(invItems[i], equipItems[i], mate, slotBefore, tl, characterId, passengerId, bts);
+                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
+                            [new ItemMove(
+                                equipItems[i].Item1, equipItems[i].Item2, movedItemId,
+                                invItems[i].Item1, invItems[i].Item2, bagSlotBefore?.Id ?? 0)],
+                            []));
                     }
                 }
             }
