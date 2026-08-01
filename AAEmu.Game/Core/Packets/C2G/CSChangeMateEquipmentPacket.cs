@@ -59,6 +59,8 @@ public class CSChangeMateEquipmentPacket : GamePacket
             Bts = bts
         };
 
+        var touchedSlots = new List<byte>();
+
         for (var i = 0; i < num; i++)
         {
             invItems[i].Item3 = new EquipItem();
@@ -125,7 +127,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
                             tasks.Add(new ItemGain(slotBefore));
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems, tasks, []));
-                        BroadcastWornChange(character, mate, equipItems[i].Item2);
+                        touchedSlots.Add(equipItems[i].Item2);
                     }
                 }
             }
@@ -145,7 +147,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
                                 new ItemGain(movedItem, invItems[i].Item1, invItems[i].Item2)
                             ],
                             []));
-                        BroadcastWornChange(character, mate, equipItems[i].Item2);
+                        touchedSlots.Add(equipItems[i].Item2);
                     }
                 }
             }
@@ -153,6 +155,8 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
         if (reply.Changes.Count > 0)
             Connection.SendPacket(new SCMateEquipmentChangedPacket(reply, true));
+
+        BroadcastWornChange(character, mate, touchedSlots);
     }
 
     /// <summary>
@@ -165,13 +169,24 @@ public class CSChangeMateEquipmentPacket : GamePacket
     /// found - a mount is served by the same path as a player - and which drives the appearance
     /// propagation rather than only the inventory picture.
     ///
-    /// It carries only the slot that changed: the message is a delta, and the slots it does not
-    /// mention keep what they had.
+    /// It carries only the slots that changed: the message is a delta, and the ones it does not
+    /// mention keep what they had. A slot that ended up empty is named with an empty item, which
+    /// is how the client is told to clear it rather than leave the old picture.
+    ///
+    /// It goes out after the mate's own message, in that order: the mate side settles the stored
+    /// record and the owner's window first, and this then rebuilds what everyone sees.
     /// </remarks>
-    private static void BroadcastWornChange(Models.Game.Char.Character character, Models.Game.Units.Mate mate, byte mateSlot)
+    private static void BroadcastWornChange(Models.Game.Char.Character character, Models.Game.Units.Mate mate,
+        List<byte> mateSlots)
     {
-        character.BroadcastPacket(
-            new SCUnitEquipmentsChangedPacket(mate.ObjId, mateSlot, mate.Equipment.GetItemBySlot(mateSlot)), true);
+        if (mateSlots.Count == 0)
+            return;
+
+        var records = new (byte slot, Item item)[mateSlots.Count];
+        for (var i = 0; i < mateSlots.Count; i++)
+            records[i] = (mateSlots[i], mate.Equipment.GetItemBySlot(mateSlots[i]));
+
+        character.BroadcastPacket(new SCUnitEquipmentsChangedPacket(mate.ObjId, records), true);
     }
 
     /// <summary>
