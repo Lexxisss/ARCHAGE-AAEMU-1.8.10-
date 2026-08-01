@@ -695,11 +695,22 @@ public class Inventory
         // container, at a slot number taken from one side of the move and an item from the
         // other, once per active mate rather than for the one that was actually touched. There
         // was no combination of those that described anything real.
+        // Both ends of the move go out as one delta rather than a message apiece: the message is
+        // batched by design, and a slot left empty is named with an empty item, which is how the
+        // client is told to clear it instead of keeping the old picture.
+        //
+        // It goes to the owner as well. The client keeps a branch for a unit it tracks locally -
+        // that is where the equipment event for the slot is raised - so a player's own gear is
+        // meant to arrive here too, and without it only the onlookers saw the change.
+        var changedSlots = new List<(byte slot, Item item)>(2);
         if (fromType == SlotType.Equipment)
-            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, fromSlot, Equipment.GetItemBySlot(fromSlot)), false);
+            changedSlots.Add((fromSlot, Equipment.GetItemBySlot(fromSlot)));
 
-        if (toType == SlotType.Equipment)
-            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, toSlot, Equipment.GetItemBySlot(toSlot)), false);
+        if (toType == SlotType.Equipment && (fromType != SlotType.Equipment || toSlot != fromSlot))
+            changedSlots.Add((toSlot, Equipment.GetItemBySlot(toSlot)));
+
+        if (changedSlots.Count > 0)
+            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, changedSlots.ToArray()), true);
 
         // Send ItemContainer events
         if (sourceContainer != targetContainer)
