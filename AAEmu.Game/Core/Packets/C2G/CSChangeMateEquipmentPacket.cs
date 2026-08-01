@@ -172,14 +172,39 @@ public class CSChangeMateEquipmentPacket : GamePacket
         (SlotType type, byte slot, Item item) source,
         (SlotType type, byte slot, Item item) dest)
     {
+        // The client reaches into its own containers with these two keys and, on this branch,
+        // does not check what comes back before writing through it. A key it cannot resolve is
+        // not a refused record - it is an access violation. So nothing leaves here unless both
+        // sides name something the client can be expected to have.
+        if (source.type != SlotType.Inventory)
+        {
+            Logger.Warn($"ChangeMateEquipment: source container {source.type} is not the inventory, " +
+                        "dropping the record rather than risking the client on it");
+            return;
+        }
+
+        if (dest.type != SlotType.EquipmentMate && dest.type != SlotType.EquipmentMateBattle)
+        {
+            Logger.Warn($"ChangeMateEquipment: destination container {dest.type} is not a mate one, " +
+                        "dropping the record rather than risking the client on it");
+            return;
+        }
+
+        if (dest.slot > MateEquipment.MaxSlotIndex)
+        {
+            Logger.Warn($"ChangeMateEquipment: mate slot {dest.slot} is past the client's last one " +
+                        $"({MateEquipment.MaxSlotIndex}), dropping the record");
+            return;
+        }
+
         Logger.Debug($"ChangeMateEquipment reply record: ({source.type}:{source.slot})=tpl " +
                      $"{source.item?.TemplateId ?? 0} <-> ({dest.type}:{dest.slot})=tpl " +
                      $"{dest.item?.TemplateId ?? 0}");
 
         reply.Changes.Add(new MateEquipmentDelta
         {
-            Before = source.item,
-            After = dest.item,
+            ItemAtSourceBefore = source.item,
+            ItemAtDestinationBefore = dest.item,
             SourceType = source.type,
             SourceIndex = source.slot,
             DestType = dest.type,

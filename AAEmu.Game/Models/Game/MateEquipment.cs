@@ -7,16 +7,23 @@ using AAEmu.Game.Models.Game.Items;
 namespace AAEmu.Game.Models.Game;
 
 /// <summary>
-/// One equipment change on a mate: the item leaving a slot, the item arriving, and where each
-/// came from.
+/// One equipment change on a mate: what each of the two slots held before it happened.
 /// </summary>
 /// <remarks>
+/// Both items are a snapshot taken before the change, not one slot's earlier and later state.
+/// On success the client puts the first into the destination and the second back into the
+/// source, so a swap, an equip and an unequip are all the same shape with different contents.
+///
 /// The items use the ordinary item encoding, not a mate-specific one.
 /// </remarks>
 public class MateEquipmentDelta
 {
-    public Item Before { get; set; }
-    public Item After { get; set; }
+    /// <summary>What the inventory side held before the change.</summary>
+    public Item ItemAtSourceBefore { get; set; }
+
+    /// <summary>What the mate's slot held before the change; the client puts this in the source.</summary>
+    public Item ItemAtDestinationBefore { get; set; }
+
     public SlotType SourceType { get; set; }
     public byte SourceIndex { get; set; }
     public SlotType DestType { get; set; }
@@ -39,6 +46,12 @@ public class MateEquipment : PacketMarshaler
 {
     /// <summary>The client caps the record count here.</summary>
     public const int MaxRecords = 2;
+
+    /// <summary>
+    /// The last slot index the client will accept for a mate. Past it, the neighbouring flags
+    /// and expiry messages write through a pointer they never obtained.
+    /// </summary>
+    public const byte MaxSlotIndex = 0x22;
 
     /// <summary>Persistent character id of the owner, not a world object id.</summary>
     public long OwnerPersistentId { get; set; }
@@ -67,15 +80,17 @@ public class MateEquipment : PacketMarshaler
         {
             var change = Changes[i];
 
-            if (change.Before == null)
+            // An empty side is a four-byte zero template id and nothing more, which the reader
+            // has its own branch for.
+            if (change.ItemAtSourceBefore == null)
                 stream.Write(0);
             else
-                stream.Write(change.Before);
+                stream.Write(change.ItemAtSourceBefore);
 
-            if (change.After == null)
+            if (change.ItemAtDestinationBefore == null)
                 stream.Write(0);
             else
-                stream.Write(change.After);
+                stream.Write(change.ItemAtDestinationBefore);
 
             stream.Write((byte)change.SourceType);
             stream.Write(change.SourceIndex);
