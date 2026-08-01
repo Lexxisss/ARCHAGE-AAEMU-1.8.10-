@@ -88,7 +88,9 @@ public class DoodadFuncRecoverItem : DoodadFuncTemplate
         }
 
         if (addedItem && item != null && item._holdingContainer.ContainerType == SlotType.Equipment)
-            character.BroadcastPacket(new SCUnitEquipmentsChangedPacket(character.ObjId, (byte)item.Slot, item), false);
+            // The owner is told as well, or the item they just picked back up is worn for everyone
+            // except themselves.
+            character.BroadcastPacket(new SCUnitEquipmentsChangedPacket(character.ObjId, (byte)item.Slot, item), true);
 
         if ((addedItem) && (owner != null))
         {

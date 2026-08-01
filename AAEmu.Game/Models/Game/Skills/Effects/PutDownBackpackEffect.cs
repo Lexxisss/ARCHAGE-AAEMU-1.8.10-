@@ -87,7 +87,8 @@ public class PutDownBackpackEffect : EffectTemplate
             doodad.Spawn();
             doodad.Save();
 
-            character.BroadcastPacket(new SCUnitEquipmentsChangedPacket(character.ObjId, (byte)EquipmentItemSlot.Backpack, null), false);
+            // The owner is told as well, or the pack they just put down stays on their own back.
+            character.BroadcastPacket(new SCUnitEquipmentsChangedPacket(character.ObjId, (byte)EquipmentItemSlot.Backpack, null), true);
             if ((previousGlider != null) && character.Equipment.GetItemBySlot((int)EquipmentItemSlot.Backpack) == null)
                 character.Inventory.SplitOrMoveItem(Items.Actions.ItemTaskType.SwapItems, previousGlider.Id,
                     previousGlider.SlotType, (byte)previousGlider.Slot, 0, SlotType.Equipment,

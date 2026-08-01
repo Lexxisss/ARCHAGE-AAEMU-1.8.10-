@@ -81,7 +81,10 @@ public partial class Character
                 doodad.Spawn();
                 doodad.Save();
 
-                BroadcastPacket(new SCUnitEquipmentsChangedPacket(ObjId, (byte)EquipmentItemSlot.Backpack, null), false);
+                // The owner is told as well: the pack left the back of the character everyone sees,
+                // and without this the dead player kept carrying it until the next time the world
+                // was rebuilt for them.
+                BroadcastPacket(new SCUnitEquipmentsChangedPacket(ObjId, (byte)EquipmentItemSlot.Backpack, null), true);
             }
 
         }
