@@ -30,7 +30,14 @@ public class CraftManager : Singleton<CraftManager>
                         COALESCE(target.req_doodad_id, fallback.req_doodad_id, 0) AS req_doodad_id,
                         COALESCE(target.actability_limit, fallback.actability_limit) AS actability_limit,
                         COALESCE(target.recommend_level, fallback.recommend_level) AS recommend_level,
-                        COALESCE(target.visible_order, fallback.visible_order) AS visible_order
+                        COALESCE(target.visible_order, fallback.visible_order) AS visible_order,
+                        COALESCE(target.cost, fallback.cost, 0) AS cost,
+                        COALESCE(target.orderable, fallback.orderable, 0) AS orderable,
+                        COALESCE(target.use_only_actability, fallback.use_only_actability, 0) AS use_only_actability,
+                        COALESCE(target.products_pack_id, fallback.products_pack_id, 0) AS products_pack_id,
+                        COALESCE(target.craft_c_category_id, fallback.craft_c_category_id, 0) AS craft_c_category_id,
+                        COALESCE(target.craft_d_category_id, fallback.craft_d_category_id, 0) AS craft_d_category_id,
+                        COALESCE(target.title, fallback.title, '') AS title
                     FROM crafts AS target
                     LEFT JOIN client_fallback.crafts AS fallback ON fallback.id = target.id
                     WHERE COALESCE(target.cast_delay, fallback.cast_delay) IS NOT NULL
@@ -53,6 +60,18 @@ public class CraftManager : Singleton<CraftManager>
                         template.ActabilityLimit = reader.GetInt32("actability_limit");
                         template.RecommendLevel = reader.GetInt32("recommend_level");
                         template.VisibleOrder = reader.GetInt32("visible_order");
+
+                        // Server-significant, not decoration: the labour a cycle costs, whether
+                        // the recipe may be ordered from somebody else, and whether proficiency
+                        // is the only gate. None of it was being read.
+                        template.Cost = reader.GetInt32("cost", 0);
+                        template.Orderable = reader.GetBoolean("orderable", true);
+                        template.UseOnlyActability = reader.GetBoolean("use_only_actability", true);
+                        template.ProductsPackId = reader.GetUInt32("products_pack_id", 0);
+                        template.CraftCCategoryId = reader.GetUInt32("craft_c_category_id", 0);
+                        template.CraftDCategoryId = reader.GetUInt32("craft_d_category_id", 0);
+                        template.Title = reader.GetString("title") ?? string.Empty;
+
                         _crafts.Add(template.Id, template);
                     }
                 }
@@ -104,7 +123,9 @@ public class CraftManager : Singleton<CraftManager>
                         template.CraftId = craftId;
                         template.ItemId = reader.GetUInt32("item_id");
                         template.Amount = reader.GetInt32("amount", 1); //We always want to cost at least 1 item ?
-                        template.MainGrade = reader.GetBoolean("main_grade");
+                        template.MainGrade = reader.GetBoolean("main_grade", true);
+                        template.RequireGrade = reader.GetInt32("require_grade", 0);
+                        template.UpperGrade = reader.GetBoolean("upper_grade", true);
 
                         _crafts[craftId].CraftMaterials.Add(template);
                     }
