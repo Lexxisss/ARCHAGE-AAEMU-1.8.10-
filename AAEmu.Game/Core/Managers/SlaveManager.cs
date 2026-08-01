@@ -218,7 +218,7 @@ public class SlaveManager : Singleton<SlaveManager>
         switch (attachPoint)
         {
             case AttachPointKind.Driver:
-                character.BroadcastPacket(new SCSlaveBoundPacket(character.Id, objId), true);
+                character.BroadcastPacket(new SCSlaveBoundPacket(character.Id, objId, (byte)character.Transform.WorldId), true);
                 break;
         }
 
