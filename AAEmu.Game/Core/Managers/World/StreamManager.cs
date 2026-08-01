@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Network.Connections;
 using AAEmu.Game.Core.Packets.S2C;
@@ -51,13 +52,30 @@ public class StreamManager : Singleton<StreamManager>
             connection.SendPacket(new TCJoinResponsePacket(1));
     }
 
+    /// <summary>
+    /// Whether an object belongs in the world's own cell listing.
+    /// </summary>
+    /// <remarks>
+    /// This channel carries the world's static furniture. Anything a player put down has its own
+    /// lifetime - it appears and disappears while people watch - and it already reaches the
+    /// client the ordinary way, when somebody comes close enough to see it. Sending it here as
+    /// well gives one object two arrivals and two owners of its state, and the state we name for
+    /// a growing plant is not one its template necessarily has.
+    /// </remarks>
+    private static bool BelongsInCellStream(Doodad doodad)
+    {
+        return doodad.OwnerId == 0 && doodad.PlantTime == DateTime.MinValue;
+    }
+
     public static void RequestCell(StreamConnection connection, uint instanceId, int x, int y)
     {
         if (connection is not null)
         {
             var worldId = connection.GameConnection?.ActiveChar?.Transform?.WorldId ?? WorldManager.DefaultWorldId;
             // TODO: Handle requests for instances correctly ?
-            var doodads = WorldManager.Instance.GetInCell<Doodad>(worldId, x, y).ToArray();
+            var doodads = WorldManager.Instance.GetInCell<Doodad>(worldId, x, y)
+                .Where(BelongsInCellStream)
+                .ToArray();
             var requestId = connection.GetNextRequestId(doodads);
             var count = Math.Min(doodads.Length, 30);
             var res = new Doodad[count];

@@ -746,9 +746,33 @@ public class Doodad : BaseUnit
         stream.Write(FirstInteractionId); // +0xB8
         stream.Write(RequesterId);        // +0xC8
 
+        // Only doodads carrying an item can size this record differently, and only these ask the
+        // client to go and fetch anything, so these are the ones worth naming when it chokes on
+        // one. UccId is here because a decal the client asks for over the other connection and
+        // never receives is the other way this ends badly.
+        if (ItemTemplateId != 0 || UccId != 0)
+        {
+            Logger.Debug($"DoodadInfo: objId={ObjId}, template={TemplateId}, funcGroup={FuncGroupId}, " +
+                         $"item={ItemTemplateId}, category={ItemManager.Instance.GetTemplate(ItemTemplateId)?.CategoryId.ToString() ?? "?"}, " +
+                         $"goodsBlock={HasTargetGoodsPayload}, uccId={UccId}, " +
+                         $"phase={PhaseTime:HH:mm:ss}, growing={TimeLeft}");
+        }
+
         return stream;
     }
 
+    /// <summary>
+    /// Whether the three extra goods fields belong in this record.
+    /// </summary>
+    /// <remarks>
+    /// The decision is not carried on the wire in the creation record - the client makes the same
+    /// one from its own item data - so the two sides have to agree exactly or the record is
+    /// eighteen bytes out and everything after it, including the next doodad in the same message,
+    /// is read as rubbish. The phase-change record does carry a flag for it; this one does not.
+    ///
+    /// The dangerous case is an item the client knows and the server does not: we leave the block
+    /// out and the client still reads it. That is worth a complaint rather than silence.
+    /// </remarks>
     public bool HasTargetGoodsPayload
     {
         get
@@ -757,7 +781,15 @@ public class Doodad : BaseUnit
                 return false;
 
             var itemTemplate = ItemManager.Instance.GetTemplate(ItemTemplateId);
-            return itemTemplate?.CategoryId is 3 or 8;
+            if (itemTemplate == null)
+            {
+                Logger.Warn($"Doodad {ObjId} (template {TemplateId}) carries item {ItemTemplateId}, " +
+                            "which this server has no template for - the goods block is being left out " +
+                            "and the client may still expect it");
+                return false;
+            }
+
+            return itemTemplate.CategoryId is 3 or 8;
         }
     }
 
