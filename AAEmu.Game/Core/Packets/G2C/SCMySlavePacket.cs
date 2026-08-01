@@ -10,13 +10,13 @@ public class SCMySlavePacket : GamePacket
     private readonly ushort _tl; // TODO slaveId
     private readonly string _slaveName;
     private readonly uint _templateId;
-    private readonly int _hp;
-    private readonly int _maxHp;
+    private readonly long _hp;
+    private readonly long _maxHp;
     private readonly float _x;
     private readonly float _y;
     private readonly float _z;
 
-    public SCMySlavePacket(uint unitId, ushort tl, string slaveName, uint templateId, int hp, int maxHp, float x, float y, float z)
+    public SCMySlavePacket(uint unitId, ushort tl, string slaveName, uint templateId, long hp, long maxHp, float x, float y, float z)
         : base(SCOffsets.SCMySlavePacket, 5)
     {
         _unitId = unitId;
@@ -36,8 +36,8 @@ public class SCMySlavePacket : GamePacket
         stream.Write(_tl);           // slaveId
         stream.Write(_slaveName);    // slaveName
         stream.Write(_templateId);   // type
-        stream.Write(_hp);           // hp
-        stream.Write(_maxHp);        // maxHp
+        stream.Write(_hp);           // hp    : i64
+        stream.Write(_maxHp);        // maxHp : i64
         stream.Write(Helpers.ConvertLongX(_x)); // WorldPosXYZ_0940
         stream.Write(Helpers.ConvertLongY(_y));
         stream.Write(_z);

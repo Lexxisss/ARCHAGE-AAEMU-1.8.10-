@@ -23,6 +23,9 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCUnitStatePacket : GamePacket
 {
+    /// <summary>Equipment slots the model/posture block describes, one bit each in its mask.</summary>
+    private const int Protocol1810EquipmentSlots = 35;
+
     private static int _npcDumpCount;
     private readonly Unit _unit;
     private readonly BaseUnitType _baseUnitType;
@@ -110,13 +113,19 @@ public class SCUnitStatePacket : GamePacket
                 stream.Write(0L);              // type(id), uint64 in target
                 stream.Write((byte)0);        // clientDriven
                 break;
+            // Ships and land vehicles. The owner is identified twice on purpose: by the
+            // persistent character id, which the client compares against its own to decide
+            // whether this is the local player's vehicle, and by the runtime object id, which
+            // the slave manager uses for the relationship itself.
             case BaseUnitType.Slave:
                 var slave = (Slave)_unit;
-                stream.Write(slave.Id);             // Id ? slave.Id
-                stream.Write(slave.TlId);           // tl
-                stream.Write(slave.TemplateId);     // templateId
-                stream.Write(slave.Summoner?.ObjId ?? 0); // ownerId ? slave.Summoner.ObjId
-                break;
+                stream.Write((long)(slave.Summoner?.Id ?? 0u));    // masterId            : i64
+                WriteMasterUnitId(stream, slave.Summoner?.ObjId ?? 0); // masterUnitId    : u16
+                stream.Write(slave.TemplateId);                    // slaveTemplateId     : u32
+                stream.Write(0L);                                  // unknownPersistentId : i64
+                stream.Write((byte)(slave.Summoner?.Transform.WorldId ?? 0)); // masterWorldId : u8
+                stream.Write(slave.TemplateId);                    // visualSlaveDescId   : u32
+                break;                                             // 28 bytes with the discriminator
             case BaseUnitType.Housing:
                 var house = (House)_unit;
                 var buildStep = house.CurrentStep == -1
@@ -132,12 +141,22 @@ public class SCUnitStatePacket : GamePacket
                 stream.Write(transfer.TlId); // tl
                 stream.Write(transfer.TemplateId); // templateId
                 break;
+            // Pets and mounts. The first field is the mate's own handle, not the owner's -
+            // this is the only place the handle and the world object ever meet.
+            //
+            // A slave gets that pairing from its own message: SCMySlave carries the object id
+            // and the handle together. A mate has no such message - SCMateSpawned files the
+            // record under the handle and never mentions the object. So if this field does not
+            // carry the handle, the record and the animal in the world are never connected: the
+            // mount stands there with no record behind it, which is an empty skill bar and
+            // nothing to ride. The owner is identified by the persistent character id below,
+            // and separately by the master name that follows the branch.
             case BaseUnitType.Mate:
                 var mount = (Mate)_unit;
-                stream.Write(mount.TlId);       // tl
-                stream.Write(mount.TemplateId); // teplateId
-                stream.Write(mount.OwnerId);    // characterId (masterId)
-                break;
+                stream.Write(mount.TlId);          // tl             : u16
+                stream.Write(mount.TemplateId);    // mateTemplateId : u32
+                stream.Write((long)mount.OwnerId); // masterId       : i64
+                break;                             // 15 bytes with the discriminator
             case BaseUnitType.Shipyard:
                 var shipyard = (Shipyard)_unit;
                 stream.Write(shipyard.ShipyardData.Id);         // type(id)
@@ -303,6 +322,12 @@ public class SCUnitStatePacket : GamePacket
             case Slave unit:
                 if (unit.BondingObjId > 0)
                 {
+                    // The point byte leads this block exactly as it does the one above, and the
+                    // rest only follows when it is not the System sentinel. It was missing here,
+                    // so a slave bonded to another one shifted the whole tail by a byte. We have
+                    // no attach point modelled for bonding, and any non-sentinel value keeps the
+                    // tuple, so None goes out until there is something real to send.
+                    stream.Write((byte)AttachPointKind.None); // point
                     stream.WriteBc(unit.BondingObjId);
                     stream.Write(0);  // space
                     stream.Write(0);  // spot
@@ -1258,10 +1283,26 @@ public class SCUnitStatePacket : GamePacket
                     WriteEquip(stream, items);
                     break;
                 }
+            // A mate is the one family that does not describe slots 19 to 25 in full. Those are
+            // the body-part references, and for a mate the client reads nothing but the type
+            // from them - writing the whole item record there puts everything after it out of
+            // place. A slave uses the ordinary full record for the same slots.
             case Mate mate:
                 {
                     items = mate.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
+                    var mateValidFlags = CalculateProtocol1810ValidFlags(items);
+                    stream.Write(mateValidFlags);
+
+                    for (var slot = 0; slot < Protocol1810EquipmentSlots; slot++)
+                    {
+                        if ((mateValidFlags & (1UL << slot)) == 0)
+                            continue;
+
+                        if (slot is >= 19 and <= 25)
+                            stream.Write(items[slot].TemplateId);
+                        else
+                            stream.Write(items[slot]);
+                    }
                     break;
                 }
             case Slave slave:
@@ -1282,7 +1323,7 @@ public class SCUnitStatePacket : GamePacket
                     // Target serializer 0x3996AB80 iterates all 35 mask
                     // bits and selects the NPC entry shape by protocol slot,
                     // not by the server-side runtime Item subclass.
-                    for (var slot = 0; slot < 35; slot++)
+                    for (var slot = 0; slot < Protocol1810EquipmentSlots; slot++)
                     {
                         if ((validFlags & (1UL << slot)) == 0)
                             continue;
@@ -1359,7 +1400,7 @@ public class SCUnitStatePacket : GamePacket
     private static ulong CalculateProtocol1810ValidFlags(List<Item> items)
     {
         ulong validFlags = 0;
-        var count = Math.Min(items.Count, 35);
+        var count = Math.Min(items.Count, Protocol1810EquipmentSlots);
         for (var index = 0; index < count; index++)
         {
             if (items[index] != null)
@@ -1369,6 +1410,26 @@ public class SCUnitStatePacket : GamePacket
         return validFlags;
     }
 
+
+    /// <summary>
+    /// The owner link inside the mate and slave <c>BaseUnitType</c> branches.
+    /// </summary>
+    /// <remarks>
+    /// Two bytes, not three. Every other unit id in this packet is the fixed three-byte compact
+    /// form, but this one field goes through the client's 16-bit handle primitive, and its
+    /// storage keeps only the low sixteen bits. Written three bytes wide it pushed the owner
+    /// name, the position and everything after them one byte along, which is what made a
+    /// summoned vehicle take the client down with it.
+    ///
+    /// Object ids here are allocated well past 65535, so the value that arrives is the truncated
+    /// one. Getting the owner wrong does not stop the object appearing - the client keeps it as
+    /// somebody else's - so if a summoned mount or vehicle shows up but refuses to be yours,
+    /// this is the field to look at, and the question is which id space the client means.
+    /// </remarks>
+    private static void WriteMasterUnitId(PacketStream stream, uint ownerObjId)
+    {
+        stream.Write((ushort)ownerObjId);
+    }
 
     private static void WriteProtocol1810Position(PacketStream stream, Vector3 position)
     {
