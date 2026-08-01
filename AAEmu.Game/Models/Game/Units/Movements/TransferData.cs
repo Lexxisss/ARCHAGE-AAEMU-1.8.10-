@@ -10,6 +10,13 @@ namespace AAEmu.Game.Models.Game.Units.Movements;
 
 public class TransferData : MoveType
 {
+    /// <summary>
+    /// What a full-scale velocity component means for this variant. It was being read at thirty
+    /// and written at fifty, so a carriage announced itself moving at a little over half the
+    /// speed it was actually given.
+    /// </summary>
+    private const float VelocityScale = 30f;
+
     public Vector3 AngVel { get; set; }
     public int Steering { get; set; }
     public int PathPointIndex { get; set; }
@@ -53,7 +60,10 @@ public class TransferData : MoveType
         (X, Y, Z) = stream.ReadPosition();
         WorldPos = new WorldPos(Helpers.ConvertLongX(X), Helpers.ConvertLongY(Y), Z);
         var tempVelocity = stream.ReadVector3Short();
-        Velocity = new Vector3(tempVelocity.X * 30f, tempVelocity.Y * 30f, tempVelocity.Z * 30f);
+        Velocity = new Vector3(
+            tempVelocity.X * VelocityScale,
+            tempVelocity.Y * VelocityScale,
+            tempVelocity.Z * VelocityScale);
         Rot = stream.ReadQuaternionShort();
         AngVel = stream.ReadVector3Single();
         Steering = stream.ReadInt32();
@@ -66,8 +76,10 @@ public class TransferData : MoveType
     {
         base.Write(stream);
         stream.WriteWorldPosition(X, Y, Z);
-        //stream.WriteVector3Short(new Vector3(Velocity.X / 50f, Velocity.Y / 50f, Velocity.Z / 50f));
-        stream.WriteVector3Short(new Vector3(Velocity.X * 0.02f, Velocity.Y * 0.02f, Velocity.Z * 0.02f));
+        stream.WriteVector3Short(new Vector3(
+            Velocity.X / VelocityScale,
+            Velocity.Y / VelocityScale,
+            Velocity.Z / VelocityScale));
         stream.WriteQuaternionShort(Rot);
         stream.WriteVector3Single(AngVel);
         stream.Write(Steering);
