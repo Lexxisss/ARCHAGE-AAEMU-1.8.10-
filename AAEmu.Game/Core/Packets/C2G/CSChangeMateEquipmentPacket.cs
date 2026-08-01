@@ -125,6 +125,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
                             tasks.Add(new ItemGain(slotBefore));
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems, tasks, []));
+                        BroadcastWornChange(character, mate, equipItems[i].Item2);
                     }
                 }
             }
@@ -144,6 +145,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
                                 new ItemGain(movedItem, invItems[i].Item1, invItems[i].Item2)
                             ],
                             []));
+                        BroadcastWornChange(character, mate, equipItems[i].Item2);
                     }
                 }
             }
@@ -151,6 +153,25 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
         if (reply.Changes.Count > 0)
             Connection.SendPacket(new SCMateEquipmentChangedPacket(reply, true));
+    }
+
+    /// <summary>
+    /// Tells everyone what the mate is wearing in that slot now.
+    /// </summary>
+    /// <remarks>
+    /// The mate equipment message reconciles the owner's own model of the slot. What puts the
+    /// gear on the animal for everyone looking at it is the generic unit equipment message,
+    /// whose handler resolves the id in the object registry without asking what kind of unit it
+    /// found - a mount is served by the same path as a player - and which drives the appearance
+    /// propagation rather than only the inventory picture.
+    ///
+    /// It carries only the slot that changed: the message is a delta, and the slots it does not
+    /// mention keep what they had.
+    /// </remarks>
+    private static void BroadcastWornChange(Models.Game.Char.Character character, Models.Game.Units.Mate mate, byte mateSlot)
+    {
+        character.BroadcastPacket(
+            new SCUnitEquipmentsChangedPacket(mate.ObjId, mateSlot, mate.Equipment.GetItemBySlot(mateSlot)), true);
     }
 
     /// <summary>
