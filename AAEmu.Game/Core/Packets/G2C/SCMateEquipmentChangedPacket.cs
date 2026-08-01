@@ -9,10 +9,12 @@ namespace AAEmu.Game.Core.Packets.G2C;
 /// </summary>
 /// <remarks>
 /// A record is an equipment delta followed by an expiry time, laid out exactly as in the
-/// request: two item records, then the source and destination type/index pairs. The two item
-/// records are the affected mate slot before and after the change - not the source item and the
-/// destination item. Sending that pair the other way round leaves the client's slot untouched,
-/// because it is being told the change ran in the opposite direction.
+/// request: two item records, then the source and destination type/index pairs. So the reply
+/// mirrors what was asked - the inventory side first, the mate side second.
+///
+/// The reverse notes name the two records before and after, which would put the slot's earlier
+/// state first. The client's own requests read the other way: equipping arrives as the item
+/// first and an empty record second, which is source and destination.
 /// </remarks>
 public class SCMateEquipmentChangedPacket : GamePacket
 {

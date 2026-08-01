@@ -72,9 +72,8 @@ public class CSChangeMateEquipmentPacket : GamePacket
             invItems[i].Item3 = (EquipItem)character.Inventory.Bag.GetItemBySlot(invItems[i].Item2);
             equipItems[i].Item3 = (EquipItem)mate.Equipment.GetItemBySlot(equipItems[i].Item2);
 
-            // What the mate slot holds before anything moves. The reply has to describe this slot
-            // as it was and as it became; sending the bag item and the mate item instead told the
-            // client the change ran the other way, so the slot never redrew.
+            // What the mate slot holds before anything moves, for the case where gear replaces
+            // gear and the old piece has to be announced wherever it ends up.
             var slotBefore = equipItems[i].Item3;
 
             Logger.Debug($"FROM: ({invItems[i].Item1}:{invItems[i].Item2}) TO ({equipItems[i].Item1}:{equipItems[i].Item2}) ITEMS: {invItems[i].Item3?.Id}, {equipItems[i].Item3?.Id}, EQUIP: {isEquip}");
@@ -100,7 +99,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, character.Inventory.Bag, mate.Equipment, invItems[i].Item3.Id, invItems[i].Item1, invItems[i].Item2, 0, equipItems[i].Item1, equipItems[i].Item2))
                     {
-                        SendEquipmentChanged(invItems[i], equipItems[i], mate, slotBefore, tl, characterId, passengerId, bts);
+                        SendEquipmentChanged(invItems[i], equipItems[i], tl, characterId, passengerId, bts);
 
                         var tasks = new List<ItemTask>
                         {
@@ -125,7 +124,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, mate.Equipment, character.Inventory.Bag, equipItems[i].Item3.Id, equipItems[i].Item1, equipItems[i].Item2, 0, invItems[i].Item1, invItems[i].Item2))
                     {
-                        SendEquipmentChanged(invItems[i], equipItems[i], mate, slotBefore, tl, characterId, passengerId, bts);
+                        SendEquipmentChanged(invItems[i], equipItems[i], tl, characterId, passengerId, bts);
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
                             [
@@ -143,32 +142,28 @@ public class CSChangeMateEquipmentPacket : GamePacket
     /// Confirms one equipment change to the client that asked for it.
     /// </summary>
     /// <remarks>
-    /// The reply carries the mate slot twice - as it was and as it is now - followed by the
-    /// source and destination the client named. The two are independent: the four type/index
-    /// bytes are echoed back untouched, while the item records describe only the mate slot.
+    /// The reply is the request's own structure with a success flag on the end, so it mirrors
+    /// what was asked: the inventory side first, the mate side second, each filled from what the
+    /// server holds rather than from what the client claimed.
     ///
-    /// Both records used to come straight off the request handling: the bag item first and the
-    /// mate item second, whichever direction the change ran. Equipping therefore announced a
-    /// slot that went from full to empty, and unequipping one that went from empty to full -
-    /// both backwards, which is why the slot redrew in neither case.
+    /// This pair was briefly sent as the affected slot before and after the change, because the
+    /// reverse notes name the two records that way. The client's own requests settle it against
+    /// that reading - equipping arrives as the item first and an empty record second, which is
+    /// the source and the destination, not the earlier and the later state.
     /// </remarks>
     private void SendEquipmentChanged(
-        (SlotType type, byte slot, Item item) source,
-        (SlotType type, byte slot, Item item) dest,
-        Models.Game.Units.Mate mate,
-        Item slotBefore,
+        (SlotType type, byte slot, Item item) inventorySide,
+        (SlotType type, byte slot, Item item) mateSide,
         ushort tl,
         long characterId,
         uint passengerId,
         bool bts)
     {
-        var slotAfter = mate.Equipment.GetItemBySlot(dest.slot);
-
-        Logger.Debug($"ChangeMateEquipment reply: slot {dest.slot}, before=tpl {slotBefore?.TemplateId ?? 0}, after=tpl {slotAfter?.TemplateId ?? 0}");
+        Logger.Debug($"ChangeMateEquipment reply: ({inventorySide.type}:{inventorySide.slot})=tpl " +
+                     $"{inventorySide.item?.TemplateId ?? 0}, ({mateSide.type}:{mateSide.slot})=tpl " +
+                     $"{mateSide.item?.TemplateId ?? 0}");
 
         Connection.SendPacket(new SCMateEquipmentChangedPacket(
-            (source.type, source.slot, slotBefore),
-            (dest.type, dest.slot, slotAfter),
-            tl, characterId, passengerId, bts));
+            inventorySide, mateSide, tl, characterId, passengerId, bts));
     }
 }
