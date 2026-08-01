@@ -99,7 +99,8 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, character.Inventory.Bag, mate.Equipment, invItems[i].Item3.Id, invItems[i].Item1, invItems[i].Item2, 0, equipItems[i].Item1, equipItems[i].Item2))
                     {
-                        SendEquipmentChanged(invItems[i], equipItems[i], tl, characterId, passengerId, bts);
+                        SendEquipmentChanged(equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2),
+                            tl, characterId, passengerId, bts);
 
                         var tasks = new List<ItemTask>
                         {
@@ -124,7 +125,8 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, mate.Equipment, character.Inventory.Bag, equipItems[i].Item3.Id, equipItems[i].Item1, equipItems[i].Item2, 0, invItems[i].Item1, invItems[i].Item2))
                     {
-                        SendEquipmentChanged(invItems[i], equipItems[i], tl, characterId, passengerId, bts);
+                        SendEquipmentChanged(equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2),
+                            tl, characterId, passengerId, bts);
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
                             [
@@ -142,28 +144,31 @@ public class CSChangeMateEquipmentPacket : GamePacket
     /// Confirms one equipment change to the client that asked for it.
     /// </summary>
     /// <remarks>
-    /// The reply is the request's own structure with a success flag on the end, so it mirrors
-    /// what was asked: the inventory side first, the mate side second, each filled from what the
-    /// server holds rather than from what the client claimed.
+    /// The request and the reply share a structure but not a subject. The request is a move:
+    /// take this out of that bag slot and put it in that mate slot. The reply describes the mate
+    /// slot alone - as it was and as it is now - which is why the reverse notes name the two item
+    /// records before and after.
     ///
-    /// This pair was briefly sent as the affected slot before and after the change, because the
-    /// reverse notes name the two records that way. The client's own requests settle it against
-    /// that reading - equipping arrives as the item first and an empty record second, which is
-    /// the source and the destination, not the earlier and the later state.
+    /// So both container bytes name the mate's container and both indexes its slot. The bag was
+    /// being named instead, copied straight out of the request, and the accepted container kinds
+    /// for this packet are only the two mate ones: an unsupported kind never reaches the apply
+    /// path, and what the client is left showing is exactly what it showed before.
     /// </remarks>
     private void SendEquipmentChanged(
-        (SlotType type, byte slot, Item item) inventorySide,
-        (SlotType type, byte slot, Item item) mateSide,
+        (SlotType type, byte slot, Item item) mateSlot,
+        Item before,
+        Item after,
         ushort tl,
         long characterId,
         uint passengerId,
         bool bts)
     {
-        Logger.Debug($"ChangeMateEquipment reply: ({inventorySide.type}:{inventorySide.slot})=tpl " +
-                     $"{inventorySide.item?.TemplateId ?? 0}, ({mateSide.type}:{mateSide.slot})=tpl " +
-                     $"{mateSide.item?.TemplateId ?? 0}");
+        Logger.Debug($"ChangeMateEquipment reply: ({mateSlot.type}:{mateSlot.slot}) " +
+                     $"before=tpl {before?.TemplateId ?? 0}, after=tpl {after?.TemplateId ?? 0}");
 
         Connection.SendPacket(new SCMateEquipmentChangedPacket(
-            inventorySide, mateSide, tl, characterId, passengerId, bts));
+            (mateSlot.type, mateSlot.slot, before),
+            (mateSlot.type, mateSlot.slot, after),
+            tl, characterId, passengerId, bts));
     }
 }
