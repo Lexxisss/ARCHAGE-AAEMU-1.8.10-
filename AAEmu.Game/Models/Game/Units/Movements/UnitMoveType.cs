@@ -7,12 +7,15 @@ public class UnitMoveType : MoveType
     public sbyte[] DeltaMovement { get; set; }
 
     /// <summary>
-    /// Posture, not combat state. The client's enum is
-    /// <c>0 Stand, 1 Crouch, 2 Prone, 3 Relaxed, 4 Stealth, 5 Swim, 6 ZeroG</c>; no other
-    /// value is known to be accepted. Comments throughout this branch used to read
-    /// "COMBAT = 0, IDLE = 1", so walking NPCs were announced as crouching and the client
-    /// posed them accordingly instead of playing a walk cycle.
+    /// One signed byte whose values have no recovered meaning beyond zero versus nonzero.
     /// </summary>
+    /// <remarks>
+    /// The table that used to be written here - stand, crouch, prone, relaxed, stealth, swim,
+    /// zero-g - was withdrawn: those names come from an unrelated registration function, not from
+    /// anything that reads this field. What is actually known is that one consumer looks at it
+    /// only for actors, tells zero from nonzero, and skips its path entirely when the common flag
+    /// bit 0x04 is set. Zero stays the safe value to send.
+    /// </remarks>
     public sbyte Stance { get; set; }
     public sbyte Alertness { get; set; }
     public byte GcFlags { get; set; }
@@ -42,7 +45,10 @@ public class UnitMoveType : MoveType
     public short SubPosY { get; set; }
     public short SubPosZ { get; set; }
 
-    /// <summary>Written only for <see cref="SubType"/> 1, 2 or 3.</summary>
+    /// <summary>
+    /// Written only for <see cref="SubType"/> 1, 2 or 3, and three bytes wide, not four - the
+    /// block is seven bytes or ten, never eleven.
+    /// </summary>
     public uint SubTypeId { get; set; }
 
     public override void Read(PacketStream stream)
@@ -85,7 +91,7 @@ public class UnitMoveType : MoveType
             SubPosY = stream.ReadInt16();
             SubPosZ = stream.ReadInt16();
             if (SubType is 1 or 2 or 3)
-                SubTypeId = stream.ReadUInt32();
+                SubTypeId = stream.ReadBc();
         }
         if ((ActorFlags & 0x100) == 0x100)
             MaxPushedUnitId = stream.ReadUInt32(); // actor.maxPushedUnitId
@@ -131,7 +137,7 @@ public class UnitMoveType : MoveType
             stream.Write(SubPosY);
             stream.Write(SubPosZ);
             if (SubType is 1 or 2 or 3)
-                stream.Write(SubTypeId);
+                stream.WriteBc(SubTypeId);
         }
         if ((ActorFlags & 0x100) == 0x100)
             stream.Write(MaxPushedUnitId);

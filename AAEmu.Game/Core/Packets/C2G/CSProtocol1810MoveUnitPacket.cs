@@ -5,7 +5,9 @@ using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
+using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.Units.Movements;
 using AAEmu.Game.Utils;
 
@@ -41,6 +43,17 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
     private bool _valid;
     private bool _usedPaddedPosition;
     private byte[] _body = Array.Empty<byte>();
+
+    /// <summary>
+    /// The whole body, read as the variant its type byte names.
+    /// </summary>
+    /// <remarks>
+    /// Only the player's own steps used to be decoded, and only as far as the position. Anything
+    /// the player was driving - a cart, a ship, the animal under them - was logged as unsupported
+    /// and dropped, which is why none of them moved: the client sends all of it here, and the
+    /// handler that knew what to do with it sits on an opcode this client never sends.
+    /// </remarks>
+    private MoveType _movement;
 
     public override PacketLogLevel LogLevel => PacketLogLevel.Off;
 
@@ -107,11 +120,40 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
             }
 
             _valid = float.IsFinite(_x) && float.IsFinite(_y) && float.IsFinite(_z);
+            _movement = ReadVariantBody();
         }
         catch (Exception exception)
         {
             Logger.Warn(exception, "Failed to decode target 0x0104 movement body, length={0}", _body.Length);
             _valid = false;
+        }
+    }
+
+    /// <summary>
+    /// Reads the body as the variant its type byte names, starting after the object id and that
+    /// byte. Returns null when the body does not hold a complete one.
+    /// </summary>
+    private MoveType ReadVariantBody()
+    {
+        try
+        {
+            var stream = new PacketStream(_body);
+            stream.ReadBc();
+            var type = (MoveTypeEnum)stream.ReadByte();
+
+            var movement = MoveType.GetType(type);
+            movement.Read(stream);
+            return movement;
+        }
+        catch (Exception exception)
+        {
+            // The body itself, so the layout can be worked out from a real one rather than
+            // guessed at. A variant that does not parse is always a length disagreement, and the
+            // only thing that settles those is the bytes.
+            Logger.Warn(exception,
+                "Failed to decode target 0x0104 {0} body, length={1}, flags=0x{2:X2}, body={3}",
+                _moveType, _body.Length, _flags, Convert.ToHexString(_body));
+            return null;
         }
     }
 
@@ -121,16 +163,10 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
         if (!_valid || character == null || character.DisabledSetPosition)
             return;
 
-        // The current restoration only accepts authoritative movement for the
-        // active character. Vehicle, mate and slave control will be restored
-        // separately from their exact 10.8 movement variants.
+        // Anything that is not the player's own step is something they are driving or riding.
         if (_objId != character.ObjId || _moveType != MoveTypeEnum.Unit)
         {
-            Logger.Warn(
-                "Ignored unsupported target movement owner/type: characterId={0}, packetObjId={1}, type={2}",
-                character.Id,
-                _objId,
-                _moveType);
+            ExecuteControlledObject(character);
             return;
         }
 
@@ -228,6 +264,79 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
                 oldZone,
                 character.Transform.ZoneId,
                 publishedNpcs);
+        }
+    }
+
+    /// <summary>
+    /// Applies a step the player made on something else - a cart, a ship, the animal under them.
+    /// </summary>
+    /// <remarks>
+    /// The client is authoritative for what it drives, exactly as it is for the player's own
+    /// steps; the server stores the state and passes it on to everyone who can see it.
+    /// </remarks>
+    private void ExecuteControlledObject(Character character)
+    {
+        if (_movement == null)
+            return;
+
+        var targetUnit = WorldManager.Instance.GetBaseUnit(_objId);
+        if (targetUnit == null)
+        {
+            Logger.Warn("Movement for an object that is not here: characterId={0}, objId={1}, type={2}",
+                character.Id, _objId, _moveType);
+            return;
+        }
+
+        switch (_movement)
+        {
+            // Steering and throttle only - the ship's own position comes from the physics step,
+            // not from here.
+            case ShipRequestMoveType shipRequest:
+                if (targetUnit is not Slave ship)
+                    return;
+
+                ship.ThrottleRequest = shipRequest.Throttle;
+                ship.SteeringRequest = shipRequest.Steering;
+                character.Transform.Parent = ship.Transform;
+                break;
+
+            // Carts and cars. Their position is whatever the driver's client says it is.
+            case VehicleMoveType vehicle:
+                if (targetUnit is not Slave car)
+                    return;
+
+                var (rotationX, rotationY, rotationZ) =
+                    MathUtil.GetSlaveRotationInDegrees(vehicle.RotationX, vehicle.RotationY, vehicle.RotationZ);
+
+                character.Transform.Parent = car.Transform;
+                car.Transform.Local.SetPosition(vehicle.X, vehicle.Y, vehicle.Z, rotationX, rotationY, rotationZ);
+                car.BroadcastPacket(new SCOneUnitMovementPacket(_objId, vehicle), true);
+                car.Transform.FinalizeTransform(); // carry the passengers along
+                break;
+
+            // The animal under the player. Its own walking step stands down while it is ridden;
+            // this is what replaces it.
+            case UnitMoveType actor when targetUnit is Mate mate:
+                mate.Transform.Local.SetPosition(actor.X, actor.Y, actor.Z,
+                    (float)MathUtil.ConvertDirectionToRadian(actor.RotationX),
+                    (float)MathUtil.ConvertDirectionToRadian(actor.RotationY),
+                    (float)MathUtil.ConvertDirectionToRadian(actor.RotationZ));
+
+                mate.BroadcastPacket(new SCOneUnitMovementPacket(_objId, actor), true);
+                mate.Transform.FinalizeTransform();
+
+                // A mount earns while it is carrying somebody. This never ran before, because the
+                // handler holding it is on an opcode this client does not send.
+                if (actor.VelX != 0 || actor.VelY != 0)
+                    mate.StartUpdateXp(character);
+                else
+                    mate.StopUpdateXp();
+                break;
+
+            default:
+                Logger.Warn("Unhandled controlled movement: characterId={0}, objId={1}, type={2}, unit={3}",
+                    character.Id, _objId, _moveType, targetUnit.GetType().Name);
+                break;
         }
     }
 
