@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -133,6 +133,9 @@ public partial class Character : Unit, ICharacter
     public CharacterAppellations Appellations { get; set; }
     public CharacterAbilities Abilities { get; set; }
     public CharacterPortals Portals { get; set; }
+
+    /// <summary>Recipes the player has pinned; the client keeps a copy and we hold the real one.</summary>
+    public CharacterFavoriteCrafts FavoriteCrafts { get; set; }
     public CharacterFriends Friends { get; set; }
     public CharacterBlocked Blocked { get; set; }
     public CharacterMates Mates { get; set; }
@@ -2306,6 +2309,8 @@ public partial class Character : Unit, ICharacter
             Appellations.Load(connection);
             Portals = new CharacterPortals(this);
             Portals.Load(connection);
+            FavoriteCrafts = new CharacterFavoriteCrafts(this);
+            FavoriteCrafts.Load(connection);
             Friends = new CharacterFriends(this);
             Friends.Load(connection);
             Blocked = new CharacterBlocked(this);
@@ -2485,6 +2490,7 @@ public partial class Character : Unit, ICharacter
             Actability?.Save(connection, transaction);
             Appellations?.Save(connection, transaction);
             Portals?.Save(connection, transaction);
+            FavoriteCrafts?.Save(connection, transaction);
             Friends?.Save(connection, transaction);
             Blocked?.Save(connection, transaction);
             Skills?.Save(connection, transaction);
