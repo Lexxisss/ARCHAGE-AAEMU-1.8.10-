@@ -98,6 +98,12 @@ public class Skill
         // Cast character for future reference
         var character = caster as Character;
 
+        if (character != null && IsGetOffRequest(Template))
+        {
+            Logger.Debug($"Skill {Template.Id} is a get-off dummy; detaching {character.Name} ({character.ObjId})");
+            character.ForceDismount(AttachUnitReason.UnmountNormal);
+        }
+
         unit.ConditionChance = true;
 
         if (unit.SkillTask != null)
@@ -1487,5 +1493,30 @@ AlwaysHit:
 
         character.LastCast = DateTime.UtcNow;
         character.IsInPostCast = true;
+    }
+
+    /// <summary>
+    /// Whether this skill is the client's way of asking to get off whatever it is standing on.
+    /// </summary>
+    /// <remarks>
+    /// Getting off a vehicle carries no effect data at all. The skill's own description calls it
+    /// a dummy, and the client expects the server to know what it means - so something here has
+    /// to recognise it, and the question is only what by.
+    ///
+    /// Not by id: a list of ids in the source ages the moment the client data changes. What the
+    /// data does say is that the skill targets the thing the caster is attached to, and carries
+    /// neither effects nor a plot - it has no way to do anything by itself. Across the 224 skills
+    /// in the 1.8 client that target a parent - sails, oars, and this - that combination picks out
+    /// exactly one, and it is the one whose description reads "dummy skill for getting off a
+    /// slave". Oarsman is the near miss, and it is excluded by its plot.
+    ///
+    /// This is a property of the data at hand rather than a promise about every data set, which
+    /// is why the caller says so in the log when it fires.
+    /// </remarks>
+    private static bool IsGetOffRequest(SkillTemplate template)
+    {
+        return template.TargetType == SkillTargetType.Parent
+               && template.Plot == null
+               && (template.Effects == null || template.Effects.Count == 0);
     }
 }
