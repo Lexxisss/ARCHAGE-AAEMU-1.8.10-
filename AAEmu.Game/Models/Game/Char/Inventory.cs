@@ -595,7 +595,8 @@ public class Inventory
             case SwapAction.doEquipInEmptySlot:
                 itemInTargetSlot.SlotType = sourceContainer.ContainerType;
                 itemInTargetSlot.Slot = fromSlot;
-                itemTasks.Add(new ItemMove(fromType, fromSlot, fromItemId, toType, toSlot, toItemId));
+                AnnounceMoveIntoEmptySlot(itemTasks, itemInTargetSlot, toType, toSlot,
+                    new ItemMove(fromType, fromSlot, fromItemId, toType, toSlot, toItemId));
                 if (targetContainer != sourceContainer)
                 {
                     sourceContainer.Items.Add(itemInTargetSlot);
@@ -622,7 +623,8 @@ public class Inventory
             case SwapAction.doMoveAllToEmpty:
                 fromItem.SlotType = targetContainer.ContainerType;
                 fromItem.Slot = toSlot;
-                itemTasks.Add(new ItemMove(fromType, fromSlot, fromItem.Id, toType, toSlot, toItemId));
+                AnnounceMoveIntoEmptySlot(itemTasks, fromItem, fromType, fromSlot,
+                    new ItemMove(fromType, fromSlot, fromItem.Id, toType, toSlot, toItemId));
                 if (targetContainer != sourceContainer)
                 {
                     sourceContainer.Items.Remove(fromItem);
@@ -753,6 +755,39 @@ public class Inventory
             targetContainer.ApplyBindRules(taskType);
 
         return itemTasks.Count > 0;
+    }
+
+    /// <summary>
+    /// Announces one item arriving in a slot that was empty, leaving another behind it.
+    /// </summary>
+    /// <remarks>
+    /// A move task names both slots and resolves both of the client's slot objects before it does
+    /// anything, giving up when either is missing. A bag has all of its slots standing, so a move
+    /// is right there and stays. An equipment slot that has never held anything need not, and a
+    /// move into one is dropped without a word - the item leaves its old slot on this side and
+    /// the client keeps showing the old picture. Emptying a slot and filling one are separate
+    /// tasks precisely so they do not depend on the other end already existing.
+    /// </remarks>
+    private static void AnnounceMoveIntoEmptySlot(List<ItemTask> tasks, Item item, SlotType vacatedType,
+        byte vacatedSlot, ItemMove ordinaryMove)
+    {
+        if (!IsEquipmentContainer(vacatedType) && !IsEquipmentContainer(item.SlotType))
+        {
+            tasks.Add(ordinaryMove);
+            return;
+        }
+
+        tasks.Add(new ItemRemove(item, vacatedType, vacatedSlot));
+        tasks.Add(new ItemGain(item));
+    }
+
+    /// <summary>
+    /// Whether this is one of the containers the client keeps its worn gear in, rather than a bag
+    /// or a warehouse. A mate has one of its own per family.
+    /// </summary>
+    private static bool IsEquipmentContainer(SlotType slotType)
+    {
+        return slotType is SlotType.Equipment or SlotType.EquipmentMate or SlotType.EquipmentMateBattle;
     }
 
     /// <summary>
