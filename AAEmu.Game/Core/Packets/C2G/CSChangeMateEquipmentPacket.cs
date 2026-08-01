@@ -111,7 +111,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, character.Inventory.Bag, mate.Equipment, invItems[i].Item3.Id, invItems[i].Item1, invItems[i].Item2, 0, equipItems[i].Item1, equipItems[i].Item2))
                     {
-                        AddChange(reply, equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2));
+                        AddChange(reply, invItems[i], equipItems[i]);
 
                         var tasks = new List<ItemTask>
                         {
@@ -136,7 +136,7 @@ public class CSChangeMateEquipmentPacket : GamePacket
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, mate.Equipment, character.Inventory.Bag, equipItems[i].Item3.Id, equipItems[i].Item1, equipItems[i].Item2, 0, invItems[i].Item1, invItems[i].Item2))
                     {
-                        AddChange(reply, equipItems[i], slotBefore, mate.Equipment.GetItemBySlot(equipItems[i].Item2));
+                        AddChange(reply, invItems[i], equipItems[i]);
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
                             [
@@ -157,30 +157,33 @@ public class CSChangeMateEquipmentPacket : GamePacket
     /// Records one applied change in the reply set.
     /// </summary>
     /// <remarks>
-    /// The request and the reply share a structure but not a subject. The request is a move:
-    /// take this out of that bag slot and put it in that mate slot. The reply describes the mate
-    /// slot alone - as it was and as it is now - which is why the reverse notes name the two item
-    /// records before and after.
+    /// A record is a swap seen from before it happened: the first item is what the source slot
+    /// held, the second is what the destination slot held, and the two slot keys say where. On
+    /// success the client puts the first item into the destination and the second one back into
+    /// the source, which is what makes both an equip and an unequip fall out of the same shape.
     ///
-    /// So both container bytes name the mate's container and both indexes its slot. The bag was
-    /// being named instead, copied straight out of the request, and the accepted container kinds
-    /// for this packet are only the two mate ones: an unsupported kind never reaches the apply
-    /// path, and what the client is left showing is exactly what it showed before.
+    /// So the pair is not one slot before and after. Naming the mate's own slot on both sides
+    /// made the client swap a slot with itself and crash on unequip, because the mate branch -
+    /// unlike the slave one - does not check the source lookup for null before copying out of it.
+    /// The slot keys are echoed as the client sent them; the source lookup goes through the
+    /// generic inventory, so a bag on that side is expected.
     /// </remarks>
-    private static void AddChange(MateEquipment reply, (SlotType type, byte slot, Item item) mateSlot,
-        Item before, Item after)
+    private static void AddChange(MateEquipment reply,
+        (SlotType type, byte slot, Item item) source,
+        (SlotType type, byte slot, Item item) dest)
     {
-        Logger.Debug($"ChangeMateEquipment reply record: ({mateSlot.type}:{mateSlot.slot}) " +
-                     $"before=tpl {before?.TemplateId ?? 0}, after=tpl {after?.TemplateId ?? 0}");
+        Logger.Debug($"ChangeMateEquipment reply record: ({source.type}:{source.slot})=tpl " +
+                     $"{source.item?.TemplateId ?? 0} <-> ({dest.type}:{dest.slot})=tpl " +
+                     $"{dest.item?.TemplateId ?? 0}");
 
         reply.Changes.Add(new MateEquipmentDelta
         {
-            Before = before,
-            After = after,
-            SourceType = mateSlot.type,
-            SourceIndex = mateSlot.slot,
-            DestType = mateSlot.type,
-            DestIndex = mateSlot.slot,
+            Before = source.item,
+            After = dest.item,
+            SourceType = source.type,
+            SourceIndex = source.slot,
+            DestType = dest.type,
+            DestIndex = dest.slot,
             ExpireTime = 0
         });
     }
