@@ -139,7 +139,7 @@ public static class CSOffsets
     public const ushort CSBagHandleSelectiveItemsPacket = 0x0B1;
     public const ushort off_3A0F1EBC = 0x053;
     public const ushort CSSkillControllerStatePacket = 0x0FD;
-    public const ushort CSMountMatePacket = 0x003;
+    public const ushort CSMountMatePacket = 0x07F;
     public const ushort CSLeaveWorldPacket = 0x0B2;
     public const ushort CSCancelLeaveWorldPacket = 0x086;
     public const ushort CSIdleStatusPacket = 0x0E2;
@@ -346,7 +346,7 @@ public static class CSOffsets
     public const ushort CSNaviTeleportPacket = 0x0BE;
     public const ushort CSNaviOpenPortalPacket = 0x149;
     public const ushort CSNaviOpenBountyPacket = 0x097;
-    public const ushort CSSetLogicDoodadPacket = 0x1EB;
+    public const ushort CSSetLogicDoodadPacket = 0x0D9; // was 0x1EB
     public const ushort CSCleanupLogicLinkPacket = 0x04B;
     public const ushort CSChangeDoodadDataPacket = 0x1C0;
     // 0x148 belongs to CSDoodadPurchaseItemPacket; the buy request arrives on 0x210,
@@ -443,6 +443,7 @@ public static class CSOffsets
     public const ushort CSTakeScheduleItemPacket = 0x1CA;
     public const ushort off_3A14F264 = 0x154;
     public const ushort off_3A14F3F4 = 0x0AC;
+    public const ushort CSUpdateFavoriteCraftsPacket = 0x0AC; // same slot as off_3A14F3F4
     public const ushort off_3A14F47C = 0x0F0;
     public const ushort CSDestroyItemPacket = 0x05E;
     public const ushort CSSplitBagItemPacket = 0x150;
@@ -528,8 +529,8 @@ public static class CSOffsets
     public const ushort CSTakedownTradeItemPacket = 0xfff;
     public const ushort CSUpdateDominionTaxRatePacket = 0x203;
     public const ushort CSUpdateNationalTaxRatePacket = 0xfff;
-    public const ushort CSPayChargeMoneyPacket = 0xfff;
-    public const ushort CSPerpayHouseTaxPacket = 0xfff;
+    public const ushort CSPayChargeMoneyPacket = 0x015;
+    public const ushort CSPerpayHouseTaxPacket = 0x1F0; // prepay; same slot as off_3A12FAAC
     public const ushort CSRankCharacterPacket = 0xfff;
     public const ushort CSRequestHouseTaxPacket = 0x20F;
     public const ushort CSRequestSpecialtyCurrentPacket = 0xfff;
@@ -546,7 +547,7 @@ public static class CSOffsets
     public const ushort CSSetForceAttackPacket = 0xfff;
     public const ushort CSTeleportEndedPacket = 0xfff;
     public const ushort CSTradeOkPacket = 0xfff;
-    public const ushort CSUnMountMatePacket = 0xfff;
+    public const ushort CSUnMountMatePacket = 0x003;
     public const ushort CSUseTeleportPacket = 0xfff;
     public const ushort CSWithdrawMoneyPacket = 0xfff;
     public const ushort CSICSGoodsListRequestPacket = 0xfff;
@@ -563,10 +564,12 @@ public static class CSOffsets
     public const ushort CSAllowRecoverPacket = 0xfff;
     public const ushort CSBuyHousePacket = 0x064;
     public const ushort CSDiscardSlavePacket = 0xfff;
-    public const ushort CSDetachFromDoodadPacket = 0xfff;
+    public const ushort CSDetachFromDoodadPacket = 0x14F; // no separate class exists; this is CSUnbondDoodad
     public const ushort CSLeaveInstantGamePacket = 0xfff;
     public const ushort CSListSpecialtyGoodsPacket = 0xfff;
     public const ushort CSAuctionPostPacket = 0xfff;
     public const ushort CSAuctionLowestPricePacket = 0xfff;
     public const ushort CSDepositMoneyPacket = 0xfff;
+    public const ushort CSItemTaskConfirmPacket = 0x162;
+    public const ushort CSRequestButlerHarvestJobPacket = 0x1BE;
 }
