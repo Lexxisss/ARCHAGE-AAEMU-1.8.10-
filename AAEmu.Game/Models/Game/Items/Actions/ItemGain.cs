@@ -18,20 +18,35 @@ namespace AAEmu.Game.Models.Game.Items.Actions;
 public class ItemGain : ItemTask
 {
     private readonly Item _item;
+    private readonly SlotType _slotType;
+    private readonly byte _slot;
 
     public ItemGain(Item item)
+        : this(item, item.SlotType, (byte)item.Slot)
+    {
+    }
+
+    /// <summary>
+    /// Overload for a destination whose container kind on the wire is not the one the item
+    /// itself carries. A mate keeps its gear in a single container on this side, while the
+    /// client keeps a separate virtual container per mate family and drops anything announced
+    /// under the wrong one.
+    /// </summary>
+    public ItemGain(Item item, SlotType slotType, byte slot)
     {
         _type = ItemAction.Take;
         _item = item;
+        _slotType = slotType;
+        _slot = slot;
     }
 
     public override PacketStream Write(PacketStream stream)
     {
         base.Write(stream);
 
-        stream.Write((byte)_item.SlotType); // type  : u8
-        stream.Write((byte)_item.Slot);     // index : u8
-        stream.Write(_item);                // full item record
+        stream.Write((byte)_slotType); // type  : u8
+        stream.Write(_slot);           // index : u8
+        stream.Write(_item);           // full item record
 
         return stream;
     }
