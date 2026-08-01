@@ -18,7 +18,12 @@ namespace AAEmu.Game.Core.Packets.C2G;
 
 public class CSSellItemsPacket : GamePacket
 {
-    private const int MaxCartEntries = 30;
+    /// <summary>
+    /// The client's own serializer sends no more than this many lines, so anything above it is a
+    /// crafted request rather than a full cart.
+    /// </summary>
+    private const int MaxCartEntries = 12;
+
     private const float MaxVendorDistance = 5f;
 
     private sealed class SaleEntry
@@ -40,6 +45,18 @@ public class CSSellItemsPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
+        // The whole body first, so the parse can be checked against it. This layout has never
+        // been verified against this client - it came down the same line as everything else, and
+        // a layout that agrees with an older version is not evidence, only a shared ancestor.
+        // If the parse does not end exactly at the end of the body, it is wrong, and the bytes
+        // are the only thing that settles which part.
+        var body = stream.LeftBytes > 0 ? stream.ReadBytes(stream.LeftBytes) : [];
+        stream = new PacketStream(body);
+
+        // Logged before anything can refuse the request, because every refusal below returns and
+        // the bytes are what we would want most at that point.
+        Logger.Debug("VendorSell body: {0} bytes, {1}", body.Length, Convert.ToHexString(body));
+
         var character = Connection.ActiveChar;
         var npcObjId = stream.ReadBc();
         var npc = WorldManager.Instance.GetNpc(npcObjId);
@@ -73,13 +90,15 @@ public class CSSellItemsPacket : GamePacket
             var iid = stream.ReadUInt64();
             var requestedStack = stream.ReadUInt32();
             var removeReservationTime = stream.ReadDateTime();
-            var clientTemplateId = stream.ReadUInt32();
+            var type1 = stream.ReadUInt32();               // no recovered meaning; not the template
             var dbSlaveId = stream.ReadUInt32();
             var clientType2 = stream.ReadUInt32();
 
-            if (slotType != SlotType.Inventory || requestedStack == 0 || requestedStack > int.MaxValue)
+            // The standard store window only ever offers bag slots; a request naming anything else
+            // did not come from it.
+            if (slotType != SlotType.Inventory)
             {
-                Fail(character, npcObjId, npc.Template.Id, iid, unchecked((int)requestedStack), "invalid_sale_slot_or_count", ErrorMessageType.StoreInvalidItem);
+                Fail(character, npcObjId, npc.Template.Id, iid, unchecked((int)requestedStack), "invalid_sale_slot", ErrorMessageType.StoreInvalidItem);
                 return;
             }
 
@@ -90,21 +109,36 @@ public class CSSellItemsPacket : GamePacket
                 return;
             }
 
-            var saleCount = (int)requestedStack;
-            if (saleCount > item.Count)
+            // How many to sell is decided here, not by the request. The window's own builder never
+            // fills this field in, so whatever arrives is leftover memory - and every sale was
+            // being refused for a count the client never meant to send. A value that makes sense
+            // is honoured; anything else sells the stack the player picked.
+            var saleCount = item.Count;
+            if (requestedStack > 0 && requestedStack <= (uint)item.Count)
             {
-                Fail(character, npcObjId, npc.Template.Id, iid, saleCount, "sale_count_exceeds_stack", ErrorMessageType.StoreInvalidItem);
-                return;
+                saleCount = (int)requestedStack;
+            }
+            else if (requestedStack != 0)
+            {
+                Logger.Debug(
+                    "VendorSell: request says {0} of item {1} but the stack holds {2}; selling the stack",
+                    requestedStack, iid, item.Count);
             }
             if (item.Template?.Sellable != true)
             {
                 Fail(character, npcObjId, npc.Template.Id, iid, saleCount, "item_not_sellable", ErrorMessageType.StoreNotSellableItem);
                 return;
             }
-            if (clientTemplateId != 0 && clientTemplateId != item.TemplateId)
+            // The template the client names is the *last* field of the record, not the first.
+            // Checking the first one refused every sale, because it holds something else that has
+            // no recovered meaning. Neither is authoritative - the item is pinned down by its own
+            // id, its slot, the container and its owner - so a disagreement is worth saying and
+            // no more.
+            if (clientType2 != 0 && clientType2 != item.TemplateId)
             {
-                Fail(character, npcObjId, npc.Template.Id, iid, saleCount, "client_template_mismatch", ErrorMessageType.StoreInvalidItem);
-                return;
+                Logger.Debug(
+                    "VendorSell: client names template {0} for item {1}, server has {2}",
+                    clientType2, iid, item.TemplateId);
             }
 
             if (!VendorPriceResolver.TryResolveMoneyRefund(item.TemplateId, item.Grade, saleCount, out var refund, out var refundFailure))
@@ -139,6 +173,20 @@ public class CSSellItemsPacket : GamePacket
                 "VendorSell request VendorNpcId={0} VendorTemplateId={1} InteractionObjId={2} ItemIid={3} ItemId={4} Count={5} RemoveReservationTime={6:o} DbSlaveId={7} Type2={8}",
                 npcObjId, npc.Template.Id, interactionObjId, iid, item.TemplateId, saleCount,
                 removeReservationTime, dbSlaveId, clientType2);
+        }
+
+        // Whatever the outcome, say whether the parse fitted the body. Anything left over, or a
+        // read that ran short, means the record shape is wrong for this client and every sale
+        // after the first field is being read from the wrong place.
+        if (stream.LeftBytes != 0)
+        {
+            Logger.Warn(
+                "VendorSell layout mismatch: {0} bytes left after reading {1} entries from a {2}-byte body, body={3}",
+                stream.LeftBytes, count, body.Length, Convert.ToHexString(body));
+        }
+        else
+        {
+            Logger.Debug("VendorSell layout ok: {0} entries consumed the whole {1}-byte body", count, body.Length);
         }
 
         lock (character.InventoryTransactionLock)
@@ -304,6 +352,12 @@ public class CSSellItemsPacket : GamePacket
         Logger.Warn(
             "VendorSell failed VendorNpcId={0} VendorTemplateId={1} ItemIid={2} RequestedCount={3} TransactionResult=failed FailureReason={4}",
             vendorNpcId, vendorTemplateId, iid, count, reason);
+
         character.SendErrorMessage(error);
+
+        // The store window holds a pending sale until it is told the trade is over. A general
+        // error message prints something and leaves that state where it was, so the window sat
+        // waiting on a sale that had already been refused.
+        character.SendPacket(new SCStoreTradeFailedPacket(false));
     }
 }
