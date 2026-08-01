@@ -5,12 +5,12 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCHouseBuildProgressPacket : GamePacket
 {
-    private readonly ushort _tl;
+    private readonly uint _tl;
     private readonly uint _modelId;
     private readonly int _allStep;
     private readonly int _curStep;
 
-    public SCHouseBuildProgressPacket(ushort tl, uint modelId, int allStep, int curStep) : base(SCOffsets.SCHouseBuildProgressPacket, 5)
+    public SCHouseBuildProgressPacket(uint tl, uint modelId, int allStep, int curStep) : base(SCOffsets.SCHouseBuildProgressPacket, 5)
     {
         _tl = tl;
         _modelId = modelId;

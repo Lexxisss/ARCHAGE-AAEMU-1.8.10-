@@ -5,10 +5,10 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCHousePermissionChangedPacket : GamePacket
 {
-    private readonly ushort _tl;
+    private readonly uint _tl;
     private readonly byte _permission;
 
-    public SCHousePermissionChangedPacket(ushort tl, byte permission) : base(SCOffsets.SCHousePermissionChangedPacket, 5)
+    public SCHousePermissionChangedPacket(uint tl, byte permission) : base(SCOffsets.SCHousePermissionChangedPacket, 5)
     {
         _tl = tl;
         _permission = permission;

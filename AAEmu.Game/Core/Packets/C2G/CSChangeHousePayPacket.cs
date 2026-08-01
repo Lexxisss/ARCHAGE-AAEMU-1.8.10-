@@ -11,7 +11,7 @@ public class CSChangeHousePayPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var tl = stream.ReadUInt16();
+        var tl = (ushort)stream.ReadUInt32(); // the handle is 32 bits on the wire; ours is 16
         var moneyAmount = stream.ReadInt32();
 
         Logger.Debug("ChangeHousePay, Tl: {0}, MoneyAmount: {1}", tl, moneyAmount);

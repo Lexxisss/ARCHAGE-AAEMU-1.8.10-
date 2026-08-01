@@ -78,6 +78,17 @@ public class RebuildHousing : SpecialEffectAction
             return;
         }
 
+        // Ask about the land before anything is spent. Rebuilding tears the old building down and
+        // consumes the materials first, so a refusal after that point would leave the player with
+        // neither building nor materials.
+        var housePosition = house.Transform.World.Position;
+        if (!HousingManager.Instance.CanPlaceDesign(character, targetDesignId, housePosition.X, housePosition.Y,
+                out var placementError, house))
+        {
+            character.SendErrorMessage(placementError);
+            return;
+        }
+
         var materials = HousingManager.Instance.GetMaterialsByHousingRebuildingId(rebuildingId);
 
         // Check every material before consuming any of them, so a partial payment is impossible.

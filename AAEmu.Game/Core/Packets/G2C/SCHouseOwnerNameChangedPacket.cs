@@ -5,10 +5,10 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCHouseOwnerNameChangedPacket : GamePacket
 {
-    private readonly ushort _tl;
+    private readonly uint _tl;
     private readonly string _newName;
 
-    public SCHouseOwnerNameChangedPacket(ushort tl, string newName) : base(SCOffsets.SCHouseOwnerNameChangedPacket, 5)
+    public SCHouseOwnerNameChangedPacket(uint tl, string newName) : base(SCOffsets.SCHouseOwnerNameChangedPacket, 5)
     {
         _tl = tl;
         _newName = newName;
