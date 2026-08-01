@@ -80,26 +80,40 @@ public class CSChangeMateEquipmentPacket : GamePacket
             Logger.Debug($"FROM: ({invItems[i].Item1}:{invItems[i].Item2}) TO ({equipItems[i].Item1}:{equipItems[i].Item2}) ITEMS: {invItems[i].Item3?.Id}, {equipItems[i].Item3?.Id}, EQUIP: {isEquip}");
             Logger.Debug($"ChangeMateEquipment request records: first=tpl {requestedFirst}, second=tpl {requestedSecond}");
 
-            // Gear moving on or off a mate is a move between two slots, and the client is told so.
-            // It used to be announced as a destruction: the item was handed to the mate and then,
-            // in the very next message, the client was asked to drop that same object from its
-            // slot and id registries. Nothing referring to it could survive that, which is why the
-            // saddle only ever showed up on the next summon, when the whole mate was described
-            // again. Taking gear off announced nothing at all, so the bag never got it back.
+            // Gear moving on or off a mate empties one slot and fills another, and both halves
+            // have to be said. Emptying is action 8 - the only one that unlinks the item and
+            // destroys the client's object - and filling is action 6, carrying the full record.
+            // A single move task is the wrong shape here: it resolves both slot objects first and
+            // gives up if either is missing, which an empty mate slot cannot promise.
+            //
+            // Only the first half used to be sent, so the saddle left the bag and arrived nowhere,
+            // and taking it off said nothing at all so the bag never got it back.
+            //
+            // The container kind is taken from the request rather than from the item, because the
+            // client keeps a separate virtual container per mate family - one for ride, another
+            // for battle - while everything here lives in a single container.
             if (isEquip)
             {
                 if (invItems[i].Item3 != null)
                 {
-                    var movedItemId = invItems[i].Item3.Id;
+                    var movedItem = invItems[i].Item3;
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, character.Inventory.Bag, mate.Equipment, invItems[i].Item3.Id, invItems[i].Item1, invItems[i].Item2, 0, equipItems[i].Item1, equipItems[i].Item2))
                     {
                         SendEquipmentChanged(invItems[i], equipItems[i], mate, slotBefore, tl, characterId, passengerId, bts);
-                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
-                            [new ItemMove(
-                                invItems[i].Item1, invItems[i].Item2, movedItemId,
-                                equipItems[i].Item1, equipItems[i].Item2, slotBefore?.Id ?? 0)],
-                            []));
+
+                        var tasks = new List<ItemTask>
+                        {
+                            new ItemRemove(movedItem, invItems[i].Item1, invItems[i].Item2),
+                            new ItemGain(movedItem, equipItems[i].Item1, equipItems[i].Item2)
+                        };
+
+                        // Gear replacing gear: whatever was in the slot has been pushed somewhere
+                        // else, and it carries its new home itself.
+                        if (slotBefore != null)
+                            tasks.Add(new ItemGain(slotBefore));
+
+                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems, tasks, []));
                     }
                 }
             }
@@ -107,16 +121,17 @@ public class CSChangeMateEquipmentPacket : GamePacket
             {
                 if (equipItems[i].Item3 != null)
                 {
-                    var movedItemId = equipItems[i].Item3.Id;
-                    var bagSlotBefore = invItems[i].Item3;
+                    var movedItem = equipItems[i].Item3;
 
                     if (character.Inventory.SplitOrMoveItemEx(ItemTaskType.Invalid, mate.Equipment, character.Inventory.Bag, equipItems[i].Item3.Id, equipItems[i].Item1, equipItems[i].Item2, 0, invItems[i].Item1, invItems[i].Item2))
                     {
                         SendEquipmentChanged(invItems[i], equipItems[i], mate, slotBefore, tl, characterId, passengerId, bts);
+
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
-                            [new ItemMove(
-                                equipItems[i].Item1, equipItems[i].Item2, movedItemId,
-                                invItems[i].Item1, invItems[i].Item2, bagSlotBefore?.Id ?? 0)],
+                            [
+                                new ItemRemove(movedItem, equipItems[i].Item1, equipItems[i].Item2),
+                                new ItemGain(movedItem, invItems[i].Item1, invItems[i].Item2)
+                            ],
                             []));
                     }
                 }
