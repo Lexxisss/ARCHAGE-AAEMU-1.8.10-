@@ -40,15 +40,29 @@ public class Buffs : IBuffs
         _toleranceCounters = new Dictionary<uint, BuffToleranceCounter>();
     }
 
-    public bool CheckBuffImmune(uint buffId)
+    /// <summary>
+    /// A copy of the effects to walk over safely.
+    /// </summary>
+    /// <remarks>
+    /// The list is shared between the world tick, skill effects and scheduled tasks, and copying
+    /// it without the lock is not safe: the copy reads the count first and fills the array after,
+    /// so a buff expiring in between leaves the copy short and throws. That was a live crash -
+    /// a dispel firing a damage trigger while the same list was being walked.
+    ///
+    /// Taking a copy rather than holding the lock for the whole walk is deliberate: the callers
+    /// end up removing effects as they go, and several of them reach back into this object.
+    /// </remarks>
+    private Buff[] Snapshot()
     {
-        IEnumerable<Buff> effects;
         lock (_lock)
         {
-            effects = _effects.ToArray();
+            return _effects.ToArray();
         }
+    }
 
-        foreach (var effect in effects)
+    public bool CheckBuffImmune(uint buffId)
+    {
+        foreach (var effect in Snapshot())
         {
             if (effect == null)
                 continue;
@@ -66,7 +80,7 @@ public class Buffs : IBuffs
 
     public bool CheckDamageImmune(DamageType damageType)
     {
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
         {
             var template = effect?.Template;
 
@@ -98,7 +112,7 @@ public class Buffs : IBuffs
     public List<Buff> GetEffectsByType(Type effectType)
     {
         var temp = new List<Buff>();
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
             if (effect.Template.GetType() == effectType)
                 temp.Add(effect);
         return temp;
@@ -106,7 +120,7 @@ public class Buffs : IBuffs
 
     public Buff GetEffectByIndex(uint index)
     {
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
             if (effect.Index == index)
                 return effect;
         return null;
@@ -114,7 +128,7 @@ public class Buffs : IBuffs
 
     public Buff GetEffectByTemplate(BuffTemplate template)
     {
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
             if (effect.Template == template)
                 return effect;
         return null;
@@ -122,7 +136,7 @@ public class Buffs : IBuffs
 
     public bool CheckBuff(uint id)
     {
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
             if (effect != null && effect.Template.BuffId > 0 && effect.Template.BuffId == id)
                 return true;
         return false;
@@ -134,7 +148,7 @@ public class Buffs : IBuffs
         if (buffs.Count == 0)
             return false;
 
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
             if (effect?.Template != null && buffs.Contains(effect.Template.BuffId))
                 return true;
         return false;
@@ -142,7 +156,7 @@ public class Buffs : IBuffs
 
     public Buff GetEffectFromBuffId(uint id)
     {
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
             if (effect != null && effect.Template.BuffId > 0 && effect.Template.BuffId == id)
                 return effect;
         return null;
@@ -150,7 +164,7 @@ public class Buffs : IBuffs
 
     public IEnumerable<Buff> GetBuffsRequiring(uint buffId)
     {
-        return _effects.Where(b => b.Template.RequireBuffId == buffId);
+        return Snapshot().Where(b => b.Template.RequireBuffId == buffId);
     }
 
     public bool CheckBuffs(List<uint> ids)
@@ -160,7 +174,7 @@ public class Buffs : IBuffs
 
         var buffIdsSet = new HashSet<uint>(ids);
 
-        foreach (var effect in _effects)
+        foreach (var effect in Snapshot())
             if (effect?.Template?.BuffId > 0 && buffIdsSet.Contains(effect.Template.BuffId))
                 return true;
 
@@ -185,7 +199,7 @@ public class Buffs : IBuffs
 
     public void GetAllBuffs(List<Buff> goodBuffs, List<Buff> badBuffs, List<Buff> hiddenBuffs)
     {
-        foreach (var buff in _effects.ToList())
+        foreach (var buff in Snapshot())
         {
             if (buff.Passive) continue;
             switch (buff.Template.Kind)
@@ -415,7 +429,7 @@ public class Buffs : IBuffs
         if (GetOwner() == null)
             return;
 
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
         {
             if (effect?.Template != null &&
                 effect.Template.Id == templateId &&
@@ -431,7 +445,7 @@ public class Buffs : IBuffs
         if (GetOwner() == null)
             return;
 
-        var effect = _effects.ToList().FirstOrDefault(candidate => candidate?.Index == index);
+        var effect = Snapshot().FirstOrDefault(candidate => candidate?.Index == index);
         effect?.SetInUse(false, false);
     }
 
@@ -440,7 +454,7 @@ public class Buffs : IBuffs
         if (GetOwner() == null)
             return;
 
-        var effect = _effects.ToList().FirstOrDefault(candidate => candidate?.Template?.BuffId == buffId);
+        var effect = Snapshot().FirstOrDefault(candidate => candidate?.Template?.BuffId == buffId);
         effect?.SetInUse(false, false);
     }
 
@@ -454,7 +468,7 @@ public class Buffs : IBuffs
 
         if (_effects == null)
             return;
-        foreach (var buff in _effects.ToList())
+        foreach (var buff in Snapshot())
             if (buff != null)
             {
                 var buffTemplate = buff.Template;
@@ -486,7 +500,7 @@ public class Buffs : IBuffs
             return;
 
         var buffIds = SkillManager.Instance.GetBuffsByTagId(buffTagId);
-        foreach (var e in _effects.ToList())
+        foreach (var e in Snapshot())
             if (e != null)
             {
                 if (!buffIds.Contains(e.Template.BuffId))
@@ -505,14 +519,14 @@ public class Buffs : IBuffs
         if (own == null)
             return;
 
-        foreach (var e in _effects.ToList())
+        foreach (var e in Snapshot())
             if (e != null /* && (e.Template.Skill == null || e.Template.Skill.Type != SkillTypes.Passive)*/)
                 e.Exit();
     }
 
     public void TriggerRemoveOn(BuffRemoveOn on, uint value = 0)
     {
-        foreach (var effect in _effects.ToList())
+        foreach (var effect in Snapshot())
         {
             if (effect != null)
             {
@@ -593,7 +607,7 @@ public class Buffs : IBuffs
         if (own == null)
             return;
 
-        foreach (var e in _effects.ToList())
+        foreach (var e in Snapshot())
             if (e != null && e.Template.RemoveOnDeath)
                 e.Exit();
     }
@@ -609,7 +623,7 @@ public class Buffs : IBuffs
         if (own == null)
             return;
 
-        foreach (var e in _effects.ToList())
+        foreach (var e in Snapshot())
             if (e != null && e.Template.Stealth)
                 e.Exit();
     }
@@ -621,7 +635,7 @@ public class Buffs : IBuffs
 
     public IEnumerable<Buff> GetAbsorptionEffects()
     {
-        return _effects.Where(e => e.Template.DamageAbsorptionTypeId > 0);
+        return Snapshot().Where(e => e.Template.DamageAbsorptionTypeId > 0);
     }
 
     public bool HasEffectsMatchingCondition(Func<Buff, bool> predicate)
