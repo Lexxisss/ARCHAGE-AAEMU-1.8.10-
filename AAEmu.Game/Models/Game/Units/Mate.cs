@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+
+using AAEmu.Commons.Network;
+using AAEmu.Commons.Utils;
 
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
@@ -11,9 +15,12 @@ using AAEmu.Game.Models.Game.Formulas;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Containers;
 using AAEmu.Game.Models.Game.NPChar;
+using AAEmu.Game.Models.Game.Units.Movements;
 using AAEmu.Game.Models.Game.Units.Static;
+using AAEmu.Game.Models.Game.World.Transform;
 using AAEmu.Game.Models.Tasks;
 using AAEmu.Game.Models.Tasks.Mate;
+using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.Units;
 
@@ -59,7 +66,15 @@ public sealed class Mate : Unit
     public List<uint> Skills { get; set; }
     public MateDb DbInfo { get; set; }
     public Task MateXpUpdateTask { get; set; }
+
+    /// <summary>The repeating step that walks an unridden mate back to its owner.</summary>
+    public Task MateFollowTask { get; set; }
+
     public MateType MateType { get; set; }  // added in 3+
+
+    /// <summary>True while somebody is in the driver's seat, so the rider is steering.</summary>
+    public bool IsRidden =>
+        Passengers.TryGetValue(AttachPointKind.Driver, out var driver) && driver.ObjId != 0;
 
     #region Attributes
 
@@ -540,6 +555,116 @@ public sealed class Mate : Unit
         // 2 seats by default
         Passengers.Add(AttachPointKind.Driver, new MatePassengerInfo { ObjId = 0, Reason = 0 });
         Passengers.Add(AttachPointKind.Passenger0, new MatePassengerInfo { ObjId = 0, Reason = 0 });
+    }
+
+    /// <summary>
+    /// Milliseconds between walking steps. Also what turns a step into a speed, so the figure the
+    /// client is told agrees with the ground actually covered.
+    /// </summary>
+    public const int FollowTickIntervalMs = 100;
+
+    /// <summary>True when the last state sent said the mate was moving.</summary>
+    private bool _isMoving;
+
+    /// <summary>
+    /// Walks one tick's worth of the way towards a point and tells everyone about it.
+    /// </summary>
+    /// <remarks>
+    /// The velocity sent has to agree with the ground actually covered: the client extrapolates
+    /// between states from it, so a figure that contradicts the displacement is what makes an
+    /// animal skate instead of walk.
+    /// </remarks>
+    /// <param name="target">Where it is heading.</param>
+    /// <param name="distance">How far it may travel this tick.</param>
+    public void MoveTowards(Vector3 target, float distance)
+    {
+        if (distance < 0.01f || IsDead)
+            return;
+
+        var currentPosition = Transform.Local.Position;
+        var targetDistance = MathUtil.CalculateDistance(currentPosition, target, true);
+        if (targetDistance <= 0.1f)
+            return;
+
+        var travelDistance = Math.Min(targetDistance, distance);
+        var (newX, newY, newZ) = PositionAndRotation.AddDistanceToFront(
+            travelDistance, targetDistance, currentPosition, target);
+        Transform.Local.SetPosition(newX, newY, newZ);
+
+        // Follow the ground rather than the straight line to the owner, but only where the two
+        // are close enough that this is a slope and not a different floor altogether.
+        var groundHeight = WorldManager.Instance.GetHeight(Transform.ZoneId, newX, newY);
+        if (Math.Abs(newZ - groundHeight) < 1f)
+            Transform.Local.SetHeight(groundHeight);
+
+        var angle = MathUtil.CalculateAngleFrom(Transform.Local.Position, target);
+        Transform.Local.SetRotationDegree(0f, 0f, (float)angle - 90);
+
+        var speedPerSecond = travelDistance * (1000f / FollowTickIntervalMs);
+        SendMovement(speedPerSecond, (float)angle);
+        _isMoving = true;
+    }
+
+    /// <summary>
+    /// Says the mate has come to a stop, once.
+    /// </summary>
+    /// <remarks>
+    /// Without a state carrying no speed the client keeps extrapolating from the last one it had
+    /// and the animal drifts on past where the server has it standing.
+    /// </remarks>
+    public void StopMovement()
+    {
+        if (!_isMoving)
+            return;
+
+        _isMoving = false;
+        SendMovement(0f, 0f);
+    }
+
+    private void SendMovement(float speedPerSecond, float angleDegrees)
+    {
+        var moveType = (UnitMoveType)MoveType.GetType(MoveTypeEnum.Unit);
+
+        short velX = 0;
+        short velY = 0;
+        if (speedPerSecond > 0f)
+        {
+            var normalized = speedPerSecond / ActorVelocityScale;
+            var (rawX, rawY) = MathUtil.AddDistanceToFront(
+                normalized * PacketStream.NormalizedShortScale, 0, 0, angleDegrees.DegToRad());
+            velX = (short)Math.Clamp(rawX, short.MinValue, short.MaxValue);
+            velY = (short)Math.Clamp(rawY, short.MinValue, short.MaxValue);
+        }
+
+        var (rotationX, rotationY, rotationZ) = Transform.Local.ToRollPitchYawSBytesMovement();
+
+        moveType.X = Transform.Local.Position.X;
+        moveType.Y = Transform.Local.Position.Y;
+        moveType.Z = Transform.Local.Position.Z;
+        moveType.VelX = velX;
+        moveType.VelY = velY;
+        moveType.RotationX = rotationX;
+        moveType.RotationY = rotationY;
+        moveType.RotationZ = rotationZ;
+        moveType.DeltaMovement = [0, speedPerSecond > 0f ? (sbyte)127 : (sbyte)0, 0];
+        moveType.Stance = 0;
+        moveType.Alertness = 0;
+        moveType.ActorFlags = 0;
+        moveType.Flags = 4;
+        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+
+        BroadcastPacket(new SCOneUnitMovementPacket(ObjId, moveType), false);
+    }
+
+    /// <summary>What a full-scale velocity component means for the actor variant.</summary>
+    private const float ActorVelocityScale = 60f;
+
+    /// <summary>Stops the walking step. Called when the mate leaves the world.</summary>
+    public void StopFollowing()
+    {
+        _ = MateFollowTask?.CancelAsync();
+        MateFollowTask = null;
+        _isMoving = false;
     }
 
     public void AddExp(int exp)

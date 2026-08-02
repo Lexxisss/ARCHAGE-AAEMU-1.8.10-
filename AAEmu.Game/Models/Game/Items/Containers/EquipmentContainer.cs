@@ -204,12 +204,25 @@ public class EquipmentContainer : ItemContainer
     public override void OnEnterContainer(Item item, ItemContainer lastContainer)
     {
         base.OnEnterContainer(item, lastContainer);
-        Owner?.UpdateGearBonuses(item, null);
+        ApplyGearBonuses(item, null);
     }
 
     public override void OnLeaveContainer(Item item, ItemContainer newContainer)
     {
         base.OnLeaveContainer(item, newContainer);
-        Owner?.UpdateGearBonuses(null, item);
+        ApplyGearBonuses(null, item);
+    }
+
+    /// <summary>
+    /// Applies the stat effect of a piece of gear entering or leaving this container.
+    /// </summary>
+    /// <remarks>
+    /// Whoever owns the container is not always who wears the gear: a mate keeps its equipment
+    /// in a container owned by its player. So this has to be something a subclass can redirect,
+    /// rather than a straight call on <see cref="Owner"/>.
+    /// </remarks>
+    protected virtual void ApplyGearBonuses(Item itemAdded, Item itemRemoved)
+    {
+        Owner?.UpdateGearBonuses(itemAdded, itemRemoved);
     }
 }

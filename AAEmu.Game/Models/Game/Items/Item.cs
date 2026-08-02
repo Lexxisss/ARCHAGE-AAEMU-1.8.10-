@@ -102,7 +102,11 @@ public class Item : PacketMarshaler, IComparable<Item>
     }
 
     public DateTime ChargeStartTime { get; set; } = DateTime.MinValue;
-    public virtual ItemDetailType DetailType { get; set; } // TODO 1.0 max type: 8, at 1.2 max type 9, at 3.0.3.0 max type 10, at 3.5.0.3 max type 12
+    /// <summary>
+    /// Which detail block this item carries. The client accepts 1 through 14 and refuses to
+    /// read anything else, so this must never go out as 0 or above 14.
+    /// </summary>
+    public virtual ItemDetailType DetailType { get; set; }
     public DateTime ChargeUseSkillTime { get => _chargeUseSkillTime; set { _chargeUseSkillTime = value; _isDirty = true; } }
     public byte Flags { get => _flags; set { _flags = value; _isDirty = true; } }
     public byte Durability { get => _durability; set { _durability = value; _isDirty = true; } }
@@ -237,116 +241,91 @@ public class Item : PacketMarshaler, IComparable<Item>
         return stream;
     }
 
+    /// <summary>
+    /// Bytes the detail block occupies after its discriminator, for every variant the client
+    /// carries as a fixed-size payload. Variant 1 is structured and is written out field by
+    /// field instead, so it is absent here.
+    /// </summary>
+    /// <remarks>
+    /// These are the client's own sizes. The lengths used to be written as "payload plus one"
+    /// and then decremented, which hid two mistakes: the vehicle variant was four bytes short,
+    /// and the mount variant was written fourteen bytes shorter than it was read. Both put every
+    /// item after them in the same message out of step. Variants twelve through fourteen were
+    /// missing entirely and were written as nothing at all.
+    ///
+    /// Subclasses that decode a variant override the read and write methods and never consult
+    /// this table; it is what the rest fall back on, and what keeps an unrecognised variant the
+    /// right length instead of silently truncating the message.
+    /// </remarks>
+    public static int DetailPayloadLength(ItemDetailType detailType)
+    {
+        return detailType switch
+        {
+            ItemDetailType.Slave => 33,
+            ItemDetailType.Mate => 20,
+            ItemDetailType.Ucc => 9,
+            ItemDetailType.Treasure => 24,
+            ItemDetailType.BigFish => 16,
+            ItemDetailType.Decoration => 16,
+            ItemDetailType.MusicSheet => 8,
+            ItemDetailType.Glider => 4,
+            ItemDetailType.SlaveEquipment => 12,
+            ItemDetailType.Location => 24,
+            ItemDetailType.Opaque12 => 10,
+            ItemDetailType.Opaque13 => 13,
+            ItemDetailType.Opaque14 => 8,
+            _ => 0
+        };
+    }
+
     public virtual void ReadDetails(PacketStream stream)
     {
-        var mDetailLength = 0;
-        switch (DetailType)
+        if (DetailType == ItemDetailType.Equipment)
         {
-            case ItemDetailType.Equipment: // 1
-                //mDetailLength = 36; // есть расшифровка в items/EquipItem, в 3+ длина данных 36 (когда нет информации), в 1.2 было 56
-                Durability = stream.ReadByte();       // durability
-                ChargeCount = stream.ReadInt16();     // chargeCount
-                ChargeTime = stream.ReadDateTime();   // chargeTime
-                TemperPhysical = stream.ReadUInt16(); // scaledA
-                TemperMagical = stream.ReadUInt16();  // scaledB
-                ChargeProcTime = stream.ReadDateTime();
-                MappingFailBonus = stream.ReadByte();
-                ElementLevel = stream.ReadByte();
-                var gemValues = stream.ReadPiscW(18);
-                GemIds = Array.ConvertAll(gemValues, value => checked((uint)value));
-                break;
-            case ItemDetailType.Slave: // 2
-                mDetailLength = 30; // есть расшифровка в items/SummonSlave
-                break;
-            case ItemDetailType.Mate: // 3
-                mDetailLength = 21; // in 1.2 - 7, in 3+ - 21 - есть расшифровка в items/SummonMate
-                break;
-            case ItemDetailType.Ucc: // 4
-                mDetailLength = 10; // есть расшифровка в items/UccItem
-                break;
-            case ItemDetailType.Treasure: // 5
-            case ItemDetailType.Location: // 11
-                mDetailLength = 25;
-                break;
-            case ItemDetailType.BigFish: // 6
-            case ItemDetailType.Decoration: // 7
-                mDetailLength = 17; // есть расшифровка в items/BigFish
-                break;
-            case ItemDetailType.MusicSheet: // 8
-                mDetailLength = 9; // есть расшифровка в items/MusicSheetItem
-                break;
-            case ItemDetailType.Glider: // 9
-                mDetailLength = 5;
-                break;
-            case ItemDetailType.SlaveEquipment: // 10
-                mDetailLength = 13;
-                break;
-            case ItemDetailType.TypeMax:
-            case ItemDetailType.Invalid:
-            default:
-                break;
+            Durability = stream.ReadByte();       // durability
+            ChargeCount = stream.ReadInt16();     // chargeCount
+            ChargeTime = stream.ReadDateTime();   // chargeTime
+            TemperPhysical = stream.ReadUInt16(); // scaledA
+            TemperMagical = stream.ReadUInt16();  // scaledB
+            ChargeProcTime = stream.ReadDateTime();
+            MappingFailBonus = stream.ReadByte();
+            ElementLevel = stream.ReadByte();
+            var gemValues = stream.ReadPiscW(18);
+            GemIds = Array.ConvertAll(gemValues, value => checked((uint)value));
+            return;
         }
 
-        mDetailLength -= 1;
-        if (mDetailLength > 0)
-        {
-            Detail = stream.ReadBytes(mDetailLength);
-        }
+        var detailLength = DetailPayloadLength(DetailType);
+        if (detailLength > 0)
+            Detail = stream.ReadBytes(detailLength);
     }
 
     public virtual void WriteDetails(PacketStream stream)
     {
-        var mDetailLength = 0;
-        switch (DetailType)
+        if (DetailType == ItemDetailType.Equipment)
         {
-            case ItemDetailType.Equipment:
-                //mDetailLength = 36; // есть расшифровка в items/EquipItem, в 3+ длина данных 36 (когда нет информации), в 1.2 было 56
-                stream.Write(Durability);     // durability
-                stream.Write(ChargeCount);    // chargeCount
-                stream.Write(ChargeTime);     // chargeTime
-                stream.Write(TemperPhysical); // scaledA
-                stream.Write(TemperMagical);  // scaledB
-                stream.Write(ChargeProcTime);
-                stream.Write(MappingFailBonus);
-                stream.Write(ElementLevel);
-                var gemValues = Array.ConvertAll(GemIds, value => (long)value);
-                stream.WritePiscW(gemValues.Length, gemValues);
-                break;
-            case ItemDetailType.Slave:
-                mDetailLength = 30;
-                break;
-            case ItemDetailType.Mate:
-                mDetailLength = 7; // есть расшифровка в items/Summon
-                break;
-            case ItemDetailType.Ucc:
-                mDetailLength = 10; // есть расшифровка в items/UccItem
-                break;
-            case ItemDetailType.Treasure:
-            case ItemDetailType.Location: // нет в 1.2
-                mDetailLength = 25;
-                break;
-            case ItemDetailType.BigFish: // есть расшифровка в items/BigFish
-            case ItemDetailType.Decoration:
-                mDetailLength = 17;
-                break;
-            case ItemDetailType.MusicSheet:
-                mDetailLength = 9; // есть расшифровка в items/MusicSheetItem
-                break;
-            case ItemDetailType.Glider:
-                mDetailLength = 5;
-                break;
-            case ItemDetailType.SlaveEquipment: // нет в 1.2
-                mDetailLength = 13;
-                break;
-            default:
-                break;
+            stream.Write(Durability);     // durability
+            stream.Write(ChargeCount);    // chargeCount
+            stream.Write(ChargeTime);     // chargeTime
+            stream.Write(TemperPhysical); // scaledA
+            stream.Write(TemperMagical);  // scaledB
+            stream.Write(ChargeProcTime);
+            stream.Write(MappingFailBonus);
+            stream.Write(ElementLevel);
+            var gemValues = Array.ConvertAll(GemIds, value => (long)value);
+            stream.WritePiscW(gemValues.Length, gemValues);
+            return;
         }
-        mDetailLength -= 1;
-        if (mDetailLength > 0)
-        {
-            Detail = new byte[mDetailLength];
-            stream.Write(Detail);
-        }
+
+        var detailLength = DetailPayloadLength(DetailType);
+        if (detailLength <= 0)
+            return;
+
+        // Keep whatever came in for a variant we do not decode, rather than replacing it with
+        // zeroes, so proxied and reloaded items go back out as they arrived.
+        if ((Detail == null) || (Detail.Length != detailLength))
+            Detail = new byte[detailLength];
+        stream.Write(Detail);
     }
 
     public virtual bool HasFlag(ItemFlag flag)

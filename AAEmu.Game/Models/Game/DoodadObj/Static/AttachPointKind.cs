@@ -87,5 +87,13 @@ public enum AttachPointKind : byte
     Rudder = 82,
     Sail2 = 83,
     Mast2 = 84,
+
+    // The client's slave-specific reconciliation branches compare the attach point against
+    // these three. They were previously read as relationship reasons, which is why they were
+    // missing here - the reason is a separate byte in the same payload.
+    Base = 85,
+    Wheel = 86,
+    Wheel2 = 87,
+
     System = 255
 }

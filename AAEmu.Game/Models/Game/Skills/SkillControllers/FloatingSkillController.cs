@@ -91,7 +91,7 @@ public class FloatingSkillController : SkillController
         moveType.X = Owner.Transform.Local.Position.X;
         moveType.Y = Owner.Transform.Local.Position.Y;
         moveType.Z = Owner.Transform.Local.Position.Z;
-        moveType.ActorFlags = 4;
+        moveType.ActorFlags = 0;     // gate word for the optional blocks only
         moveType.Flags = 4;
         moveType.DeltaMovement = new sbyte[3] { 0, 127, 0 };
         moveType.Stance = 0;

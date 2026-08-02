@@ -29,6 +29,8 @@ using AAEmu.Game.Models.Tasks.Housing;
 using AAEmu.Game.Utils;
 using AAEmu.Game.Utils.DB;
 
+using Microsoft.Data.Sqlite;
+
 using MySql.Data.MySqlClient;
 
 using NLog;
@@ -48,6 +50,19 @@ public class HousingManager : Singleton<HousingManager>
     private List<ItemHousingDecoration> _housingItemHousingDecorations;
     private List<HousingItemHousings> _housingItemHousings;
     private Dictionary<uint, HousingTemplate> _housingTemplates;
+
+    /// <summary>Plots of land, grouped by the name of the zone they sit in.</summary>
+    private Dictionary<string, List<HousingAreas>> _housingAreasByZone;
+
+    /// <summary>The rule groups plots point at, keyed by their own id.</summary>
+    private Dictionary<uint, HousingGroup> _housingGroups;
+
+    /// <summary>Every conversion of one design into another, keyed by its own id.</summary>
+    private Dictionary<uint, HousingRebuilding> _housingRebuildings;
+
+    /// <summary>Materials a rebuild consumes, grouped by rebuild id.</summary>
+    private Dictionary<uint, List<HousingRebuildingMaterial>> _housingRebuildingMaterials;
+
     private bool _isCheckingTaxTiming;
     private List<uint> _removedHousings;
 
@@ -127,11 +142,14 @@ public class HousingManager : Singleton<HousingManager>
         _housingItemHousings = new List<HousingItemHousings>();
         _housingDecorations = new Dictionary<uint, HousingDecoration>();
         _housingItemHousingDecorations = new List<ItemHousingDecoration>();
+        _housingRebuildings = new Dictionary<uint, HousingRebuilding>();
+        _housingRebuildingMaterials = new Dictionary<uint, List<HousingRebuildingMaterial>>();
+        _housingAreasByZone = new Dictionary<string, List<HousingAreas>>(StringComparer.OrdinalIgnoreCase);
+        _housingGroups = new Dictionary<uint, HousingGroup>();
 
-        // var housingAreas = new Dictionary<uint, HousingAreas>();
         // var houseTaxes = new Dictionary<uint, HouseTax>();
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             Logger.Info("Loading Housing Information ...");
 
@@ -165,6 +183,21 @@ public class HousingManager : Singleton<HousingManager>
             else
                 Logger.Warn("Housing bindings not loaded...");
 
+            // A design no longer carries its garden radius itself - it points at a size row that
+            // does. Reading the old column found nothing, which is how every building ended up
+            // with a garden of zero.
+            var gardenRadiusBySize = new Dictionary<uint, float>();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT id, garden_radius FROM housing_sizes";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                        gardenRadiusBySize[reader.GetUInt32("id")] = reader.GetFloat("garden_radius");
+                }
+            }
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT * FROM housings";
@@ -184,7 +217,22 @@ public class HousingManager : Singleton<HousingManager>
                         template.GateExists = reader.GetBoolean("gate_exists", true);
                         template.Hp = reader.GetInt32("hp");
                         template.RepairCost = reader.GetUInt32("repair_cost");
-                        //template.GardenRadius = reader.GetFloat("garden_radius"); // there is no such field in the database for version 3.0.3.0
+                        template.HousingSizeId = reader.GetUInt32("housing_size_id", 0);
+                        template.GardenRadius = gardenRadiusBySize.GetValueOrDefault(template.HousingSizeId, 0f);
+                        template.RotateItemId = reader.GetUInt32("rotate_item_id", 0);
+                        template.RotateItemCount = reader.GetInt32("rotate_item_count", 0);
+
+                        // Declaration order is the assumed slot order - see HousingTemplate.UccKinds.
+                        template.UccKinds[0] = reader.GetInt32("ucc_kind_floor", 0);
+                        template.UccKinds[1] = reader.GetInt32("ucc_kind_outwall", 0);
+                        template.UccKinds[2] = reader.GetInt32("ucc_kind_roof", 0);
+                        template.UccKinds[3] = reader.GetInt32("ucc_kind_top", 0);
+                        template.UccKinds[4] = reader.GetInt32("ucc_kind_wall", 0);
+                        template.UccScales[0] = reader.GetInt32("ucc_scale_floor", 0);
+                        template.UccScales[1] = reader.GetInt32("ucc_scale_outwall", 0);
+                        template.UccScales[2] = reader.GetInt32("ucc_scale_roof", 0);
+                        template.UccScales[3] = reader.GetInt32("ucc_scale_top", 0);
+                        template.UccScales[4] = reader.GetInt32("ucc_scale_wall", 0);
                         template.Family = reader.GetString("family");
                         var taxationId = reader.GetUInt32("taxation_id");
                         template.Taxation = TaxationsManager.Instance.taxations.ContainsKey(taxationId) ? TaxationsManager.Instance.taxations[taxationId] : null;
@@ -236,17 +284,24 @@ public class HousingManager : Singleton<HousingManager>
 
             Logger.Info($"Loaded Housing Templates {_housingTemplates.Count}");
 
+            LoadHousingAreas(connection);
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT * FROM housing_build_steps";
                 command.Prepare();
+                var buildStepCount = 0;
+                var buildStepDesignsMissing = 0;
                 using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
                 {
                     while (reader.Read())
                     {
                         var housingId = reader.GetUInt32("housing_id");
                         if (!_housingTemplates.ContainsKey(housingId))
+                        {
+                            buildStepDesignsMissing++;
                             continue;
+                        }
 
                         var template = new HousingBuildStep
                         {
@@ -259,8 +314,17 @@ public class HousingManager : Singleton<HousingManager>
                         };
 
                         _housingTemplates[housingId].BuildSteps.Add(template.Step, template);
+                        buildStepCount++;
                     }
                 }
+
+                // Without stages every design is finished the moment it is placed, which is the
+                // hardest thing to tell apart from a design that genuinely has none.
+                if (buildStepCount == 0)
+                    Logger.Warn("No housing build steps loaded - every building will be placed already finished");
+                else
+                    Logger.Info($"Loaded Housing Build Steps {buildStepCount}" +
+                                (buildStepDesignsMissing > 0 ? $", {buildStepDesignsMissing} skipped for unknown designs" : ""));
             }
 
             Logger.Info("Loaded Decoration Templates...");
@@ -309,6 +373,60 @@ public class HousingManager : Singleton<HousingManager>
                     }
                 }
             }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM housing_rebuildings";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var template = new HousingRebuilding
+                        {
+                            Id = reader.GetUInt32("id"),
+                            HousingId = reader.GetUInt32("housing_id"),
+                            SkillId = reader.GetUInt32("skill_id"),
+                            ActabilityGroupId = reader.GetUInt32("actability_group_id", 0),
+                            LaborPower = reader.GetInt32("labor_power", 0),
+                            Name = reader.GetString("name", string.Empty),
+                            ChangePointDesc = reader.GetString("change_point_desc", string.Empty)
+                        };
+
+                        _housingRebuildings[template.Id] = template;
+                    }
+                }
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM housing_rebuilding_materials";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var material = new HousingRebuildingMaterial
+                        {
+                            Id = reader.GetUInt32("id"),
+                            HousingRebuildingId = reader.GetUInt32("housing_rebuilding_id"),
+                            ItemId = reader.GetUInt32("item_id"),
+                            Count = reader.GetInt32("count", 0)
+                        };
+
+                        if (!_housingRebuildingMaterials.TryGetValue(material.HousingRebuildingId, out var list))
+                        {
+                            list = new List<HousingRebuildingMaterial>();
+                            _housingRebuildingMaterials.Add(material.HousingRebuildingId, list);
+                        }
+
+                        list.Add(material);
+                    }
+                }
+            }
+
+            Logger.Info("Loaded {0} housing rebuildings with {1} material groups",
+                _housingRebuildings.Count, _housingRebuildingMaterials.Count);
         }
 
         Logger.Info("Loading Player Buildings ...");
@@ -475,6 +593,249 @@ public class HousingManager : Singleton<HousingManager>
     }
 
     /// <summary>
+    /// Loads the plots of land and the rules that govern them.
+    /// </summary>
+    /// <remarks>
+    /// None of this was read before, which is why the server accepted a building anywhere at all.
+    /// A plot carries no shape here - see <see cref="HousingAreas"/> - so what this buys is the
+    /// zone a placement lands in and everything that follows from the plots of that zone.
+    /// </remarks>
+    private void LoadHousingAreas(SqliteConnection connection)
+    {
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT * FROM housing_groups";
+            command.Prepare();
+            using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+            {
+                while (reader.Read())
+                {
+                    var group = new HousingGroup
+                    {
+                        Id = reader.GetUInt32("id"),
+                        Name = reader.GetString("name"),
+                        AllowedTaxDelayWeek = reader.GetInt32("allowed_tax_delay_week", 0),
+                        CanExtend = reader.GetBoolean("can_extend", true),
+                        Houseless = reader.GetBoolean("houseless", true),
+                        ExistingCategoryId = reader.GetUInt32("existing_category_id", 0)
+                    };
+
+                    _housingGroups[group.Id] = group;
+                }
+            }
+        }
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT * FROM housing_group_categories";
+            command.Prepare();
+            using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+            {
+                while (reader.Read())
+                {
+                    var groupId = reader.GetUInt32("housing_group_id");
+                    if (!_housingGroups.TryGetValue(groupId, out var group))
+                        continue;
+
+                    group.AllowedCategories[reader.GetUInt32("category_id")] = reader.GetInt32("max_construct_count", 0);
+                }
+            }
+        }
+
+        var areaCount = 0;
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT * FROM housing_areas";
+            command.Prepare();
+            using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+            {
+                while (reader.Read())
+                {
+                    var area = new HousingAreas
+                    {
+                        Id = reader.GetUInt32("id"),
+                        Name = reader.GetString("name") ?? string.Empty,
+                        GroupId = reader.GetUInt32("housing_group_id"),
+                        Activated = reader.GetBoolean("activated", true),
+                        OpensAt = ReadAreaOpeningDate(reader)
+                    };
+
+                    if (!_housingAreasByZone.TryGetValue(area.Name, out var areas))
+                    {
+                        areas = new List<HousingAreas>();
+                        _housingAreasByZone.Add(area.Name, areas);
+                    }
+
+                    areas.Add(area);
+                    areaCount++;
+                }
+            }
+        }
+
+        if (areaCount == 0)
+            Logger.Warn("No housing areas loaded - placement cannot be checked against the world");
+        else
+            Logger.Info($"Loaded Housing Areas {areaCount} over {_housingAreasByZone.Count} zones, {_housingGroups.Count} groups");
+    }
+
+    /// <summary>
+    /// Whether a design may be raised at a spot, by design id.
+    /// </summary>
+    /// <remarks>
+    /// For callers that have to know before they spend anything - a rebuild consumes materials
+    /// and demolishes the old building before the new one is placed, so it has to ask first.
+    /// </remarks>
+    /// <param name="replacing">
+    /// A building that is about to make way for this one. It is left out of the ownership counts,
+    /// or a rebuild on land that admits one building per player would refuse itself.
+    /// </param>
+    public bool CanPlaceDesign(Character character, uint designId, float x, float y, out ErrorMessageType error,
+        House replacing = null)
+    {
+        if (!_housingTemplates.TryGetValue(designId, out var design))
+        {
+            error = ErrorMessageType.HouseCannotCreate;
+            return false;
+        }
+
+        return ValidatePlacement(character, design, x, y, out error, replacing);
+    }
+
+    /// <summary>
+    /// Decides whether a design may be raised where the player asked for it.
+    /// </summary>
+    /// <remarks>
+    /// The client refuses a bad placement on its own and sends nothing, so a request that arrives
+    /// here has already passed its checks. That is a reason not to expect refusals, not a reason
+    /// to trust the request: nothing stops a crafted one.
+    ///
+    /// The check is as fine as the data allows, which is the zone. A plot's outline lives in the
+    /// client's world data, so the server cannot tell one plot of a zone from another - what it
+    /// can tell is which zone the placement lands in, which plots that zone holds, and everything
+    /// the rules of those plots then say. A placement passes if any plot of the zone would accept
+    /// it; the refusal reported is the one from the plot that got furthest.
+    /// </remarks>
+    /// <returns>False when the placement is refused; the reason is in <paramref name="error"/>.</returns>
+    private bool ValidatePlacement(Character character, HousingTemplate design, float x, float y,
+        out ErrorMessageType error, House replacing = null)
+    {
+        error = ErrorMessageType.NoHousingArea;
+
+        if (_housingAreasByZone.Count == 0)
+            return true; // nothing loaded to check against; the log at startup already said so
+
+        var zoneKey = WorldManager.Instance.GetZoneId(character.Transform.WorldId, x, y);
+        var zone = ZoneManager.Instance.GetZoneByKey(zoneKey);
+        if (zone == null || string.IsNullOrEmpty(zone.Name) ||
+            !_housingAreasByZone.TryGetValue(zone.Name, out var areas) || areas.Count == 0)
+        {
+            Logger.Info($"Placement refused: no housing plots in zone {zone?.Name ?? "?"} (key {zoneKey})");
+            return false;
+        }
+
+        var now = DateTime.UtcNow;
+        var owned = new Dictionary<uint, House>();
+        GetByCharacterId(owned, character.Id);
+        var ownedHouses = owned.Values.Where(h => h != replacing).ToList();
+        var ownsAnyHouse = ownedHouses.Count > 0;
+        ErrorMessageType? refusal = null;
+
+        foreach (var area in areas)
+        {
+            if (!_housingGroups.TryGetValue(area.GroupId, out var group))
+                continue;
+
+            // Least specific first, so the reason we keep is the one from the plot that got
+            // furthest through the rules - the closest thing to an answer for the player.
+            if (!group.AllowedCategories.TryGetValue(design.CategoryId, out var maxCount))
+            {
+                refusal ??= ErrorMessageType.HouseCannotLoacateInvalidCategoryArea;
+                continue;
+            }
+
+            if (!area.Activated)
+            {
+                refusal = ErrorMessageType.HousingAreaNotActivated;
+                continue;
+            }
+
+            if (area.OpensAt > now)
+            {
+                refusal = ErrorMessageType.HousingAreaNotOpen;
+                continue;
+            }
+
+            if (group.Houseless && ownsAnyHouse)
+            {
+                refusal = ErrorMessageType.HouseCannotOwnMoreHouselessCondition;
+                continue;
+            }
+
+            if (group.ExistingCategoryId > 0 &&
+                !ownedHouses.Any(h => h.Template?.CategoryId == group.ExistingCategoryId))
+            {
+                refusal = ErrorMessageType.HouseCannotOwnMoreExistingCategoryCondition;
+                continue;
+            }
+
+            if (maxCount > 0 && CountOwnedInZone(ownedHouses, zone.Name, design.CategoryId) >= maxCount)
+            {
+                refusal = ErrorMessageType.HouseCannotConstructInAreaByMaxConstructCount;
+                continue;
+            }
+
+            return true;
+        }
+
+        error = refusal ?? ErrorMessageType.NoHousingArea;
+        Logger.Info($"Placement refused in zone {zone.Name} for design {design.Id} (category {design.CategoryId}): {error}");
+        return false;
+    }
+
+    /// <summary>
+    /// How many buildings of one category the player already has in a zone. The count is per
+    /// zone rather than per plot for the same reason the checks are - the plot cannot be told.
+    /// </summary>
+    private static int CountOwnedInZone(List<House> ownedHouses, string zoneName, uint categoryId)
+    {
+        var count = 0;
+        foreach (var house in ownedHouses)
+        {
+            if (house.Template?.CategoryId != categoryId)
+                continue;
+
+            var zone = ZoneManager.Instance.GetZoneByKey(
+                WorldManager.Instance.GetZoneId(
+                    house.Transform.WorldId,
+                    house.Transform.World.Position.X,
+                    house.Transform.World.Position.Y));
+
+            if (string.Equals(zone?.Name, zoneName, StringComparison.OrdinalIgnoreCase))
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Reads a plot's opening date, which is kept as separate fields and left at zero for a plot
+    /// that was never scheduled.
+    /// </summary>
+    private static DateTime ReadAreaOpeningDate(SQLiteWrapperReader reader)
+    {
+        var year = reader.GetInt32("at_year", 0);
+        if (year <= 0)
+            return DateTime.MinValue;
+
+        var month = Math.Clamp(reader.GetInt32("at_month", 1), 1, 12);
+        var day = Math.Clamp(reader.GetInt32("at_day", 1), 1, DateTime.DaysInMonth(year, month));
+        var hour = Math.Clamp(reader.GetInt32("at_hour", 0), 0, 23);
+        var minute = Math.Clamp(reader.GetInt32("at_min", 0), 0, 59);
+
+        return new DateTime(year, month, day, hour, minute, 0, DateTimeKind.Utc);
+    }
+
+    /// <summary>
     /// Sends tax information about a house
     /// </summary>
     /// <param name="connection"></param>
@@ -545,8 +906,8 @@ public class HousingManager : Singleton<HousingManager>
                 totalTaxAmountDue, // Amount Due
                 house.ProtectionEndDate,
                 requiresPayment,
-                weeksWithoutPay,  // TODO: do proper calculation ?
-                -1,
+                (byte)Math.Clamp(weeksWithoutPay, 0, byte.MaxValue),  // TODO: do proper calculation ?
+                0,   // weeksPrepay: a single byte on the wire, so -1 is not expressible here
                 house.Template.HeavyTax
             )
         );
@@ -563,10 +924,13 @@ public class HousingManager : Singleton<HousingManager>
     /// <param name="zRot"></param>
     /// <param name="itemId"></param>
     /// <param name="moneyAmount"></param>
-    /// <param name="ht"></param>
-    /// <param name="autoUseAaPoint"></param>
+    /// <param name="ht">
+    /// Carried through from the request. The client always sends zero - it has no sender path
+    /// that fills this in - so it is not the housing type and placement must not be refused over
+    /// it. The type the client expects back in the state block comes from the design instead.
+    /// </param>
     public void Build(GameConnection connection, uint designId, float posX, float posY, float posZ, float zRot,
-        ulong itemId, int moneyAmount, int ht, bool autoUseAaPoint)
+        ulong itemId, long moneyAmount, int ht)
     {
         // TODO validate house by range...
         // TODO remove itemId
@@ -582,60 +946,26 @@ public class HousingManager : Singleton<HousingManager>
 
         // var zoneId = WorldManager.Instance.GetZoneId(connection.ActiveChar.Transform.WorldId, posX, posY);
 
-        var houseTemplate = _housingTemplates[designId];
+        // A design the server does not know is a refusal, not an exception. Placement has no
+        // reply of its own - the client is told about a refusal through the general error
+        // message, with the reason it names for a building it could not create.
+        if (!_housingTemplates.TryGetValue(designId, out var houseTemplate))
+        {
+            Logger.Warn($"Build: no housing design {designId} for player {connection.ActiveChar.Name}");
+            connection.ActiveChar.SendErrorMessage(ErrorMessageType.HouseCannotCreate);
+            return;
+        }
+
+        // Before anything is taken from the player: what the land allows.
+        if (!ValidatePlacement(connection.ActiveChar, houseTemplate, posX, posY, out var placementError))
+        {
+            connection.ActiveChar.SendErrorMessage(placementError);
+            return;
+        }
         CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
 
-        if (FeaturesManager.Fsets.Check(Models.Game.Features.Feature.taxItem))
-        {
-            // Pay in Tax Certificate
-
-            var userTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.TaxCertificate);
-            var userBoundTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.BoundTaxCertificate);
-            var totalUserTaxCount = userTaxCount + userBoundTaxCount;
-            var totalCertsCost = (int)Math.Ceiling(totalTaxAmountDue / 10000f);
-
-            // Annoyingly complex item consumption, maybe we need a separate function in inventory to handle this kind of thing
-            var consumedCerts = totalCertsCost;
-            if (totalCertsCost > totalUserTaxCount)
-            {
-                connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
-                return;
-            }
-            else
-            {
-                var c = consumedCerts;
-                // Use Bound First
-                if ((userBoundTaxCount > 0) && (c > 0))
-                {
-                    if (c > userBoundTaxCount)
-                        c = userBoundTaxCount;
-                    connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.BoundTaxCertificate, c, null);
-                    consumedCerts -= c;
-                }
-                c = consumedCerts;
-                if ((userTaxCount > 0) && (c > 0))
-                {
-                    if (c > userTaxCount)
-                        c = userTaxCount;
-                    connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.TaxCertificate, c, null);
-                    consumedCerts -= c;
-                }
-
-                if (consumedCerts != 0)
-                    Logger.Error($"Something went wrong when paying tax for new building for player {connection.ActiveChar.Name}");
-            }
-        }
-        else
-        {
-            // Pay in Gold
-            // TODO: test house with actual gold tax
-            if (totalTaxAmountDue > connection.ActiveChar.Money)
-            {
-                connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
-                return;
-            }
-            connection.ActiveChar.SubtractMoney(SlotType.Inventory, totalTaxAmountDue, ItemTaskType.HouseCreation);
-        }
+        if (!ChargePlacementTax(connection, totalTaxAmountDue))
+            return;
 
         if (connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseBuilding, sourceDesignItem.TemplateId, 1, sourceDesignItem) <= 0)
         {
@@ -659,10 +989,6 @@ public class HousingManager : Singleton<HousingManager>
         house.Transform.Local.SetPosition(posX, posY, posZ);
         house.Transform.Local.SetZRotation(zRot);
 
-        if (house.Template.BuildSteps.Count > 0)
-            house.CurrentStep = 0;
-        else
-            house.CurrentStep = -1;
         house.OwnerId = connection.ActiveChar.Id;
         house.CoOwnerId = connection.ActiveChar.Id;
         house.AccountId = connection.AccountId;
@@ -671,10 +997,49 @@ public class HousingManager : Singleton<HousingManager>
         house.AllowRecover = true;
         house.PlaceDate = DateTime.UtcNow;
         house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays);
+
+        // Last, because a design with no stages is finished on the spot and builds its doors and
+        // chests here - and those take the building's ownership as it stands at that moment.
+        //
+        // Having no stages is a real case, but it is also exactly what an unloaded build-step
+        // table looks like from the outside, hence the log.
+        house.CurrentStep = house.Template.FirstBuildStep;
+        if (house.CurrentStep == -1)
+            Logger.Info($"Build: design {designId} has no construction stages, house {house.Id} is placed finished");
+        else
+            Logger.Debug($"Build: house {house.Id} design {designId} starts at stage {house.CurrentStep} of {house.Template.BuildSteps.Count}, model {house.ModelId}, {house.AllAction} actions");
+
         _houses.Add(house.Id, house);
         _housesTl.Add(house.TlId, house);
-        connection.ActiveChar.SendPacket(new SCMyHousePacket(house));
+
+        // The placement reply is not a message of its own. The client expects, in this order:
+        // the generic scene object for the foundation, then the house state once that object
+        // exists, then the build progress. Spawn covers the first two - it is what makes the
+        // building visible and sends its state - so nothing may be sent before it.
+        //
+        // A "my house" message used to go out here, ahead of the spawn. No such packet exists
+        // in this client, so it carried a placeholder opcode; encoding it threw and took the
+        // rest of the placement with it, which is why the building appeared and vanished.
         house.Spawn();
+
+        // Exactly what the spawn message carried, because a building that does not appear leaves
+        // nothing else to go on: the client refuses one silently and says nothing back.
+        Logger.Info($"Build: spawned house {house.Id} objId={house.ObjId}, tl={house.TlId}, " +
+                    $"design={house.TemplateId}, step={house.CurrentStep}, model={house.ModelId}, " +
+                    $"world={house.Transform.WorldId}, zone={house.Transform.ZoneId}, " +
+                    $"pos=({house.Transform.World.Position.X:F1},{house.Transform.World.Position.Y:F1},{house.Transform.World.Position.Z:F1}), " +
+                    $"doodads={house.AttachedDoodads.Count}");
+
+        // Step 8: the ownership summary. Without it the client never learns the building is
+        // its own, and never asks for its tax either - the request comes from this handler.
+        connection.ActiveChar.SendPacket(new SCHouseDataPacket(house));
+
+        connection.ActiveChar.SendPacket(new SCHouseBuildProgressPacket(
+            house.TlId,
+            house.ModelId,
+            house.AllAction,
+            house.CurrentStep == -1 ? house.AllAction : house.CurrentAction));
+
         UpdateTaxInfo(house);
     }
 
@@ -713,6 +1078,272 @@ public class HousingManager : Singleton<HousingManager>
         house.Name = string.Concat(name.Substring(0, 1).ToUpper(), name.AsSpan(1));
         house.IsDirty = true; // Manually set the IsDirty on House level
         connection.SendPacket(new SCUnitNameChangedPacket(house.ObjId, house.Name));
+    }
+
+    /// <summary>
+    /// Takes the up-front tax a placement or a rebuild owes, in certificates where the feature
+    /// is enabled and in gold otherwise.
+    /// </summary>
+    /// <returns>False when the player cannot pay; an error has already been sent to them.</returns>
+    private static bool ChargePlacementTax(GameConnection connection, int totalTaxAmountDue)
+    {
+        if (FeaturesManager.Fsets.Check(Models.Game.Features.Feature.taxItem))
+        {
+            var userTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.TaxCertificate);
+            var userBoundTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.BoundTaxCertificate);
+            var totalUserTaxCount = userTaxCount + userBoundTaxCount;
+            var totalCertsCost = (int)Math.Ceiling(totalTaxAmountDue / 10000f);
+
+            if (totalCertsCost > totalUserTaxCount)
+            {
+                connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
+                return false;
+            }
+
+            // Bound certificates first, so the player keeps the tradeable ones.
+            var consumedCerts = totalCertsCost;
+            var c = consumedCerts;
+            if (userBoundTaxCount > 0 && c > 0)
+            {
+                if (c > userBoundTaxCount)
+                    c = userBoundTaxCount;
+                connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.BoundTaxCertificate, c, null);
+                consumedCerts -= c;
+            }
+
+            c = consumedCerts;
+            if (userTaxCount > 0 && c > 0)
+            {
+                if (c > userTaxCount)
+                    c = userTaxCount;
+                connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseCreation, Item.TaxCertificate, c, null);
+                consumedCerts -= c;
+            }
+
+            if (consumedCerts != 0)
+                Logger.Error($"Something went wrong when paying tax for new building for player {connection.ActiveChar.Name}");
+
+            return true;
+        }
+
+        if (totalTaxAmountDue > connection.ActiveChar.Money)
+        {
+            connection.ActiveChar.SendErrorMessage(ErrorMessageType.MailNotEnoughMoneyToPayTaxes);
+            return false;
+        }
+
+        connection.ActiveChar.SubtractMoney(SlotType.Inventory, totalTaxAmountDue, ItemTaskType.HouseCreation);
+        return true;
+    }
+
+    /// <summary>
+    /// Turns an already placed building.
+    /// </summary>
+    /// <remarks>
+    /// The client blocks this locally for a building the player does not own, or is standing
+    /// too far from, so a request that reaches here has already passed those on its side. That
+    /// is a reason not to expect refusals, not a reason to skip checking.
+    ///
+    /// Turning a building is not free: the design names the certificate it costs and how many.
+    /// Some designs name none, and those turn for nothing.
+    /// </remarks>
+    public void RotateHouse(GameConnection connection, uint objId, float zRot, float height)
+    {
+        var character = connection?.ActiveChar;
+        if (character == null)
+            return;
+
+        House house = null;
+        foreach (var candidate in _houses.Values)
+        {
+            if (candidate.ObjId != objId)
+                continue;
+            house = candidate;
+            break;
+        }
+
+        if (house == null || house.OwnerId != character.Id)
+        {
+            character.SendErrorMessage(ErrorMessageType.HouseCannotRotate);
+            return;
+        }
+
+        if (!ChargeRotationCost(character, house))
+            return;
+
+        house.Transform.Local.SetZRotation(zRot);
+        house.IsDirty = true;
+
+        house.BroadcastPacket(new SCHouseRotatedPacket(house.ObjId, zRot), true);
+    }
+
+    /// <summary>
+    /// Takes what turning a building costs.
+    /// </summary>
+    /// <remarks>
+    /// The design carries both halves of the price. A design that names no item, or names one but
+    /// asks for none of it, turns for free - both are common in the shipped data.
+    /// </remarks>
+    /// <returns>False when the player cannot pay; they have already been told.</returns>
+    private static bool ChargeRotationCost(Character character, House house)
+    {
+        var itemId = house.Template?.RotateItemId ?? 0;
+        var count = house.Template?.RotateItemCount ?? 0;
+        if (itemId == 0 || count <= 0)
+            return true;
+
+        if (!character.Inventory.CheckItems(SlotType.Inventory, itemId, count))
+        {
+            character.SendErrorMessage(ErrorMessageType.NotEnoughItem);
+            return false;
+        }
+
+        if (character.Inventory.Bag.ConsumeItem(ItemTaskType.HouseBuilding, itemId, count, null) > 0)
+            return true;
+
+        Logger.Error($"RotateHouse: failed to take {count} of item {itemId} from {character.Name}");
+        character.SendErrorMessage(ErrorMessageType.NotEnoughItem);
+        return false;
+    }
+
+    /// <summary>
+    /// Finds the rebuild offered by a given skill that produces a given design.
+    /// </summary>
+    /// <remarks>
+    /// A rebuild is identified by that pair rather than by the target design alone: several
+    /// skills can lead to the same design from different starting buildings.
+    /// </remarks>
+    /// <returns>The rebuild id, or 0 when the skill does not offer that design.</returns>
+    public uint GetHousingRebuildingId(uint skillId, uint housingId)
+    {
+        foreach (var rebuilding in _housingRebuildings.Values)
+        {
+            if (rebuilding.SkillId == skillId && rebuilding.HousingId == housingId)
+                return rebuilding.Id;
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Materials a rebuild consumes. Empty when the rebuild is unknown or free.
+    /// </summary>
+    public IReadOnlyList<HousingRebuildingMaterial> GetMaterialsByHousingRebuildingId(uint housingRebuildingId)
+    {
+        return _housingRebuildingMaterials.TryGetValue(housingRebuildingId, out var materials)
+            ? materials
+            : Array.Empty<HousingRebuildingMaterial>();
+    }
+
+    /// <summary>
+    /// Removes the old building immediately before a rebuild puts a new one in its place.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately not <see cref="Demolish"/>: an ordinary demolition expires the protection,
+    /// rewrites the tax state and mails the contents back to the owner. None of that is wanted
+    /// here, because the building is being replaced rather than lost and the replacement
+    /// carries its own fresh tax period. Doing both would bill the player twice and post them
+    /// a refund for a house they still have.
+    /// </remarks>
+    public void DemolishBeforeRebuilding(GameConnection connection, House house)
+    {
+        if (house == null || !_houses.ContainsKey(house.Id))
+        {
+            connection?.ActiveChar?.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+            return;
+        }
+
+        if (connection != null && house.OwnerId != connection.ActiveChar.Id)
+        {
+            connection.ActiveChar?.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+            return;
+        }
+
+        var ownerChar = WorldManager.Instance.GetCharacterById(house.OwnerId);
+
+        house.OwnerId = 0;
+        house.CoOwnerId = 0;
+        house.AccountId = 0;
+        house.SellPrice = 0;
+        house.SellToPlayerId = 0;
+        house.Permission = HousingPermission.Public;
+        house.IsDirty = true;
+
+        ownerChar?.SendPacket(new SCHouseRemovedPacket(house.TlId));
+
+        _removedHousings.Add(house.Id);
+        RemoveDeadHouse(house);
+    }
+
+    /// <summary>
+    /// Replaces an existing building with another design at the same spot.
+    /// </summary>
+    /// <remarks>
+    /// The caller is expected to have checked and consumed the rebuild materials and to have
+    /// called <see cref="DemolishBeforeRebuilding"/> first. Tax is charged the same way a new
+    /// placement charges it, because the replacement starts a fresh protection period.
+    ///
+    /// No design item is consumed here - a rebuild is paid for in materials, not in a design.
+    /// </remarks>
+    /// <param name="oldHouseName">Carried over so the building keeps its name across the swap.</param>
+    public House Rebuild(GameConnection connection, uint designId, float posX, float posY, float posZ, float zRot,
+        string oldHouseName)
+    {
+        if (connection?.ActiveChar == null)
+            return null;
+
+        if (!_housingTemplates.TryGetValue(designId, out var houseTemplate))
+        {
+            connection.ActiveChar.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+            return null;
+        }
+
+        // The land is not checked here. By the time a rebuild reaches this point the old building
+        // has already been torn down and the materials are already spent, so a refusal would
+        // leave the player with neither. The check belongs before any of that - see
+        // <see cref="CanPlaceDesign"/> and its caller.
+        CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
+
+        if (!ChargePlacementTax(connection, totalTaxAmountDue))
+            return null;
+
+        var house = Create(designId, connection.ActiveChar.Faction.Id);
+        house.Id = HousingIdManager.Instance.GetNextId();
+        house.Transform.Local.SetPosition(posX, posY, posZ);
+        house.Transform.Local.SetZRotation(zRot);
+
+        if (!string.IsNullOrEmpty(oldHouseName))
+            house.Name = oldHouseName;
+
+        house.OwnerId = connection.ActiveChar.Id;
+        house.CoOwnerId = connection.ActiveChar.Id;
+        house.AccountId = connection.AccountId;
+        house.Ht = 0;
+        house.Permission = HousingPermission.Private;
+        house.AllowRecover = true;
+        house.PlaceDate = DateTime.UtcNow;
+        house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays);
+
+        house.CurrentStep = house.Template.FirstBuildStep;
+
+        _houses.Add(house.Id, house);
+        _housesTl.Add(house.TlId, house);
+
+        // Same ordering as a fresh placement: the scene object and its state come from Spawn,
+        // and the build progress follows once the object exists.
+        house.Spawn();
+
+        connection.ActiveChar.SendPacket(new SCHouseDataPacket(house));
+
+        connection.ActiveChar.SendPacket(new SCHouseBuildProgressPacket(
+            house.TlId,
+            house.ModelId,
+            house.AllAction,
+            house.CurrentStep == -1 ? house.AllAction : house.CurrentAction));
+
+        UpdateTaxInfo(house);
+
+        return house;
     }
 
     /// <summary>
@@ -1542,7 +2173,7 @@ public class HousingManager : Singleton<HousingManager>
 
         SetForSaleMarkers(house, false);
 
-        character.SendPacket(new SCMyHousePacket(house));
+        character.SendPacket(new SCHouseDataPacket(house));
         var oldOwner = WorldManager.Instance.GetCharacterById(previousOwner);
         if ((oldOwner != null) && (oldOwner.IsOnline))
             oldOwner.SendPacket(new SCHouseRemovedPacket(house.TlId));

@@ -153,6 +153,15 @@ public static class Helpers
         return (resultX, resultY, resultZ);
     }
 
+    /// <summary>Lowest height the packed position can carry.</summary>
+    public const float MinPackedHeight = -100f;
+
+    /// <summary>
+    /// Highest height the packed position can carry. One quantization step below 4096, which is
+    /// itself not representable.
+    /// </summary>
+    public const float MaxPackedHeight = 4095.999f;
+
     public static byte[] ConvertPosition(float x, float y, float z)
     {
         var longX = ConvertLongX(x);
@@ -163,7 +172,13 @@ public static class Helpers
 
         var resultX = (preX ^ (longX + preX + (0 > preX ? 1 : 0))) >> 3;
         var resultY = (preY ^ (longY + preY + (0 > preY ? 1 : 0))) >> 3;
-        var resultZ = (long)Math.Floor((z + 100f) / 4196f * 4194304f + 0.5);
+
+        // Height is quantized into twenty-two bits over [-100, 4096), and only those bits travel.
+        // The upper endpoint is not one of them: exactly 4096 quantizes to a value whose low
+        // twenty-two bits are zero, so it arrives as -100 and the object appears underground.
+        // Clamp below it rather than let that happen.
+        var clampedZ = Math.Clamp(z, MinPackedHeight, MaxPackedHeight);
+        var resultZ = (long)Math.Floor((clampedZ + 100f) / 4196f * 4194304f + 0.5);
 
         var position = new byte[9];
         position[0] = (byte)(resultX >> 32);

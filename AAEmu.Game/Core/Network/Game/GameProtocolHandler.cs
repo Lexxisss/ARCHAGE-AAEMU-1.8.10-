@@ -167,10 +167,25 @@ public class GameProtocolHandler : BaseProtocolHandler
                     }
                     else
                     {
-                        var packet = (GamePacket)Activator.CreateInstance(classType);
-                        packet.Level = level;
-                        packet.Connection = connection;
-                        packet.Decode(stream2);
+                        // One packet's own failure must not take the session with it. Framing is
+                        // length-prefixed and each message is already carved into its own buffer,
+                        // so the reader is free to mis-parse a single body without costing us the
+                        // position of the next one. Letting it reach the outer handler shut the
+                        // connection down instead, which presents as everything working until it
+                        // suddenly does not - one GM command going through and then silence.
+                        try
+                        {
+                            var packet = (GamePacket)Activator.CreateInstance(classType);
+                            packet.Level = level;
+                            packet.Connection = connection;
+                            packet.Decode(stream2);
+                        }
+                        catch (Exception packetException)
+                        {
+                            Logger.Error(packetException,
+                                "Dropped packet 0x{0:x3} ({1}) from {2}: {3}",
+                                type, classType.Name, connection?.Ip, packetException.Message);
+                        }
                     }
                 }
                 else
@@ -183,8 +198,10 @@ public class GameProtocolHandler : BaseProtocolHandler
         }
         catch (Exception e)
         {
+            // Only framing or decryption failures reach here now, and those genuinely leave the
+            // stream position unknown - there is nothing safe to continue from.
+            Logger.Error(e, "Unrecoverable receive error for {0}, closing the connection", connection?.Ip);
             connection?.Shutdown();
-            Logger.Error(e);
         }
     }
 

@@ -85,17 +85,68 @@ public class PositionAndRotation
         return (roll, pitch, yaw);
     }
 
+    /// <summary>
+    /// The actor's three-byte rotation as a movement body carries it.
+    /// </summary>
+    /// <remarks>
+    /// These three bytes are one rotation vector, not three angles: their direction is the axis
+    /// turned about and their length is the angle, as a fraction of a full turn, times 127. The
+    /// client rebuilds a quaternion from exactly that.
+    ///
+    /// Writing an angle per axis was only ever right by accident, and only for a turn about a
+    /// single axis - which is most of them, hence how long it survived. Combine two and the axis
+    /// the client reconstructs is not the one meant; push all three high and the length passes
+    /// the client's upper guard and it drops the rotation altogether.
+    /// </remarks>
     public (sbyte, sbyte, sbyte) ToRollPitchYawSBytesMovement()
     {
-        sbyte roll = MathUtil.ConvertRadianToDirection(Rotation.X - TwoPi);
-        sbyte pitch = MathUtil.ConvertRadianToDirection(Rotation.Y - TwoPi);
-        sbyte yaw = MathUtil.ConvertRadianToDirection(Rotation.Z - TwoPi);
-        /*
-        sbyte roll = (sbyte)(vec3.X / (Math.PI * 2) / ToSByteDivider);
-        sbyte pitch = (sbyte)(vec3.Y / (Math.PI * 2) / ToSByteDivider);
-        sbyte yaw = (sbyte)(vec3.Z / (Math.PI * 2) / ToSByteDivider);
-        */
-        return (roll, pitch, yaw);
+        var q = Quaternion.Normalize(ToQuaternion());
+
+        // A quaternion and its negation are the same rotation but describe it the long way round.
+        // Take the short one, or a small turn goes out as an almost complete one.
+        if (q.W < 0f)
+            q = new Quaternion(-q.X, -q.Y, -q.Z, -q.W);
+
+        var halfAngle = MathF.Acos(Math.Clamp(q.W, -1f, 1f));
+        var fullAngle = 2f * halfAngle;
+
+        var vector = Vector3.Zero;
+        if (fullAngle > 1e-4f)
+        {
+            var sin = MathF.Sin(halfAngle);
+            var axis = MathF.Abs(sin) > 1e-6f
+                ? Vector3.Normalize(new Vector3(q.X, q.Y, q.Z) / sin)
+                : Vector3.UnitX;
+
+            vector = axis * (fullAngle / TwoPi);
+        }
+
+        return (QuantizeRotation(vector.X), QuantizeRotation(vector.Y), QuantizeRotation(vector.Z));
+    }
+
+    /// <summary>Rebuilds the rotation a three-byte movement vector stands for.</summary>
+    /// <remarks>
+    /// Outside the length the client accepts it answers with no rotation at all, so the same
+    /// happens here rather than producing something the client would never show.
+    /// </remarks>
+    public static Quaternion FromMovementRotation(sbyte x, sbyte y, sbyte z)
+    {
+        var r = new Vector3(x / 127f, y / 127f, z / 127f);
+        var lengthSquared = r.LengthSquared();
+        if (lengthSquared < 6.200012e-5f || lengthSquared > 0.999938f)
+            return Quaternion.Identity;
+
+        var length = MathF.Sqrt(lengthSquared);
+        var axis = r / length;
+        var halfAngle = MathF.PI * length;
+        var sin = MathF.Sin(halfAngle);
+
+        return new Quaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, MathF.Cos(halfAngle));
+    }
+
+    private static sbyte QuantizeRotation(float value)
+    {
+        return (sbyte)Math.Clamp(MathF.Floor(value * 127f + 0.5f), -127f, 127f);
     }
 
     public void SetRotation(float roll, float pitch, float yaw)

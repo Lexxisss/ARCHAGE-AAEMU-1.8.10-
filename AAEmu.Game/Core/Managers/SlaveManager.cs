@@ -210,15 +210,29 @@ public class SlaveManager : Singleton<SlaveManager>
         lock (_slaveListLock)
             slave = _tlSlaves.FirstOrDefault(x => x.Value.ObjId == objId).Value;
         //var slave = GetActiveSlaveByObjId(objId);
-        if ((slave == null) || (slave.AttachedCharacters.ContainsKey(attachPoint)))
+        if (slave == null)
+        {
+            Logger.Warn($"BindSlave: no slave with objId {objId} for {character.Name} ({character.ObjId})");
             return;
+        }
+
+        // A refusal here is invisible from the outside: the client asked to sit down, got nothing
+        // back, and goes on believing it is standing while the seat is held on this side. Nobody
+        // then asks to get up from a seat they do not think they occupy, so the seat stays taken
+        // for good. That deserves to say so in the log.
+        if (slave.AttachedCharacters.TryGetValue(attachPoint, out var seatedCharacter))
+        {
+            Logger.Warn($"BindSlave: {attachPoint} of slave {slave.Name} ({slave.ObjId}) is already held by " +
+                        $"{seatedCharacter?.Name} ({seatedCharacter?.ObjId}), refusing {character.Name} ({character.ObjId})");
+            return;
+        }
 
         character.BroadcastPacket(new SCUnitAttachedPacket(character.ObjId, attachPoint, bondKind, objId), true);
         character.AttachedPoint = attachPoint;
         switch (attachPoint)
         {
             case AttachPointKind.Driver:
-                character.BroadcastPacket(new SCSlaveBoundPacket(character.Id, objId), true);
+                character.BroadcastPacket(new SCSlaveBoundPacket(character.Id, objId, (byte)character.Transform.WorldId), true);
                 break;
         }
 
@@ -809,7 +823,7 @@ public class SlaveManager : Singleton<SlaveManager>
         #region SQLLite
 
         using (var connection2 = SQLite.CreateConnection("Data", SQLite.ServerDatabase))
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {
@@ -1139,6 +1153,92 @@ public class SlaveManager : Singleton<SlaveManager>
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Finds a spawned slave by its database id.
+    /// </summary>
+    public Slave GetActiveSlaveByDbId(uint dbId)
+    {
+        foreach (var slave in _activeSlaves.Values)
+            if (slave.Id == dbId)
+                return slave;
+
+        return null;
+    }
+
+    /// <summary>
+    /// Renames a spawned slave and tells everyone who can see it.
+    /// </summary>
+    /// <returns>The slave, or null when the name is unusable or the caller does not own it.</returns>
+    public Slave RenameSlave(GameConnection connection, ushort tlId, string newName)
+    {
+        var owner = connection?.ActiveChar;
+        if (owner == null)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            Logger.Warn($"{owner.Name} tried to give a slave an empty name");
+            return null;
+        }
+
+        if (!_tlSlaves.TryGetValue(tlId, out var slave) || slave.Summoner?.ObjId != owner.ObjId)
+        {
+            Logger.Warn($"{owner.Name} tried to rename a slave they do not own (tl {tlId})");
+            return null;
+        }
+
+        slave.Name = newName.Trim();
+        owner.BroadcastPacket(new SCUnitNameChangedPacket(slave.ObjId, slave.Name), true);
+
+        return slave;
+    }
+
+    /// <summary>
+    /// Handles the summon item for a slave being destroyed.
+    /// </summary>
+    /// <remarks>
+    /// The slave and its summon item are two halves of one thing: the item carries the
+    /// database id of the vehicle it summons. Destroying the item without removing the row
+    /// left the vehicle behind in the database forever, owned by an item that no longer
+    /// exists, and it would come back on the next load.
+    /// </remarks>
+    /// <returns>True when a stored slave was actually removed.</returns>
+    public bool OnDeleteSlaveItem(uint slaveDbId)
+    {
+        if (slaveDbId == 0)
+            return false;
+
+        // Despawn it first if the player currently has it out.
+        var active = GetActiveSlaveByDbId(slaveDbId);
+        if (active?.Summoner != null)
+            RemoveActiveSlave(active.Summoner, active.TlId);
+
+        return DeleteSlaveById(slaveDbId);
+    }
+
+    /// <summary>Removes one stored slave row.</summary>
+    public bool DeleteSlaveById(uint dbId)
+    {
+        if (dbId == 0)
+            return false;
+
+        try
+        {
+            using var connection = MySQL.CreateConnection();
+            using var command = connection.CreateCommand();
+            command.Connection = connection;
+            command.CommandText = "DELETE FROM slaves WHERE `id` = @id";
+            command.Parameters.AddWithValue("@id", dbId);
+            command.Prepare();
+            return command.ExecuteNonQuery() > 0;
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Failed to delete slave {0} from the database", dbId);
+            return false;
+        }
     }
 
     public void RemoveActiveSlave(Character character, ushort slaveTlId)

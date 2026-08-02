@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using AAEmu.Commons.Network;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
@@ -38,7 +39,6 @@ public sealed class House : Unit
     private uint _sellToPlayerId;
     private uint _sellPrice;
     private int _expandedDecoLimit;
-    private int _payMoneyAmount;
     private bool _isPublic;
 
     /// <summary>
@@ -48,11 +48,46 @@ public sealed class House : Unit
     public bool IsDirty { get => _isDirty; set => _isDirty = value; }
     public new uint Id { get => _id; set { _id = value; _isDirty = true; } }
     public ulong AccountId { get => _accountId; set { _accountId = value; _isDirty = true; } }
+
+    /// <summary>
+    /// The <c>ht</c> value the client sent with its placement request. The client always sends
+    /// zero here - the field is initialised to zero and no sender path assigns it - so this is
+    /// not the building's housing type and must not be echoed back in the state block. What the
+    /// client expects to receive is <see cref="HousingType"/>.
+    /// </summary>
     public int Ht { get => _ht; set { _ht = value; _isDirty = true; } }
+
+    /// <summary>
+    /// The housing type the client classifies buildings by. Its accessor reads this from the
+    /// building's own definition, and the classifiers compare it against category numbers, so it
+    /// comes from the design and never from the request that placed the building.
+    /// </summary>
+    public int HousingType => (int)(_template?.CategoryId ?? 0);
+
+    /// <summary>
+    /// Who the client resolves as this building's owner. An ownerless building announces itself
+    /// with <see cref="PublicOwnerIdentity"/>, which makes the client print its own "public owner"
+    /// text; anything else is taken as the identity itself.
+    /// </summary>
+    /// <remarks>
+    /// The client only treats values of 1000 and above as identities without further
+    /// interpretation; below that is its sentinel space, of which only 600 and 601 have a
+    /// recovered meaning - publicly owned, and look the owner up through the linked scene unit.
+    /// What it does with the rest of that space was not recovered.
+    ///
+    /// This matters here: character ids start at one (see CharacterIdManager), so every owner on
+    /// a fresh server lands in that unrecovered range. If a building still shows no owner after
+    /// its state block reads correctly, this is the next thing to look at - and the answer is to
+    /// start handing out character ids above the threshold, not to add an offset here, because
+    /// the client also compares this value against ids it already knows.
+    /// </remarks>
+    public long OwnerIdentity => OwnerId == 0 ? PublicOwnerIdentity : OwnerId;
     public uint CoOwnerId { get => _coOwnerId; set { _coOwnerId = value; _isDirty = true; } }
     public int ExpandedDecoLimit { get => _expandedDecoLimit; set { _expandedDecoLimit = value; _isDirty = true; } }
-    public int PayMoneyAmount { get => _payMoneyAmount; set { _payMoneyAmount = value; _isDirty = true; } }
     public bool IsPublic { get => _isPublic; set { _isPublic = value; _isDirty = true; } }
+
+    /// <summary>Part of the state block; we have nothing driving it yet.</summary>
+    public bool IsBoundButler { get; set; }
     public new uint TemplateId { get => _templateId; set { _templateId = value; _isDirty = true; } }
     public HousingTemplate Template
     {
@@ -75,7 +110,21 @@ public sealed class House : Unit
         {
             _currentStep = value;
             _isDirty = true;
-            ModelId = _currentStep == -1 ? Template.MainModelId : Template.BuildSteps[_currentStep].ModelId;
+
+            // The model shown is the one the design gives for this stage, and the finished model
+            // once there is no stage left. A stage the design has no row for used to throw here
+            // and take the whole placement with it; say so and stand the finished building up
+            // instead, because that is at least visible and tells us the design data is short.
+            if (_currentStep == -1)
+                ModelId = Template.MainModelId;
+            else if (Template.BuildSteps.TryGetValue(_currentStep, out var stepRow))
+                ModelId = stepRow.ModelId;
+            else
+            {
+                Logger.Warn($"House {Id} design {TemplateId} has no build step {_currentStep}, using the finished model");
+                ModelId = Template.MainModelId;
+            }
+
             if (_currentStep == -1) // TODO ...
             {
                 foreach (var bindingDoodad in Template.HousingBindingDoodad)
@@ -103,8 +152,9 @@ public sealed class House : Unit
             if (_currentStep > 0)
             {
                 BaseAction = 0;
-                for (var i = 0; i < _currentStep; i++)
-                    BaseAction += Template.BuildSteps[i].NumActions;
+                foreach (var step in Template.BuildSteps.Values)
+                    if (step.Step < _currentStep)
+                        BaseAction += step.NumActions;
             }
         }
     }
@@ -149,6 +199,35 @@ public sealed class House : Unit
         Events.OnDeath += OnDeath;
     }
 
+    /// <summary>
+    /// The contribution skill the design asks for right now, or zero for a building that is
+    /// finished or whose design has no stages.
+    /// </summary>
+    /// <remarks>
+    /// Stages partition the total number of actions between them: each says how many actions it
+    /// takes, and the stage being worked on is the first whose running total passes the actions
+    /// already done. That stage's skill is the only one the contribution path accepts, so it is
+    /// the only one worth offering the player.
+    /// </remarks>
+    public uint ActiveBuildSkillId
+    {
+        get
+        {
+            if (CurrentStep == -1 || Template == null)
+                return 0;
+
+            var cumulative = 0;
+            foreach (var step in Template.BuildSteps.Values.OrderBy(s => s.Step))
+            {
+                cumulative += step.NumActions;
+                if (CurrentAction < cumulative)
+                    return step.SkillId;
+            }
+
+            return 0;
+        }
+    }
+
     public void AddBuildAction()
     {
         if (CurrentStep == -1)
@@ -156,19 +235,18 @@ public sealed class House : Unit
 
         lock (_lock)
         {
+            // Stages are looked up by the ordinal the design numbers them with, not by position
+            // in the table: a design whose stages do not start at zero used to lose its last one
+            // and finish the building a stage early.
+            var actionsInStep = Template.BuildSteps.TryGetValue(CurrentStep, out var stepRow) ? stepRow.NumActions : 0;
             var nextAction = NumAction + 1;
-            if (Template.BuildSteps[CurrentStep].NumActions > nextAction)
+            if (actionsInStep > nextAction)
                 NumAction = nextAction;
             else
             {
                 NumAction = 0;
                 var nextStep = CurrentStep + 1;
-                if (Template.BuildSteps.Count > nextStep)
-                    CurrentStep = nextStep;
-                else
-                {
-                    CurrentStep = -1;
-                }
+                CurrentStep = Template.BuildSteps.ContainsKey(nextStep) ? nextStep : -1;
             }
         }
     }
@@ -293,37 +371,112 @@ public sealed class House : Unit
         return true;
     }
 
+    /// <summary>Number of UCC decoration slots the state block always carries.</summary>
+    private const int UccSlotCount = HousingTemplate.UccSlotCount;
+
+    /// <summary>
+    /// Number of trailing 64-bit values the state block always carries. They are not positions -
+    /// see <see cref="Write"/>.
+    /// </summary>
+    private const int TrailingReservedCount = 6;
+
+    /// <summary>Owner identity meaning "nobody in particular"; the client names such a building publicly owned.</summary>
+    private const long PublicOwnerIdentity = 600;
+
+    /// <summary>
+    /// Writes the house state block.
+    /// </summary>
+    /// <remarks>
+    /// The variable-width block is a single value, not four. Build progress does not live in
+    /// this packet at all - it has its own message carrying allstep and curstep - so packing
+    /// the step counters in alongside the template id displaced the rest of the payload.
+    ///
+    /// The three id fields are 64 bits on the wire while the model holds them as 32. Writing
+    /// them at their model width lost four bytes each.
+    ///
+    /// The block did not end at isPublic. A bound-butler flag, a butler id, five UCC
+    /// decoration records and six reserved 64-bit values follow it.
+    ///
+    /// Two of the fields were also carrying the wrong value rather than the wrong width. The
+    /// housing type is the design's own category, not the <c>ht</c> the placement request came
+    /// with - that one is always zero. And of the two 64-bit ids only the second is read: it is
+    /// the owner identity, and the first is kept but never consulted, so sending the co-owner
+    /// there only invited a later reader to believe it meant something.
+    ///
+    /// The sale pair sits where it belongs. There are two 64-bit values before the restricted
+    /// buyer's name - the asking price and who the sale is reserved for - and only the second
+    /// was written; the first was going out much earlier, right after the packed design id,
+    /// which put the housing type and both owner identities eight bytes past where they are
+    /// read. That is the other half of the ownerless building: even a correct owner identity
+    /// was picked up from the middle of two other fields.
+    /// </remarks>
     public PacketStream Write(PacketStream stream)
     {
         var ownerName = NameManager.Instance.GetCharacterName(OwnerId);
         var sellToPlayerName = NameManager.Instance.GetCharacterName(SellToPlayerId);
 
-        stream.Write(TlId);             // tl
-        stream.Write(Id);               // dbId
-        stream.WriteBc(ObjId);          // bc
+        stream.Write((uint)TlId);              // tl                 : u32, wider than the model holds it
+        stream.Write(Id);                      // dbId               : i32
+        stream.WriteBc(ObjId);                 // bc                 : 3 bytes, the handler's lookup key
 
-        if (CurrentStep == -1)
-            stream.WritePisc(TemplateId, 0, 0, 0);
-        else
-            stream.WritePisc(TemplateId, AllAction, CurrentAction, PayMoneyAmount);
+        stream.WritePisc(TemplateId);          // housingDescId      : pish u8, then the value at its own width
+        stream.Write(HousingType);             // housingType        : i32, the design's own category
+        stream.Write(0L);                      // ownerIdentityAux   : u64, kept but never consulted
+        stream.Write(OwnerIdentity);           // ownerIdentity      : u64
+        stream.Write(ownerName ?? "");         // ownerName          : string, max 128
+        stream.Write(AccountId);               // accountId          : u64
+        stream.Write((byte)Permission);        // permission         : u8, 0 owner / 1 expedition / 2 all / 3 family
+        WriteWorldPosition(stream, Transform.World.Position);
+        stream.Write(Name ?? "");              // houseName          : string, max 128
+        stream.Write(AllowRecover);            // allowRecover       : bool
+        stream.Write((long)SellPrice);         // salePrice          : i64
+        stream.Write((long)SellToPlayerId);    // saleTargetIdentity : u64
+        stream.Write(sellToPlayerName ?? "");  // sellToName         : string, max 128
+        stream.Write(ExpandedDecoLimit);       // expandedDecoLimit  : i32
+        stream.Write(0);                       // reserved           : i32, serialized but never applied
+        stream.Write(IsPublic);                // isPublic           : bool
+        stream.Write(IsBoundButler);           // isBoundButler      : bool
+        stream.Write(0u);                      // butlerId           : u32, only read when bound
 
-        stream.Write(Ht);                     // ht
-        stream.Write(CoOwnerId);              // type(id)
-        stream.Write(OwnerId);                // type(id)
-        stream.Write(ownerName ?? "");
-        stream.Write(AccountId);              // accountId
-        stream.Write((byte)Permission);       // permission
-        stream.Write(Helpers.ConvertLongX(Transform.World.Position.X));
-        stream.Write(Helpers.ConvertLongY(Transform.World.Position.Y));
-        stream.Write(Transform.World.Position.Z);
-        stream.Write(Name);                   // house // TODO max length 128
-        stream.Write(AllowRecover);           // allowRecover
-        stream.Write(SellToPlayerId);         // type(id)
-        stream.Write(sellToPlayerName ?? ""); // sellToName
-        stream.Write(ExpandedDecoLimit);      // expandedDecoLimit
-        stream.Write(Template.MainModelId);   // model_id (type) не точно!
-        stream.Write(IsPublic);               // isPublic
+        // The five decal slots. Their kinds belong to the design - floor, outer wall, roof, top,
+        // wall - and used to go out as zeros, which told the client the building takes no decals
+        // at all. What is applied to a slot is a separate identity, and it stays empty: there is
+        // nowhere on the server to keep one yet.
+        var uccKinds = Template?.UccKinds;
+        for (var i = 0; i < UccSlotCount; i++)
+        {
+            stream.Write(Id);                      // houseId      : i32
+            stream.Write(0L);                      // type         : i64, the applied decal
+            stream.Write(uccKinds?[i] ?? 0);       // ucc_kind     : i32
+            stream.Write(i);                       // ucc_position : i32
+        }
+
+        // Six plain 64-bit values, not two positions. The serializer labels them x/y/z/x/y/z,
+        // which is what made them look like a pair of coordinate records, but the client copies
+        // all six as full 64-bit words into two of its own collections - one holding scene object
+        // ids it later walks and tears down, one holding named state for drawing the building's
+        // area - and starts both empty. Each collection is a begin/end/capacity triple, so what
+        // arrives here becomes its bookkeeping: it has to stay zero. Never put the building's
+        // position, an object id or any other live value in them.
+        //
+        // Written as a position - two 20-byte records - this block was eight bytes short, and it
+        // is the last thing in the packet, so the client ran off the end of it and dropped the
+        // whole state rather than losing a field.
+        for (var i = 0; i < TrailingReservedCount; i++)
+            stream.Write(0L);              // reservedTail0..5 : i64
+
         return stream;
+    }
+
+    /// <summary>
+    /// The 20-byte world position this subsystem uses: <c>i64 x, i64 y, f32 z</c>. It is not
+    /// the ordinary three-float vector.
+    /// </summary>
+    private static void WriteWorldPosition(PacketStream stream, Vector3 position)
+    {
+        stream.Write(Helpers.ConvertLongX(position.X));
+        stream.Write(Helpers.ConvertLongY(position.Y));
+        stream.Write(position.Z);
     }
 
     public void OnDeath(object sender, EventArgs args)

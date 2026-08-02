@@ -592,21 +592,85 @@ public class PacketStream : ICloneable, IComparable
         return result;
     }
 
+    /// <summary>
+    /// Reads the 11-byte world position used by every movement body.
+    /// </summary>
+    /// <remarks>
+    /// The wire form is <c>X:u32, Y:u32, Z:u16 + 6 bits</c>, with the top two bits of the
+    /// last byte holding the Y and X signs. Each coordinate only ever fills three bytes, so
+    /// on the wire it reads as three significant bytes followed by a zero.
+    ///
+    /// This used to read the correct 11 bytes and then decode them with the nine-byte
+    /// offsets, so X came out right while Y picked up the padding byte as its low byte and
+    /// Z was read from Y's high byte onwards. Both were badly wrong, and the sign bits were
+    /// taken from the middle of Z.
+    /// </remarks>
     public (float x, float y, float z) ReadPosition()
     {
-        var position = ReadBytes(11);
-        return Helpers.ConvertPosition(position);
+        var raw = ReadBytes(11);
+        var packed = new[] { raw[0], raw[1], raw[2], raw[4], raw[5], raw[6], raw[8], raw[9], raw[10] };
+        return Helpers.ConvertPosition(packed);
+    }
+
+    /// <summary>
+    /// Writes the 11-byte world position used by every movement body. See <see cref="ReadPosition"/>.
+    /// </summary>
+    /// <remarks>
+    /// Distinct from <see cref="WritePosition(float,float,float)"/>, which emits the nine
+    /// significant bytes without the padding and is what the non-movement packets use.
+    /// Writing that shorter form inside a movement body leaves it two bytes short and shifts
+    /// velocity, rotation, stance and the actor flags out of place.
+    /// </remarks>
+    public PacketStream WriteWorldPosition(float x, float y, float z)
+    {
+        var p = Helpers.ConvertPosition(x, y, z);
+        Write(p[0]);
+        Write(p[1]);
+        Write(p[2]);
+        Write((byte)0);
+        Write(p[3]);
+        Write(p[4]);
+        Write(p[5]);
+        Write((byte)0);
+        Write(p[6]);
+        Write(p[7]);
+        Write(p[8]);
+        return this;
+    }
+
+    /// <summary>
+    /// Divisor for every normalized 16-bit movement field: the maximum a signed short holds,
+    /// not the power of two above it.
+    /// </summary>
+    public const float NormalizedShortScale = 32767f;
+
+    /// <summary>
+    /// Turns a normalized value into the 16-bit form movement bodies use.
+    /// </summary>
+    /// <remarks>
+    /// Clamped and rounded away from zero at the halves, which is what the client's own writer
+    /// does. The conversion this replaced threw on anything out of range - and the one caller
+    /// that guarded against it answered by writing a rotation of all zeros, so a unit turning
+    /// faster than the scale allows simply stopped turning.
+    /// </remarks>
+    public static short ToNormalizedShort(float value)
+    {
+        var clamped = Math.Clamp(value, -1f, 1f);
+        return (short)MathF.Floor(clamped * NormalizedShortScale + 0.5f);
     }
 
     public Quaternion ReadQuaternionShort()
     {
-        var quatX = Convert.ToSingle(ReadInt16() * 0.000030518509f);
-        var quatY = Convert.ToSingle(ReadInt16() * 0.000030518509f);
-        var quatZ = Convert.ToSingle(ReadInt16() * 0.000030518509f);
+        var quatX = ReadInt16() / NormalizedShortScale;
+        var quatY = ReadInt16() / NormalizedShortScale;
+        var quatZ = ReadInt16() / NormalizedShortScale;
         var quatNorm = quatX * quatX + quatY * quatY + quatZ * quatZ;
 
+        // The fourth component is not transmitted: the sender picks the equivalent rotation whose
+        // w is not negative, and it is rebuilt here. Past the threshold the client reads it as
+        // zero rather than taking a root of a negative number.
         var quatW = 0.0f;
-        if (quatNorm < 0.99750)
+        if (quatNorm <= 0.9998999834)
         {
             quatW = (float)Math.Sqrt(1.0 - quatNorm);
         }
@@ -627,9 +691,9 @@ public class PacketStream : ICloneable, IComparable
 
     public Vector3 ReadVector3Short()
     {
-        var x = Convert.ToSingle(ReadInt16()) * 0.000030518509f;
-        var y = Convert.ToSingle(ReadInt16()) * 0.000030518509f;
-        var z = Convert.ToSingle(ReadInt16()) * 0.000030518509f;
+        var x = ReadInt16() / NormalizedShortScale;
+        var y = ReadInt16() / NormalizedShortScale;
+        var z = ReadInt16() / NormalizedShortScale;
         var temp = new Vector3(x, y, z);
 
         return temp;
@@ -846,21 +910,13 @@ public class PacketStream : ICloneable, IComparable
     public PacketStream WriteQuaternionShort(Quaternion values, bool scalar = false)
     {
         var temp = new PacketStream();
-        try
-        {
-            temp.Write(Convert.ToInt16(values.X * 32767f));
-            temp.Write(Convert.ToInt16(values.Y * 32767f));
-            temp.Write(Convert.ToInt16(values.Z * 32767f));
-        }
-        catch
-        {
-            var res = new byte[6];
-            temp.Write(res);
-        }
+        temp.Write(ToNormalizedShort(values.X));
+        temp.Write(ToNormalizedShort(values.Y));
+        temp.Write(ToNormalizedShort(values.Z));
 
         if (scalar)
         {
-            temp.Write(Convert.ToInt16(values.W));
+            temp.Write(ToNormalizedShort(values.W));
         }
         return Write(temp, false);
     }
@@ -876,9 +932,9 @@ public class PacketStream : ICloneable, IComparable
     public PacketStream WriteVector3Short(Vector3 values)
     {
         var temp = new PacketStream();
-        temp.Write(Convert.ToInt16(values.X * 32767f));
-        temp.Write(Convert.ToInt16(values.Y * 32767f));
-        temp.Write(Convert.ToInt16(values.Z * 32767f));
+        temp.Write(ToNormalizedShort(values.X));
+        temp.Write(ToNormalizedShort(values.Y));
+        temp.Write(ToNormalizedShort(values.Z));
         return Write(temp, false);
     }
 

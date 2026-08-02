@@ -5,14 +5,27 @@ using AAEmu.Game.Models.Game.World;
 
 namespace AAEmu.Game.Models.Game.Units.Movements;
 
+/// <summary>
+/// The byte that opens every movement body and chooses which variant follows it.
+/// </summary>
+/// <remarks>
+/// These are wire values, not an internal numbering: the byte goes out as-is and the client
+/// picks its reader from it. Everything from the ship onwards used to be one short - a ship went
+/// out under the vehicle's number, a ship request under the ship's and a transfer under the ship
+/// request's - so each was read with the wrong reader and the wrong length.
+///
+/// Two and three are the same vehicle layout; anything the client does not recognise falls back
+/// to the generic one.
+/// </remarks>
 public enum MoveTypeEnum
 {
     Default = 0,
     Unit = 1,
     Vehicle = 2,
-    Ship = 3,
-    ShipRequest = 4,
-    Transfer = 5
+    VehicleAlternate = 3,
+    Ship = 4,
+    ShipRequest = 5,
+    Transfer = 6
 }
 
 public abstract class MoveType : PacketMarshaler
@@ -68,7 +81,10 @@ public abstract class MoveType : PacketMarshaler
             case MoveTypeEnum.Unit:
                 mType = new UnitMoveType();
                 break;
+            // Both vehicle numbers carry the same body, so a client that sends either has to be
+            // read the same way.
             case MoveTypeEnum.Vehicle:
+            case MoveTypeEnum.VehicleAlternate:
                 mType = new VehicleMoveType();
                 break;
             case MoveTypeEnum.Ship:

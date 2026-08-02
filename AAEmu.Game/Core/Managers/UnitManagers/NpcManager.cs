@@ -256,6 +256,19 @@ public class NpcManager : Singleton<NpcManager>
             return template;
         }
 
+        // A model with no body parts of its own cannot be dressed by this method, and the
+        // caller copies BodyItems back wholesale - so falling through would overwrite the
+        // template's own slots with an all-zero array and leave the NPC headless. 4471 NPCs
+        // reach here on such a model, because char_race_id alone decides who enters: plenty
+        // of props, constructs and creatures carry race 0 while having nothing humanoid about
+        // their mesh. This is the check a 5.0 server spells as SubType == "ActorModel", which
+        // was dropped here on the grounds that the race switch below already filters enough.
+        // It does not.
+        if (!_itemBodyParts.ContainsKey(template.ModelId))
+        {
+            return template;
+        }
+
         //Logger.Info("Loading random npc {0} custom templates...", template.ModelId);
         var modelParamsId = 0u;
         switch ((Race)template.CharRaceId)
@@ -287,9 +300,18 @@ public class NpcManager : Singleton<NpcManager>
                 break;
         }
 
-        // choose randomly from the client total-custom list. modelParamsId is
-        // only assigned to supported humanoid races above, so no foreign
-        // ModelManager/ActorModel check is required here.
+        // The mesh outranks char_race_id. total_character_customs.model_id uses the same
+        // numbering as npcs.model_id, so when an NPC already stands on one of the humanoid
+        // appearance models, that is the appearance its custom has to fit - whatever race the
+        // row claims. 74 NPCs sit on the Firran male model 20 while carrying race 0, 1 or 5,
+        // and deriving the id from race handed each of them a Nuian or Hariharan custom to
+        // wear on a Firran body: the wrong face on the wrong head.
+        if (template.ModelId is 10 or 11 or 14 or 15 or 16 or 17 or 18 or 19 or 20 or 21 or 24 or 25)
+        {
+            modelParamsId = template.ModelId;
+        }
+
+        // choose randomly from the client total-custom list.
         if (modelParamsId != 0)
         {
             // Get all possible hair item_ids that match this model

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using AAEmu.Commons.Network;
 using AAEmu.Commons.Utils;
@@ -39,66 +39,11 @@ public class SCOneUnitMovementPacket : GamePacket
 
     public override PacketStream Write(PacketStream stream)
     {
-        if (_type is UnitMoveType unitMoveType)
-        {
-            WriteUnitMovementBody(stream, unitMoveType);
-            return stream;
-        }
-
         stream.WriteBc(_id);
         stream.Write((byte)_type.Type);
         stream.Write(_type);
         return stream;
     }
-
-    private void WriteUnitMovementBody(PacketStream stream, UnitMoveType unitMoveType)
-    {
-        stream.WriteBc(_id);
-        stream.Write((byte)unitMoveType.Type);
-        stream.Write(unitMoveType.Time);
-        stream.Write(unitMoveType.Flags);
-        if ((unitMoveType.Flags & 0x10) == 0x10)
-        {
-            stream.Write(unitMoveType.ScType);
-            stream.Write(unitMoveType.Phase);
-        }
-
-        WritePaddedPosition(stream, unitMoveType.X, unitMoveType.Y, unitMoveType.Z);
-        stream.Write(unitMoveType.VelX);
-        stream.Write(unitMoveType.VelY);
-        stream.Write(unitMoveType.VelZ);
-        stream.Write(unitMoveType.RotationX);
-        stream.Write(unitMoveType.RotationY);
-        stream.Write(unitMoveType.RotationZ);
-
-        var delta = unitMoveType.DeltaMovement ?? new sbyte[3];
-        stream.Write(delta.Length > 0 ? delta[0] : (sbyte)0);
-        stream.Write(delta.Length > 1 ? delta[1] : (sbyte)0);
-        stream.Write(delta.Length > 2 ? delta[2] : (sbyte)0);
-        stream.Write((byte)unitMoveType.Stance);
-        stream.Write((byte)unitMoveType.Alertness);
-        stream.Write(unitMoveType.ActorFlags);
-    }
-
-    // Same 9-byte position encoding as PacketStream.WritePosition, but with a
-    // zero pad byte inserted after the X block and after the Y block, matching
-    // the 11-byte position field observed for unit movement on this client.
-    private static void WritePaddedPosition(PacketStream stream, float x, float y, float z)
-    {
-        var pos = Helpers.ConvertPosition(x, y, z);
-        stream.Write(pos[0]);
-        stream.Write(pos[1]);
-        stream.Write(pos[2]);
-        stream.Write((byte)0);
-        stream.Write(pos[3]);
-        stream.Write(pos[4]);
-        stream.Write(pos[5]);
-        stream.Write((byte)0);
-        stream.Write(pos[6]);
-        stream.Write(pos[7]);
-        stream.Write(pos[8]);
-    }
-
     public override string Verbose()
     {
         return " - " + (_type?.Type.ToString() ?? "none") + " " +
@@ -123,9 +68,9 @@ public class SCOneUnitMovementPacket : GamePacket
         movement.RotationY = rotationY;
         movement.RotationZ = rotationZ;
         movement.DeltaMovement = new sbyte[3];
-        movement.Stance = 1;    // idle
+        movement.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
         movement.Alertness = 0; // idle
-        movement.ActorFlags = 3;
+        movement.ActorFlags = 0;
         return movement;
     }
 }

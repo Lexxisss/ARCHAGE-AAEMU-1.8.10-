@@ -55,8 +55,9 @@ public class CSListCharacterPacket : GamePacket
                 Connection.SendPacket(new SCCharacterListPacket(last, temp));
             }
 
-        var houses = Connection.Houses.Values.ToArray();
-        foreach (var house in houses)
-            Connection.SendPacket(new SCLoginCharInfoHouse(house.OwnerId, house));
+        // Nothing about the account's buildings is sent here. This client has no character-list
+        // housing message - the one that used to go out carried the placeholder opcode, and
+        // encoding that throws, so every account that owned a building lost its character list.
+        // Ownership reaches the client once it is in the world, through the building summary.
     }
 }

@@ -406,7 +406,14 @@ public class Simulation : Patrol
             npc.Transform.Local.SetPosition(newX, newY, newZ);
 
             var angle = MathUtil.CalculateAngleFrom(npc.Transform.Local.Position, target);
-            var (velX, velY) = MathUtil.AddDistanceToFront(4000, 0, 0, (float)angle.DegToRad());
+            // The client decodes each velocity short as raw / 32768 * 60, and it extrapolates
+            // between updates from that value - so a velocity that disagrees with how far the
+            // unit actually moves in the interval is what makes NPCs slide and stutter. This
+            // used to be a flat 4000, i.e. a claimed 7.32 units per second for every NPC
+            // whatever its real speed. Derive it from the speed the simulation is using.
+            var speedPerSecond = npc.BaseMoveSpeed * npc.MoveSpeedMul;
+            var velocityRaw = Math.Clamp(speedPerSecond / 60f * 32768f, short.MinValue, short.MaxValue);
+            var (velX, velY) = MathUtil.AddDistanceToFront(velocityRaw, 0, 0, (float)angle.DegToRad());
             npc.Transform.Local.SetRotationDegree(0f, 0f, (float)angle - 90);
             var (rx, ry, rz) = npc.Transform.Local.ToRollPitchYawSBytesMovement();
 
@@ -418,14 +425,14 @@ public class Simulation : Patrol
             moveType.RotationX = rx;
             moveType.RotationY = ry;
             moveType.RotationZ = rz;
-            moveType.ActorFlags = (byte)(RunningMode ? 4 : 5); // 5-walk, 4-run, 3-stand still
+            moveType.ActorFlags = 0;     // gate word for the optional blocks only; walk vs run comes from velocity
             moveType.Flags = 0;
 
             moveType.DeltaMovement = new sbyte[3];
             moveType.DeltaMovement[0] = 0;
             moveType.DeltaMovement[1] = (sbyte)(RunningMode ? 127 : 63);
             moveType.DeltaMovement[2] = 0;
-            moveType.Stance = 1;    // COMBAT = 0x0, IDLE = 0x1
+            moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
             moveType.Alertness = 1; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
             moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
 

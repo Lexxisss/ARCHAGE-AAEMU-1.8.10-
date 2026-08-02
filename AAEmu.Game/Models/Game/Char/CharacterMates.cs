@@ -147,41 +147,39 @@ public class CharacterMates
         mount.PostUpdateCurrentHp(mount, 0, mount.Hp, KillReason.Unknown);
     }
 
+    /// <summary>
+    /// Whether the animal this item summons is something to ride or something that fights.
+    /// </summary>
+    /// <remarks>
+    /// The client is told which of the two it is and will not offer to mount a battle pet, so a
+    /// mount filed under the wrong one simply cannot be ridden.
+    ///
+    /// The distinction is the summon item's category, and the categories split cleanly by the
+    /// group they belong to: ridables sit in one group, battle pets and pets in another. The
+    /// list below is that split, read from this client's own category table:
+    ///
+    ///     ride    92 riding, 109 underwater, 112 unclassified/test, 176 giant, 198 guardian
+    ///     battle  95 battle, 191 pet, 197 groa
+    ///
+    /// It used to name only 92, 109 and 176, which is the set from a much later client. Dragons
+    /// and everything else added since fell through to battle and could not be mounted.
+    ///
+    /// Category 64 is the quest category and holds two ridable vehicles among ordinary quest
+    /// items. Only summon items reach this method, so naming it here cannot affect anything else
+    /// in that category.
+    /// </remarks>
     private static MateType GetMateType(Item item)
     {
-        MateType res;
-        switch (item.Template.CategoryId)
+        return item.Template.CategoryId switch
         {
-            case 92:
-            case 109:
-            case 176:
-                res = MateType.Ride;
-                break;
-            case 95:
-            case 191:
-            default:
-                res = MateType.Battle;
-                break;
-        }
-
-        return res;
+            64 or 92 or 109 or 112 or 176 or 198 => MateType.Ride,
+            _ => MateType.Battle
+        };
     }
 
     private static void SetMateType(Item item, Units.Mate mount)
     {
-        switch (item.Template.CategoryId)
-        {
-            case 92:
-            case 109:
-            case 176:
-                mount.MateType = MateType.Ride;
-                break;
-            case 95:
-            case 191:
-            default:
-                mount.MateType = MateType.Battle;
-                break;
-        }
+        mount.MateType = GetMateType(item);
     }
 
     public void DespawnMate(uint tlId)

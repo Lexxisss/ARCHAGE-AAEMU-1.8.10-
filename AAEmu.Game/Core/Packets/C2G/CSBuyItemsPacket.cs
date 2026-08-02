@@ -20,7 +20,11 @@ namespace AAEmu.Game.Core.Packets.C2G;
 
 public class CSBuyItemsPacket : GamePacket
 {
-    private const int MaxCartEntries = 30;
+    /// <summary>The client's own serializer sends no more purchase lines than this.</summary>
+    private const int MaxCartEntries = 12;
+
+    /// <summary>The buy-back cart holds more than the purchase cart does.</summary>
+    private const int MaxBuyBackEntries = 16;
     private const float MaxVendorDistance = 5f;
 
     private sealed class PurchaseEntry
@@ -54,7 +58,7 @@ public class CSBuyItemsPacket : GamePacket
         var buyCount = stream.ReadByte();
         var buyBackCount = stream.ReadByte();
 
-        if (buyCount > MaxCartEntries || buyBackCount > MaxCartEntries || buyCount + buyBackCount == 0)
+        if (buyCount > MaxCartEntries || buyBackCount > MaxBuyBackEntries || buyCount + buyBackCount == 0)
         {
             Fail(character, npcObjId, npc?.Template?.Id ?? 0, shopId, 0, 0, "invalid_cart_size", ErrorMessageType.BuyCartEmpty);
             return;
@@ -492,6 +496,11 @@ public class CSBuyItemsPacket : GamePacket
         Logger.Warn(
             "VendorBuy failed VendorNpcId={0} VendorTemplateId={1} ShopId={2} RequestedItemId={3} RequestedCount={4} TransactionResult=failed FailureReason={5}",
             vendorNpcId, vendorTemplateId, shopId, itemId, count, reason);
+
         character.SendErrorMessage(error);
+
+        // The store window holds a pending purchase until it is told the trade is over. Without
+        // this it keeps waiting on one that was already refused.
+        character.SendPacket(new SCStoreTradeFailedPacket(true));
     }
 }

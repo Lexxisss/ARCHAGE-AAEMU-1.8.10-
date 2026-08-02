@@ -134,12 +134,12 @@ public class Line : Patrol
         moveType.RotationY = 0;
         moveType.RotationZ = rotZ;
 
-        moveType.ActorFlags = 5;     // 5-walk, 4-run, 3-stand still
+        moveType.ActorFlags = 0;     // gate word for the optional blocks only; carries no walk/run meaning
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 127;
         moveType.DeltaMovement[2] = 0;
-        moveType.Stance = 1;    // COMBAT = 0x0, IDLE = 0x1
+        moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
         moveType.Alertness = 0; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
         moveType.Time += 50;    // has to change all the time for normal motion.
 

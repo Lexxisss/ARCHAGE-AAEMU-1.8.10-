@@ -24,6 +24,26 @@ public class Craft
     public int RecommendLevel { get; set; }
     public int VisibleOrder { get; set; }
 
+    /// <summary>
+    /// Labour one cycle of this recipe costs. Server-side, not a display value: it was never
+    /// read, so crafting was free.
+    /// </summary>
+    public int Cost { get; set; }
+
+    /// <summary>Whether the recipe may be published as an order for somebody else to fill.</summary>
+    public bool Orderable { get; set; }
+
+    /// <summary>
+    /// When set, the proficiency limit is the only thing gating the recipe - level and other
+    /// requirements do not apply.
+    /// </summary>
+    public bool UseOnlyActability { get; set; }
+
+    public uint ProductsPackId { get; set; }
+    public uint CraftCCategoryId { get; set; }
+    public uint CraftDCategoryId { get; set; }
+    public string Title { get; set; }
+
     public List<CraftProduct> CraftProducts { get; set; }
     public List<CraftMaterial> CraftMaterials { get; set; }
     public bool IsPack { get; set; }

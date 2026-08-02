@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -16,6 +17,7 @@ using AAEmu.Game.Models.Game.Items.Actions;
 using AAEmu.Game.Models.Game.Mate;
 using AAEmu.Game.Models.Game.Skills.Buffs;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Models.Tasks.Mate;
 using AAEmu.Game.Utils.DB;
 
 using NLog;
@@ -319,12 +321,15 @@ public class MateManager : Singleton<MateManager>
         }
     }
 
+    /// <summary>
+    /// Detaches everyone riding this mount and tells the observers.
+    /// </summary>
     public void UnMountMate(Mate mateInfo)
     {
+        mateInfo.StopUpdateXp();
+
         foreach (var seatInfo in mateInfo.Passengers.Values)
         {
-            mateInfo.StopUpdateXp();
-
             // Request seat position
             Character targetObj = null;
             if (seatInfo != null)
@@ -367,7 +372,34 @@ public class MateManager : Singleton<MateManager>
         owner.SendPacket(new SCMateSpawnedPacket(mate));
         mate.Spawn();
 
-        Logger.Debug($"Mount spawned: ownerObjId={owner.ObjId}, tlId={mate.TlId}, mateObjId={mate.ObjId}");
+        // From here on the animal walks after its owner on its own. Nothing did this before, so a
+        // summoned mate simply stood where it was put.
+        mate.MateFollowTask = new MateFollowTask(mate);
+        TaskManager.Instance.Schedule(
+            mate.MateFollowTask,
+            TimeSpan.FromMilliseconds(MateFollowTask.TickIntervalMs),
+            TimeSpan.FromMilliseconds(MateFollowTask.TickIntervalMs));
+
+        // Mirrors the ten fixed slots of SCMateSpawned so the log says exactly what the client
+        // was handed, padding included. Two mates from different templates must not end up with
+        // the same list here - if they do, the fault is on this side of the wire.
+        var wireSkills = mate.Skills.Take(10).ToList();
+        while (wireSkills.Count < 10)
+            wireSkills.Add(0);
+
+        Logger.Debug($"Mount spawned: ownerObjId={owner.ObjId}, tlId={mate.TlId}, mateObjId={mate.ObjId}, " +
+                     $"npcId={mate.TemplateId}, mateType={mate.MateType}, skills=[{string.Join(", ", wireSkills)}]");
+
+        // What the mate is actually wearing at the moment it goes out. An empty list here means
+        // the gear never reached the container and there is no point looking at the unit state.
+        var worn = mate.Equipment?.GetSlottedItemsList() ?? [];
+        var wornText = string.Join(", ", worn
+            .Select((wornItem, slot) => (wornItem, slot))
+            .Where(entry => entry.wornItem != null)
+            .Select(entry => $"{(EquipmentItemSlot)entry.slot}({entry.slot})=tpl {entry.wornItem.TemplateId}/id {entry.wornItem.Id}"));
+
+        Logger.Debug($"Mount equipment: mateId={mate.Id}, containerId={mate.Equipment?.ContainerId}, " +
+                     $"mateIdOnContainer={mate.Equipment?.MateId}, worn=[{wornText}]");
     }
 
     public void RemoveActiveMateAndDespawn(Character owner, uint tlId)
@@ -376,12 +408,16 @@ public class MateManager : Singleton<MateManager>
         if (mateInfo == null) return;
         if (mateInfo.TlId != tlId) return; // skip if invalid tlId
 
-        //foreach (var ati in mateInfo.Passengers)
-        //    UnMountMate(WorldManager.Instance.GetCharacterByObjId(ati.Value.ObjId), mateInfo.TlId, ati.Key, AttachUnitReason.SlaveBinding);
-        foreach (var ati in mateInfo.Passengers)
-            UnMountMate(mateInfo);
+        // Detach every passenger before the mount itself goes away. The client hangs the
+        // attachment and its UI off the parent, so removing the parent first leaves that
+        // state racing the teardown.
+        //
+        // This used to be called once per passenger, but it already walks every seat itself.
+        // The first call cleared them all and every later one just logged an empty-seat warning.
+        UnMountMate(mateInfo);
 
         mateInfo.StopUpdateXp();
+        mateInfo.StopFollowing();
 
         for (var i = 0; i < _activeMates[owner.ObjId].Count; i++)
         {
@@ -405,6 +441,8 @@ public class MateManager : Singleton<MateManager>
         if (mateInfo == null) return;
 
         UnMountMate(mateInfo);
+
+        mateInfo.StopFollowing();
 
         for (var i = 0; i < _activeMates[owner.ObjId].Count; i++)
         {
@@ -440,13 +478,44 @@ public class MateManager : Singleton<MateManager>
         }
     }
 
+    /// <summary>
+    /// The skills a mate or slave of this npc template announces to its owner.
+    /// </summary>
+    /// <remarks>
+    /// Which id belongs in the ten slots of SCMateSpawned is still open. Resolving
+    /// npc_mount_skills through mount_skills to the real skill id was tried first, on the
+    /// reasoning that <see cref="GetMountAttachedSkills"/> expects a real skill id on the way
+    /// back in. That never got a fair test: the mate record was unreachable at the time for an
+    /// unrelated reason, so the bar stayed empty either way. Now that the record is reachable,
+    /// the bar draws the same buttons for templates whose skill sets do not overlap at all -
+    /// so the client is not using what we send.
+    ///
+    /// So this hands over the mount_skills row id instead, the raw contents of npc_mount_skills.
+    /// Two templates with different rows must now produce visibly different bars. If they still
+    /// do not, neither id is what the slots want and the layout itself is the next suspect.
+    ///
+    /// The row is still checked against mount_skills: an id with no row behind it is meaningless
+    /// to the client whichever way this ends up being decided.
+    /// </remarks>
     public List<uint> GetMateSkills(uint id)
     {
-        foreach (var skills in _npcMountSkills)
-            if (skills.Key == id)
-                return skills.Value;
+        if (!_npcMountSkills.TryGetValue(id, out var mountSkillIds))
+            return null;
 
-        return null;
+        var skills = new List<uint>(mountSkillIds.Count);
+        foreach (var mountSkillId in mountSkillIds)
+        {
+            if (!_mountSkills.ContainsKey(mountSkillId))
+            {
+                Logger.Warn($"npc_mount_skills references missing mount_skills row {mountSkillId} for npc {id}");
+                continue;
+            }
+
+            if (!skills.Contains(mountSkillId))
+                skills.Add(mountSkillId);
+        }
+
+        return skills;
     }
 
     /// <summary>
@@ -508,7 +577,7 @@ public class MateManager : Singleton<MateManager>
 
         #region SQLite
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {
@@ -537,7 +606,7 @@ public class MateManager : Singleton<MateManager>
             }
         }
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {
@@ -557,7 +626,7 @@ public class MateManager : Singleton<MateManager>
             }
         }
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {

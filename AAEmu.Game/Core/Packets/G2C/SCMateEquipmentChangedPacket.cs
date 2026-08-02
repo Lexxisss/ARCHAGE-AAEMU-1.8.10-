@@ -1,55 +1,34 @@
-﻿using AAEmu.Commons.Network;
+using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
-using AAEmu.Game.Models.Game.Items;
+using AAEmu.Game.Models.Game;
 
 namespace AAEmu.Game.Core.Packets.G2C;
 
+/// <summary>
+/// Authoritative result of an equipment change on a mate.
+/// </summary>
+/// <remarks>
+/// The same shape as the slave message: the equipment set the request carries, capped at two
+/// records here rather than three, followed by a success flag. The flag is not decorative - the
+/// handler reconciles the client's model against it, so a refused change has to be reported
+/// rather than left silent.
+/// </remarks>
 public class SCMateEquipmentChangedPacket : GamePacket
 {
-    private readonly ushort _tlId;
-    private readonly uint _characterId;
-    private readonly uint _passengerId;
-    private readonly bool _bts;
-    private readonly byte _num;
-    private readonly (SlotType type, byte slot, Item item) _itemA;
-    private readonly (SlotType type, byte slot, Item item) _itemB;
+    private readonly MateEquipment _mateEquipment;
+    private readonly bool _success;
 
-    public SCMateEquipmentChangedPacket((SlotType type, byte slot, Item item) itemA, (SlotType type, byte slot, Item item) itemB, ushort tlId, uint characterId, uint passengerId, bool bts) : base(SCOffsets.SCMateEquipmentChangedPacket, 5)
+    public SCMateEquipmentChangedPacket(MateEquipment mateEquipment, bool success)
+        : base(SCOffsets.SCMateEquipmentChangedPacket, 5)
     {
-        _itemA = itemA;
-        _itemB = itemB;
-        _tlId = tlId;
-        _characterId = characterId;
-        _passengerId = passengerId;
-        _bts = bts;
-        _num = 1; // all time == 1
+        _mateEquipment = mateEquipment;
+        _success = success;
     }
 
     public override PacketStream Write(PacketStream stream)
     {
-        stream.Write(_characterId); // type
-        stream.Write(_tlId);        // tl
-        stream.Write(_passengerId); // type
-        stream.Write(_bts);         // bts
-        stream.Write(_num);         // num
-
-        if (_itemA.item == null)
-            stream.Write(0);
-        else
-            stream.Write(_itemA.item);
-
-        if (_itemB.item == null)
-            stream.Write(0);
-        else
-            stream.Write(_itemB.item);
-
-        stream.Write((byte)_itemA.type);
-        stream.Write(_itemA.slot);
-        stream.Write((byte)_itemB.type);
-        stream.Write(_itemB.slot);
-
-        stream.Write(true); // success
-
+        stream.Write(_mateEquipment); // changes : the same set the request carries, max 2 records
+        stream.Write(_success);       // success : bool
         return stream;
     }
 }

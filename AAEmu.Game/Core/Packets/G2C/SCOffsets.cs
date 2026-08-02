@@ -1,4 +1,4 @@
-namespace AAEmu.Game.Core.Packets.G2C;
+﻿namespace AAEmu.Game.Core.Packets.G2C;
 
 public static class SCOffsets
 {
@@ -10,9 +10,13 @@ public static class SCOffsets
     public const ushort SCTrionConfigPacket = 0x0F9; //+
     public const ushort SCAccountAttributeConfigPacket = 0x249; //+
     public const ushort SCLevelRestrictionConfigPacket = 0x31E; //+
-    public const ushort SCTaxItemConfigPacket = 0x32C; //+
+    public const ushort SCTaxItemConfigPacket = 0x38D; //+
     public const ushort SCInGameShopConfigPacket = 0x220; //+
     public const ushort SCGameRuleConfigPacket = 0x21B; //+
+    // UNVERIFIED - kept at the value this server has always used. Both housing reverse reports
+    // give 0x104 for this packet and call the collision resolved, but 0x104 is taken here by
+    // SCMiniScoreboardUpdatePacket, and this one goes out during login, so a wrong number is not
+    // free either way. Check it against the client before moving it.
     public const ushort SCHousingAreaConfig = 0x077; // SCProtectFactionPacket
     public const ushort SCTaxItemConfig2Packet = 0x00F; //+
     public const ushort SCChatSpamConfigPacket = 0x0AD; //+
@@ -222,7 +226,7 @@ public static class SCOffsets
     public const ushort SCNpcInteractionStatusChangePacket = 0x1AE;
     public const ushort SCVegetationCutdowningPacket = 0x1FC;
     public const ushort SCCompletedQuestsPacket = 0x286;
-    public const ushort SCCraftItemNulockPacket = 0x2B4;
+    public const ushort SCCraftItemUnlockPacket = 0x160; // was 0x2B4 and misspelled Nulock
     public const ushort SCLootableStatePacket = 0x2BA;
     public const ushort SCUnitLootingStatePacket = 0x2F2;
     public const ushort SCLootItemTookPacket = 0x2B1;
@@ -249,9 +253,9 @@ public static class SCOffsets
     public const ushort SCDoodadPhaseChangedPacket = 0x2E1;
     public const ushort SCDoodadPuzzleScenePacket = 0x308;
     public const ushort SCDoodadAcceptQuestPacket = 0x01B;
-    public const ushort SCDoodadsRemovedPacket = 0x009;
+    public const ushort SCDoodadsRemovedPacket = 0x1FC; // was 0x009
     public const ushort SCDoodadOriginatorPacket = 0x010;
-    public const ushort SCDoodadInteractionCallbackPacket = 0x0C2;
+    public const ushort SCDoodadInteractionCallbackPacket = 0x0C2; // was 0x177, which is SCSetDoodadManikinSkin
     public const ushort SCSetDoodadManikinSkinPacket = 0x177;
     public const ushort off_3A108C8C = 0x2E0;
     public const ushort SCMailFailPacket = 0x021;
@@ -333,8 +337,8 @@ public static class SCOffsets
     public const ushort SCAreaChatBubblePacket = 0x180; // target 10.8 x2game.dll
     public const ushort SCChatBubblePacket = 0x0A8;
     public const ushort SCAreaTeamMessagePacket = 0x109;
-    public const ushort SCDoodadSoundPacket = 0x005;
-    public const ushort SCDoodadPhaseMsgPacket = 0x28F;
+    public const ushort SCDoodadSoundPacket = 0x19C; // was 0x005
+    public const ushort SCDoodadPhaseMsgPacket = 0x19D; // was 0x28F
     public const ushort SCDoodadPhaseMsg2Packet = 0x18C;
     public const ushort SCNuonsArrowMsgPacket = 0x1B5;
     public const ushort SCCooldownsPacket = 0x255;
@@ -550,7 +554,7 @@ public static class SCOffsets
     public const ushort SCIndunDirectTelPacket = 0x215;
     public const ushort SCWorldRestrictOwnerChangePacket = 0x1CB;
     //public const ushort SCLevelRestrictionConfigPacket = 0x31E;
-    //public const ushort SCTaxItemConfigPacket = 0x32C; // off_3A109F8C
+    //public const ushort SCTaxItemConfigPacket = 0x38D; // off_3A109F8C
     public const ushort SCReputationChangedPacket = 0x1E7;
     public const ushort SCReputationRelationsPacket = 0x234;
     public const ushort SCReputationRelationChangedPacket = 0x035;
@@ -725,6 +729,7 @@ public static class SCOffsets
     public const ushort off_3A10AA4C = 0x279;
     public const ushort off_3A10AA5C = 0x346;
     public const ushort off_3A10AA6C = 0x01C;
+    public const ushort SCBuyFailedMerchantGoodLimitPurchasePacket = 0x01C; // same slot as off_3A10AA6C
     public const ushort off_3A10AA7C = 0x108;
     public const ushort off_3A10AA8C = 0x028;
     public const ushort off_3A10AA9C = 0x166;
@@ -756,7 +761,7 @@ public static class SCOffsets
     public const ushort SCLinkTextForEnchantBroadcastPacket = 0x014;
     public const ushort off_3A10C654 = 0x0EA;
     public const ushort SCCvFCombatRelationshipPacket = 0x358;
-    public const ushort SCAddHousePacket = 0x175;
+    public const ushort SCHouseDataPacket = 0x175; // older name in this file: SCAddHouse
     //public const ushort SCChatSpamConfigPacket = 0x0AD;
     public const ushort SCTeamMemberDionnectedPacket = 0x2B9;
     public const ushort SCTeamJointInfoPacket = 0x026;
@@ -895,6 +900,7 @@ public static class SCOffsets
     public const ushort SCFamilyDescribedPacket = 0x1E6;
     public const ushort SCFamilyMemberAddedPacket = 0x022;
     public const ushort off_3A112970 = 0x1C7;
+    public const ushort SCFavoriteCraftsPacket = 0x1C7; // same slot as off_3A112970
     public const ushort off_3A112980 = 0x207;
     public const ushort SCUnitStatePacket = 0x133;
     public const ushort SCSiegeStatePacket = 0x25E;
@@ -935,7 +941,7 @@ public static class SCOffsets
     // в версии 3030 в x2game.dll нет таких пакетов
     public const ushort SCFactionCreatedPacket = 0xfff;
     public const ushort SCFactionSetRelationStatePacket = 0xfff;
-    public const ushort SCDominionTaxRatePacket = 0xfff;
+    public const ushort SCDominionTaxRatePacket = 0x080;
     public const ushort SCNationalTaxRatePacket = 0xfff;
     public const ushort SCDominionTaxBalancedPacket = 0xfff;
     public const ushort SCFamilyDescPacket = 0xfff;
@@ -948,7 +954,7 @@ public static class SCOffsets
     public const ushort SCGradeEnchantBroadcastPacket = 0xfff;
     public const ushort SCHouseBuildPayChangedPacket = 0xfff;
     public const ushort SCTeamBecameRaidTeamPacket = 0xfff;
-    //public const ushort SCAttachmentTakenPacket = 0xfff;
+    //public const ushort SCAttachmentTakenPacket = 0x089;
     //public const ushort SCBondDoodadPacket = 0x205; // SCAttachToDoodadPacket
     //public const ushort SCUnbondDoodadPacket = 0x06a; //SCDetachFromDoodadPacket
     public const ushort SCTradeOkUpdatePacket = 0xfff;
@@ -961,7 +967,7 @@ public static class SCOffsets
     public const ushort SCExpeditionRoleChangedPacket = 0xfff;
     //public const ushort SCFactionListPacket = 0xfff; // SCSystemFactionListPacket
     public const ushort SCItemUccDataChangedPacket = 0xfff; // SCItemUccChangedPacket
-    public const ushort SCResponseCommonFarmListPacket = 0xfff;
+    public const ushort SCResponseCommonFarmListPacket = 0x106;
     public const ushort SCRefreshInCharacterListPacket = 0xfff;
     public const ushort SCScheduleItemUpdatePacket = 0xfff;
     public const ushort SCSchoolOfFishDoodadsPacket = 0xfff;
@@ -988,10 +994,10 @@ public static class SCOffsets
     public const ushort SCCannotStartTradePacket = 0xfff;
     public const ushort SCCharacterGamePointsPacket = 0x228;
     public const ushort SCCharacterLaborPowerChangedPacket = 0x239;
-    public const ushort SCChargeMoneyPaidPacket = 0xfff;
+    public const ushort SCChargeMoneyPaidPacket = 0x093;
     public const ushort SCCofferContentsUpdatePacket = 0xfff;
-    public const ushort SCConstructHouseTaxPacket = 0xfff;
-    public const ushort SCEscapeSlavePacket = 0xfff;
+    public const ushort SCConstructHouseTaxPacket = 0x256;
+    public const ushort SCEscapeSlavePacket = 0x2ED;
     public const ushort SCFactionDeclareHostileResultPacket = 0xfff;
     public const ushort SCFactionImmigrateInvitePacket = 0xfff;
     public const ushort SCFactionImmigrateInviteResultPacket = 0xfff;
@@ -1000,20 +1006,22 @@ public static class SCOffsets
     public const ushort SCFactionOwnerChangedPacket = 0xfff;
     public const ushort SCFactionRelationExpiredPacket = 0xfff;
     public const ushort SCFriendsPacket = 0xfff;
-    public const ushort SCHouseResetForSalePacket = 0xfff;
-    public const ushort SCHouseSetForSalePacket = 0xfff;
-    public const ushort SCHouseSoldPacket = 0xfff;
-    public const ushort SCHouseStatePacket = 0xfff;
-    public const ushort SCHouseTaxInfoPacket = 0xfff;
-    public const ushort SCHousingRecoverTogglePacket = 0xfff;
+    public const ushort SCHouseResetForSalePacket = 0x385;
+    public const ushort SCHouseSetForSalePacket = 0x344;
+    public const ushort SCHouseSoldPacket = 0x2C7;
+    public const ushort SCHouseStatePacket = 0x1BE;
+    public const ushort SCHouseTaxInfoPacket = 0x270;
+    public const ushort SCHousingRecoverTogglePacket = 0x19C;
     public const ushort SCICSGoodListPacket = 0xfff;
     public const ushort SCICSMenuListPacket = 0xfff;
     public const ushort SCKnockBackUnitPacket = 0xfff;
     public const ushort SCLoginCharInfoHousePacket = 0xfff;
-    public const ushort SCMailFailedPacket = 0xfff;
+    public const ushort SCMailFailedPacket = 0x021;
     public const ushort SCMileageChangedPacket = 0xfff;
     public const ushort SCMineAmountPacket = 0xfff;
     public const ushort SCMyHousePacket = 0xfff;
-    public const ushort SCMySlavePacket = 0xfff;
+    public const ushort SCMySlavePacket = 0x366;
     public const ushort SCNationalMonumentChangedPacket = 0xfff;
+    public const ushort SCItemTaskConfirmAskPacket = 0x0EA;
+    public const ushort SCIsUnitInFarmPacket = 0x325;
 }

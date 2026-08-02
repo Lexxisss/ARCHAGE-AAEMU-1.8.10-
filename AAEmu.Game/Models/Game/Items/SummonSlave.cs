@@ -2,6 +2,7 @@
 using System.Numerics;
 
 using AAEmu.Commons.Network;
+using AAEmu.Commons.Utils;
 using AAEmu.Game.Models.Game.Items.Templates;
 
 namespace AAEmu.Game.Models.Game.Items;
@@ -10,7 +11,17 @@ public class SummonSlave : Item
 {
     private DateTime _repairStartTime;
     public override ItemDetailType DetailType => ItemDetailType.Slave;
-    public override uint DetailBytesLength => 29;
+
+    /// <summary>
+    /// The client reads a fixed 33 bytes after the detail discriminator for this variant.
+    /// </summary>
+    /// <remarks>
+    /// The old figure of 29 came from the branch that writes no repair time: it wrote a bare
+    /// int where the other branch writes a full timestamp, so the record's length depended on
+    /// whether the vehicle happened to be under repair. Every item after a wrecked one in the
+    /// same message was read four bytes out of place.
+    /// </remarks>
+    public override uint DetailBytesLength => 33;
 
     public byte SlaveType { get; set; } // Not sure about this, captures show 2 here
     public uint SlaveDbId { get; set; }
@@ -43,24 +54,14 @@ public class SummonSlave : Item
         if (stream.LeftBytes < DetailBytesLength)
             return;
         SlaveType = stream.ReadByte(); // Type? (2 = slave?)
-        SlaveDbId = stream.ReadBc(); // DbId
+        SlaveDbId = stream.ReadBc();   // DbId
         IsDestroyed = stream.ReadByte();
-        try
-        {
-            // Read time of something else than 0
-            var timeBytes = stream.ReadBytes(4);
-            if (Convert.ToInt32(timeBytes) != 0)
-                RepairStartTime = Convert.ToDateTime(timeBytes);
-            else
-                RepairStartTime = DateTime.MinValue;
 
-            // Read remaining bytes
-            _ = stream.ReadBytes((int)DetailBytesLength - 1 - 4 - 4); // Filler, Equipment?
-        }
-        catch
-        {
-            RepairStartTime = DateTime.MinValue;
-        }
+        var repairStart = stream.ReadInt64(); // repairStartTime, a timestamp like every other one
+        RepairStartTime = repairStart == 0 ? DateTime.MinValue : Helpers.UnixTime(repairStart);
+
+        _ = stream.ReadInt32();        // recovery counter; anything but zero reads as recovering
+        _ = stream.ReadBytes(16);      // summon-location constraint, not decoded
     }
 
     public override void WriteDetails(PacketStream stream)
@@ -69,8 +70,10 @@ public class SummonSlave : Item
         stream.WriteBc(SlaveDbId);
         stream.Write(IsDestroyed);
 
+        // Both branches have to be the same width - this is a timestamp field, and an empty one
+        // is a zero timestamp, not a shorter record.
         if (RepairStartTime == DateTime.MinValue)
-            stream.Write(0);
+            stream.Write(0L);
         else
             stream.Write(RepairStartTime);
 

@@ -53,7 +53,10 @@ public class FinishStatePacket : GamePacket
                 Connection.SendPacket(new SCTaxItemConfigPacket(0));
                 Connection.SendPacket(new SCInGameShopConfigPacket(1, 2, 0));
                 Connection.SendPacket(new SCGameRuleConfigPacket(0, 0));
-                Connection.SendPacket(new SCHousingAreaConfig(true, DateTime.UtcNow));
+                // No opening date: every housing area is open. Sending the current moment instead
+                // only worked because it had just passed, and any clock skew would have had the
+                // client refuse placement outright.
+                Connection.SendPacket(new SCHousingAreaConfig(true, DateTime.MinValue));
                 Connection.SendPacket(new SCTaxItemConfig2Packet(0));
                 break;
             case 1:

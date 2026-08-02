@@ -1,6 +1,7 @@
 using System;
 
 using AAEmu.Commons.Network;
+using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Network.Stream;
 using AAEmu.Game.Models.Game.DoodadObj;
 
@@ -60,22 +61,57 @@ public class TCDoodadStreamPacket : StreamPacket
             _doodads.Length,
             bodyLength);
 
+        // This channel is meant for the world's own furniture, which the client already has in
+        // its map data. Anything a player put there is ours alone, and the state we name for it
+        // changes as it grows - which is the one thing that differs between a plant the client
+        // reads happily and one it hangs on. Name them, so the next hang has a suspect.
+        foreach (var doodad in _doodads)
+        {
+            if (doodad.OwnerId == 0 && doodad.PlantTime == DateTime.MinValue)
+                continue;
+
+            Logger.Warn(
+                "TCDoodadStream carries a player-placed object: objId={0}, template={1}, funcGroup={2}, " +
+                "owner={3}, item={4}, planted={5:u}, scale={6}",
+                doodad.ObjId,
+                doodad.TemplateId,
+                doodad.FuncGroupId,
+                doodad.OwnerId,
+                doodad.ItemTemplateId,
+                doodad.PlantTime,
+                doodad.Scale);
+        }
+
         return stream;
     }
 
+    /// <summary>
+    /// The eleven-byte packed position, the same one the rest of this family uses.
+    /// </summary>
+    /// <remarks>
+    /// Written as two plain signed integers here for a while, which is a different encoding
+    /// entirely: the real one carries magnitudes and keeps each sign as a bit in the last byte,
+    /// alongside the top of the height. A negative coordinate came out as an enormous positive
+    /// one, and the height shared its byte with nothing.
+    /// </remarks>
     private static void WriteProtocol1810Position(PacketStream stream, float x, float y, float z)
     {
-        // Streamed doodads use 32-bit X/Y fixed point and a 24-bit Z value.
-        stream.Write((int)(x * 512f));
-        stream.Write((int)(y * 512f));
+        var xFixed = (long)(x * 512f);
+        var yFixed = (long)(y * 512f);
 
-        var zRaw = (int)Math.Floor(((z + 100f) / 4196f * 4194304f) + 0.5f);
-        zRaw = Math.Clamp(zRaw, 0, 0xFFFFFF);
-        stream.Write(new[]
-        {
-            (byte)zRaw,
-            (byte)(zRaw >> 8),
-            (byte)(zRaw >> 16)
-        });
+        stream.Write((uint)Math.Min(uint.MaxValue, Math.Abs(xFixed)));
+        stream.Write((uint)Math.Min(uint.MaxValue, Math.Abs(yFixed)));
+
+        var clampedZ = Math.Clamp(z, Helpers.MinPackedHeight, Helpers.MaxPackedHeight);
+        var zCode = (uint)Math.Clamp((long)MathF.Floor(((clampedZ + 100f) / 4196f * 4194304f) + 0.5f), 0L, 0x3F_FFFFL);
+
+        stream.Write((ushort)(zCode & 0xFFFF));
+
+        var high = (byte)((zCode >> 16) & 0x3F);
+        if (yFixed < 0)
+            high |= 0x40;
+        if (xFixed < 0)
+            high |= 0x80;
+        stream.Write(high);
     }
 }

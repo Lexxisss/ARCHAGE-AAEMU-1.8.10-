@@ -595,7 +595,8 @@ public class Inventory
             case SwapAction.doEquipInEmptySlot:
                 itemInTargetSlot.SlotType = sourceContainer.ContainerType;
                 itemInTargetSlot.Slot = fromSlot;
-                itemTasks.Add(new ItemMove(fromType, fromSlot, fromItemId, toType, toSlot, toItemId));
+                AnnounceMoveIntoEmptySlot(itemTasks, itemInTargetSlot, toType, toSlot,
+                    new ItemMove(fromType, fromSlot, fromItemId, toType, toSlot, toItemId));
                 if (targetContainer != sourceContainer)
                 {
                     sourceContainer.Items.Add(itemInTargetSlot);
@@ -622,7 +623,8 @@ public class Inventory
             case SwapAction.doMoveAllToEmpty:
                 fromItem.SlotType = targetContainer.ContainerType;
                 fromItem.Slot = toSlot;
-                itemTasks.Add(new ItemMove(fromType, fromSlot, fromItem.Id, toType, toSlot, toItemId));
+                AnnounceMoveIntoEmptySlot(itemTasks, fromItem, fromType, fromSlot,
+                    new ItemMove(fromType, fromSlot, fromItem.Id, toType, toSlot, toItemId));
                 if (targetContainer != sourceContainer)
                 {
                     sourceContainer.Items.Remove(fromItem);
@@ -685,42 +687,30 @@ public class Inventory
             itemInTargetSlot.OwnerId = targetContainer?.OwnerId ?? 0;
 
         // Handle Equipment Broadcasting
-        var mates = MateManager.Instance.GetActiveMates(Owner.ObjId);
+        //
+        // Only the player's own gear is announced here. A mate has its own message for this,
+        // sent by the handler that serves the request, and the mate family owns a whole set of
+        // them - changed, flags changed, expired. What used to go out instead was the generic
+        // unit message carrying a mate's object id, built from the *player's* equipment
+        // container, at a slot number taken from one side of the move and an item from the
+        // other, once per active mate rather than for the one that was actually touched. There
+        // was no combination of those that described anything real.
+        // Both ends of the move go out as one delta rather than a message apiece: the message is
+        // batched by design, and a slot left empty is named with an empty item, which is how the
+        // client is told to clear it instead of keeping the old picture.
+        //
+        // It goes to the owner as well. The client keeps a branch for a unit it tracks locally -
+        // that is where the equipment event for the slot is raised - so a player's own gear is
+        // meant to arrive here too, and without it only the onlookers saw the change.
+        var changedSlots = new List<(byte slot, Item item)>(2);
         if (fromType == SlotType.Equipment)
-        {
-            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, fromSlot, Equipment.GetItemBySlot(fromSlot)), false);
-        }
-        else
-        {
-            if (mates != null)
-            {
-                foreach (var mate in mates)
-                {
-                    if (mate is not null && fromType == SlotType.EquipmentMate)
-                    {
-                        Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(mate.ObjId, fromSlot, Equipment.GetItemBySlot(toSlot)), true);
-                    }
-                }
-            }
-        }
+            changedSlots.Add((fromSlot, Equipment.GetItemBySlot(fromSlot)));
 
-        if (toType == SlotType.Equipment)
-        {
-            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, toSlot, Equipment.GetItemBySlot(toSlot)), false);
-        }
-        else
-        {
-            if (mates != null)
-            {
-                foreach (var mate in mates)
-                {
-                    if (mate is not null && toType == SlotType.EquipmentMate)
-                    {
-                        Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(mate.ObjId, toSlot, fromItem), true);
-                    }
-                }
-            }
-        }
+        if (toType == SlotType.Equipment && (fromType != SlotType.Equipment || toSlot != fromSlot))
+            changedSlots.Add((toSlot, Equipment.GetItemBySlot(toSlot)));
+
+        if (changedSlots.Count > 0)
+            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, changedSlots.ToArray()), true);
 
         // Send ItemContainer events
         if (sourceContainer != targetContainer)
@@ -753,6 +743,39 @@ public class Inventory
             targetContainer.ApplyBindRules(taskType);
 
         return itemTasks.Count > 0;
+    }
+
+    /// <summary>
+    /// Announces one item arriving in a slot that was empty, leaving another behind it.
+    /// </summary>
+    /// <remarks>
+    /// A move task names both slots and resolves both of the client's slot objects before it does
+    /// anything, giving up when either is missing. A bag has all of its slots standing, so a move
+    /// is right there and stays. An equipment slot that has never held anything need not, and a
+    /// move into one is dropped without a word - the item leaves its old slot on this side and
+    /// the client keeps showing the old picture. Emptying a slot and filling one are separate
+    /// tasks precisely so they do not depend on the other end already existing.
+    /// </remarks>
+    private static void AnnounceMoveIntoEmptySlot(List<ItemTask> tasks, Item item, SlotType vacatedType,
+        byte vacatedSlot, ItemMove ordinaryMove)
+    {
+        if (!IsEquipmentContainer(vacatedType) && !IsEquipmentContainer(item.SlotType))
+        {
+            tasks.Add(ordinaryMove);
+            return;
+        }
+
+        tasks.Add(new ItemRemove(item, vacatedType, vacatedSlot));
+        tasks.Add(new ItemGain(item));
+    }
+
+    /// <summary>
+    /// Whether this is one of the containers the client keeps its worn gear in, rather than a bag
+    /// or a warehouse. A mate has one of its own per family.
+    /// </summary>
+    private static bool IsEquipmentContainer(SlotType slotType)
+    {
+        return slotType is SlotType.Equipment or SlotType.EquipmentMate or SlotType.EquipmentMateBattle;
     }
 
     /// <summary>
