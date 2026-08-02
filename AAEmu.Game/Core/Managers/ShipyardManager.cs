@@ -77,15 +77,19 @@ public class ShipyardManager : Singleton<ShipyardManager>
         shipyard.ShipyardData.Y = pos.Y;
         shipyard.ShipyardData.Z = pos.Z;
         shipyard.ShipyardData.zRot = pos.Yaw;
-        shipyard.ShipyardData.MoneyAmount = 0;
-        shipyard.ShipyardData.Actions = shipyardData.Step;
-        shipyard.ShipyardData.Type = template.OriginItemId;
+        shipyard.ShipyardData.Pay = 0;
+        shipyard.ShipyardData.ActionsCompleted = 0;
+        shipyard.ShipyardData.Unknown34 = 0;
+        // Ownership is read from the identity, not from the name - the name was the only thing
+        // going out, and a name decides nothing.
+        shipyard.ShipyardData.OwnerId = owner.Id;
         shipyard.ShipyardData.OwnerName = owner.Name;
-        shipyard.ShipyardData.Type2 = owner.Id;
-        shipyard.ShipyardData.Type3 = owner.Faction.Id;
+        shipyard.ShipyardData.UnknownC4 = 0;
         shipyard.ShipyardData.Spawned = DateTime.UtcNow;
         shipyard.ShipyardData.ObjId = objId;
-        shipyard.ShipyardData.Hp = template.ShipyardSteps[shipyardData.Step].MaxHp * 100;
+        // Three fields the client keeps and never reads. Zero, rather than a plausible-looking
+        // number that would only mislead the next person to open this.
+        shipyard.ShipyardData.HpOrStatus = 0;
         shipyard.ShipyardData.Step = shipyardData.Step;
 
         // we will make checks for the availability of money and items to create a shipyard
@@ -206,7 +210,7 @@ public class ShipyardManager : Singleton<ShipyardManager>
         var shipyardCompleteTask = new ShipyardCompleteTask();
         shipyardCompleteTask._shipyard = shipyard;
 
-        shipyard.ShipyardData.Step = 1000; // last step, the ceremony of launching the ship
+        shipyard.ShipyardData.Step = ShipyardData.FinishedStep;
         character.BroadcastPacket(new SCShipyardStatePacket(shipyard.ShipyardData), true);
 
         var animTime = shipyard.Template.CeremonyAnimTime;

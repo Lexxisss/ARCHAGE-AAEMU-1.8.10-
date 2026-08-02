@@ -6,6 +6,7 @@ using AAEmu.Game.Core.Packets;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Housing;
+using AAEmu.Game.Models.Game.Shipyard;
 using AAEmu.Game.Models.Game.Skills.Templates;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.World;
@@ -68,13 +69,15 @@ public class CraftEffect : EffectTemplate
                             //Logger.Trace("[Shipyard] AllAction {0}, CurrentStep {1}, ShipyardSteps.Count {2}", shipyard.AllAction, shipyard.CurrentStep, shipyard.Template.ShipyardSteps.Count);
                             if (shipyard.CurrentStep == -1)
                             {
-                                shipyard.ShipyardData.Actions = shipyard.AllAction;
-                                shipyard.ShipyardData.Step = shipyard.Template.ShipyardSteps.Count;
+                                // Finished: all the work done, and the stage a finished yard
+                                // reports - which is a flat thousand, not one past the last.
+                                shipyard.ShipyardData.ActionsCompleted = (uint)shipyard.AllAction;
+                                shipyard.ShipyardData.Step = ShipyardData.FinishedStep;
                                 Logger.Trace("[Shipyard] Actions {0}, Step {1}", shipyard.AllAction, shipyard.Template.ShipyardSteps.Count);
                             }
                             else
                             {
-                                shipyard.ShipyardData.Actions = shipyard.CurrentAction;
+                                shipyard.ShipyardData.ActionsCompleted = (uint)shipyard.CurrentAction;
                                 shipyard.ShipyardData.Step = shipyard.CurrentStep;
                                 Logger.Trace("[Shipyard] Actions {0}, Step {1}", shipyard.CurrentAction, shipyard.CurrentStep);
                             }
