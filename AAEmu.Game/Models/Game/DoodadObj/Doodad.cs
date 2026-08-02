@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -694,20 +694,15 @@ public class Doodad : BaseUnit
         // +0x04, +0x44, +0x60, +0x78 share one PISC/PISH header.
         // The fourth value is commonFarmId, not quest glow or owner id.
         //
-        // The third is what the client keeps as this object's current phase, and it is the whole
-        // of how a door, a window or a flower bed becomes part of the building it sits on: the
-        // client resolves that value to a descriptor and compares the descriptor against the
-        // design's own list of fixtures. Match, and the object joins the building's own model and
-        // its counters. No match, and the object still appears - it just belongs to nothing, which
-        // is four symptoms at once: it is missing from the count the building shows, it is placed
-        // as though it stood alone in the world instead of on its parent, its growth is read
-        // against nothing, and for one category of fixture the building's own state is recomputed
-        // from it and comes out wrong enough to take the whole building's interactions with it.
+        // The order here is measured. Do not reorder it on an offset table alone.
         //
-        // The item template was going out in that slot and the phase one slot earlier. The two are
-        // swapped here on our own offset table plus the target's reading of the third slot; if
-        // ordinary doodads start looking wrong, this is the first thing to put back.
-        stream.WritePisc(TemplateId, ItemTemplateId, FuncGroupId, CommonFarmId);
+        // A reverse of the fixtures a building carries found that the client decides what belongs
+        // to a building by a value it read at a byte offset it called the third of these, and the
+        // middle two were swapped to suit. In play the swap sent every object's look through the
+        // wrong number: a stone came out drawn as a fish, and the fixtures a building carries
+        // stopped arriving at all. Whatever offset that reading names, it is not this slot; until
+        // someone can say which slot it is, the working order stands.
+        stream.WritePisc(TemplateId, FuncGroupId, ItemTemplateId, CommonFarmId);
 
         // bit0=field +0x90, bit1=+0x91, bit2=+0x48, bit3=+0x92.
         // Existing Flag remains a raw target packed byte for compatibility.

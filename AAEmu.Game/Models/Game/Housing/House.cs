@@ -315,24 +315,14 @@ public sealed class House : Unit
     /// Sends the doors, windows and chests fixed to this building, in batches it accepts.
     /// </summary>
     /// <remarks>
-    /// Each one is let go of first. The client will not take a handle it is still holding - it
-    /// throws the record away as a repeat before it can be hung on anything - so anything left over
-    /// from a previous delivery has to be cleared, or the fixtures come back attached to nothing or
-    /// not at all. Letting go of a handle the client never had costs nothing.
+    /// Letting go of each one first, on the reasoning that the client refuses a handle it still
+    /// holds, was tried here and left the building with no fixtures at all. Whatever the client
+    /// does with a release for something it never had, it is not nothing. The releasing belongs
+    /// where the building leaves sight, which is where it now is, and not here.
     /// </remarks>
     public void SendAttachedDoodads(Character character)
     {
         var doodads = AttachedDoodads.ToArray();
-
-        for (var offset = 0; offset < doodads.Length; offset += SCDoodadsRemovedPacket.MaxCountPerPacket)
-        {
-            var remaining = doodads.Length - offset;
-            var last = remaining <= SCDoodadsRemovedPacket.MaxCountPerPacket;
-            var ids = new uint[last ? remaining : SCDoodadsRemovedPacket.MaxCountPerPacket];
-            for (var i = 0; i < ids.Length; i++)
-                ids[i] = doodads[offset + i].ObjId;
-            character.SendPacket(new SCDoodadsRemovedPacket(last, ids));
-        }
 
         for (var i = 0; i < doodads.Length; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
         {
