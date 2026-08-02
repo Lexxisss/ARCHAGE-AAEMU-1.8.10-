@@ -147,12 +147,15 @@ public class SCUnitStatePacket : GamePacket
             case BaseUnitType.Housing:
                 var house = (House)_unit;
 
-                // A finished building has no stage, and which value stands for that is still not
-                // settled - zero and minus one have not been shown to mean the same thing, and
-                // neither has been shown to be what a finished building was sent with. Zero goes
-                // out until the width above has been judged on a client, because a stage compared
-                // while the field was the wrong size tells us nothing.
-                var buildStep = house.CurrentStep == -1 ? 0 : house.CurrentStep;
+                // How much building is left, counted from the end: the work done less the work
+                // the design asks for. So it runs negative and climbs to zero, minus one means
+                // one action short, and zero means finished - which is also what a design with no
+                // stages at all sends, both its counts being zero.
+                //
+                // Not the ordinal of the current stage, which is what went out for a while. That
+                // happened to be zero for a building just placed, which is the right answer by
+                // accident, and would have drifted the moment anyone hammered a nail into it.
+                var buildStep = house.CurrentStep == -1 ? 0 : house.CurrentAction - house.AllAction;
 
                 stream.Write(house.TlId);         // tl         : u16
                 stream.Write(house.TemplateId);   // designType : u32
