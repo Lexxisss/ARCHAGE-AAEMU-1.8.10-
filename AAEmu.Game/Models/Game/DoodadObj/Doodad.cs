@@ -693,7 +693,21 @@ public class Doodad : BaseUnit
 
         // +0x04, +0x44, +0x60, +0x78 share one PISC/PISH header.
         // The fourth value is commonFarmId, not quest glow or owner id.
-        stream.WritePisc(TemplateId, FuncGroupId, ItemTemplateId, CommonFarmId);
+        //
+        // The third is what the client keeps as this object's current phase, and it is the whole
+        // of how a door, a window or a flower bed becomes part of the building it sits on: the
+        // client resolves that value to a descriptor and compares the descriptor against the
+        // design's own list of fixtures. Match, and the object joins the building's own model and
+        // its counters. No match, and the object still appears - it just belongs to nothing, which
+        // is four symptoms at once: it is missing from the count the building shows, it is placed
+        // as though it stood alone in the world instead of on its parent, its growth is read
+        // against nothing, and for one category of fixture the building's own state is recomputed
+        // from it and comes out wrong enough to take the whole building's interactions with it.
+        //
+        // The item template was going out in that slot and the phase one slot earlier. The two are
+        // swapped here on our own offset table plus the target's reading of the third slot; if
+        // ordinary doodads start looking wrong, this is the first thing to put back.
+        stream.WritePisc(TemplateId, ItemTemplateId, FuncGroupId, CommonFarmId);
 
         // bit0=field +0x90, bit1=+0x91, bit2=+0x48, bit3=+0x92.
         // Existing Flag remains a raw target packed byte for compatibility.

@@ -476,17 +476,21 @@ public sealed class House : Unit
         stream.Write(IsBoundButler);           // isBoundButler      : bool
         stream.Write(0u);                      // butlerId           : u32, only read when bound
 
-        // The five decal slots. Their kinds belong to the design - floor, outer wall, roof, top,
-        // wall - and used to go out as zeros, which told the client the building takes no decals
-        // at all. What is applied to a slot is a separate identity, and it stays empty: there is
-        // nowhere on the server to keep one yet.
+        // The five decal slots. Each carries the place it goes on the building, and that number is
+        // what the client sorts them by - the order they arrive in does not matter, but the number
+        // does, and it counts from one: wall, floor, top, outer wall, roof. Zero means no place at
+        // all, which is what every slot was claiming while these were numbered from zero and read
+        // in whatever order the columns happened to be declared.
+        //
+        // What is applied to a slot is a separate identity, and it stays empty: there is nowhere on
+        // the server to keep one yet.
         var uccKinds = Template?.UccKinds;
         for (var i = 0; i < UccSlotCount; i++)
         {
             stream.Write(Id);                      // houseId      : i32
             stream.Write(0L);                      // type         : i64, the applied decal
             stream.Write(uccKinds?[i] ?? 0);       // ucc_kind     : i32
-            stream.Write(i);                       // ucc_position : i32
+            stream.Write(i + 1);                   // ucc_position : i32, 1..5
         }
 
         // Two world positions, twenty bytes each. What they are for is not recovered and nothing

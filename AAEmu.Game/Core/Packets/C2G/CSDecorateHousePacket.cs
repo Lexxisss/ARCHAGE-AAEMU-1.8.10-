@@ -14,7 +14,10 @@ public class CSDecorateHousePacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var houseTlId = (ushort)stream.ReadUInt32(); // the handle is 32 bits on the wire; ours is 16
+        // Four bytes, and all four matter: this is the building's own id, not the short-lived
+        // handle everything else in this subsystem is keyed by. Cutting it to sixteen bits was
+        // harmless only while the two happened to be small.
+        var houseId = stream.ReadUInt32();
         var designId = stream.ReadUInt32();
         var x = stream.ReadSingle();
         var y = stream.ReadSingle();
@@ -32,12 +35,12 @@ public class CSDecorateHousePacket : GamePacket
         var quat = new Quaternion(quatX, quatY, quatZ, quatW);
 
         Logger.Debug("DecorateHouse, houseId: {0}, designId: {1}, x: {2}, y: {3}, z: {4}, rot {5}, objId: {6}, itemId: {7}",
-            houseTlId, designId, x, y, z, quat, parentObjId, itemId);
+            houseId, designId, x, y, z, quat, parentObjId, itemId);
 
-        if (!HousingManager.Instance.DecorateHouse(Connection.ActiveChar, houseTlId, designId, posVec, quat, parentObjId, itemId))
+        if (!HousingManager.Instance.DecorateHouse(Connection.ActiveChar, houseId, designId, posVec, quat, parentObjId, itemId))
         {
             Connection.ActiveChar.SendErrorMessage(ErrorMessageType.HouseCannotDecorate);
-            Logger.Warn("DecorateHouse, FAILED with houseId: {0}, designId: {1}, x: {2}, y: {3}, z: {4}, rot {5}, objId: {6}, itemId: {7}", houseTlId, designId, x, y, z, quat, parentObjId, itemId);
+            Logger.Warn("DecorateHouse, FAILED with houseId: {0}, designId: {1}, x: {2}, y: {3}, z: {4}, rot {5}, objId: {6}, itemId: {7}", houseId, designId, x, y, z, quat, parentObjId, itemId);
         }
     }
 }

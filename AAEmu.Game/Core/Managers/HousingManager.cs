@@ -40,9 +40,16 @@ namespace AAEmu.Game.Core.Managers;
 public class HousingManager : Singleton<HousingManager>
 {
     private const uint ForSaleMarkerDoodadId = 6760;
-    private const int MaxHeavyTaxCounted = 10; // Maximum number of heavy tax buildings to take into account for tax calculation
     private const int HoursForFailedTaxToReturnHouse = 22;
     private const double CopperPerCertificate = 1000000.0; // For older versions of AA, 1 sale certificate / 100g
+
+    /// <summary>
+    /// How much tax is multiplied by, keyed by the number of heavily taxed buildings it starts at.
+    /// </summary>
+    /// <remarks>
+    /// Kept sorted so a lookup can walk it and stop at the last row the owner's count reaches.
+    /// </remarks>
+    private static readonly SortedDictionary<int, float> HeavyTaxes = new();
     private const int TaxPaysForDays = 7; // Number of days 1 week worth of tax pays for
     private Dictionary<uint, House> _houses;
     private Dictionary<ushort, House> _housesTl; // TODO or so mb tlId is id in the active zone? or type of house
@@ -153,6 +160,17 @@ public class HousingManager : Singleton<HousingManager>
         {
             Logger.Info("Loading Housing Information ...");
 
+            // The surcharge for owning several heavily taxed buildings.
+            HeavyTaxes.Clear();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT count, multiplier FROM heavy_taxes ORDER BY count ASC";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                    HeavyTaxes[reader.GetInt32("count")] = reader.GetFloat("multiplier");
+            }
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT * FROM item_housings";
@@ -222,17 +240,20 @@ public class HousingManager : Singleton<HousingManager>
                         template.RotateItemId = reader.GetUInt32("rotate_item_id", 0);
                         template.RotateItemCount = reader.GetInt32("rotate_item_count", 0);
 
-                        // Declaration order is the assumed slot order - see HousingTemplate.UccKinds.
-                        template.UccKinds[0] = reader.GetInt32("ucc_kind_floor", 0);
-                        template.UccKinds[1] = reader.GetInt32("ucc_kind_outwall", 0);
-                        template.UccKinds[2] = reader.GetInt32("ucc_kind_roof", 0);
-                        template.UccKinds[3] = reader.GetInt32("ucc_kind_top", 0);
-                        template.UccKinds[4] = reader.GetInt32("ucc_kind_wall", 0);
-                        template.UccScales[0] = reader.GetInt32("ucc_scale_floor", 0);
-                        template.UccScales[1] = reader.GetInt32("ucc_scale_outwall", 0);
-                        template.UccScales[2] = reader.GetInt32("ucc_scale_roof", 0);
-                        template.UccScales[3] = reader.GetInt32("ucc_scale_top", 0);
-                        template.UccScales[4] = reader.GetInt32("ucc_scale_wall", 0);
+                        // Ordered by the place each decal goes on the building, because that number
+                        // travels with the slot and is what the client sorts them by. The order the
+                        // columns happen to be declared in is not it, and was what these were read
+                        // in for a while.
+                        template.UccKinds[0] = reader.GetInt32("ucc_kind_wall", 0);    // 1 wall
+                        template.UccKinds[1] = reader.GetInt32("ucc_kind_floor", 0);   // 2 floor
+                        template.UccKinds[2] = reader.GetInt32("ucc_kind_top", 0);     // 3 top
+                        template.UccKinds[3] = reader.GetInt32("ucc_kind_outwall", 0); // 4 outer wall
+                        template.UccKinds[4] = reader.GetInt32("ucc_kind_roof", 0);    // 5 roof
+                        template.UccScales[0] = reader.GetInt32("ucc_scale_wall", 0);
+                        template.UccScales[1] = reader.GetInt32("ucc_scale_floor", 0);
+                        template.UccScales[2] = reader.GetInt32("ucc_scale_top", 0);
+                        template.UccScales[3] = reader.GetInt32("ucc_scale_outwall", 0);
+                        template.UccScales[4] = reader.GetInt32("ucc_scale_roof", 0);
                         template.Family = reader.GetString("family");
                         var taxationId = reader.GetUInt32("taxation_id");
                         template.Taxation = TaxationsManager.Instance.taxations.ContainsKey(taxationId) ? TaxationsManager.Instance.taxations[taxationId] : null;
@@ -876,6 +897,9 @@ public class HousingManager : Singleton<HousingManager>
         if (!_housesTl.TryGetValue(tlId, out var house))
             return;
 
+        // What a building costs to put up is not what its owner owes afterwards. The two were the
+        // same number here, so a house announced the price of its own construction - deposit and
+        // all, already paid - as a debt, the moment it was finished.
         CalculateBuildingTaxInfo(house.AccountId, house.Template, false, out var totalTaxAmountDue, out _, out _, out _, out _);
 
         var baseTax = (int)(house.Template.Taxation?.Tax ?? 0);
@@ -964,7 +988,7 @@ public class HousingManager : Singleton<HousingManager>
         }
         CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
 
-        if (!ChargePlacementTax(connection, totalTaxAmountDue))
+        if (!ChargePlacementTax(connection, houseTemplate, totalTaxAmountDue))
             return;
 
         if (connection.ActiveChar.Inventory.Bag.ConsumeItem(ItemTaskType.HouseBuilding, sourceDesignItem.TemplateId, 1, sourceDesignItem) <= 0)
@@ -1085,14 +1109,17 @@ public class HousingManager : Singleton<HousingManager>
     /// is enabled and in gold otherwise.
     /// </summary>
     /// <returns>False when the player cannot pay; an error has already been sent to them.</returns>
-    private static bool ChargePlacementTax(GameConnection connection, int totalTaxAmountDue)
+    private static bool ChargePlacementTax(GameConnection connection, HousingTemplate template, int totalTaxAmountDue)
     {
-        if (FeaturesManager.Fsets.Check(Models.Game.Features.Feature.taxItem))
+        // Buildings are paid for in tax certificates, not coin. Charging coin was the branch this
+        // took whenever the certificate feature was switched off, and off is where it sits by
+        // default, so every building anyone has put up here has been paid for in gold.
+        var totalCertsCost = CertificatesFor(template, totalTaxAmountDue);
+        if (totalCertsCost > 0)
         {
             var userTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.TaxCertificate);
             var userBoundTaxCount = connection.ActiveChar.Inventory.GetItemsCount(SlotType.Inventory, Item.BoundTaxCertificate);
             var totalUserTaxCount = userTaxCount + userBoundTaxCount;
-            var totalCertsCost = (int)Math.Ceiling(totalTaxAmountDue / 10000f);
 
             if (totalCertsCost > totalUserTaxCount)
             {
@@ -1304,7 +1331,7 @@ public class HousingManager : Singleton<HousingManager>
         // <see cref="CanPlaceDesign"/> and its caller.
         CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
 
-        if (!ChargePlacementTax(connection, totalTaxAmountDue))
+        if (!ChargePlacementTax(connection, houseTemplate, totalTaxAmountDue))
             return null;
 
         var house = Create(designId, connection.ActiveChar.Faction.Id);
@@ -1439,6 +1466,56 @@ public class HousingManager : Singleton<HousingManager>
     /// <param name="hostileTaxRate"></param>
     /// <param name="oneWeekTaxCount"></param>
     /// <returns></returns>
+    /// <summary>How much the tax is multiplied by for someone who owns this many heavily taxed buildings.</summary>
+    /// <remarks>
+    /// Read from the design data's own threshold table: the highest row whose count the owner has
+    /// reached. A row of zero means no surcharge, which is what the first two rows carry, so the
+    /// answer stays at one until the third building.
+    /// </remarks>
+    private static float GetHeavyTaxMultiplier(int heavyHouseCount)
+    {
+        var surcharge = 0f;
+        foreach (var row in HeavyTaxes)
+        {
+            if (row.Key > heavyHouseCount)
+                break;
+            surcharge = row.Value;
+        }
+
+        // The table's number is what is added, not what the tax is multiplied by: the two on the
+        // third building means two hundred percent on top, so three times over, and the five the
+        // table settles at means six.
+        return 1f + surcharge;
+    }
+
+    /// <summary>How many tax certificates an amount of tax money costs, for this design's own rate.</summary>
+    /// <remarks>
+    /// The design names both what one period costs in money and what it costs in certificates, and
+    /// the two are authored independently: a hundred thousand buys one certificate on one design,
+    /// a hundred and fifty thousand buys two on another, three million buys one. No single divisor
+    /// fits, which is why the three that were invented for this - ten thousand, five thousand and
+    /// a million - could not all have been right, and were not.
+    ///
+    /// So the certificates are counted in periods: what the money comes to, over what one period
+    /// costs, times what one period costs in certificates.
+    ///
+    /// This is our reading of the data and not something anyone has found in the client. What is
+    /// established is only that buildings are paid for in certificates rather than coin, and that
+    /// two other kinds of building divide the count again by numbers we do not have. Until those
+    /// turn up this is what we charge, and it is at least built from the design's own figures
+    /// rather than a constant somebody liked.
+    /// </remarks>
+    private static int CertificatesFor(HousingTemplate template, int taxAmount)
+    {
+        var tax = template.Taxation?.Tax ?? 0;
+        var seals = template.Taxation?.SealCount ?? 0;
+        if (tax == 0 || seals == 0 || taxAmount <= 0)
+            return 0;
+
+        var periods = (double)taxAmount / tax;
+        return (int)Math.Ceiling(periods * seals);
+    }
+
     public bool CalculateBuildingTaxInfo(ulong accountId, HousingTemplate newHouseTemplate, bool buildingNewHouse, out int totalTaxToPay, out int heavyHouseCount, out int normalHouseCount, out int hostileTaxRate, out int oneWeekTaxCount)
     {
         totalTaxToPay = 0;
@@ -1469,11 +1546,15 @@ public class HousingManager : Singleton<HousingManager>
                 normalHouseCount++;
         }
 
-        // Default Heavy Tax formula for 1.2
-        var taxMultiplier = (heavyHouseCount < MaxHeavyTaxCounted ? heavyHouseCount : MaxHeavyTaxCounted) * 0.5f;
-        // If less than 3 properties, or not a heavy tax property, no extra multiplier needed
-        if ((heavyHouseCount < 3) || (newHouseTemplate.HeavyTax == false))
-            taxMultiplier = 1f;
+        // The surcharge for owning several heavily taxed buildings is a table, not a formula: each
+        // row names a number of buildings and the multiplier that applies from there up, and the
+        // highest row the count reaches wins. The first two rows carry no surcharge at all, which
+        // is why nothing happens until the third building.
+        //
+        // What stood here was `min(count, 10) * 0.5`, whose origin nobody recorded and which agrees
+        // with the table nowhere: at three buildings it charged one and a half times where the
+        // table asks for two.
+        var taxMultiplier = newHouseTemplate.HeavyTax ? GetHeavyTaxMultiplier(heavyHouseCount) : 1f;
 
         totalTaxToPay = oneWeekTaxCount = (int)Math.Ceiling(newHouseTemplate.Taxation.Tax * taxMultiplier);
 
@@ -1621,9 +1702,12 @@ public class HousingManager : Singleton<HousingManager>
             // Return taxes
             if (!failedToPayTax)
             {
-                if (FeaturesManager.Fsets.Check(Models.Game.Features.Feature.taxItem))
+                // What was paid for one period comes back, counted the design's own way rather
+                // than through a divisor somebody picked.
+                var refundedCertificates = CertificatesFor(house.Template, (int)(house.Template.Taxation?.Tax ?? 0));
+                if (refundedCertificates > 0)
                 {
-                    var taxItem = ItemManager.Instance.Create(Item.BoundTaxCertificate, (int)(house.Template.Taxation.Tax / 5000), 0);
+                    var taxItem = ItemManager.Instance.Create(Item.BoundTaxCertificate, refundedCertificates, 0);
                     taxItem.OwnerId = house.OwnerId;
                     taxItem.SlotType = SlotType.Mail;
                     returnedItems.Add(taxItem);
@@ -2248,7 +2332,7 @@ public class HousingManager : Singleton<HousingManager>
     /// <param name="parentObjId"></param>
     /// <param name="itemId"></param>
     /// <returns></returns>
-    public bool DecorateHouse(Character player, ushort houseTlId, uint designId, Vector3 pos, Quaternion quat, uint parentObjId, ulong itemId)
+    public bool DecorateHouse(Character player, uint houseId, uint designId, Vector3 pos, Quaternion quat, uint parentObjId, ulong itemId)
     {
         // Check Player
         if (player == null)
@@ -2262,9 +2346,21 @@ public class HousingManager : Singleton<HousingManager>
             return false;
         }
 
-        // Check House
-        var house = GetHouseByTlId(houseTlId);
-        if ((house == null) || (house.TlId != houseTlId))
+        // The request names the building by its own id, not by the handle the rest of this
+        // subsystem is keyed on. The handle is tried as well, and loudly, because the two are
+        // small numbers on a young server and were indistinguishable until now - if that line ever
+        // appears in the log, the request means the handle after all and this reads it wrongly.
+        var house = GetHouseById(houseId);
+        if (house == null)
+        {
+            house = houseId <= ushort.MaxValue ? GetHouseByTlId((ushort)houseId) : null;
+            if (house != null)
+                Logger.Warn(
+                    "DecorateHouse: no building with id {0}, but one with that handle - the request names the handle, not the id",
+                    houseId);
+        }
+
+        if (house == null)
         {
             // Invalid House
             player.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);

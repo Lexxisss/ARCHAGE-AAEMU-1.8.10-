@@ -29,11 +29,11 @@ public class SCHouseTaxInfoPacket : GamePacket
     private readonly byte _weeksWithoutPay;
     private readonly byte _weeksPrepay;
     private readonly bool _isHeavyTaxHouse;
-    private readonly int _taxType;
+    private readonly byte _taxType;
 
     public SCHouseTaxInfoPacket(uint tl, int dominionTaxRate, int hostileTaxRate, long moneyAmount,
         long moneyAmount2, DateTime due, bool isAlreadyPaid, byte weeksWithoutPay, byte weeksPrepay,
-        bool isHeavyTaxHouse, int taxType = 0) : base(SCOffsets.SCHouseTaxInfoPacket, 5)
+        bool isHeavyTaxHouse, byte taxType = 1) : base(SCOffsets.SCHouseTaxInfoPacket, 5)
     {
         _tl = tl;
         _dominionTaxRate = dominionTaxRate;
@@ -60,7 +60,9 @@ public class SCHouseTaxInfoPacket : GamePacket
         stream.Write(_weeksWithoutPay);  // weeksWithoutPay  : u8
         stream.Write(_weeksPrepay);      // weeksPrepay      : u8
         stream.Write(_isHeavyTaxHouse);  // isHeavyTaxHouse  : bool
-        stream.Write(_taxType);          // taxType          : i32
+        // One byte, not four. Ordinary buildings are type one; two and three exist and change how
+        // a sum is turned into the number of certificates it costs.
+        stream.Write(_taxType);          // taxType          : u8
         return stream;
     }
 }

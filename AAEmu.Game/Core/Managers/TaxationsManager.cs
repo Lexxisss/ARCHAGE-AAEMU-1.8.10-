@@ -34,6 +34,7 @@ public class TaxationsManager : Singleton<TaxationsManager>
                         template.Id = reader.GetUInt32("id");
                         template.Tax = reader.GetUInt32("tax");
                         template.Show = reader.GetBoolean("show", true);
+                        template.SealCount = reader.GetUInt32("seal_count", 0);
                         taxations.Add(template.Id, template);
                     }
                 }
