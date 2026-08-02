@@ -12,15 +12,24 @@ namespace AAEmu.Game.Utils.DB;
 
 /// <summary>
 /// Dedicated read-only data source for the complete quest system.
-/// The target Kakao database is authoritative. The fallback database is used
-/// only when the target database does not contain the requested table at all.
-/// This connector is intentionally independent from DoodadSQLite and from the
-/// legacy global SQLite connector.
+/// The primary database below is authoritative. The fallback is consulted only
+/// when the primary does not contain the requested table at all; rows are never
+/// merged between the two. This connector is intentionally independent from
+/// DoodadSQLite and from the legacy global SQLite connector.
 /// </summary>
+/// <remarks>
+/// Quests read from the base database at the moment, with the target client's own database behind
+/// it. That is the reverse of every other subsystem here and it is meant to be temporary - the two
+/// names below are the whole of it, so swapping them back is the entire change.
+///
+/// Which one is opened decides far more than the two lookups that name it: it becomes SQLite's
+/// <c>main</c>, and the sixty-odd quest queries that name their tables plainly resolve there first
+/// and reach the other only for a table the first has never heard of.
+/// </remarks>
 public static class QuestSQLite
 {
-    public const string PrimaryDatabaseFile = "1.8.1.0-Kakao-KR.sqlite";
-    public const string FallbackDatabaseFile = "base.sqlite3";
+    public const string PrimaryDatabaseFile = "base.sqlite3";
+    public const string FallbackDatabaseFile = "1.8.1.0-Kakao-KR.sqlite";
     public const string FallbackAlias = "quest_fallback";
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -131,10 +140,11 @@ public static class QuestSQLite
             _primaryTables = ReadTables(connection, "main");
             _fallbackTables = ReadTables(connection, FallbackAlias);
             Logger.Info(
-                "Quest SQLite initialized: primary={0} tables, fallback={1} tables, source={2}",
+                "Quest SQLite initialized: reading from {0} ({1} tables), falling back to {2} ({3} tables)",
+                PrimaryDatabaseFile,
                 _primaryTables.Count,
-                _fallbackTables.Count,
-                PrimaryDatabasePath);
+                FallbackDatabaseFile,
+                _fallbackTables.Count);
         }
     }
 
