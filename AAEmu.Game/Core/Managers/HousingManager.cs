@@ -50,6 +50,9 @@ public class HousingManager : Singleton<HousingManager>
     /// Kept sorted so a lookup can walk it and stop at the last row the owner's count reaches.
     /// </remarks>
     private static readonly SortedDictionary<int, float> HeavyTaxes = new();
+
+    /// <summary>How many pieces of one kind of furniture a design's limit list allows.</summary>
+    private static readonly Dictionary<(uint LimitId, uint GroupId), int> DecoGroupLimits = new();
     private const int TaxPaysForDays = 7; // Number of days 1 week worth of tax pays for
     private Dictionary<uint, House> _houses;
     private Dictionary<ushort, House> _housesTl; // TODO or so mb tlId is id in the active zone? or type of house
@@ -169,6 +172,22 @@ public class HousingManager : Singleton<HousingManager>
                 using var reader = new SQLiteWrapperReader(command.ExecuteReader());
                 while (reader.Read())
                     HeavyTaxes[reader.GetInt32("count")] = reader.GetFloat("multiplier");
+            }
+
+            // How much of each kind of furniture a design holds. The client works this out from the
+            // same rows without being told, so we have to reach the same answer.
+            DecoGroupLimits.Clear();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                    "SELECT housing_deco_limit_id, deco_actability_group_id, count FROM housing_deco_limit_elems";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var key = (reader.GetUInt32("housing_deco_limit_id"), reader.GetUInt32("deco_actability_group_id"));
+                    DecoGroupLimits[key] = reader.GetInt32("count");
+                }
             }
 
             using (var command = connection.CreateCommand())
@@ -896,6 +915,12 @@ public class HousingManager : Singleton<HousingManager>
     {
         if (!_housesTl.TryGetValue(tlId, out var house))
             return;
+
+        // Asking about a building's tax means having the building, which is the nearest thing to
+        // proof that it was registered - there is no message that says so outright. The state goes
+        // again here, for the case where the timed delivery lost its race and was dropped in
+        // silence. It describes rather than creates, so saying it twice costs nothing.
+        connection.SendPacket(new SCHouseStatePacket(house));
 
         // What a building costs to put up is not what its owner owes afterwards. The two were the
         // same number here, so a house announced the price of its own construction - deposit and
@@ -2322,6 +2347,49 @@ public class HousingManager : Singleton<HousingManager>
     }
 
     /// <summary>
+    /// Whether the building will take one more piece of furniture of this kind.
+    /// </summary>
+    /// <remarks>
+    /// Furniture is limited twice over: by how much a building holds altogether, and by how much of
+    /// each kind it holds - so many chairs, so many trees, so many of whatever else the design
+    /// groups together. The second limit is per group and the client enforces it from its own data
+    /// without being told, so the server has to reach the same answer from the same three tables or
+    /// the two will disagree about what fits.
+    ///
+    /// The extra room a player can buy applies to the building's total and does not raise any of
+    /// the per-group limits.
+    ///
+    /// A design with no limit list, or a kind with no row in it, is left alone: silence there means
+    /// no limit rather than a limit of none.
+    /// </remarks>
+    private bool HasRoomForDecorationGroup(House house, HousingDecoration decoration)
+    {
+        var limitId = house?.Template?.HousingDecoLimitId ?? 0;
+        var groupId = decoration?.DecoActAbilityGroupId ?? 0;
+        if (limitId == 0 || groupId == 0)
+            return true;
+
+        if (!DecoGroupLimits.TryGetValue((limitId, groupId), out var allowed))
+            return true;
+
+        var placed = 0;
+        foreach (var furniture in WorldManager.Instance.GetDoodadByHouseDbId(house.Id))
+        {
+            var design = GetDecorationDesignFromDoodadId(furniture.TemplateId);
+            if (design != null && design.DecoActAbilityGroupId == groupId)
+                placed++;
+        }
+
+        if (placed < allowed)
+            return true;
+
+        Logger.Info(
+            "DecorateHouse: building {0} already holds {1} of group {2}, which is all it takes",
+            house.Id, placed, groupId);
+        return false;
+    }
+
+    /// <summary>
     /// Places a piece of furniture at a given location, using item and design
     /// </summary>
     /// <param name="player"></param>
@@ -2371,6 +2439,12 @@ public class HousingManager : Singleton<HousingManager>
 
         // Create decoration doodad
         var decorationDesign = GetDecorationDesignFromId(designId);
+
+        if (!HasRoomForDecorationGroup(house, decorationDesign))
+        {
+            player.SendErrorMessage(ErrorMessageType.HouseCannotDecorate);
+            return false;
+        }
 
         // TODO: Validate if designId is correct for the given item
         /*

@@ -67,20 +67,10 @@ public class CraftEffect : EffectTemplate
                             shipyard.AddBuildAction();
                             //Logger.Trace("[Shipyard] BaseAction {0}, NumAction {1}, CurrentAction {2}", shipyard.BaseAction, shipyard.NumAction, shipyard.CurrentAction);
                             //Logger.Trace("[Shipyard] AllAction {0}, CurrentStep {1}, ShipyardSteps.Count {2}", shipyard.AllAction, shipyard.CurrentStep, shipyard.Template.ShipyardSteps.Count);
-                            if (shipyard.CurrentStep == -1)
-                            {
-                                // Finished: all the work done, and the stage a finished yard
-                                // reports - which is a flat thousand, not one past the last.
-                                shipyard.ShipyardData.ActionsCompleted = (uint)shipyard.AllAction;
-                                shipyard.ShipyardData.Step = ShipyardData.FinishedStep;
-                                Logger.Trace("[Shipyard] Actions {0}, Step {1}", shipyard.AllAction, shipyard.Template.ShipyardSteps.Count);
-                            }
-                            else
-                            {
-                                shipyard.ShipyardData.ActionsCompleted = (uint)shipyard.CurrentAction;
-                                shipyard.ShipyardData.Step = shipyard.CurrentStep;
-                                Logger.Trace("[Shipyard] Actions {0}, Step {1}", shipyard.CurrentAction, shipyard.CurrentStep);
-                            }
+                            // Adding the action already brought the two numbers we send into line
+                            // with it; setting them again here is what let them drift apart.
+                            Logger.Trace("[Shipyard] Actions {0}, Step {1}",
+                                shipyard.ShipyardData.ActionsCompleted, shipyard.ShipyardData.Step);
 
                             character.BroadcastPacket(new SCShipyardStatePacket(shipyard.ShipyardData), true);
                             character.Craft.EndCraft();

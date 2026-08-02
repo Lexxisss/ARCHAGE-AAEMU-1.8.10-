@@ -490,5 +490,35 @@ public sealed class Shipyard : Unit
                 }
             }
         }
+
+        SyncBuildProgress();
+    }
+
+    /// <summary>
+    /// Brings what we send about the building work into line with what we know of it.
+    /// </summary>
+    /// <remarks>
+    /// The client does not check the stage against the count of work done - it takes both as given -
+    /// so keeping them from drifting apart is entirely on this side. They were being set in whatever
+    /// place happened to be sending a state message, which is how they drifted.
+    ///
+    /// A finished yard reports a flat thousand and the whole of its work done, whatever its design's
+    /// stages number.
+    /// </remarks>
+    public void SyncBuildProgress()
+    {
+        if (ShipyardData == null)
+            return;
+
+        if (CurrentStep == -1)
+        {
+            ShipyardData.ActionsCompleted = (uint)AllAction;
+            ShipyardData.Step = ShipyardData.FinishedStep;
+        }
+        else
+        {
+            ShipyardData.ActionsCompleted = (uint)CurrentAction;
+            ShipyardData.Step = CurrentStep;
+        }
     }
 }

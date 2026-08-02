@@ -283,8 +283,21 @@ public sealed class House : Unit
         base.Hide();
     }
 
-    /// <summary>How long the client is given to register the building before it is told about it.</summary>
-    private static readonly TimeSpan StateFollowUpDelay = TimeSpan.FromMilliseconds(200);
+    /// <summary>
+    /// How long the client is given to register the building before it is told about it.
+    /// </summary>
+    /// <remarks>
+    /// A pause is not the barrier this wants. What has to be true when the state and the fixtures
+    /// arrive is that the building is registered, its record built, and the fixtures' parent
+    /// resolvable - and no message from the client says when that happened; there is nothing to
+    /// wait on. So this is a guess at how long it takes, and half a second is a generous one where
+    /// two hundred milliseconds was barely a round trip and lost the race whenever the client was
+    /// busy loading scenery.
+    ///
+    /// The second way in is <see cref="HousingManager.HouseTaxInfo"/>: a player asking about a
+    /// building's tax has one, which is the closest thing to proof the protocol offers.
+    /// </remarks>
+    private static readonly TimeSpan StateFollowUpDelay = TimeSpan.FromMilliseconds(500);
 
     public override void AddVisibleObject(Character character)
     {
@@ -298,10 +311,29 @@ public sealed class House : Unit
         base.AddVisibleObject(character);
     }
 
-    /// <summary>Sends the doors, windows and chests fixed to this building, in batches it accepts.</summary>
+    /// <summary>
+    /// Sends the doors, windows and chests fixed to this building, in batches it accepts.
+    /// </summary>
+    /// <remarks>
+    /// Each one is let go of first. The client will not take a handle it is still holding - it
+    /// throws the record away as a repeat before it can be hung on anything - so anything left over
+    /// from a previous delivery has to be cleared, or the fixtures come back attached to nothing or
+    /// not at all. Letting go of a handle the client never had costs nothing.
+    /// </remarks>
     public void SendAttachedDoodads(Character character)
     {
         var doodads = AttachedDoodads.ToArray();
+
+        for (var offset = 0; offset < doodads.Length; offset += SCDoodadsRemovedPacket.MaxCountPerPacket)
+        {
+            var remaining = doodads.Length - offset;
+            var last = remaining <= SCDoodadsRemovedPacket.MaxCountPerPacket;
+            var ids = new uint[last ? remaining : SCDoodadsRemovedPacket.MaxCountPerPacket];
+            for (var i = 0; i < ids.Length; i++)
+                ids[i] = doodads[offset + i].ObjId;
+            character.SendPacket(new SCDoodadsRemovedPacket(last, ids));
+        }
+
         for (var i = 0; i < doodads.Length; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
         {
             var count = doodads.Length - i;
@@ -311,26 +343,36 @@ public sealed class House : Unit
         }
     }
 
+    /// <summary>
+    /// Takes the building and everything fixed to it back off the player's screen.
+    /// </summary>
+    /// <remarks>
+    /// The fixtures go first and the building after. Taking the building away first leaves each
+    /// door and window a moment with no parent, and nothing here waits for anything - and the
+    /// client will not accept a handle it still holds, so a door that was not properly let go of
+    /// is a door that cannot come back. That is why they were missing after a relog: they were
+    /// still in the client's hands from last time, and the second delivery was thrown away as a
+    /// repeat before it could be hung on anything.
+    /// </remarks>
     public override void RemoveVisibleObject(Character character)
     {
         base.RemoveVisibleObject(character);
-
-        character.SendPacket(new SCUnitsRemovedPacket(new[] { ObjId }));
 
         // TODO: This should be handled in base.RemoveVisibleObject
         var doodadIds = new uint[AttachedDoodads.Count];
         for (var i = 0; i < AttachedDoodads.Count; i++)
             doodadIds[i] = AttachedDoodads[i].ObjId;
 
-        for (var i = 0; i < doodadIds.Length; i += SCDoodadsRemovedPacket.MaxCountPerPacket)
+        for (var offset = 0; offset < doodadIds.Length; offset += SCDoodadsRemovedPacket.MaxCountPerPacket)
         {
-            var offset = i * SCDoodadsRemovedPacket.MaxCountPerPacket;
-            var length = doodadIds.Length - offset;
-            var last = length <= SCDoodadsRemovedPacket.MaxCountPerPacket;
-            var temp = new uint[last ? length : SCDoodadsRemovedPacket.MaxCountPerPacket];
+            var remaining = doodadIds.Length - offset;
+            var last = remaining <= SCDoodadsRemovedPacket.MaxCountPerPacket;
+            var temp = new uint[last ? remaining : SCDoodadsRemovedPacket.MaxCountPerPacket];
             Array.Copy(doodadIds, offset, temp, 0, temp.Length);
             character.SendPacket(new SCDoodadsRemovedPacket(last, temp));
         }
+
+        character.SendPacket(new SCUnitsRemovedPacket(new[] { ObjId }));
     }
 
     #endregion
