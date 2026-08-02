@@ -13,6 +13,7 @@ using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Expeditions;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Models.Tasks.Housing;
 using MySql.Data.MySqlClient;
 
 namespace AAEmu.Game.Models.Game.Housing;
@@ -282,12 +283,24 @@ public sealed class House : Unit
         base.Hide();
     }
 
+    /// <summary>How long the client is given to register the building before it is told about it.</summary>
+    private static readonly TimeSpan StateFollowUpDelay = TimeSpan.FromMilliseconds(200);
+
     public override void AddVisibleObject(Character character)
     {
+        // The building first, on its own. Its state and its doors are both looked up against what
+        // this message registers, and the client neither waits for that nor says anything when it
+        // has not happened yet - it drops the state whole, owner and all, and hangs the doors on
+        // nothing. See HouseStateFollowUpTask.
         character.SendPacket(new SCUnitStatePacket(this));
-        character.SendPacket(new SCHouseStatePacket(this));
+        TaskManager.Instance.Schedule(new HouseStateFollowUpTask(this, character), StateFollowUpDelay);
 
-        // TODO: This should be handled in the base.AddVisibleObject
+        base.AddVisibleObject(character);
+    }
+
+    /// <summary>Sends the doors, windows and chests fixed to this building, in batches it accepts.</summary>
+    public void SendAttachedDoodads(Character character)
+    {
         var doodads = AttachedDoodads.ToArray();
         for (var i = 0; i < doodads.Length; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
         {
@@ -296,8 +309,6 @@ public sealed class House : Unit
             Array.Copy(doodads, i, temp, 0, temp.Length);
             character.SendPacket(new SCDoodadsCreatedPacket(temp));
         }
-
-        base.AddVisibleObject(character);
     }
 
     public override void RemoveVisibleObject(Character character)
@@ -384,6 +395,12 @@ public sealed class House : Unit
     private const long PublicOwnerIdentity = 600;
 
     /// <summary>
+    /// The work done so far, as the client is told it: level with what the design asks for once the
+    /// building is finished, so that the two compare equal and it stops calling it a building site.
+    /// </summary>
+    public int BuildProgressAction => CurrentStep == -1 ? AllAction : CurrentAction;
+
+    /// <summary>
     /// Writes the house state block.
     /// </summary>
     /// <remarks>
@@ -426,12 +443,24 @@ public sealed class House : Unit
         stream.Write(Id);                      // dbId               : u32
         stream.WriteBc(ObjId);                 // sceneObjectId      : 3 bytes, the handler's lookup key
 
-        // The design id and two more numbers nobody has been able to name. Empty is the honest
-        // filling: the group has to carry three values or everything behind it moves.
-        stream.WritePisc(TemplateId, 0, 0);    // packedHouseIds     : pish u8, then the values
-        stream.Write(0L);                      // moneyAmount        : u64
+        // The design, and how far along the building is: the work it asks for and the work done.
+        // The client keeps the pair and calls the building unfinished while the two differ - that
+        // one comparison is the whole of it. Both were going out empty, which made them equal, so
+        // every foundation announced itself as a finished house no matter what the unit state drew,
+        // and a finished house is offered nothing to do. It is the same pair the progress message
+        // carries, and it has to agree with it.
+        //
+        // They were briefly the guild and the family, on a reading that named them from the server
+        // side. Two audits since put both in the same two slots of the client's own house record
+        // as the progress message writes its counts into, which settles it.
+        stream.WritePisc(TemplateId, AllAction, BuildProgressAction); // housingDescId, allstep, curstep
+
+        // The asking price belongs here, at the front, and who the sale is reserved for belongs
+        // further down before the buyer's name. The two were the other way round: a price sat
+        // where the reservation is read and a zero where the price is.
+        stream.Write((long)SellPrice);         // salePrice          : i64
         stream.Write(HousingType);             // ht                 : i32, the design's own category
-        stream.Write(0L);                      // unnamed            : u64, kept but never consulted
+        stream.Write(0L);                      // ownerIdentityAux   : u64, kept but never consulted
         stream.Write(OwnerIdentity);           // ownerIdentity      : u64
         stream.Write(ownerName ?? "");         // ownerName          : string, max 128
         stream.Write(AccountId);               // accountId          : u64
@@ -439,7 +468,7 @@ public sealed class House : Unit
         WriteWorldPosition(stream, Transform.World.Position);
         stream.Write(Name ?? "");              // houseName          : string, max 128
         stream.Write(AllowRecover);            // allowRecover       : bool
-        stream.Write((long)SellPrice);         // salePrice          : u64, the only one here
+        stream.Write((long)SellToPlayerId);    // saleTargetIdentity : u64, who the sale is held for
         stream.Write(sellToPlayerName ?? "");  // sellToName         : string, max 128
         stream.Write(ExpandedDecoLimit);       // expandedDecoLimit  : i32
         stream.Write(0);                       // unnamed            : u32, serialized but never applied

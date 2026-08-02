@@ -596,24 +596,27 @@ public class SCUnitStatePacket : GamePacket
                 break;
         }
 
-        // Three packed groups. The middle one is the affiliations: faction, guild and family. Which
-        // slot each one sits in is the open question - a table read while working on housing put
-        // the faction third, and with it there everyone came out of the same side as everyone else,
-        // so it is back in the first slot where the working order has always had it.
+        // Three packed groups. The first ends with the appellation and holds nothing else anyone
+        // reads; the handle that used to sit in its second slot was never confirmed and is not
+        // wanted. The middle group is the affiliations. The last one belongs to characters; for
+        // everything else it is parsed and thrown away.
+        //
+        // The faction leads the middle group. Two separate audits place it third instead, one of
+        // them on a client consumer that publishes the third slot under that name - but with it
+        // third every unit in the world came out of the same side as the player, mobs included,
+        // and putting it back in front made them hostile again. That was measured twice, in play,
+        // which beats a reading of the binary. Guild follows it; family is not sent at all.
         if (_unit is Character)
         {
-            // ???, ??? and Appellation (Title)
-            stream.WritePisc(0, 0, character.Appellations.ActiveAppellation, 0);            // pisc
-                                                                                            // Faction and Guild
-            stream.WritePisc(character.Faction?.Id ?? 0, character.Expedition?.Id ?? 0, 0); // target group has 3 values
-                                                                                            // PvP Honor gained and PvP Kills
-            stream.WritePisc(character.HonorGainedInCombat, character.HostileFactionKills, 0, 0); // pisc
+            stream.WritePisc(0, 0, 0, character.Appellations.ActiveAppellation);        // A3 = appellation
+            stream.WritePisc(character.Faction?.Id ?? 0, character.Expedition?.Id ?? 0, 0);
+            stream.WritePisc(character.HonorGainedInCombat, character.HostileFactionKills, 0, 0);
         }
         else
         {
-            stream.WritePisc(0, _unit.TlId, 0, 0);                                  // target per-unit transient identity
-            stream.WritePisc(_unit.Faction?.Id ?? 0, _unit.Expedition?.Id ?? 0, 0); // target group has 3 values
-            stream.WritePisc(0, 0, 0, 0);                                           // pisc
+            stream.WritePisc(0, 0, 0, 0);                                           // nothing here is read
+            stream.WritePisc(_unit.Faction?.Id ?? 0, _unit.Expedition?.Id ?? 0, 0);
+            stream.WritePisc(0, 0, 0, 0);
         }
         piscEnd = stream.Count;
 

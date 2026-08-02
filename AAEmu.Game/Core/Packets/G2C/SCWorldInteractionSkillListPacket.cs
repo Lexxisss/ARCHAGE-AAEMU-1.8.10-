@@ -49,11 +49,15 @@ public class SCWorldInteractionSkillListPacket : GamePacket
         stream.WriteBc(_targetObjId);
         stream.WriteBc(_sourceObjId);
 
-        // Embedded WorldInteractionList.
-        stream.WriteBc(_targetObjId);  // +0x00
-        stream.WriteBc(_sourceObjId);  // +0x04
+        // The list itself. The second handle is the one the client looks the object up by, and
+        // everything it then offers hangs off finding it: no object, no buttons, no window, the
+        // whole interaction quietly torn down. It was carrying the player who reached out rather
+        // than the thing reached for, so the lookup was for a unit that is never a valid subject,
+        // and that is enough on its own to leave a building with nothing to click.
+        stream.WriteBc(_sourceObjId);   // +0x00, context
+        stream.WriteBc(_targetObjId);   // +0x04, what the client looks up
         stream.Write(_interactionType); // +0x08
-        stream.WriteBc(_pickObjId);    // +0x0C
+        stream.WriteBc(_pickObjId);     // +0x0C
         stream.Write((uint)_interactions.Length); // +0x38
         stream.Write(_extraInfo);      // +0x3C
         foreach (var interaction in _interactions)

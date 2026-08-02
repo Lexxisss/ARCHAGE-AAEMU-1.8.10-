@@ -22,6 +22,12 @@ namespace AAEmu.Game.Core.Packets.G2C;
 ///
 /// It replaces the per-building message we used to send, which does not exist in this client.
 ///
+/// The field behind the handle is the owner's identity, and the client compares it against its own
+/// player's - that comparison is the whole of "this one is mine". The building's row number in our
+/// database was going out there instead, and no row number will ever equal a player identity, so
+/// every building came back as somebody else's. The handle ahead of it is two bytes, not four, the
+/// same width it has everywhere else here.
+///
 /// The client caps this at twenty records and ignores the rest, so larger sets have to be
 /// split across messages.
 /// </remarks>
@@ -51,15 +57,15 @@ public class SCHouseDataPacket : GamePacket
             var house = _houses[i];
             var ownerName = NameManager.Instance.GetCharacterName(house.OwnerId) ?? string.Empty;
 
-            stream.Write((uint)house.TlId);      // tl         : u32
-            stream.Write((long)house.Id);        // type/id    : i64
-            stream.WriteBc(house.ObjId);         // bc         : 3 bytes
-            stream.Write(house.AccountId);       // accountId  : u64
-            stream.Write(ownerName);             // owner      : string, max 128
+            stream.Write(house.TlId);            // tl            : u16
+            stream.Write(house.OwnerIdentity);   // ownerIdentity : u64
+            stream.WriteBc(house.ObjId);         // objId         : 3 bytes
+            stream.Write(house.AccountId);       // accountId     : u64
+            stream.Write(ownerName);             // ownerName     : string, max 128
             WriteWorldPosition(stream, house.Transform.World.Position);
-            stream.Write((int)house.TemplateId); // type2      : i32
-            stream.Write((byte)house.Permission);// permission : u8
-            stream.Write(house.Name ?? string.Empty); // house : string, max 128
+            stream.Write((int)house.TemplateId); // housingType   : u32
+            stream.Write((byte)house.Permission);// permission    : u8, 0 owner / 1 guild / 2 all / 3 family
+            stream.Write(house.Name ?? string.Empty); // houseName : string, max 128
         }
 
         return stream;
