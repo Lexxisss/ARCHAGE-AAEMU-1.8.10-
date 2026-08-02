@@ -1023,6 +1023,5 @@ public static class SCOffsets
     public const ushort SCMySlavePacket = 0x366;
     public const ushort SCNationalMonumentChangedPacket = 0xfff;
     public const ushort SCItemTaskConfirmAskPacket = 0x0EA;
-    public const ushort SCCountTotalMailPacket = 0x23A;
     public const ushort SCIsUnitInFarmPacket = 0x325;
 }

@@ -134,14 +134,11 @@ public class SCUnitStatePacket : GamePacket
                 stream.Write((byte)(slave.Summoner?.Transform.WorldId ?? 0)); // masterWorldId : u8
                 stream.Write(slave.TemplateId);                    // visualSlaveDescId : u32
                 break;                                             // 28 bytes with the discriminator
-            // Buildings, eleven bytes with the discriminator: the handle at two, the design at
-            // four and the construction stage at four.
-            //
-            // The handle is two bytes, not four. It is read through the client's sixteen-bit
-            // archive helper - the same one that reads other proven two-byte fields - and a
-            // four-byte write puts two extra bytes at the very front of the branch, which shifts
-            // everything behind it. A table that called it four bytes was followed here for a
-            // while, and a placed building never appeared while it was.
+            // Buildings, nine bytes with the discriminator: the handle at two, the design at four
+            // and the construction stage at two. Both the handle and the stage are read through
+            // the client's sixteen-bit archive helper, and writing either of them as four bytes
+            // pushes everything behind it along - the stage did exactly that for a while, on the
+            // word of a table that has now been withdrawn.
             //
             // The stage is the ordinal the design's own step rows are numbered by: the client
             // looks up the row whose step matches to know what the half-built house looks like,
@@ -150,18 +147,17 @@ public class SCUnitStatePacket : GamePacket
             case BaseUnitType.Housing:
                 var house = (House)_unit;
 
-                // A finished building has no stage, and what to put here for one is not
-                // established: the design's own rows are numbered from zero, so zero is both the
-                // first stage and the only value a finished building was ever sent with. Minus
-                // one - what the model uses internally for "done" - is not a value the client has
-                // ever been sent, and a building placed finished never appeared at all while it
-                // was going out.
+                // A finished building has no stage, and which value stands for that is still not
+                // settled - zero and minus one have not been shown to mean the same thing, and
+                // neither has been shown to be what a finished building was sent with. Zero goes
+                // out until the width above has been judged on a client, because a stage compared
+                // while the field was the wrong size tells us nothing.
                 var buildStep = house.CurrentStep == -1 ? 0 : house.CurrentStep;
 
-                stream.Write(house.TlId);       // tl         : u16
-                stream.Write(house.TemplateId); // designType : u32
-                stream.Write(buildStep);        // buildstep  : i32
-                break;                          // 11 bytes with the discriminator
+                stream.Write(house.TlId);         // tl         : u16
+                stream.Write(house.TemplateId);   // designType : u32
+                stream.Write((short)buildStep);   // buildstep  : i16
+                break;                            // 9 bytes with the discriminator
             case BaseUnitType.Transfer:
                 var transfer = (Transfer)_unit;
                 stream.Write(transfer.TlId); // tl
@@ -597,32 +593,24 @@ public class SCUnitStatePacket : GamePacket
                 break;
         }
 
-        // Three packed groups. The middle one is the affiliations, and its order is expedition,
-        // family, faction - the faction is the *third* slot, not the first. Writing it first put
-        // the guild where the faction belongs and left the faction at zero, which is what the
-        // client then used for relations, permissions and everything it colours by side.
-        //
-        // Only the first group's last slot and the whole third group belong to a character; for
-        // anything else the third group is read and thrown away.
+        // Three packed groups. The middle one is the affiliations: faction, guild and family. Which
+        // slot each one sits in is the open question - a table read while working on housing put
+        // the faction third, and with it there everyone came out of the same side as everyone else,
+        // so it is back in the first slot where the working order has always had it.
         if (_unit is Character)
         {
-            stream.WritePisc(0, 0, character.Appellations.ActiveAppellation, 0); // A: A3 = appellation
-            stream.WritePisc(                                                   // B: expedition, family, faction
-                character.Expedition?.Id ?? 0,
-                character.Family,
-                character.Faction?.Id ?? 0);
-            stream.WritePisc(character.HonorGainedInCombat, character.HostileFactionKills, 0, 0); // C
+            // ???, ??? and Appellation (Title)
+            stream.WritePisc(0, 0, character.Appellations.ActiveAppellation, 0);            // pisc
+                                                                                            // Faction and Guild
+            stream.WritePisc(character.Faction?.Id ?? 0, character.Expedition?.Id ?? 0, 0); // target group has 3 values
+                                                                                            // PvP Honor gained and PvP Kills
+            stream.WritePisc(character.HonorGainedInCombat, character.HostileFactionKills, 0, 0); // pisc
         }
         else
         {
-            // Group A holds an appellation in its last slot and nothing anyone reads in the rest;
-            // the handle we used to put in the second slot was never confirmed and is not used.
-            stream.WritePisc(0, 0, 0, 0);                    // A
-            stream.WritePisc(                                // B: expedition, family, faction
-                _unit.Expedition?.Id ?? 0,
-                0,
-                _unit.Faction?.Id ?? 0);
-            stream.WritePisc(0, 0, 0, 0);                    // C, ignored for anything but a character
+            stream.WritePisc(0, _unit.TlId, 0, 0);                                  // target per-unit transient identity
+            stream.WritePisc(_unit.Faction?.Id ?? 0, _unit.Expedition?.Id ?? 0, 0); // target group has 3 values
+            stream.WritePisc(0, 0, 0, 0);                                           // pisc
         }
         piscEnd = stream.Count;
 
