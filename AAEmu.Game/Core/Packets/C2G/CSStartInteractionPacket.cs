@@ -143,13 +143,20 @@ public class CSStartInteractionPacket : GamePacket
             var buildSkillId = house.ActiveBuildSkillId;
             if (buildSkillId == 0)
             {
+                // A finished building has nothing to contribute to, and that is not a refusal - it
+                // is simply a building whose doors, chests and name plaque are what a player deals
+                // with, and those are ordinary objects reached the ordinary way.
+                //
+                // Cancelling here tore the interaction down instead, and the client's own building
+                // window went with it: designs built in several stages behaved, because there was
+                // always a stage to offer, while a design placed finished in one go answered every
+                // approach with a cancel and could never be looked at at all.
                 Logger.Info(
                     "House interaction: nothing to contribute, objId={0}, design={1}, step={2}",
                     house.ObjId,
                     house.TemplateId,
                     house.CurrentStep);
 
-                Connection.ActiveChar.SendPacket(new SCCancelWorldInteractionPacket(sourceObjId, targetObjId));
                 return;
             }
 
