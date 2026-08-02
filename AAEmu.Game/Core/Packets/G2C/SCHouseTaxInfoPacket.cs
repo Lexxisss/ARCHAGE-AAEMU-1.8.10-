@@ -48,6 +48,12 @@ public class SCHouseTaxInfoPacket : GamePacket
         _taxType = taxType;
     }
 
+    /// <remarks>
+    /// Forty-one bytes, and every width and position here has been checked against the client and
+    /// found to agree. Do not change them. The panel showing a bare number that is none of these is
+    /// not this message's doing - both amounts are turned into text before they reach the panel, so
+    /// a raw integer on screen comes from somewhere else in its own plumbing.
+    /// </remarks>
     public override PacketStream Write(PacketStream stream)
     {
         stream.Write(_tl);               // tl               : u32

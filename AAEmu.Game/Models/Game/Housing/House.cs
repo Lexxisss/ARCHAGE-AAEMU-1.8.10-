@@ -126,22 +126,9 @@ public sealed class House : Unit
                 ModelId = Template.MainModelId;
             }
 
-            if (_currentStep == -1) // TODO ...
-            {
-                foreach (var bindingDoodad in Template.HousingBindingDoodad)
-                {
-                    var doodad = DoodadManager.Instance.Create(0, bindingDoodad.DoodadId, this, true);
-                    doodad.AttachPoint = bindingDoodad.AttachPointId;
-                    doodad.ParentObj = this;
-                    doodad.Transform = this.Transform.CloneDetached(doodad);
-                    doodad.Transform.Parent = this.Transform;
-                    doodad.Transform.Local.ApplyWorldSpawnPositionWithDeg(bindingDoodad.Position);
-                    doodad.InitDoodad();
-
-                    AttachedDoodads.Add(doodad);
-                }
-            }
-            else if (AttachedDoodads.Count > 0)
+            // A finished building has doors and windows, but they are not made here. They are made
+            // once its record exists at the other end - see EnsureAttachedDoodads.
+            if (_currentStep != -1 && AttachedDoodads.Count > 0)
             {
                 foreach (var doodad in AttachedDoodads)
                     if (doodad.ObjId > 0)
@@ -311,26 +298,56 @@ public sealed class House : Unit
         base.AddVisibleObject(character);
     }
 
+    // The doors, windows and chests fixed to a building are not sent from here, and there is no
+    // method left that does. Each announces itself when it is put into the world, and a second copy
+    // of a handle the client already holds is thrown away - taking the good one with it.
+    //
+    // That was one half of it. A building raised in one go sent them twice and its fixtures came
+    // out dead; one raised stage by stage sent them once, because it was already in sight by then,
+    // and its fixtures worked - until the player came back, when the second copy finally went out
+    // and they vanished.
+
     /// <summary>
-    /// Sends the doors, windows and chests fixed to this building, in batches it accepts.
+    /// Makes this building's doors, windows and chests, if it is finished and has none yet.
     /// </summary>
     /// <remarks>
-    /// Letting go of each one first, on the reasoning that the client refuses a handle it still
-    /// holds, was tried here and left the building with no fixtures at all. Whatever the client
-    /// does with a release for something it never had, it is not nothing. The releasing belongs
-    /// where the building leaves sight, which is where it now is, and not here.
+    /// The other half, and the reason a building raised in one go still came out dead after the
+    /// double delivery was fixed. A fixture is fitted to the building's own record at the far end,
+    /// and a fixture that arrives before that record exists is never fitted afterwards - it keeps
+    /// what it was born with, which is nothing.
+    ///
+    /// Made where the stage was set, they were born during placement: after the building itself,
+    /// but half a second ahead of the message that builds its record. A building raised stage by
+    /// stage escaped that only by accident - it has no fixtures to make until the last stage is
+    /// done, by which time the record has long existed - which is why the two behaved differently
+    /// on identical code.
+    ///
+    /// So they are made here instead, once, straight after the record has been sent.
     /// </remarks>
-    public void SendAttachedDoodads(Character character)
+    public void EnsureAttachedDoodads()
     {
-        var doodads = AttachedDoodads.ToArray();
+        if (CurrentStep != -1 || AttachedDoodads.Count > 0 || Template?.HousingBindingDoodad == null)
+            return;
 
-        for (var i = 0; i < doodads.Length; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
+        foreach (var bindingDoodad in Template.HousingBindingDoodad)
         {
-            var count = doodads.Length - i;
-            var temp = new Doodad[count <= SCDoodadsCreatedPacket.MaxCountPerPacket ? count : SCDoodadsCreatedPacket.MaxCountPerPacket];
-            Array.Copy(doodads, i, temp, 0, temp.Length);
-            character.SendPacket(new SCDoodadsCreatedPacket(temp));
+            var doodad = DoodadManager.Instance.Create(0, bindingDoodad.DoodadId, this, true);
+            doodad.AttachPoint = bindingDoodad.AttachPointId;
+            doodad.ParentObj = this;
+            doodad.Transform = Transform.CloneDetached(doodad);
+            doodad.Transform.Parent = Transform;
+            doodad.Transform.Local.ApplyWorldSpawnPositionWithDeg(bindingDoodad.Position);
+            doodad.InitDoodad();
+
+            AttachedDoodads.Add(doodad);
+
+            // Into the world by hand. Spawn walks this list, but it has already run by now - the
+            // building had to exist at the far end before its fixtures could be made at all - so
+            // anything made here would otherwise sit in the list and never reach anyone.
+            doodad.Spawn();
         }
+
+        Logger.Info("House {0}: made {1} fixtures now that its record has been sent", Id, AttachedDoodads.Count);
     }
 
     /// <summary>
@@ -525,10 +542,19 @@ public sealed class House : Unit
             stream.Write(i + 1);                   // ucc_position : i32, 1..5
         }
 
-        // Two world positions, twenty bytes each. What they are for is not recovered and nothing
-        // here has a value to put in them, so they go out at the origin.
+        // Two world positions, twenty bytes each. What they anchor was never recovered - only that
+        // they are positions and that nobody found a building that needed them filled.
+        //
+        // EXPERIMENT. They went out at the origin, and the client refuses to let the owner put
+        // furniture down on ground it says is not theirs, while agreeing the building itself is.
+        // If these two say where the building's ground is, then at the origin its ground is a mile
+        // away and belongs to nobody, which would explain exactly that. The building's own position
+        // goes in both until somebody can name them.
+        //
+        // If the building stops appearing, or its state stops arriving, put the zeros back first -
+        // this is the last field in the message and the cheapest thing to undo.
         for (var i = 0; i < TrailingPositionCount; i++)
-            WriteWorldPosition(stream, Vector3.Zero); // tailPosition0..1 : 20 bytes each
+            WriteWorldPosition(stream, Transform.World.Position); // tailPosition0..1 : 20 bytes each
 
         return stream;
     }

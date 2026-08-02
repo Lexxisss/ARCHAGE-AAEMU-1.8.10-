@@ -107,9 +107,14 @@ public class SCUnitStatePacket : GamePacket
         stream.Write((byte)_baseUnitType);
         switch (_baseUnitType)
         {
+            // The byte written just above the switch is the tag of a tagged identity, and this is
+            // its variant for an ordinary player. A reading that called the tag missing was nearly
+            // acted on here; the tag is the unit-type byte itself, and the seven types are the
+            // seven tags. The shipyard variant coming to thirteen bytes and the building's to nine
+            // only works with the byte counted once.
             case BaseUnitType.Character:
-                stream.Write((ulong)(character?.Id ?? 0u)); // characterId
-                stream.Write(0L);                           // v
+                stream.Write((ulong)(character?.Id ?? 0u)); // identityValue     : u64
+                stream.Write(0L);                           // identitySecondary : u64, unread here
                 break;
             case BaseUnitType.Npc:
                 stream.WriteBc(npc.ObjId);    // objId

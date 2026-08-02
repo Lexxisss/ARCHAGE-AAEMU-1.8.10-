@@ -51,13 +51,17 @@ public class CSStartInteractionPacket : GamePacket
             var interactions = DoodadManager.Instance.GetInteractionSkills(doodad.FuncGroupId);
             if (interactions.Length == 0)
             {
+                // Nothing to offer is not the same as no. Answering with a cancel tears the whole
+                // interaction down at the far end - no buttons, no window - which is how a finished
+                // building came to refuse its own owner, and is the likeliest reason a door or a
+                // window on one answers to nothing. Say nothing instead and leave the client with
+                // whatever it can make of the object on its own.
                 Logger.Warn(
                     "Doodad interaction group has no functions: objId={0}, templateId={1}, funcGroupId={2}",
                     doodad.ObjId,
                     doodad.TemplateId,
                     doodad.FuncGroupId);
 
-                Connection.ActiveChar.SendPacket(new SCCancelWorldInteractionPacket(sourceObjId, targetObjId));
                 Connection.ClearDoodadInteraction();
                 return;
             }

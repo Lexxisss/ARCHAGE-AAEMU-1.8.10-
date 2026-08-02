@@ -946,9 +946,6 @@ public class HousingManager : Singleton<HousingManager>
 
         // Logger.Debug($"SCHouseTaxInfoPacket; tlId:{house.TlId}, domTaxRate: 0, deposit: {depositTax}, taxDue:{totalTaxAmountDue}, protectEnd:{house.ProtectionEndDate}, isPaid:{requiresPayment}, weeksWithoutPay:{weeksWithoutPay}, isHeavy:{house.Template.HeavyTax}");
         
-        // Every number that goes into the tax panel, as it goes in. The panel has been showing a
-        // large negative amount, and there is no telling from here whether the fault is in what we
-        // put in or in where it lands.
         Logger.Info(
             "HouseTaxInfo: house={0} tl={1} design={2} baseTax={3} deposit={4} due={5} " +
             "protectionEnd={6} taxDue={7} requiresPayment={8} weeksWithoutPay={9} heavy={10}",

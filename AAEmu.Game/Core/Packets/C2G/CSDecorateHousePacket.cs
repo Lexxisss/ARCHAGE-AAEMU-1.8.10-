@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Network.Game;
@@ -14,10 +15,21 @@ public class CSDecorateHousePacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        // Four bytes, and all four matter: this is the building's own id, not the short-lived
-        // handle everything else in this subsystem is keyed by. Cutting it to sixteen bits was
-        // harmless only while the two happened to be small.
-        var houseId = stream.ReadUInt32();
+        // The whole request, byte for byte, because the reading below has been wrong twice and
+        // guessing a third time is worse than looking.
+        var raw = new byte[stream.Count - stream.Pos];
+        for (var i = 0; i < raw.Length; i++)
+            raw[i] = stream.ReadByte();
+        Logger.Info("DecorateHouse raw {0} bytes: {1}", raw.Length, BitConverter.ToString(raw));
+        stream.Pos -= raw.Length;
+
+        // Two bytes, not four. Read as four it swallowed the start of the design and left every
+        // coordinate behind it a denormal fraction - the building came out as twelve million and
+        // the design as a hundred and thirty-four million. Two bytes give a building of one and a
+        // design of a hundred and ninety-four, which are numbers this world has.
+        //
+        // The fifth field in this subsystem to be written four bytes wide and read two.
+        var houseId = (uint)stream.ReadUInt16();
         var designId = stream.ReadUInt32();
         var x = stream.ReadSingle();
         var y = stream.ReadSingle();
