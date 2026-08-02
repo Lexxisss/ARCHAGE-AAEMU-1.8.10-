@@ -927,6 +927,41 @@ public partial class Quest
 
     private static int NormalizeSelectiveRewardIndex(int selected) => selected <= 0 ? 0 : selected - 1;
 
+    /// <summary>
+    /// Whether accepting this quest hands the player anything.
+    /// </summary>
+    /// <remarks>
+    /// Only such a quest needs its objectives restated once the client knows about it: the goods
+    /// are handed over while the quest is still being started, so the client sees them arrive
+    /// against a quest it has not been told about yet.
+    /// </remarks>
+    public bool HasStartingSupply()
+    {
+        return Template.GetComponents(QuestComponentKind.Supply)
+            .SelectMany(component => component.Acts)
+            .Any(act => act.DetailType is "QuestActSupplyItem"
+                or "QuestActSupplySelectiveItem"
+                or "QuestActSupplyRankedItem"
+                or "QuestActSupplyResultRankedItem");
+    }
+
+    /// <summary>
+    /// Which component the turn-in is reported under, worked out without paying anything.
+    /// </summary>
+    /// <remarks>
+    /// The payout used to answer this on its way through, which forced the reward to be handed
+    /// over before the quest could be reported finished. Asking separately lets the two happen in
+    /// the order they belong in.
+    /// </remarks>
+    public uint PeekCompletionComponentId()
+    {
+        lock (_runtimeLock)
+        {
+            var rewardComponents = Template.GetComponents(QuestComponentKind.Reward).OrderBy(x => x.Id).ToArray();
+            return rewardComponents.Length > 0 ? rewardComponents[^1].Id : CurrentComponentId;
+        }
+    }
+
     public bool ApplyRuntimeRewards(int selected, bool includeLevelSupply, out uint completedComponentId)
     {
         lock (_runtimeLock)

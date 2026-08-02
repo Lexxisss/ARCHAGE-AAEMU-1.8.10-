@@ -28,6 +28,10 @@ namespace AAEmu.Game.Models.Game.Char;
 public partial class CharacterQuests
 {
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+
+    /// <summary>How many quests one stored completion record covers, a bit each.</summary>
+    private const int CompletedQuestsPerBlock = 64;
+
     private readonly List<uint> _removed;
     private uint _activeCinemaId;
 
@@ -137,6 +141,19 @@ public partial class CharacterQuests
         }
 
         Owner.SendPacket(new SCQuestContextStartedPacket(quest, quest.CurrentComponentId));
+
+        // Starting the quest is what hands over whatever it sends the player off with, and that
+        // happens above, before the client has heard of the quest at all: the goods arrive, the
+        // client counts them against nothing, and the objective that asks for them sits at zero
+        // while they are plainly in the bag.
+        //
+        // The message that carries progress is a merge onto a quest the client already knows, and
+        // it is dropped without a word when there is none - so it could not be sent any earlier
+        // than this. Sent here it restates the objectives against what the player is actually
+        // holding, which is what the count should have been all along.
+        if (quest.HasStartingSupply())
+            quest.SendRuntimeUpdate();
+
         RefreshQuestNotifier();
         Logger.Info("Quest {0} started for {1}, runtime={2}, component={3}, status={4}, source={5}:{6}",
             questId, Owner.Name, quest.Id, quest.CurrentComponentId, quest.Status, sourceType, sourceTemplateId);
@@ -194,19 +211,23 @@ public partial class CharacterQuests
         var completed = false;
         try
         {
-            if (!quest.ApplyRuntimeRewards(selected, includeLevelSupply, out var componentId))
-            {
-                Owner.SendPacket(new SCQuestContextFailedPacket(questId, QuestStatusFailed.CantSupplyRewards));
-                return false;
-            }
+            // The quest is handed in first and paid for afterwards. It used to be the other way
+            // round, and the reward could be handed over and then something further down refuse -
+            // leaving the player holding the goods with the quest still on their list, ready to be
+            // turned in again for the same reward, and again after that.
+            //
+            // The order costs us the other failure: if paying out goes wrong now, the quest is
+            // already reported finished and the player is owed something they did not get. That is
+            // the one worth having - it is visible, it is one player, and it does not multiply.
+            var componentId = quest.PeekCompletionComponentId();
 
-            var blockId = (ushort)(questId / 64);
+            var blockId = (ushort)(questId / CompletedQuestsPerBlock);
             if (!CompletedQuests.TryGetValue(blockId, out var completedBlock))
             {
                 completedBlock = new CompletedQuest(blockId);
                 CompletedQuests[blockId] = completedBlock;
             }
-            completedBlock.Body.Set((int)(questId % 64), true);
+            completedBlock.Body.Set((int)(questId % CompletedQuestsPerBlock), true);
 
             quest.MarkRuntimeCompleted(componentId);
             ActiveQuests.Remove(questId);
@@ -215,8 +236,17 @@ public partial class CharacterQuests
             QuestIdManager.Instance.ReleaseId((uint)quest.Id);
 
             Owner.SendPacket(new SCQuestContextCompletedPacket(questId, componentId));
-            RefreshQuestNotifier();
             completed = true;
+
+            if (!quest.ApplyRuntimeRewards(selected, includeLevelSupply, out _))
+            {
+                Logger.Error(
+                    "Quest {0} was turned in by {1} but its reward could not be handed over; the player is owed it",
+                    questId, Owner.Name);
+                Owner.SendPacket(new SCQuestContextFailedPacket(questId, QuestStatusFailed.CantSupplyRewards));
+            }
+
+            RefreshQuestNotifier();
             DispatchRuntimeEvent(new QuestRuntimeEvent
             {
                 Type = QuestRuntimeEventType.QuestCompleted,
@@ -872,21 +902,46 @@ public partial class CharacterQuests
         }
     }
 
+    /// <summary>
+    /// Tells the client which quests this player has already finished.
+    /// </summary>
+    /// <remarks>
+    /// We keep them packed - one record per sixty-four quests, a bit each - and the client wants
+    /// them one by one, so they are unpacked here. Sending our own packing instead left the client
+    /// with no idea which quests were done, so a giver went on offering a finished quest that the
+    /// server then refused to hand out: visible, unclickable, forever.
+    ///
+    /// Numbers no design exists for are left out. They cost a lookup each, once per login, and the
+    /// client would only discard them after doing the same lookup itself.
+    /// </remarks>
     public void SendCompleted()
     {
-        var completedQuests = CompletedQuests.Values.ToArray();
-        if (completedQuests.Length <= 200)
+        var questIds = new List<uint>();
+        foreach (var (blockId, block) in CompletedQuests)
         {
-            Owner.SendPacket(new SCCompletedQuestsPacket(completedQuests));
+            for (var bit = 0; bit < CompletedQuestsPerBlock; bit++)
+            {
+                if (!block.Body[bit])
+                    continue;
+
+                var questId = (uint)blockId * CompletedQuestsPerBlock + (uint)bit;
+                if (QuestManager.Instance.GetTemplate(questId) == null)
+                    continue;
+
+                questIds.Add(questId);
+            }
+        }
+
+        if (questIds.Count == 0)
+        {
+            Owner.SendPacket(new SCCompletedQuestsPacket([]));
             return;
         }
 
-        for (var i = 0; i < completedQuests.Length; i += 20)
+        for (var i = 0; i < questIds.Count; i += SCCompletedQuestsPacket.MaxEntries)
         {
-            var size = completedQuests.Length - i >= 200 ? 200 : completedQuests.Length - i;
-            var result = new CompletedQuest[size];
-            Array.Copy(completedQuests, i, result, 0, size);
-            Owner.SendPacket(new SCCompletedQuestsPacket(result));
+            var size = Math.Min(SCCompletedQuestsPacket.MaxEntries, questIds.Count - i);
+            Owner.SendPacket(new SCCompletedQuestsPacket(questIds.GetRange(i, size).ToArray()));
         }
     }
 
