@@ -980,7 +980,7 @@ public static class SCOffsets
     public const ushort SCSchoolOfFishDoodadsPacket = 0x12C; // x2game.dll factory 0x39358390, body serializer 0x399ED380
     public const ushort SCSearchListPacket = 0xfff;
     public const ushort SCSpamReportedPacket = 0xfff;
-    public const ushort SCSpecialtyRatioPacket = 0xfff;
+    public const ushort SCSpecialtyRatioPacket = 0x100; // target x2game.dll factory 0x393452A0, reader 0x399E9BF0
     public const ushort SCTeamMemberDisconnectedPacket = 0xfff;
     public const ushort SCTeamMemberRoleChangedPacket = 0xfff;
     public const ushort SCTelescopeToggledPacket = 0xfff;

@@ -12,5 +12,5 @@ public sealed class SpecialtyGoods
     public uint Stock { get; init; }
     public bool CanProduce { get; init; }
     public sbyte Currency { get; init; }
-    public byte Type { get; init; }
+    public byte Grade { get; init; }
 }

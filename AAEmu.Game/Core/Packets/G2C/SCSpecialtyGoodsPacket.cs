@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,21 +41,26 @@ public class SCSpecialtyGoodsPacket : GamePacket
         stream.Write(_isEnd);
 
         foreach (var goods in _goods)
-        {
-            // x2game.dll 0x39A9D010, one 0x30-byte in-memory record.
-            stream.Write(goods.ItemId);        // +0x00 u32
-            stream.Write(goods.CurrentAmount); // +0x08 i64
-            stream.Write(goods.BaseAmount);    // +0x10 i64
-            stream.Write(goods.Ratio);          // +0x18 u32
-            stream.Write(goods.Stock);          // +0x1C u32
-            stream.Write(goods.CanProduce);     // +0x20 bool
-            stream.Write(goods.Currency);       // +0x24 i8 on wire
-            stream.Write(goods.Type);           // +0x28 u8 on wire
-        }
+            WriteGoodsRecord(stream, goods);
 
         foreach (var itemId in _eventItemIds)
             stream.Write(itemId); // x2game.dll 0x399D0A72-0x399D0A8C: u32, max 50
 
         return stream;
     }
+    internal static void WriteGoodsRecord(PacketStream stream, SpecialtyGoods goods)
+    {
+        // Shared target record reader: x2game.dll 0x39A9D010.
+        // The last byte is item grade. Dedicated resolves it through 0x39CA0970 before
+        // constructing the same record at 0x39824340-0x39824429.
+        stream.Write(goods.ItemId);        // +0x00 u32
+        stream.Write(goods.CurrentAmount); // +0x08 i64
+        stream.Write(goods.BaseAmount);    // +0x10 i64
+        stream.Write(goods.Ratio);         // +0x18 u32
+        stream.Write(goods.Stock);         // +0x1C u32
+        stream.Write(goods.CanProduce);    // +0x20 bool
+        stream.Write(goods.Currency);      // +0x24 i8 on wire
+        stream.Write(goods.Grade);         // +0x28 u8 item grade
+    }
+
 }

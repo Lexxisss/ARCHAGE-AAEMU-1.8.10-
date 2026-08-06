@@ -33,16 +33,22 @@ public class CSListSpecialtyGoodsPacket : GamePacket
             return;
         }
 
+        var destinationZoneGroupId = SpecialtyManager.Instance.GetDestinationZoneGroup(npcObjId);
         var chunkCount = (goods.Count + SCSpecialtyGoodsPacket.MaxGoods - 1) / SCSpecialtyGoodsPacket.MaxGoods;
         for (var chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++)
         {
             var chunk = goods
                 .Skip(chunkIndex * SCSpecialtyGoodsPacket.MaxGoods)
-                .Take(SCSpecialtyGoodsPacket.MaxGoods);
+                .Take(SCSpecialtyGoodsPacket.MaxGoods)
+                .ToArray();
+            var eventItemIds = SpecialtyManager.Instance.GetActiveEventItemIds(
+                destinationZoneGroupId,
+                chunk.Select(x => x.ItemId));
             Connection.ActiveChar.SendPacket(new SCSpecialtyGoodsPacket(
                 chunkIndex == 0,
                 chunkIndex == chunkCount - 1,
-                chunk));
+                chunk,
+                eventItemIds));
         }
     }
 }

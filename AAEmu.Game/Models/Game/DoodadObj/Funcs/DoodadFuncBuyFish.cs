@@ -33,6 +33,10 @@ public class DoodadFuncBuyFish : DoodadFuncTemplate
 
         owner.ItemTemplateId = backpack.TemplateId;
 
+        // Target client data has no per-instance weight multiplier in the buy-fish function:
+        // doodad_func_buy_fish_items only authorizes item ids, fish_details only defines the
+        // generated length/weight ranges, and item_prices.refund carries the payout for each
+        // concrete size-class item template. Weight and length remain instance metadata.
         var payout = backpack.Template?.Refund ?? 0;
         if (payout <= 0)
         {

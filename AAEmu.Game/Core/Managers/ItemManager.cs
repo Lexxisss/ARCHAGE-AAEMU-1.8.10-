@@ -1181,6 +1181,7 @@ public class ItemManager : Singleton<ItemManager>
                             AssetId = reader.GetUInt32("asset_id"),
                             BackpackType = (BackpackType)reader.GetUInt32("backpack_type_id"),
                             DeclareSiegeZoneGroupId = reader.GetUInt32("declare_siege_zone_group_id"),
+                            FreshnessGroupId = reader.GetUInt32("freshness_group_id", 0),
                             Heavy = reader.GetBoolean("heavy"),
                             Asset2Id = reader.GetUInt32("asset2_id"),
                             // No available 10.x or legacy item_backpacks schema has this field.
