@@ -2,6 +2,7 @@
 
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game;
@@ -15,6 +16,12 @@ namespace AAEmu.Game.Core.Packets.C2G;
 /// </summary>
 public class CSChangeSlaveEquipmentPacket : GamePacket
 {
+    /// <summary>
+    /// "Moored" in the client database - the harbour buff whose description is
+    /// "You can customize ship components".
+    /// </summary>
+    private const uint MooredBuffId = 13817;
+
     public CSChangeSlaveEquipmentPacket() : base(CSOffsets.CSChangeSlaveEquipmentPacket, 5)
     {
     }
@@ -81,6 +88,23 @@ public class CSChangeSlaveEquipmentPacket : GamePacket
                 slave.TemplateId, slave.Id, slave.Equipment?.ContainerId ?? 0,
                 slave.Equipment?.ContainerType ?? SlotType.None,
                 slave.Equipment?.OwnerId ?? 0, slave.Equipment?.MateId ?? 0);
+            Connection.SendPacket(new SCSlaveEquipmentChangedPacket(request, false));
+            return;
+        }
+
+        // A ship is refitted where the harbour allows it and nowhere else. The lighthouse spheres
+        // hang the Moored buff on anything of the right faction that sails in, and the client
+        // database says what it is for in as many words: "You can customize ship components".
+        // Land vehicles are not moored anywhere and keep the old behaviour. A server whose client
+        // data places no such sphere cannot enforce this, and refusing every change there would be
+        // worse than not checking at all.
+        if ((slave.Template?.IsABoat() ?? false) &&
+            SphereBuffManager.Instance.IsBuffPlacedInWorld(MooredBuffId) &&
+            !slave.Buffs.CheckBuff(MooredBuffId))
+        {
+            Logger.Debug(
+                "ChangeSlaveEquipment: slave {0}/{1} is not moored, refit refused",
+                slave.TemplateId, slave.Id);
             Connection.SendPacket(new SCSlaveEquipmentChangedPacket(request, false));
             return;
         }
