@@ -360,6 +360,9 @@ public class DamageEffect : EffectTemplate
                     reductionMul = 1.0f - armor / (armor + 5300.0f);
                     finalDamage = finalDamage * targetUnit.IncomingSpellDamageMul;
                     break;
+                case DamageType.Siege:
+                    finalDamage = finalDamage * targetUnit.IncomingSiegeDamageMul;
+                    break;
                 default:
                     finalDamage = finalDamage * targetUnit.IncomingDamageMul;
                     break;

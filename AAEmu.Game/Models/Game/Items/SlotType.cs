@@ -14,8 +14,9 @@ public enum SlotType : byte
     // under the ride container never reaches a battle pet's slots.
     //
     // Ships and land vehicles use their own equipment model. 0x07 is the short-lived
-    // preliminary container used while the equipment window is being prepared; 0xF2 is the
-    // persistent slave/vehicle equipment container used by the final model.
+    // preliminary client container used while the equipment window is being prepared; it is
+    // not valid in a committed CSChangeSlaveEquipment request. 0xF2 is the persistent
+    // slave/vehicle equipment container used by the final model and server mutation.
     EquipmentSlavePreliminary = 0x07,
     EquipmentMateBattle = 0xED, // 237, MATE_TYPE_BATTLE
     EquipmentSlave = 0xF2,      // 242, ship / land-vehicle equipment

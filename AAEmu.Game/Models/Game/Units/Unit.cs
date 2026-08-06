@@ -204,6 +204,16 @@ public class Unit : BaseUnit, IUnit
     public virtual float IncomingRangedDamageMul { get; set; } = 1f;
     [UnitAttribute(UnitAttribute.IncomingSpellDamageMul)]
     public virtual float IncomingSpellDamageMul { get; set; } = 1f;
+    [UnitAttribute(UnitAttribute.IncomingSiegeDamageMul)]
+    public virtual float IncomingSiegeDamageMul
+    {
+        get
+        {
+            // unit_modifiers stores this family in tenths of a percent: -16 means -1.6%.
+            var raw = CalculateWithBonuses(0d, UnitAttribute.IncomingSiegeDamageMul);
+            return Math.Max(0f, 1f + (float)(raw / 1000d));
+        }
+    }
     [UnitAttribute(UnitAttribute.AggroMul)]
     public float AggroMul
     {

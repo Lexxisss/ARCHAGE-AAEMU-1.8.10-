@@ -956,12 +956,6 @@ public class SlaveManager : Singleton<SlaveManager>
 
         ApplySlaveBonuses(summonedSlave);
 
-        if (!isLoadedPlayerSlave)
-        {
-            summonedSlave.Hp = summonedSlave.MaxHp;
-            summonedSlave.Mp = summonedSlave.MaxMp;
-        }
-
         var createdInitialEquipment = false;
         if (summonedSlave.Equipment.Items.Count == 0 &&
             _slaveInitialItems.TryGetValue(summonedSlave.Template.SlaveInitialItemPackId, out var itemPack))
@@ -990,6 +984,20 @@ public class SlaveManager : Singleton<SlaveManager>
             Logger.Debug(
                 "Loaded {0} persisted equipment items for slave dbId={1}, template={2}",
                 summonedSlave.Equipment.Items.Count, summonedSlave.Id, summonedSlave.TemplateId);
+        }
+
+        var equipmentModifierCount = summonedSlave.RebuildEquipmentBonuses();
+        var equipmentBuffCount = summonedSlave.RebuildEquipmentBuffs();
+        Logger.Debug(
+            "Applied {0} item unit modifiers and {1} grade equip buffs from {2} equipment entries " +
+            "to slave {3}/{4}",
+            equipmentModifierCount, equipmentBuffCount, summonedSlave.Equipment.Items.Count,
+            summonedSlave.TemplateId, summonedSlave.Id);
+
+        if (!isLoadedPlayerSlave)
+        {
+            summonedSlave.Hp = summonedSlave.MaxHp;
+            summonedSlave.Mp = summonedSlave.MaxMp;
         }
 
         summonedSlave.Hp = Math.Min(summonedSlave.Hp, summonedSlave.MaxHp);

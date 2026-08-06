@@ -1320,10 +1320,14 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
             currentRegion.RemoveObject(obj);
         }
 
-        // Also show children
+        // Also show children, but never one that has already been hidden. A ship republishes its
+        // children every time it moves, and a rig taken off the ship was announced again moments
+        // after the client had been told to remove it - so the sail the player had just unequipped
+        // stayed on the ship, and equipping another one looked like it stacked. Show() raises this
+        // flag before it publishes, so a component being spawned still reaches the client.
         if (obj.Transform?.Children?.Count > 0)
             foreach (var child in obj.Transform.Children)
-                if (child != null)
+                if (child?.GameObject is { IsVisible: true })
                     AddVisibleObject(child.GameObject);
 
         //Logger.Warn($" objects={_objects.Count}, doodads={_doodads.Count}, npcs={_npcs.Count}, characters={_characters.Count}");

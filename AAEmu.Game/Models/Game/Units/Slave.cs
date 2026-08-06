@@ -10,12 +10,14 @@ using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.GameData;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Formulas;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
+using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Skills.Effects;
 using AAEmu.Game.Models.Game.Slaves;
 using AAEmu.Game.Models.Game.Units.Static;
@@ -75,6 +77,122 @@ public class Slave : Unit
     public Task LeaveTask { get; set; }
     public CancellationTokenSource CancelTokenSource { get; set; }
     public List<uint> Skills { get; set; }
+
+    // Item unit_modifiers installed in EquipmentSlave are direct attributes of the parent
+    // ship/vehicle. They are not buffs and must not be copied from the spawned component slave.
+    // Keep them under a dedicated source key so a rebuild removes only the equipment contribution.
+    private const uint SlaveEquipmentBonusIndex = 0xFFFFFFFE;
+
+    // Runtime indices of ordinary buffs supplied by item_grade_buffs/items.buff_id for
+    // items installed in the parent slave's persistent 0xF2 equipment container.
+    // Keep these separate from passive component-marker buffs and from direct Item
+    // unit_modifiers (BUG-07), so replacing one equipment item removes only its equip effect.
+    private readonly Dictionary<uint, uint> _equipmentBuffIndices = new();
+
+    /// <summary>
+    /// Rebuilds the parent slave attributes contributed by items in its persistent 0xF2
+    /// equipment container. Returns the number of applied unit-modifier rows.
+    /// </summary>
+    public int RebuildEquipmentBonuses()
+    {
+        Bonuses[SlaveEquipmentBonusIndex] = new List<Bonus>();
+
+        if (Equipment == null)
+            return 0;
+
+        var applied = 0;
+        foreach (var item in Equipment.Items)
+        {
+            if (item == null)
+                continue;
+
+            foreach (var template in ItemManager.Instance.GetUnitModifiers(item.TemplateId))
+            {
+                AddBonus(SlaveEquipmentBonusIndex, new Bonus
+                {
+                    Owner = this,
+                    Template = template,
+                    Value = template.Value
+                });
+                applied++;
+            }
+        }
+
+        return applied;
+    }
+
+    /// <summary>
+    /// Reconciles grade-dependent equip-effect buffs of the items installed in this
+    /// slave's 0xF2 equipment container. The target client/dedicated data path is:
+    /// item_grade_buffs(item_id, item_grade_id, num_pieces=1) -> buff_id, with
+    /// items.buff_id as the fallback (x2game-dev_dedicate.dll 0x39CA3C10).
+    /// These buffs belong to the parent slave; spawned doodad/child-slave components
+    /// retain only their own passive marker buffs.
+    /// </summary>
+    public int RebuildEquipmentBuffs()
+    {
+        var desired = new Dictionary<uint, Item>();
+
+        if (Equipment != null)
+        {
+            foreach (var item in Equipment.Items)
+            {
+                if (item?.Template == null)
+                    continue;
+
+                var buffTemplate = ItemGameData.Instance.GetItemBuff(item.TemplateId, item.Grade);
+                if (buffTemplate == null && item.Template.BuffId != 0)
+                    buffTemplate = SkillManager.Instance.GetBuffTemplate(item.Template.BuffId);
+
+                // item_grade_buffs is also used by character gear. Only buffs explicitly
+                // marked slave_applicable may be transferred to a ship/vehicle.
+                if (buffTemplate == null || !buffTemplate.SlaveApplicable)
+                    continue;
+
+                desired.TryAdd(buffTemplate.Id, item);
+            }
+        }
+
+        foreach (var applied in new Dictionary<uint, uint>(_equipmentBuffIndices))
+        {
+            if (desired.ContainsKey(applied.Key))
+                continue;
+
+            Buffs.RemoveEffect(applied.Value);
+            _equipmentBuffIndices.Remove(applied.Key);
+        }
+
+        foreach (var pair in desired)
+        {
+            if (_equipmentBuffIndices.TryGetValue(pair.Key, out var existingIndex) &&
+                Buffs.GetEffectByIndex(existingIndex)?.Template?.Id == pair.Key)
+                continue;
+
+            if (existingIndex != 0)
+                _equipmentBuffIndices.Remove(pair.Key);
+
+            var template = SkillManager.Instance.GetBuffTemplate(pair.Key);
+            if (template == null)
+                continue;
+
+            var effect = new Buff(
+                this,
+                this,
+                new SkillCasterUnit(ObjId),
+                template,
+                null,
+                DateTime.UtcNow)
+            {
+                SourceAbilityLevel = (ushort)Math.Max(1, pair.Value.Template.Level)
+            };
+
+            Buffs.AddBuff(effect);
+            if (Buffs.GetEffectByIndex(effect.Index) == effect)
+                _equipmentBuffIndices[pair.Key] = effect.Index;
+        }
+
+        return _equipmentBuffIndices.Count;
+    }
 
     public Slave()
     {
@@ -630,6 +748,19 @@ public class Slave : Unit
 
     public override void AddVisibleObject(Character character)
     {
+        // Never announce a slave that has already left the world. A rig taken off a ship was
+        // published again moments after the client had been told to remove it, so the sail the
+        // player had just unequipped came straight back and stayed there. Guarding the children
+        // loop in WorldManager was not enough - the republication reaches this method by more
+        // than one route - so the refusal belongs here, at the only place that writes the packets.
+        if (!IsVisible || WorldManager.Instance.GetBaseUnit(ObjId) == null)
+        {
+            Logger.Debug(
+                "Skipped announcing slave {0}/{1} to {2}: it is no longer in the world",
+                TemplateId, ObjId, character.Id);
+            return;
+        }
+
         character.SendPacket(new SCUnitStatePacket(this));
         character.SendPacket(new SCUnitPointsPacket(ObjId, Hp, Mp, HighAbilityRsc));
         //character.SendPacket(new SCSlaveStatusPacket(ObjId, TlId, Summoner?.Name ?? string.Empty, Summoner?.ObjId ?? 0, Id));

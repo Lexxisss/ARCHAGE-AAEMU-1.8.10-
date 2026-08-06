@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
@@ -191,6 +192,8 @@ public class CSChangeSlaveEquipmentPacket : GamePacket
             Bts = request.Bts
         };
 
+        var oldMaxHp = slave.MaxHp;
+        var oldHp = slave.Hp;
         var applied = new List<EquipmentOperation>(operations.Count);
         var allTasks = new List<ItemTask>();
 
@@ -252,25 +255,18 @@ public class CSChangeSlaveEquipmentPacket : GamePacket
                 ExpireTime = operation.Change.ExpireTime
             });
 
-            var slaveWireType = operation.SourceIsInventory
-                ? operation.Change.DestType
-                : operation.Change.SourceType;
-
+            // SCItemTaskSuccess is owned by the character item model. Announce only the
+            // character inventory half here. SCSlaveEquipmentChanged is authoritative for
+            // the 0xF2 side; repeating it in the generic task aliases ship slots 17/18 to
+            // the character ranged/musical slots in the target client.
             if (operation.BagItem != null)
                 allTasks.Add(new ItemRemove(
                     operation.BagItem, SlotType.Inventory, operation.BagIndex));
-            if (operation.SlaveItem != null)
-                allTasks.Add(new ItemRemove(
-                    operation.SlaveItem, slaveWireType, operation.SlaveIndex));
 
             var bagAfter = character.Inventory.Bag.GetItemBySlot(operation.BagIndex);
-            var slaveAfter = slave.Equipment.GetItemBySlot(operation.SlaveIndex);
             if (bagAfter != null)
                 allTasks.Add(new ItemGain(
                     bagAfter, SlotType.Inventory, operation.BagIndex));
-            if (slaveAfter != null)
-                allTasks.Add(new ItemGain(
-                    slaveAfter, slaveWireType, operation.SlaveIndex));
         }
 
         // The in-memory swap is not acknowledged until both the owner's bag and the slave's
@@ -287,6 +283,8 @@ public class CSChangeSlaveEquipmentPacket : GamePacket
             Connection.SendPacket(new SCSlaveEquipmentChangedPacket(request, false));
             return;
         }
+
+        var equipmentModifierCount = slave.RebuildEquipmentBonuses();
 
         if (allTasks.Count > 0)
             Connection.SendPacket(new SCItemTaskSuccessPacket(
@@ -308,20 +306,47 @@ public class CSChangeSlaveEquipmentPacket : GamePacket
                 useSlaveProtocolSlots: true),
             true);
 
+        // Official item-grade equip effects belong to the parent slave. Reconcile them only
+        // after the equipment delta, so SCBuffCreated/SCBuffRemoved cannot precede the item
+        // that supplies the effect on either the owner or observer client.
+        var equipmentBuffCount = slave.RebuildEquipmentBuffs();
+        var newMaxHp = slave.MaxHp;
+        slave.Hp = oldMaxHp > 0 && oldHp >= oldMaxHp
+            ? newMaxHp
+            : Math.Min(oldHp, newMaxHp);
+
+        // The equipment delta makes the client rebuild the slave's template attributes. Publish
+        // the matching current points and owner summary after that delta so the new MaxHp is visible
+        // immediately without a despawn/re-summon.
+        slave.BroadcastPacket(
+            new SCUnitPointsPacket(slave.ObjId, slave.Hp, slave.Mp, slave.HighAbilityRsc),
+            true);
+        character.SendPacket(new SCMySlavePacket(
+            slave.ObjId, slave.TlId, slave.Name, slave.TemplateId,
+            slave.Hp, slave.MaxHp,
+            slave.Transform.World.Position.X,
+            slave.Transform.World.Position.Y,
+            slave.Transform.World.Position.Z));
+
         // The slot/item delta alone does not create or remove the physical sail, cannon, rudder,
         // lamp, etc. Rebuild the attached doodad/child-slave components from the committed state.
         SlaveManager.Instance.SynchronizeEquipmentComponents(slave);
+        SlaveManager.Instance.UpdateSlaveRepairPoints(slave);
 
         Logger.Info(
             "Slave equipment changed and persisted: owner={0}, slave={1}/{2}, container={3}, " +
-            "records={4}, equippedItems={5}",
+            "records={4}, equippedItems={5}, itemModifiers={6}, equipBuffs={7}, maxHp={8}->{9}",
             character.Id, slave.TemplateId, slave.Id, slave.Equipment.ContainerId,
-            operations.Count, slave.Equipment.Items.Count);
+            operations.Count, slave.Equipment.Items.Count, equipmentModifierCount, equipmentBuffCount,
+            oldMaxHp, newMaxHp);
     }
 
     private static bool IsSlaveContainer(SlotType slotType)
     {
-        return slotType is SlotType.EquipmentSlave or SlotType.EquipmentSlavePreliminary;
+        // Target dedicated handler 0x3980D855 accepts Inventory (0x02) and the persistent
+        // slave container (0xF2). Preliminary 0x07 is a client-side staging model and is
+        // rejected by the official committed equipment-change path at 0x3980D875.
+        return slotType == SlotType.EquipmentSlave;
     }
 
     private static bool SnapshotMatches(Item packetItem, Item serverItem)
