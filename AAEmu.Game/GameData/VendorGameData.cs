@@ -85,11 +85,34 @@ public class VendorGameData : Singleton<VendorGameData>, IGameDataLoader
 
     private void LoadNpcGoods(SqliteConnection connection)
     {
-        const string table = "zzz_custom_join__merchants__merchant_packs__merchant_goods";
-        EnsureMainTableExists(connection, table);
+        const string legacyTable = "zzz_custom_join__merchants__merchant_packs__merchant_goods";
+        var useNativeTables = HasMainTable(connection, "merchants") &&
+                              HasMainTable(connection, "merchant_packs") &&
+                              HasMainTable(connection, "merchant_goods");
+        if (!useNativeTables)
+            EnsureMainTableExists(connection, legacyTable);
 
         using var command = connection.CreateCommand();
-        command.CommandText = $@"
+        command.CommandText = useNativeTables
+            ? @"
+SELECT COALESCE(mg.view_order, mg.id) AS display_order,
+       m.npc_id AS merchants__npc_id,
+       mg.item_id AS merchant_goods__item_id,
+       mg.grade_id AS merchant_goods__grade_id,
+       mp.kind_id AS merchant_packs__kind_id,
+       mg.cost AS merchant_goods__cost,
+       mp.item_point_id AS merchant_packs__item_point_id,
+       mp.item_point_icon AS merchant_packs__item_point_icon,
+       mp.item_point_icon_key AS merchant_packs__item_point_icon_key,
+       mg.id AS merchant_goods__id,
+       mg.purchase_type_id AS merchant_goods__purchase_type_id,
+       mg.purchase_limit AS merchant_goods__purchase_limit
+FROM main.merchants AS m
+JOIN main.merchant_packs AS mp ON mp.id = m.merchant_pack_id
+JOIN main.merchant_goods AS mg ON mg.merchant_pack_id = mp.id
+WHERE mg.enable IS NULL OR LOWER(CAST(mg.enable AS TEXT)) IN ('t', 'true', '1')
+ORDER BY m.npc_id, display_order, mg.id"
+            : $@"
 SELECT rowid AS display_order,
        merchants__npc_id,
        merchant_goods__item_id,
@@ -102,7 +125,7 @@ SELECT rowid AS display_order,
        merchant_goods__id,
        merchant_goods__purchase_type_id,
        merchant_goods__purchase_limit
-FROM main.{table}
+FROM main.{legacyTable}
 ORDER BY rowid";
 
         using var sqliteReader = command.ExecuteReader();
@@ -149,11 +172,32 @@ ORDER BY rowid";
 
     private void LoadPackGoods(SqliteConnection connection)
     {
-        const string table = "zzz_custom_join__merchant_packs__merchant_goods";
-        EnsureMainTableExists(connection, table);
+        const string legacyTable = "zzz_custom_join__merchant_packs__merchant_goods";
+        var useNativeTables = HasMainTable(connection, "merchant_packs") &&
+                              HasMainTable(connection, "merchant_goods");
+        if (!useNativeTables)
+            EnsureMainTableExists(connection, legacyTable);
 
         using var command = connection.CreateCommand();
-        command.CommandText = $@"
+        command.CommandText = useNativeTables
+            ? @"
+SELECT mp.id AS merchant_packs__id,
+       mp.kind_id AS merchant_packs__kind_id,
+       mg.item_id AS merchant_goods__item_id,
+       mg.grade_id AS merchant_goods__grade_id,
+       mg.cost AS merchant_goods__cost,
+       mp.item_point_id AS merchant_packs__item_point_id,
+       mp.item_point_icon AS merchant_packs__item_point_icon,
+       mp.item_point_icon_key AS merchant_packs__item_point_icon_key,
+       mg.id AS merchant_goods__id,
+       mg.purchase_type_id AS merchant_goods__purchase_type_id,
+       mg.purchase_limit AS merchant_goods__purchase_limit,
+       COALESCE(mg.view_order, mg.id) AS display_order
+FROM main.merchant_packs AS mp
+JOIN main.merchant_goods AS mg ON mg.merchant_pack_id = mp.id
+WHERE mg.enable IS NULL OR LOWER(CAST(mg.enable AS TEXT)) IN ('t', 'true', '1')
+ORDER BY mp.id, display_order, mg.id"
+            : $@"
 SELECT rowid AS display_order,
        merchant_packs__id,
        merchant_packs__kind_id,
@@ -166,7 +210,7 @@ SELECT rowid AS display_order,
        merchant_goods__id,
        merchant_goods__purchase_type_id,
        merchant_goods__purchase_limit
-FROM main.{table}
+FROM main.{legacyTable}
 ORDER BY rowid";
 
         using var sqliteReader = command.ExecuteReader();
@@ -199,6 +243,14 @@ ORDER BY rowid";
             }
             goods.Add(good);
         }
+    }
+
+    private static bool HasMainTable(SqliteConnection connection, string table)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = $name LIMIT 1";
+        command.Parameters.AddWithValue("$name", table);
+        return command.ExecuteScalar() != null;
     }
 
     private static void EnsureMainTableExists(SqliteConnection connection, string table)

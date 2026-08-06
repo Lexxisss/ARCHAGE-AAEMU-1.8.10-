@@ -7,16 +7,12 @@ using AAEmu.Game.Models.Game.Items;
 namespace AAEmu.Game.Models.Game;
 
 /// <summary>
-/// One equipment change on a ship or land vehicle: the item leaving a slot, the item arriving,
-/// and where each came from.
+/// One ship/vehicle equipment swap. Both items are snapshots of the two slots before the swap.
 /// </summary>
-/// <remarks>
-/// The items use the ordinary item encoding, not a slave-specific one.
-/// </remarks>
 public class SlaveEquipmentDelta
 {
-    public Item Before { get; set; }
-    public Item After { get; set; }
+    public Item ItemAtSourceBefore { get; set; }
+    public Item ItemAtDestinationBefore { get; set; }
     public SlotType SourceType { get; set; }
     public byte SourceIndex { get; set; }
     public SlotType DestType { get; set; }
@@ -25,54 +21,88 @@ public class SlaveEquipmentDelta
 }
 
 /// <summary>
-/// A set of equipment changes for one slave, as both directions carry it.
+/// Equipment-change set used by both CSChangeSlaveEquipment and SCSlaveEquipmentChanged.
 /// </summary>
 /// <remarks>
-/// The client clamps the record count to three; anything beyond that is discarded rather than
-/// rejected, so the server has to split larger changes across messages itself.
-///
-/// This used to be a fixed pair of items with no record count at all, and its owner id was
-/// 32 bits where the wire has 64.
+/// Recovered target layout:
+/// <c>ownerPersistentId:i64, tl:u16, dbSlaveId:u32, bts:bool, num:u8</c>, followed by at most
+/// three records. Each record is <c>Item, Item, EquipSlot, EquipSlot, expireTime:i64</c>.
 /// </remarks>
 public class SlaveEquipment : PacketMarshaler
 {
-    /// <summary>The client caps the record count here.</summary>
     public const int MaxRecords = 3;
+    public const byte MaxSlotIndex = 34;
 
-    /// <summary>Persistent character id of the owner, not a world object id.</summary>
     public long OwnerPersistentId { get; set; }
-
     public ushort Tl { get; set; }
     public uint DbSlaveId { get; set; }
-
-    /// <summary>Exact meaning unresolved; carried through unchanged.</summary>
     public bool Bts { get; set; }
-
+    public byte WireCount { get; private set; }
     public List<SlaveEquipmentDelta> Changes { get; } = new();
+
+    public override void Read(PacketStream stream)
+    {
+        OwnerPersistentId = stream.ReadInt64();
+        Tl = stream.ReadUInt16();
+        DbSlaveId = stream.ReadUInt32();
+        Bts = stream.ReadBoolean();
+
+        var wireCount = stream.ReadByte();
+        WireCount = wireCount;
+        var count = Math.Min(wireCount, (byte)MaxRecords);
+
+        for (var i = 0; i < wireCount; i++)
+        {
+            var first = new Item();
+            first.Read(stream);
+            var second = new Item();
+            second.Read(stream);
+
+            var sourceType = (SlotType)stream.ReadByte();
+            var sourceIndex = stream.ReadByte();
+            var destType = (SlotType)stream.ReadByte();
+            var destIndex = stream.ReadByte();
+            var expireTime = stream.ReadInt64();
+
+            if (i >= count)
+                continue;
+
+            Changes.Add(new SlaveEquipmentDelta
+            {
+                ItemAtSourceBefore = first.TemplateId == 0 ? null : first,
+                ItemAtDestinationBefore = second.TemplateId == 0 ? null : second,
+                SourceType = sourceType,
+                SourceIndex = sourceIndex,
+                DestType = destType,
+                DestIndex = destIndex,
+                ExpireTime = expireTime
+            });
+        }
+    }
 
     public override PacketStream Write(PacketStream stream)
     {
         var num = Math.Min(Changes.Count, MaxRecords);
 
-        stream.Write(OwnerPersistentId); // ownerPersistentId : i64
-        stream.Write(Tl);                // tl                : u16
-        stream.Write(DbSlaveId);         // dbSlaveId         : u32
-        stream.Write(Bts);               // bts               : bool
-        stream.Write((byte)num);         // num               : u8, clamped to 3 by the client
+        stream.Write(OwnerPersistentId);
+        stream.Write(Tl);
+        stream.Write(DbSlaveId);
+        stream.Write(Bts);
+        stream.Write((byte)num);
 
         for (var i = 0; i < num; i++)
         {
             var change = Changes[i];
 
-            if (change.Before == null)
+            if (change.ItemAtSourceBefore == null)
                 stream.Write(0);
             else
-                stream.Write(change.Before);
+                stream.Write(change.ItemAtSourceBefore);
 
-            if (change.After == null)
+            if (change.ItemAtDestinationBefore == null)
                 stream.Write(0);
             else
-                stream.Write(change.After);
+                stream.Write(change.ItemAtDestinationBefore);
 
             stream.Write((byte)change.SourceType);
             stream.Write(change.SourceIndex);

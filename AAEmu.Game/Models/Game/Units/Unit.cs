@@ -6,7 +6,6 @@ using System.Numerics;
 
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
-using AAEmu.Game.Core.Managers.AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Connections;
@@ -227,6 +226,8 @@ public class Unit : BaseUnit, IUnit
     public bool ForceAttack { get; set; }
     public bool Invisible { get; set; }
     public uint OwnerId { get; set; }
+    /// <summary>Normalised mother-faction id of the unit that delivered the latest killing blow.</summary>
+    public uint LastKillerFactionId { get; private set; }
     public SkillTask SkillTask { get; set; }
     public SkillTask AutoAttackTask { get; set; }
     public DateTime GlobalCooldown { get; set; }
@@ -449,9 +450,17 @@ public class Unit : BaseUnit, IUnit
     {
         InterruptSkills();
 
-        Events.OnDeath(this, new OnDeathArgs { Killer = (Unit)killer, Victim = this });
+        if (killer is Unit killerUnit && killerUnit.Faction != null)
+            LastKillerFactionId = killerUnit.Faction.MotherId != 0
+                ? killerUnit.Faction.MotherId
+                : killerUnit.Faction.Id;
+        else
+            LastKillerFactionId = 0;
+
+        Events.OnDeath(this, new OnDeathArgs { Killer = killer as Unit, Victim = this });
         Buffs.RemoveEffectsOnDeath();
-        killer.BroadcastPacket(new SCUnitDeathPacket(ObjId, killReason, (Unit)killer), true);
+        if (killer is Unit deathSource)
+            killer.BroadcastPacket(new SCUnitDeathPacket(ObjId, killReason, deathSource), true);
         if (killer == this)
         {
             switch (this)
@@ -479,15 +488,15 @@ public class Unit : BaseUnit, IUnit
         {
             killer.BroadcastPacket(new SCAiAggroPacket(killer.ObjId, 0), true);
 
-            if (killer is Unit killerUnit)
+            if (killer is Unit combatKillerUnit)
             {
-                killerUnit.SummarizeDamage = 0;
-                if (killerUnit.CurrentTarget is Unit unitTarget)
+                combatKillerUnit.SummarizeDamage = 0;
+                if (combatKillerUnit.CurrentTarget is Unit unitTarget)
                 {
                     unitTarget.IsInBattle = false;
                 }
 
-                killerUnit.IsInBattle = false;
+                combatKillerUnit.IsInBattle = false;
             }
             //killer.StartRegen();
             killer.BroadcastPacket(new SCTargetChangedPacket(killer.ObjId, 0), true);

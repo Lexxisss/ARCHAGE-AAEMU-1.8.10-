@@ -1,4 +1,5 @@
-﻿using AAEmu.Game.Models.Game.Skills.Templates;
+using AAEmu.Game.Models.Game.Skills.Plots;
+using AAEmu.Game.Models.Game.Skills.Templates;
 using AAEmu.Game.Models.Game.Units;
 
 using NLog;
@@ -17,7 +18,7 @@ public class SkillController
     }
     public SkillControllerTemplate Template { get; set; }
     public Unit Owner { get; protected set; }
-    public Unit Target { get; protected set; }
+    public BaseUnit Target { get; protected set; }
 
     public SCState State { get; protected set; }
 
@@ -29,37 +30,85 @@ public class SkillController
     public virtual void Execute()
     {
         State = SCState.Running;
-        Logger.Trace($"SkillController: Npc {Owner.Name}:{Owner.ObjId} entering execute state={State}");
+        Logger.Trace("SkillController: owner={0}:{1} entering execute state={2}",
+            Owner?.Name ?? "<null>",
+            Owner?.ObjId ?? 0,
+            State);
     }
 
     public virtual void End()
     {
         State = SCState.Ended;
-        Logger.Trace($"SkillController: Npc {Owner.Name}:{Owner.ObjId} entering end state={State}");
+        if (Owner?.ActiveSkillController == this)
+            Owner.ActiveSkillController = null;
+        Logger.Trace("SkillController: owner={0}:{1} entering end state={2}",
+            Owner?.Name ?? "<null>",
+            Owner?.ObjId ?? 0,
+            State);
     }
 
     public static SkillController CreateSkillController(SkillControllerTemplate template, BaseUnit owner, BaseUnit target)
     {
-        if (template == null)
-        {
+        if (template == null || owner is not Unit)
             return null;
-        }
 
+        SkillController controller;
         switch ((SkillControllerKind)template.KindId)
         {
             case SkillControllerKind.Floating:
-                Logger.Trace($"SkillController: create FloatingSkillController");
-                return new FloatingSkillController(template, owner, target) { State = SCState.Created };
-            case SkillControllerKind.Wandering:
-                Logger.Trace($"SkillController: create WanderingSkillController");
-                return new WanderingSkillController(template, owner, target) { State = SCState.Created };
+                controller = new FloatingSkillController(template, owner, target);
+                break;
             case SkillControllerKind.Leap:
-                Logger.Trace($"SkillController: create LeapSkillController");
-                var ctrl = new LeapSkillController(template, owner, target) { State = SCState.Created };
-                return ctrl;
+                controller = new LeapSkillController(template, owner, target);
+                break;
+            case SkillControllerKind.Wandering:
+                controller = new WanderingSkillController(template, owner, target);
+                break;
+            case SkillControllerKind.Dash:
+                controller = new DashSkillController(template, owner, target);
+                break;
+            case SkillControllerKind.Rotate:
+                controller = new RotateSkillController(template, owner, target);
+                break;
+            case SkillControllerKind.Rope:
+                controller = new TimedSkillController(template, owner, target, ResolveClientDrivenDuration(template, 1000));
+                break;
+            case SkillControllerKind.Anchor:
+                controller = new TimedSkillController(template, owner, target, ResolveClientDrivenDuration(template, 1500));
+                break;
+            case SkillControllerKind.Flowgraph:
+                controller = new TimedSkillController(template, owner, target, ResolveClientDrivenDuration(template, 250));
+                break;
+            case SkillControllerKind.Impulse:
+            case SkillControllerKind.Move:
+            case SkillControllerKind.Crawl:
+                controller = new TimedSkillController(template, owner, target, ResolveClientDrivenDuration(template, 500));
+                break;
             default:
-                Logger.Trace($"SkillController: create defaultSkillController");
-                return null;
+                PlotDiagnostics.UnsupportedController(template.Id, template.KindId);
+                // Unknown target-data kinds still receive a finite lifecycle so the unit is
+                // not left with a null/permanently-running controller.
+                controller = new TimedSkillController(template, owner, target, 250);
+                break;
         }
+
+        controller.State = SCState.Created;
+        Logger.Trace("SkillController: created {0} for template={1}, kind={2}",
+            controller.GetType().Name,
+            template.Id,
+            template.KindId);
+        return controller;
+    }
+
+    private static int ResolveClientDrivenDuration(SkillControllerTemplate template, int fallback)
+    {
+        // The parameter layout differs by kind. Select a plausible millisecond field but
+        // reject rope lengths/angles measured in the hundreds of thousands.
+        foreach (var value in template.Value)
+        {
+            if (value >= 1 && value <= 60000)
+                return value;
+        }
+        return fallback;
     }
 }

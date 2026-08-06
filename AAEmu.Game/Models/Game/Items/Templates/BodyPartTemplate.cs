@@ -11,4 +11,5 @@ public class BodyPartTemplate : ItemTemplate
     public bool BeautyShopOnly { get; set; }
     public uint ItemId { get; set; }
     public uint SlotTypeId { get; set; }
+    public string AssetPath { get; set; } = string.Empty;
 }

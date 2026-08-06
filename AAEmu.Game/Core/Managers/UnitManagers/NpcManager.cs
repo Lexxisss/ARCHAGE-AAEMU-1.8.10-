@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using AAEmu.Commons.Utils;
@@ -33,10 +34,20 @@ public class NpcManager : Singleton<NpcManager>
     private Dictionary<uint, TotalCharacterCustom> _totalCharacterCustoms;
     private Dictionary<uint, Dictionary<uint, List<BodyPartTemplate>>> _itemBodyParts;
     private Dictionary<uint, uint> _defaultFaceItemsByModel;
-    private HashSet<uint> _itemsWithoutArmorVisual;
-    private Dictionary<uint, List<uint>> _tccLookup;
-    // you can provide a seed here if you want NPCs to more reliable retain their appearance between reboots, or leave out the seed to get it random every time
-    private Random _loadCustomRandom = new Random(330995);
+    private Dictionary<uint, BodyPartTemplate> _defaultBodyItemsByModel;
+    private Dictionary<(uint ItemId, uint ModelId), ArmorVisualVariants> _armorVisualVariants;
+    private Dictionary<uint, uint> _skinColorModels;
+    private Dictionary<uint, uint> _bodyNormalMapModels;
+    private Dictionary<uint, uint> _faceDiffuseMapModels;
+    private Dictionary<uint, uint> _faceNormalMapModels;
+    private Dictionary<uint, uint> _faceEyelashMapModels;
+    private Dictionary<uint, uint> _faceDecalModels;
+
+    private sealed class ArmorVisualVariants
+    {
+        public string PrimaryPath { get; set; } = string.Empty;
+        public string SecondaryPath { get; set; } = string.Empty;
+    }
     public Dictionary<uint, NpcSpawnerNpc> _npcSpawnerNpc;    // npcSpawnerId, nsn
     public Dictionary<uint, NpcSpawnerTemplate> _npcSpawners; // npcSpawnerId, template
     public Dictionary<uint, List<uint>> _npcMemberAndSpawnerId; // memberId, List<npcSpawnerId>
@@ -68,61 +79,328 @@ public class NpcManager : Singleton<NpcManager>
 
     private void ApplyExplicitCustomBodyParts(NpcTemplate template, TotalCharacterCustom custom)
     {
-        if (template == null)
+        if (template == null || !_itemBodyParts.TryGetValue(template.ModelId, out var slots))
             return;
 
-        if (!_itemBodyParts.TryGetValue(template.ModelId, out var slots))
-            return;
+        _totalCharacterCustoms.TryGetValue(template.DefaultCustomId, out var defaultCustom);
+        if (defaultCustom?.ModelId != template.ModelId)
+            defaultCustom = null;
 
-        // A zero face_id means "use the character model's default face", not
-        // "use the first item_body_parts row". Row ordering is not semantic
-        // and selected test/mannequin heads for several humanoid models.
-        var faceItemId = custom?.FaceId ?? 0;
-        var hasCharacterDefaults = _defaultFaceItemsByModel.TryGetValue(template.ModelId, out var defaultFaceItemId);
-        if (faceItemId == 0 && hasCharacterDefaults)
-            faceItemId = defaultFaceItemId;
+        _defaultFaceItemsByModel.TryGetValue(template.ModelId, out var defaultFaceItemId);
+        _defaultBodyItemsByModel.TryGetValue(template.ModelId, out var standardBody);
 
-        ApplyExplicitBodyPart(template, slots, EquipmentItemSlotType.Face,
-            faceItemId, useFirstFallback: !hasCharacterDefaults);
-        ApplyExplicitBodyPart(template, slots, EquipmentItemSlotType.Hair,
-            custom?.HairId ?? template.HairId, useFirstFallback: !hasCharacterDefaults);
-        ApplyExplicitBodyPart(template, slots, EquipmentItemSlotType.Horns,
+        // Face zero means the character model's canonical face. Never use the first
+        // row in item_body_parts: for Firran that row has no eye geometry and makes
+        // otherwise different NPCs collapse to the same fallback head.
+        ApplyResolvedBodyPart(template, slots, EquipmentItemSlotType.Face,
+            custom?.FaceId ?? 0, defaultFaceItemId);
+
+        // Hair zero is an explicit bald choice. If a non-zero custom hair is invalid
+        // for this model, only then fall back to the same model's default custom hair.
+        var hairId = custom?.HairId ?? 0;
+        if (hairId == 0)
+            ClearResolvedBodyPart(template, EquipmentItemSlotType.Hair);
+        else
+            ApplyResolvedBodyPart(template, slots, EquipmentItemSlotType.Hair,
+                hairId, defaultCustom?.HairId ?? 0);
+
+        ApplyResolvedBodyPart(template, slots, EquipmentItemSlotType.Horns,
             custom?.HornId ?? 0);
-        ApplyExplicitBodyPart(template, slots, EquipmentItemSlotType.Tail,
+        ApplyResolvedBodyPart(template, slots, EquipmentItemSlotType.Tail,
             custom?.TailId ?? 0);
-        ApplyExplicitBodyPart(template, slots, EquipmentItemSlotType.Body,
-            custom?.BodyId ?? 0, useFirstFallback: true);
+
+        // body_id=0 is not "no body". It means the canonical nude under-body for
+        // this exact model, over which normal armor or a one-piece cosplay is drawn.
+        // Select it by its model-bound /nude/ asset path and never by arbitrary row
+        // order (which can select a mannequin body instead).
+        ApplyResolvedBodyPart(template, slots, EquipmentItemSlotType.Body,
+            custom?.BodyId ?? 0,
+            defaultCustom?.BodyId ?? 0,
+            standardBody?.ItemId ?? 0);
+
+        // The full client DB has a separate slot_type_id=34 body-part path for wings.
+        // It is outside Face..Beard and is sent through target SCUnitState slot 34.
+        template.WingItem = default;
+        var wing = FindCompatibleBodyPart(slots, EquipmentItemSlotType.Wings,
+            custom?.WingId ?? 0);
+        if (wing != null)
+            template.WingItem = (wing.ItemId, wing.NpcOnly);
     }
 
-    private void ApplyExplicitBodyPart(NpcTemplate template, Dictionary<uint, List<BodyPartTemplate>> slots,
-        EquipmentItemSlotType slot, uint itemId, bool useFirstFallback = false, bool useLastFallback = false)
+    private static BodyPartTemplate FindCompatibleBodyPart(
+        Dictionary<uint, List<BodyPartTemplate>> slots,
+        EquipmentItemSlotType slot,
+        params uint[] candidateItemIds)
     {
-        var bodyIndex = (int)slot - 23;
+        if (!slots.TryGetValue((uint)slot, out var candidates))
+            return null;
+
+        foreach (var candidateItemId in candidateItemIds)
+        {
+            if (candidateItemId == 0)
+                continue;
+
+            var match = candidates.FirstOrDefault(x => x.ItemId == candidateItemId);
+            if (match != null)
+                return match;
+        }
+
+        return null;
+    }
+
+    private static void ClearResolvedBodyPart(NpcTemplate template, EquipmentItemSlotType slot)
+    {
+        var bodyIndex = (int)slot - (int)EquipmentItemSlotType.Face;
+        if (bodyIndex >= 0 && bodyIndex < template.BodyItems.Length)
+            template.BodyItems[bodyIndex] = default;
+    }
+
+    private void ApplyResolvedBodyPart(
+        NpcTemplate template,
+        Dictionary<uint, List<BodyPartTemplate>> slots,
+        EquipmentItemSlotType slot,
+        params uint[] candidateItemIds)
+    {
+        var bodyIndex = (int)slot - (int)EquipmentItemSlotType.Face;
         if (bodyIndex < 0 || bodyIndex >= template.BodyItems.Length)
             return;
 
         template.BodyItems[bodyIndex] = default;
-        if (!slots.TryGetValue((uint)slot, out var candidates))
-        {
-            if (itemId != 0)
-                Logger.Warn($"NPC custom slot missing: npc={template.Id}, model={template.ModelId}, slot={slot}, item={itemId}");
-            return;
-        }
-
-        var match = itemId != 0 ? candidates.FirstOrDefault(x => x.ItemId == itemId) : null;
-        if (match == null && useFirstFallback)
-            match = candidates.FirstOrDefault(x => !x.NpcOnly) ?? candidates.FirstOrDefault();
-        if (match == null && useLastFallback)
-            match = candidates.LastOrDefault(x => !x.NpcOnly) ?? candidates.LastOrDefault();
-
+        var match = FindCompatibleBodyPart(slots, slot, candidateItemIds);
         if (match == null)
         {
-            if (itemId != 0)
-                Logger.Warn($"NPC custom body part not found: npc={template.Id}, model={template.ModelId}, slot={slot}, item={itemId}");
+            if (candidateItemIds.Any(x => x != 0))
+                Logger.Warn(
+                    "NPC model-bound body part not found: npc={0}, model={1}, slot={2}, candidates=[{3}]",
+                    template.Id, template.ModelId, slot,
+                    string.Join(",", candidateItemIds.Where(x => x != 0)));
             return;
         }
 
         template.BodyItems[bodyIndex] = (match.ItemId, match.NpcOnly);
+    }
+
+    private static bool IsCanonicalNudeBodyAsset(string assetPath)
+    {
+        if (string.IsNullOrWhiteSpace(assetPath))
+            return false;
+
+        var normalized = assetPath.Replace('\\', '/').ToLowerInvariant();
+        return normalized.Contains("/nude/") &&
+               !normalized.Contains("/maneking/") &&
+               !normalized.Contains("/mannequin/");
+    }
+
+
+    private TotalCharacterCustom ResolveCompatibleCustom(NpcTemplate template, out uint resolvedCustomId, out string resolution)
+    {
+        resolvedCustomId = 0;
+
+        if (template.NoApplyTotalCustom)
+        {
+            resolution = "suppressed:no_apply_total_custom";
+            return null;
+        }
+
+        if (!template.IsHumanoidModel)
+        {
+            resolution = "none:non_humanoid_model";
+            return null;
+        }
+
+        // Explicit NPC data always wins. It is accepted only when the custom was
+        // authored for the exact model/skeleton used by this NPC.
+        if (template.TotalCustomId != 0)
+        {
+            if (_totalCharacterCustoms.TryGetValue(template.TotalCustomId, out var direct))
+            {
+                if (direct.ModelId == template.ModelId)
+                {
+                    resolvedCustomId = direct.Id;
+                    resolution = "direct:compatible";
+                    return direct;
+                }
+
+                Logger.Warn(
+                    "NPC custom/model mismatch: npc={0}, npcModel={1}, custom={2}, customModel={3}; trying model default",
+                    template.Id, template.ModelId, direct.Id, direct.ModelId);
+            }
+            else
+            {
+                Logger.Warn(
+                    "NPC custom missing: npc={0}, npcModel={1}, custom={2}; trying model default",
+                    template.Id, template.ModelId, template.TotalCustomId);
+            }
+
+            if (TryResolveModelDefaultCustom(template, out var directFallback))
+            {
+                resolvedCustomId = directFallback.Id;
+                resolution = "fallback:model_default_from_direct";
+                return directFallback;
+            }
+
+            resolution = "none:incompatible_direct";
+            return null;
+        }
+
+        if (TryResolveModelDefaultCustom(template, out var modelDefault))
+        {
+            resolvedCustomId = modelDefault.Id;
+            resolution = "model_default:compatible";
+            return modelDefault;
+        }
+
+        resolution = "none:no_custom";
+        return null;
+    }
+
+    private bool TryResolveModelDefaultCustom(NpcTemplate template, out TotalCharacterCustom custom)
+    {
+        custom = null;
+        if (template.DefaultCustomId == 0 ||
+            !_totalCharacterCustoms.TryGetValue(template.DefaultCustomId, out var candidate) ||
+            candidate.ModelId != template.ModelId)
+            return false;
+
+        custom = candidate;
+        return true;
+    }
+
+    private static void LoadModelBoundAssetIndex(
+        Microsoft.Data.Sqlite.SqliteConnection connection,
+        string tableName,
+        Dictionary<uint, uint> destination)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT id, model_id FROM {tableName}";
+        command.Prepare();
+        using var sqliteReader = command.ExecuteReader();
+        using var reader = new SQLiteWrapperReader(sqliteReader);
+        while (reader.Read())
+            destination[reader.GetUInt32("id", 0)] = reader.GetUInt32("model_id", 0);
+    }
+
+    private static bool IsModelBoundAssetCompatible(
+        uint assetId,
+        uint modelId,
+        IReadOnlyDictionary<uint, uint> assetModels)
+    {
+        if (assetId == 0)
+            return true;
+
+        return assetModels.TryGetValue(assetId, out var assetModelId) &&
+               (assetModelId == 0 || assetModelId == modelId);
+    }
+
+    private uint ResolveSkinColorId(
+        NpcTemplate template,
+        TotalCharacterCustom selectedCustom,
+        TotalCharacterCustom modelDefaultCustom)
+    {
+        var requestedId = selectedCustom?.SkinColorId ?? 0;
+        if (IsModelBoundAssetCompatible(requestedId, template.ModelId, _skinColorModels))
+            return requestedId;
+
+        var fallbackId = modelDefaultCustom?.SkinColorId ?? 0;
+        if (IsModelBoundAssetCompatible(fallbackId, template.ModelId, _skinColorModels))
+        {
+            Logger.Warn(
+                "NPC skin color/model mismatch corrected: npc={0}, model={1}, requested={2}, fallback={3}",
+                template.Id, template.ModelId, requestedId, fallbackId);
+            return fallbackId;
+        }
+
+        Logger.Warn(
+            "NPC skin color/model mismatch has no compatible fallback: npc={0}, model={1}, requested={2}",
+            template.Id, template.ModelId, requestedId);
+        return 0;
+    }
+
+    private uint ResolveOptionalModelBoundAssetId(
+        NpcTemplate template,
+        string fieldName,
+        uint requestedId,
+        IReadOnlyDictionary<uint, uint> assetModels)
+    {
+        if (IsModelBoundAssetCompatible(requestedId, template.ModelId, assetModels))
+            return requestedId;
+
+        Logger.Warn(
+            "NPC model-bound appearance asset suppressed: npc={0}, model={1}, field={2}, asset={3}",
+            template.Id, template.ModelId, fieldName, requestedId);
+        return 0;
+    }
+
+
+    private ArmorVisualVariants GetArmorVisualVariants(uint itemId, uint modelId)
+    {
+        if (_armorVisualVariants.TryGetValue((itemId, modelId), out var exact))
+            return exact;
+
+        // Some client-authored equipment intentionally uses model 0 as a generic asset.
+        return _armorVisualVariants.TryGetValue((itemId, 0), out var generic) ? generic : null;
+    }
+
+    private void ResolveNpcCosplayVisual(NpcTemplate template)
+    {
+        template.CosplayVisual = 0;
+        template.CosplayPrimaryAssetPath = string.Empty;
+        template.CosplaySecondaryAssetPath = string.Empty;
+        template.CosplayVisualResolution = template.Items.Cosplay == 0
+            ? "none:no_cosplay"
+            : "primary:no_compatible_asset";
+
+        if (template.Items.Cosplay == 0)
+            return;
+
+        var variants = GetArmorVisualVariants(template.Items.Cosplay, template.ModelId);
+        if (variants == null)
+            return;
+
+        template.CosplayPrimaryAssetPath = variants.PrimaryPath ?? string.Empty;
+        template.CosplaySecondaryAssetPath = variants.SecondaryPath ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(template.CosplaySecondaryAssetPath))
+        {
+            template.CosplayVisualResolution = "primary:secondary_missing";
+            return;
+        }
+
+        // TARGET-DIRECT: cosplay_visual=0 resolves item_armors.asset_id, while 1
+        // selects asset2_id when a compatible asset exists. The client DB has no
+        // per-NPC cosplay_visual column, so only the explicit *_h secondary naming
+        // convention is selected automatically. This fixes hooded NPC costumes
+        // without forcing unrelated alternate assets on every costume user.
+        var secondaryName = Path.GetFileNameWithoutExtension(template.CosplaySecondaryAssetPath);
+        if (secondaryName.EndsWith("_h", StringComparison.OrdinalIgnoreCase))
+        {
+            template.CosplayVisual = 1;
+            template.CosplayVisualResolution = "secondary:hood_suffix";
+        }
+        else
+        {
+            template.CosplayVisualResolution = "primary:secondary_not_hood";
+        }
+    }
+
+
+    private static float NormalizeDecalWeight(uint assetId, float weight)
+    {
+        // The client DB commonly stores weight=1 for an empty (id=0) decal slot.
+        // Sending that pair verbatim asks the renderer to blend a missing/default
+        // resource at full strength, which is the source of phantom facial overlays.
+        if (assetId == 0 || float.IsNaN(weight) || float.IsInfinity(weight))
+            return 0f;
+
+        return Math.Clamp(weight, 0f, 1f);
+    }
+
+    private static float NormalizeMovableDecalScale(uint assetId, float scale)
+    {
+        if (assetId == 0)
+            return 1f;
+
+        return scale > 0f && !float.IsNaN(scale) && !float.IsInfinity(scale) ? scale : 1f;
     }
 
     public Npc Create(uint objectId, uint id)
@@ -138,6 +416,7 @@ public class NpcManager : Singleton<NpcManager>
         npc.TemplateId = id; // duplicate Id
         npc.Id = id;
         npc.Template = template;
+        npc.Name = template.Name ?? string.Empty;
         npc.ModelId = template.ModelId;
         // total_custom_id is client appearance data. Copy the resolved skin/face
         // parameters to the live NPC; otherwise SCUnitState emits no material data.
@@ -149,48 +428,52 @@ public class NpcManager : Singleton<NpcManager>
         npc.Level = template.Level;
         npc.Patrol = null;
 
-        if (template.TotalCustomId == 0)
-        {
-            // load random hairstyles
-            var templ = LoadCustom(template);
-            template.HairId = templ.HairId;
-            template.HornId = templ.HornId;
-            template.ModelParams = templ.ModelParams;
-            template.BodyItems = templ.BodyItems;
-        }
-
-        // LoadCustom can replace the resolved appearance for templates without
-        // a fixed total_custom_id, so copy it only after that resolution.
+        // Appearance is resolved once while loading the target client DB. An explicit
+        // total_custom_id wins. Rows with total_custom_id=0 keep the model default; their
+        // DB-authored Head/Cosplay equipment supplies the intended visible variation.
         npc.ModelParams = template.NoApplyTotalCustom
             ? new UnitCustomModelParams(UnitCustomModelType.None)
             : template.ModelParams ?? new UnitCustomModelParams(UnitCustomModelType.None);
 
-        SetEquipItemTemplate(npc, template.Items.Headgear, EquipmentItemSlot.Head);
-        SetEquipItemTemplate(npc, template.Items.Necklace, EquipmentItemSlot.Neck);
-        SetEquipItemTemplate(npc, template.Items.Shirt, EquipmentItemSlot.Chest);
-        SetEquipItemTemplate(npc, template.Items.Belt, EquipmentItemSlot.Waist);
-        SetEquipItemTemplate(npc, template.Items.Pants, EquipmentItemSlot.Legs);
-        SetEquipItemTemplate(npc, template.Items.Gloves, EquipmentItemSlot.Hands);
-        SetEquipItemTemplate(npc, template.Items.Shoes, EquipmentItemSlot.Feet);
-        SetEquipItemTemplate(npc, template.Items.Bracelet, EquipmentItemSlot.Arms);
-        SetEquipItemTemplate(npc, template.Items.Back, EquipmentItemSlot.Back);
-        SetEquipItemTemplate(npc, template.Items.Undershirts, EquipmentItemSlot.Undershirt);
-        SetEquipItemTemplate(npc, template.Items.Underpants, EquipmentItemSlot.Underpants);
-        SetEquipItemTemplate(npc, template.Items.Mainhand, EquipmentItemSlot.Mainhand);
-        SetEquipItemTemplate(npc, template.Items.Offhand, EquipmentItemSlot.Offhand);
-        SetEquipItemTemplate(npc, template.Items.Ranged, EquipmentItemSlot.Ranged);
-        SetEquipItemTemplate(npc, template.Items.Musical, EquipmentItemSlot.Musical);
-        SetEquipItemTemplate(npc, template.Items.Cosplay, EquipmentItemSlot.Cosplay);
-        SetEquipItemTemplate(npc, template.Items.Stabilizer, EquipmentItemSlot.Stabilizer);
+        // Do not write the appearance tail into template.ModelParams here. The
+        // object belongs to the cached NPC template and is shared by all live
+        // instances. SCUnitState builds a deep packet-local copy and supplies the
+        // ordinary BaseRace/BaseGender there. In target x2game.dll VisualRace != 0
+        // means an active visual-race transformation, not the NPC's normal race.
+
+        SetEquipItemTemplate(npc, template.Items.Headgear, EquipmentItemSlot.Head, template.Items.HeadgearGrade);
+        SetEquipItemTemplate(npc, template.Items.Necklace, EquipmentItemSlot.Neck, template.Items.NecklaceGrade);
+        SetEquipItemTemplate(npc, template.Items.Shirt, EquipmentItemSlot.Chest, template.Items.ShirtGrade);
+        SetEquipItemTemplate(npc, template.Items.Belt, EquipmentItemSlot.Waist, template.Items.BeltGrade);
+        SetEquipItemTemplate(npc, template.Items.Pants, EquipmentItemSlot.Legs, template.Items.PantsGrade);
+        SetEquipItemTemplate(npc, template.Items.Gloves, EquipmentItemSlot.Hands, template.Items.GlovesGrade);
+        SetEquipItemTemplate(npc, template.Items.Shoes, EquipmentItemSlot.Feet, template.Items.ShoesGrade);
+        SetEquipItemTemplate(npc, template.Items.Bracelet, EquipmentItemSlot.Arms, template.Items.BraceletGrade);
+        SetEquipItemTemplate(npc, template.Items.Back, EquipmentItemSlot.Back, template.Items.BackGrade);
+        SetEquipItemTemplate(npc, template.Items.Undershirts, EquipmentItemSlot.Undershirt, template.Items.UndershirtsGrade);
+        SetEquipItemTemplate(npc, template.Items.Underpants, EquipmentItemSlot.Underpants, template.Items.UnderpantsGrade);
+        SetEquipItemTemplate(npc, template.Items.Mainhand, EquipmentItemSlot.Mainhand, template.Items.MainhandGrade);
+        SetEquipItemTemplate(npc, template.Items.Offhand, EquipmentItemSlot.Offhand, template.Items.OffhandGrade);
+        SetEquipItemTemplate(npc, template.Items.Ranged, EquipmentItemSlot.Ranged, template.Items.RangedGrade);
+        SetEquipItemTemplate(npc, template.Items.Musical, EquipmentItemSlot.Musical, template.Items.MusicalGrade);
+        SetEquipItemTemplate(npc, template.Items.Backpack, EquipmentItemSlot.Backpack, template.Items.BackpackGrade);
+        SetEquipItemTemplate(npc, template.Items.Cosplay, EquipmentItemSlot.Cosplay, template.Items.CosplayGrade);
+        SetEquipItemTemplate(npc, template.Items.Stabilizer, EquipmentItemSlot.Stabilizer, template.Items.StabilizerGrade);
 
         for (var i = 0; i < 7; i++)
         {
-            EquipmentItemSlot slot = (EquipmentItemSlot)(i + 19);
-            if ((slot == EquipmentItemSlot.Hair) && (template.ModelParams != null))
-                SetEquipItemTemplate(npc, template.HairId, EquipmentItemSlot.Hair);
-            else
-                SetEquipItemTemplate(npc, template.BodyItems[i].ItemId, slot, 0, template.BodyItems[i].NpcOnly);
+            var slot = (EquipmentItemSlot)(i + 19);
+            var bodyItem = template.BodyItems[i];
+
+            // ApplyExplicitCustomBodyParts already resolved each requested part
+            // against item_body_parts for this exact model. Use that validated
+            // result for Hair as well; using template.HairId directly bypassed
+            // the fallback and could attach hair authored for another skeleton.
+            SetEquipItemTemplate(npc, bodyItem.ItemId, slot, 0, bodyItem.NpcOnly);
         }
+
+        if (template.WingItem.ItemId != 0)
+            SetEquipItemTemplate(npc, template.WingItem.ItemId, EquipmentItemSlot.ProtocolSlot34, 0, template.WingItem.NpcOnly);
 
         foreach (var buffId in template.Buffs)
         {
@@ -236,188 +519,23 @@ public class NpcManager : Singleton<NpcManager>
         return npc;
     }
 
-    private NpcTemplate LoadCustom(NpcTemplate template)
-    {
-        // This temporary object carries only the resolved appearance. It still
-        // must retain the source model id: ApplyExplicitCustomBodyParts indexes
-        // item_body_parts by model_id. Leaving it at zero removed Face and Body
-        // from every random-custom NPC (total_custom_id == 0), producing black
-        // skin, TEST materials and headless models for both genders.
-        var _template = new NpcTemplate
-        {
-            ModelId = template.ModelId,
-            CharRaceId = template.CharRaceId,
-            Gender = template.Gender
-        };
-        var totalCustomId = template.TotalCustomId;
-
-        if (totalCustomId != 0 || template.FactionId == 115 || template.FactionId == 116) // 115 - Monstrosity, 116 - Animal
-        {
-            return template;
-        }
-
-        // A model with no body parts of its own cannot be dressed by this method, and the
-        // caller copies BodyItems back wholesale - so falling through would overwrite the
-        // template's own slots with an all-zero array and leave the NPC headless. 4471 NPCs
-        // reach here on such a model, because char_race_id alone decides who enters: plenty
-        // of props, constructs and creatures carry race 0 while having nothing humanoid about
-        // their mesh. This is the check a 5.0 server spells as SubType == "ActorModel", which
-        // was dropped here on the grounds that the race switch below already filters enough.
-        // It does not.
-        if (!_itemBodyParts.ContainsKey(template.ModelId))
-        {
-            return template;
-        }
-
-        //Logger.Info("Loading random npc {0} custom templates...", template.ModelId);
-        var modelParamsId = 0u;
-        switch ((Race)template.CharRaceId)
-        {
-            case Race.None:
-            case Race.Nuian: // Nuian male
-                modelParamsId = (Gender)template.Gender == Gender.Male ? (byte)10 : (byte)11;
-                break;
-            case Race.Dwarf: // Dwarf male
-                modelParamsId = (Gender)template.Gender == Gender.Male ? (byte)14 : (byte)15;
-                break;
-            case Race.Elf: // Elf male
-                modelParamsId = (Gender)template.Gender == Gender.Male ? (byte)16 : (byte)17;
-                break;
-            case Race.Hariharan: // Hariharan male
-                modelParamsId = (Gender)template.Gender == Gender.Male ? (byte)18 : (byte)19;
-                break;
-            case Race.Ferre: // Ferre male
-                modelParamsId = (Gender)template.Gender == Gender.Male ? (byte)20 : (byte)21;
-                break;
-            case Race.Warborn: // Warborn male
-                modelParamsId = (Gender)template.Gender == Gender.Male ? (byte)24 : (byte)25;
-                break;
-            case Race.Fairy:
-                break;
-            case Race.Returned:
-                break;
-            default:
-                break;
-        }
-
-        // The mesh outranks char_race_id. total_character_customs.model_id uses the same
-        // numbering as npcs.model_id, so when an NPC already stands on one of the humanoid
-        // appearance models, that is the appearance its custom has to fit - whatever race the
-        // row claims. 74 NPCs sit on the Firran male model 20 while carrying race 0, 1 or 5,
-        // and deriving the id from race handed each of them a Nuian or Hariharan custom to
-        // wear on a Firran body: the wrong face on the wrong head.
-        if (template.ModelId is 10 or 11 or 14 or 15 or 16 or 17 or 18 or 19 or 20 or 21 or 24 or 25)
-        {
-            modelParamsId = template.ModelId;
-        }
-
-        // choose randomly from the client total-custom list.
-        if (modelParamsId != 0)
-        {
-            // Get all possible hair item_ids that match this model
-            var hairsForThisModel = new List<uint>();
-            foreach (var item in ItemManager.Instance.GetAllItems())
-                if ((item is BodyPartTemplate bpt) && (bpt.ModelId == template.ModelId) && (bpt.SlotTypeId == (uint)EquipmentItemSlotType.Hair))
-                    hairsForThisModel.Add(bpt.ItemId);
-
-            if (hairsForThisModel.Count > 0)
-            {
-                // TODO: Slow, but I don't know of a better way to do this atm
-                var possibleTotalCustoms = (from tc in _totalCharacterCustoms
-                                            where (tc.Value.ModelId == modelParamsId) && (hairsForThisModel.Contains(tc.Value.HairId))
-                                            select tc.Value.Id).ToList();
-
-                // If anything in result, pick something random from it
-                if (possibleTotalCustoms.Count > 0)
-                {
-                    var r = _loadCustomRandom.Next(possibleTotalCustoms.Count);
-                    totalCustomId = possibleTotalCustoms[r];
-                }
-                else
-                {
-                    Logger.Trace($"No compatible TotalCharacterCustoms hair found for NPC: {template.Id}");
-                }
-            }
-        }
-        else
-        {
-            return template;
-        }
-
-        TotalCharacterCustom selectedCustom = null;
-        if (totalCustomId > 0)
-        {
-            var tc = _totalCharacterCustoms[totalCustomId];
-            selectedCustom = tc;
-
-            _template.HairId = tc.HairId;
-            _template.HornId = tc.HornId;
-
-            _template.ModelParams = new UnitCustomModelParams(UnitCustomModelType.Face);
-            _template.ModelParams
-                .SetModelId(tc.ModelId)
-                .SetBodyNormalMapId(tc.BodyNormalMapId)
-                .SetBodyNormalMapWeight(tc.BodyNormalMapWeight)
-                .SetDefaultHairColor(tc.DefaultHairColor)
-                .SetHairColorId(tc.HairColorId)
-                .SetHornColorId(tc.HornColorId)
-                .SetSkinColorId(tc.SkinColorId)
-                .SetTwoToneFirstWidth(tc.TwoToneFirstWidth)
-                .SetTwoToneHair(tc.TwoToneHairColor)
-                .SetTwoToneSecondWidth(tc.TwoToneSecondWidth);
-
-            _template.ModelParams.Face.MovableDecalAssetId = tc.FaceMovableDecalAssetId;
-            _template.ModelParams.Face.MovableDecalScale = tc.FaceMovableDecalScale;
-            _template.ModelParams.Face.MovableDecalRotate = tc.FaceMovableDecalRotate;
-            _template.ModelParams.Face.MovableDecalMoveX = tc.FaceMovableDecalMoveX;
-            _template.ModelParams.Face.MovableDecalMoveY = tc.FaceMovableDecalMoveY;
-
-            _template.ModelParams.Face.SetFixedDecalAsset(0, tc.FaceFixedDecalAsset0Id, tc.FaceFixedDecalAsset0Weight);
-            _template.ModelParams.Face.SetFixedDecalAsset(1, tc.FaceFixedDecalAsset1Id, tc.FaceFixedDecalAsset1Weight);
-            _template.ModelParams.Face.SetFixedDecalAsset(2, tc.FaceFixedDecalAsset2Id, tc.FaceFixedDecalAsset2Weight);
-            _template.ModelParams.Face.SetFixedDecalAsset(3, tc.FaceFixedDecalAsset3Id, tc.FaceFixedDecalAsset3Weight);
-            _template.ModelParams.Face.SetFixedDecalAsset(4, tc.FaceFixedDecalAsset4Id, tc.FaceFixedDecalAsset4Weight);
-            _template.ModelParams.Face.SetFixedDecalAsset(5, tc.FaceFixedDecalAsset5Id, tc.FaceFixedDecalAsset5Weight);
-
-            _template.ModelParams.Face.DiffuseMapId = tc.FaceDiffuseMapId;
-            _template.ModelParams.Face.NormalMapId = tc.FaceNormalMapId;
-            _template.ModelParams.Face.EyelashMapId = tc.FaceEyelashMapId;
-            _template.ModelParams.Face.LipColor = tc.LipColor;
-            _template.ModelParams.Face.LeftPupilColor = tc.LeftPupilColor;
-            _template.ModelParams.Face.RightPupilColor = tc.RightPupilColor;
-            _template.ModelParams.Face.EyebrowColor = tc.EyebrowColor;
-            _template.ModelParams.Face.MovableDecalWeight = tc.FaceMovableDecalWeight;
-            _template.ModelParams.Face.NormalMapWeight = tc.FaceNormalMapWeight;
-            _template.ModelParams.Face.DecoColor = tc.DecoColor;
-            _template.ModelParams.Face.Modifier = tc.Modifier;
-
-            _template.Name = tc.Name;
-            _template.NpcOnly = tc.NpcOnly;
-            _template.OwnerTypeId = tc.OwnerTypeId;
-        }
-        else
-        {
-            _template.ModelParams = new UnitCustomModelParams(UnitCustomModelType.Skin);
-        }
-
-        ApplyExplicitCustomBodyParts(_template, selectedCustom);
-
-        //Logger.Info("Loaded npc {0} random hair {1} and hairColor {2}", template.ModelId, _template.HairId, _template.ModelParams.HairColorId);
-
-        return _template;
-    }
-
     public void Load()
     {
         if (_loaded)
             return;
 
         _templates = new Dictionary<uint, NpcTemplate>();
-        _tccLookup = new Dictionary<uint, List<uint>>();
         _totalCharacterCustoms = new Dictionary<uint, TotalCharacterCustom>();
         _itemBodyParts = new Dictionary<uint, Dictionary<uint, List<BodyPartTemplate>>>();
         _defaultFaceItemsByModel = new Dictionary<uint, uint>();
-        _itemsWithoutArmorVisual = new HashSet<uint>();
+        _defaultBodyItemsByModel = new Dictionary<uint, BodyPartTemplate>();
+        _armorVisualVariants = new Dictionary<(uint ItemId, uint ModelId), ArmorVisualVariants>();
+        _skinColorModels = new Dictionary<uint, uint>();
+        _bodyNormalMapModels = new Dictionary<uint, uint>();
+        _faceDiffuseMapModels = new Dictionary<uint, uint>();
+        _faceNormalMapModels = new Dictionary<uint, uint>();
+        _faceEyelashMapModels = new Dictionary<uint, uint>();
+        _faceDecalModels = new Dictionary<uint, uint>();
 
         Logger.Info("Loading npc templates...");
         using (var connection = SQLite.CreateTargetClientConnection())
@@ -476,9 +594,9 @@ public class NpcManager : Singleton<NpcManager>
                         custom.LeftPupilColor = reader.GetUInt32("left_pupil_color", 0);
                         custom.RightPupilColor = reader.GetUInt32("right_pupil_color", 0);
                         custom.EyebrowColor = reader.GetUInt32("eyebrow_color", 0);
-                        // The target wire field is always a length-prefixed
-                        // 128-byte morph array. Normalize malformed rows here so
-                        // they cannot shift the visual-race/wing tail.
+                        // The database stores only the raw 128-byte morph payload.
+                        // Normalize malformed rows here; UnitCustomModelParams adds the
+                        // target protocol's required ushort length prefix on the wire.
                         if (!reader.IsDBNull("modifier") && reader.GetValue("modifier") is byte[] modifierBlob)
                         {
                             if (modifierBlob.Length == 128)
@@ -508,12 +626,13 @@ public class NpcManager : Singleton<NpcManager>
                 }
 
                 // Create a cached reference list by Model ID
-                foreach (var c in _totalCharacterCustoms)
-                {
-                    if (!_tccLookup.ContainsKey(c.Value.ModelId))
-                        _tccLookup.Add(c.Value.ModelId, new List<uint>());
-                    _tccLookup[c.Value.ModelId].Add(c.Value.Id);
-                }
+
+                LoadModelBoundAssetIndex(connection, "skin_colors", _skinColorModels);
+                LoadModelBoundAssetIndex(connection, "body_normal_maps", _bodyNormalMapModels);
+                LoadModelBoundAssetIndex(connection, "face_diffuse_maps", _faceDiffuseMapModels);
+                LoadModelBoundAssetIndex(connection, "face_normal_maps", _faceNormalMapModels);
+                LoadModelBoundAssetIndex(connection, "face_eyelash_maps", _faceEyelashMapModels);
+                LoadModelBoundAssetIndex(connection, "face_decal_assets", _faceDecalModels);
 
                 // Target-client character definitions are the authoritative
                 // default face for each humanoid model. NPC total customs use
@@ -539,43 +658,20 @@ public class NpcManager : Singleton<NpcManager>
                 // is what the wrong-eyes reports were. So the characters table is left as the
                 // authoritative default here, for every humanoid model including theirs.
                 //
-                // Sending 20117/20118 was tried once before and produced a base head showing
-                // through and some NPCs with no head - but at that time a full Face morph was
-                // being sent for them as well, and the morph is authored against the default
-                // face rather than the one we were substituting. The two were fighting. The
-                // appearance override for Firran is now the Skin variant, which carries no
-                // morph, so this face is no longer competing with one.
+                // The full Face morph and the face body-part must refer to the same model.
+                // Keeping characters.face_item_id as the model default gives the modifier blob
+                // the exact eye geometry it was authored against; substituting the first row by
+                // numeric order recreates the duplicate-head and missing-eye failures.
                 //
                 // The 8141/8157 pair remains a trap in this table: same slot, ferre model,
                 // nuian face mask. Any rule that reintroduces a search here must filter on the
                 // mask, not just on the model.
 
-                // Some NPC cloth packs reference intentionally invisible or
-                // incomplete armor records. Sending such an item makes this
-                // client render its black/missing-material placeholder. With
-                // no usable default or model-specific asset, absence of the
-                // equipment entry is the equivalent intended visual state.
                 command.CommandText = @"
-                    SELECT ar.item_id
-                    FROM item_armors ar
-                    LEFT JOIN armor_assets aa ON aa.id = ar.asset_id
-                    WHERE ar.asset2_id = 0
-                      AND aa.slot_type_id IN (3, 4, 5, 6, 7)
-                      AND (ar.asset_id = 0 OR (
-                          COALESCE(aa.default_asset_id, 0) = 0
-                          AND NOT EXISTS (
-                              SELECT 1
-                              FROM item_armor_assets ia
-                              WHERE ia.armor_asset_id = ar.asset_id)))";
-                command.Prepare();
-                using (var sqliteReader = command.ExecuteReader())
-                using (var reader = new SQLiteWrapperReader(sqliteReader))
-                {
-                    while (reader.Read())
-                        _itemsWithoutArmorVisual.Add(reader.GetUInt32("item_id"));
-                }
-
-                command.CommandText = "SELECT * FROM item_body_parts";
+                    SELECT ibp.*, COALESCE(ia.path, '') AS asset_path
+                    FROM item_body_parts ibp
+                    LEFT JOIN item_assets ia ON ia.id = ibp.asset_id
+                    ORDER BY ibp.model_id, ibp.slot_type_id, ibp.item_id";
                 command.Prepare();
                 using (var sqliteReader = command.ExecuteReader())
                 using (var reader = new SQLiteWrapperReader(sqliteReader))
@@ -591,7 +687,18 @@ public class NpcManager : Singleton<NpcManager>
                         bp.ModelId = reader.GetUInt32("model_id", 0);
                         bp.NpcOnly = reader.GetBoolean("npc_only", true);
                         bp.SlotTypeId = reader.GetUInt32("slot_type_id", 0);
+                        bp.AssetPath = reader.GetString("asset_path", string.Empty);
                         bodyParts.Add(bp);
+
+                        if (bp.SlotTypeId == (uint)EquipmentItemSlotType.Body)
+                        {
+                            if (!_defaultBodyItemsByModel.TryGetValue(bp.ModelId, out var currentBody) ||
+                                (!IsCanonicalNudeBodyAsset(currentBody.AssetPath) &&
+                                 IsCanonicalNudeBodyAsset(bp.AssetPath)))
+                            {
+                                _defaultBodyItemsByModel[bp.ModelId] = bp;
+                            }
+                        }
 
                         if (!slotBodyParts.ContainsKey(bp.SlotTypeId))
                         {
@@ -619,6 +726,60 @@ public class NpcManager : Singleton<NpcManager>
                         }
                     }
                 }
+
+                // Cache both armor visual variants by item and model. The target
+                // client chooses item_armors.asset_id for cosplay_visual=0 and
+                // asset2_id for cosplay_visual=1. This graph is client data, not
+                // a server-invented equipment lookup.
+                command.CommandText = @"
+                    SELECT ia.item_id, a.model_id, a.path, 0 AS visual_variant
+                    FROM item_armors ia
+                    JOIN item_armor_assets links ON links.armor_asset_id = ia.asset_id
+                    JOIN item_assets a ON a.id = links.asset_id
+                    UNION ALL
+                    SELECT ia.item_id, a.model_id, a.path, 1 AS visual_variant
+                    FROM item_armors ia
+                    JOIN item_armor_assets links ON links.armor_asset_id = ia.asset2_id
+                    JOIN item_assets a ON a.id = links.asset_id
+                    WHERE ia.asset2_id IS NOT NULL AND ia.asset2_id <> 0";
+                command.Prepare();
+                using (var sqliteReader = command.ExecuteReader())
+                using (var reader = new SQLiteWrapperReader(sqliteReader))
+                {
+                    while (reader.Read())
+                    {
+                        var itemId = reader.GetUInt32("item_id", 0);
+                        var modelId = reader.GetUInt32("model_id", 0);
+                        var path = reader.GetString("path", string.Empty);
+                        var visualVariant = reader.GetByte("visual_variant", 0);
+                        var key = (itemId, modelId);
+                        if (!_armorVisualVariants.TryGetValue(key, out var variants))
+                        {
+                            variants = new ArmorVisualVariants();
+                            _armorVisualVariants.Add(key, variants);
+                        }
+
+                        if (visualVariant == 0)
+                        {
+                            if (string.IsNullOrWhiteSpace(variants.PrimaryPath))
+                                variants.PrimaryPath = path;
+                        }
+                        else
+                        {
+                            var currentIsHood = Path.GetFileNameWithoutExtension(variants.SecondaryPath)
+                                .EndsWith("_h", StringComparison.OrdinalIgnoreCase);
+                            var candidateIsHood = Path.GetFileNameWithoutExtension(path)
+                                .EndsWith("_h", StringComparison.OrdinalIgnoreCase);
+                            if (string.IsNullOrWhiteSpace(variants.SecondaryPath) ||
+                                (!currentIsHood && candidateIsHood))
+                                variants.SecondaryPath = path;
+                        }
+                    }
+                }
+
+                // NPC rows with total_custom_id=0 intentionally use their model's
+                // character default. Do not synthesize a custom from unrelated NPC rows:
+                // visible distinctions then come from the DB-authored Head/Cosplay items.
 
                 command.CommandText = "SELECT * from npcs";
                 command.Prepare();
@@ -653,7 +814,10 @@ public class NpcManager : Singleton<NpcManager>
 
                         var template = new NpcTemplate();
                         template.Id = reader.GetUInt32("id", 0);
-                        template.Name = LocalizationManager.Instance.Get("npcs", "name", template.Id);
+                        var localizedName = LocalizationManager.Instance.Get("npcs", "name", template.Id);
+                        template.Name = string.IsNullOrWhiteSpace(localizedName)
+                            ? reader.GetString("name", string.Empty)
+                            : localizedName;
                         template.CharRaceId = reader.GetInt32("char_race_id", 0);
                         template.NpcGradeId = (NpcGradeType)reader.GetByte("npc_grade_id", 0);
                         template.NpcKindId = (NpcKindType)reader.GetByte("npc_kind_id", 0);
@@ -740,10 +904,12 @@ public class NpcManager : Singleton<NpcManager>
                         //var bodyPack = reader.GetInt32("equip_bodies_id", 0); // there is no such field in the database for version 3.0.3.0
                         var clothPack = reader.GetInt32("equip_cloths_id", 0);
                         var weaponPack = reader.GetInt32("equip_weapons_id", 0);
+                        template.EquipClothsId = clothPack > 0 ? (uint)clothPack : 0u;
+                        template.EquipWeaponsId = weaponPack > 0 ? (uint)weaponPack : 0u;
                         template.TotalCustomId = reader.GetUInt32("total_custom_id", 0);
                         using (var command2 = connection.CreateCommand())
                         {
-                            command2.CommandText = "SELECT char_race_id, char_gender_id FROM characters WHERE model_id = @model_id";
+                            command2.CommandText = "SELECT char_race_id, char_gender_id, default_custom_id FROM characters WHERE model_id = @model_id";
                             command2.Parameters.AddWithValue("model_id", template.ModelId);
                             command2.Prepare();
                             using (var sqliteReader2 = command2.ExecuteReader())
@@ -753,6 +919,12 @@ public class NpcManager : Singleton<NpcManager>
                                 {
                                     template.Race = reader2.GetByte("char_race_id", 0);
                                     template.Gender = reader2.GetByte("char_gender_id", 0);
+
+                                    // The look this model wears when nothing else is chosen for it,
+                                    // and whether the model is a person at all: a model with no row
+                                    // here is a beast or a machine, and has no face to describe.
+                                    template.IsHumanoidModel = true;
+                                    template.DefaultCustomId = reader2.GetUInt32("default_custom_id", 0);
                                 }
                             }
                         }
@@ -789,6 +961,8 @@ public class NpcManager : Singleton<NpcManager>
                                         template.Items.BraceletGrade = reader2.GetByte("bracelet_grade_id", 0);
                                         template.Items.Back = reader2.GetUInt32("back_id", 0);
                                         template.Items.BackGrade = reader2.GetByte("back_grade_id", 0);
+                                        template.Items.Backpack = reader2.GetUInt32("backpack_id", 0);
+                                        template.Items.BackpackGrade = reader2.GetByte("backpack_grade_id", 0);
                                         template.Items.Cosplay = reader2.GetUInt32("cosplay_id", 0);
                                         template.Items.CosplayGrade = reader2.GetByte("cosplay_grade_id", 0);
                                         template.Items.Undershirts = reader2.GetUInt32("undershirt_id", 0);
@@ -827,47 +1001,82 @@ public class NpcManager : Singleton<NpcManager>
                             }
                         }
 
-                        TotalCharacterCustom selectedCustom = null;
-                        if ((template.TotalCustomId > 0) && _totalCharacterCustoms.TryGetValue(template.TotalCustomId, out var tc))
+                        ResolveNpcCosplayVisual(template);
+
+                        // Resolve appearance only inside the NPC model. A direct custom from a
+                        // different model is not harmless: its face maps, decals and body parts
+                        // address another skeleton and produce TEST materials, duplicate fallback
+                        // heads, or missing geometry.
+                        var selectedCustom = ResolveCompatibleCustom(
+                            template, out var resolvedCustomId, out var customResolution);
+                        template.ResolvedCustomId = resolvedCustomId;
+                        template.ResolvedCustomModelId = selectedCustom?.ModelId ?? 0;
+                        template.CustomResolution = customResolution;
+                        template.HairId = selectedCustom?.HairId ?? 0;
+                        template.HornId = selectedCustom?.HornId ?? 0;
+
+                        if (selectedCustom != null)
                         {
-                            selectedCustom = tc;
-                            template.HairId = tc.HairId;
-                            template.HornId = tc.HornId;
+                            var tc = selectedCustom;
+                            _totalCharacterCustoms.TryGetValue(template.DefaultCustomId, out var modelDefaultCustom);
+                            if (modelDefaultCustom?.ModelId != template.ModelId)
+                                modelDefaultCustom = null;
+
+                            var skinColorId = ResolveSkinColorId(template, tc, modelDefaultCustom);
+                            var bodyNormalMapId = ResolveOptionalModelBoundAssetId(
+                                template, "body_normal_map_id", tc.BodyNormalMapId, _bodyNormalMapModels);
+                            var faceDiffuseMapId = ResolveOptionalModelBoundAssetId(
+                                template, "face_diffuse_map_id", tc.FaceDiffuseMapId, _faceDiffuseMapModels);
+                            var faceNormalMapId = ResolveOptionalModelBoundAssetId(
+                                template, "face_normal_map_id", tc.FaceNormalMapId, _faceNormalMapModels);
+                            var faceEyelashMapId = ResolveOptionalModelBoundAssetId(
+                                template, "face_eyelash_map_id", tc.FaceEyelashMapId, _faceEyelashMapModels);
+                            var movableDecalId = ResolveOptionalModelBoundAssetId(
+                                template, "face_movable_decal_asset_id", tc.FaceMovableDecalAssetId, _faceDecalModels);
+                            var fixedDecalIds = new[]
+                            {
+                                ResolveOptionalModelBoundAssetId(template, "face_fixed_decal_asset_0_id", tc.FaceFixedDecalAsset0Id, _faceDecalModels),
+                                ResolveOptionalModelBoundAssetId(template, "face_fixed_decal_asset_1_id", tc.FaceFixedDecalAsset1Id, _faceDecalModels),
+                                ResolveOptionalModelBoundAssetId(template, "face_fixed_decal_asset_2_id", tc.FaceFixedDecalAsset2Id, _faceDecalModels),
+                                ResolveOptionalModelBoundAssetId(template, "face_fixed_decal_asset_3_id", tc.FaceFixedDecalAsset3Id, _faceDecalModels),
+                                ResolveOptionalModelBoundAssetId(template, "face_fixed_decal_asset_4_id", tc.FaceFixedDecalAsset4Id, _faceDecalModels),
+                                ResolveOptionalModelBoundAssetId(template, "face_fixed_decal_asset_5_id", tc.FaceFixedDecalAsset5Id, _faceDecalModels)
+                            };
 
                             template.ModelParams = new UnitCustomModelParams(UnitCustomModelType.Face);
                             template.ModelParams
-                                .SetModelId(tc.ModelId)
-                                .SetBodyNormalMapId(tc.BodyNormalMapId)
+                                .SetBodyDiffuseOrModelDefaultId(0) // target +0x0C is not tc.ModelId; target custom copier leaves it at default
+                                .SetBodyNormalMapId(bodyNormalMapId)
                                 .SetBodyNormalMapWeight(tc.BodyNormalMapWeight)
                                 .SetDefaultHairColor(tc.DefaultHairColor)
                                 .SetHairColorId(tc.HairColorId)
                                 .SetHornColorId(tc.HornColorId)
-                                .SetSkinColorId(tc.SkinColorId)
+                                .SetSkinColorId(skinColorId)
                                 .SetTwoToneFirstWidth(tc.TwoToneFirstWidth)
                                 .SetTwoToneHair(tc.TwoToneHairColor)
                                 .SetTwoToneSecondWidth(tc.TwoToneSecondWidth);
 
-                            template.ModelParams.Face.MovableDecalAssetId = tc.FaceMovableDecalAssetId;
-                            template.ModelParams.Face.MovableDecalScale = tc.FaceMovableDecalScale;
+                            template.ModelParams.Face.MovableDecalAssetId = movableDecalId;
+                            template.ModelParams.Face.MovableDecalScale = NormalizeMovableDecalScale(movableDecalId, tc.FaceMovableDecalScale);
                             template.ModelParams.Face.MovableDecalRotate = tc.FaceMovableDecalRotate;
                             template.ModelParams.Face.MovableDecalMoveX = tc.FaceMovableDecalMoveX;
                             template.ModelParams.Face.MovableDecalMoveY = tc.FaceMovableDecalMoveY;
 
-                            template.ModelParams.Face.SetFixedDecalAsset(0, tc.FaceFixedDecalAsset0Id, tc.FaceFixedDecalAsset0Weight);
-                            template.ModelParams.Face.SetFixedDecalAsset(1, tc.FaceFixedDecalAsset1Id, tc.FaceFixedDecalAsset1Weight);
-                            template.ModelParams.Face.SetFixedDecalAsset(2, tc.FaceFixedDecalAsset2Id, tc.FaceFixedDecalAsset2Weight);
-                            template.ModelParams.Face.SetFixedDecalAsset(3, tc.FaceFixedDecalAsset3Id, tc.FaceFixedDecalAsset3Weight);
-                            template.ModelParams.Face.SetFixedDecalAsset(4, tc.FaceFixedDecalAsset4Id, tc.FaceFixedDecalAsset4Weight);
-                            template.ModelParams.Face.SetFixedDecalAsset(5, tc.FaceFixedDecalAsset5Id, tc.FaceFixedDecalAsset5Weight);
+                            template.ModelParams.Face.SetFixedDecalAsset(0, fixedDecalIds[0], NormalizeDecalWeight(fixedDecalIds[0], tc.FaceFixedDecalAsset0Weight));
+                            template.ModelParams.Face.SetFixedDecalAsset(1, fixedDecalIds[1], NormalizeDecalWeight(fixedDecalIds[1], tc.FaceFixedDecalAsset1Weight));
+                            template.ModelParams.Face.SetFixedDecalAsset(2, fixedDecalIds[2], NormalizeDecalWeight(fixedDecalIds[2], tc.FaceFixedDecalAsset2Weight));
+                            template.ModelParams.Face.SetFixedDecalAsset(3, fixedDecalIds[3], NormalizeDecalWeight(fixedDecalIds[3], tc.FaceFixedDecalAsset3Weight));
+                            template.ModelParams.Face.SetFixedDecalAsset(4, fixedDecalIds[4], NormalizeDecalWeight(fixedDecalIds[4], tc.FaceFixedDecalAsset4Weight));
+                            template.ModelParams.Face.SetFixedDecalAsset(5, fixedDecalIds[5], NormalizeDecalWeight(fixedDecalIds[5], tc.FaceFixedDecalAsset5Weight));
 
-                            template.ModelParams.Face.DiffuseMapId = tc.FaceDiffuseMapId;
-                            template.ModelParams.Face.NormalMapId = tc.FaceNormalMapId;
-                            template.ModelParams.Face.EyelashMapId = tc.FaceEyelashMapId;
+                            template.ModelParams.Face.DiffuseMapId = faceDiffuseMapId;
+                            template.ModelParams.Face.NormalMapId = faceNormalMapId;
+                            template.ModelParams.Face.EyelashMapId = faceEyelashMapId;
                             template.ModelParams.Face.LipColor = tc.LipColor;
                             template.ModelParams.Face.LeftPupilColor = tc.LeftPupilColor;
                             template.ModelParams.Face.RightPupilColor = tc.RightPupilColor;
                             template.ModelParams.Face.EyebrowColor = tc.EyebrowColor;
-                            template.ModelParams.Face.MovableDecalWeight = tc.FaceMovableDecalWeight;
+                            template.ModelParams.Face.MovableDecalWeight = NormalizeDecalWeight(movableDecalId, tc.FaceMovableDecalWeight);
                             template.ModelParams.Face.NormalMapWeight = tc.FaceNormalMapWeight;
                             template.ModelParams.Face.DecoColor = tc.DecoColor;
                             template.ModelParams.Face.Modifier = tc.Modifier;
@@ -877,13 +1086,16 @@ public class NpcManager : Singleton<NpcManager>
                             template.ModelParams.Face.WingOffsetY = tc.WingOffsetY;
                             template.ModelParams.Face.WingOffsetZ = tc.WingOffsetZ;
 
-                            template.Name = tc.Name;
+                            // Preserve the localized name loaded from npcs/localized_texts.
+                            // total_character_customs has no server/runtime name in 1.8.1.0.
                             template.NpcOnly = tc.NpcOnly;
                             template.OwnerTypeId = tc.OwnerTypeId;
                         }
                         else
                         {
-                            template.ModelParams = new UnitCustomModelParams(UnitCustomModelType.Skin);
+                            // ext=0: no foreign/default material override. Model-bound face/body
+                            // parts are still resolved below, so the NPC keeps a valid skeleton.
+                            template.ModelParams = new UnitCustomModelParams(UnitCustomModelType.None);
                         }
 
                         if (template.NpcPostureSetId > 0)
@@ -974,25 +1186,86 @@ public class NpcManager : Singleton<NpcManager>
         }
     }
 
+    /// <summary>
+    /// Builds a transient runtime identity for an NPC visual item without
+    /// consuming the persistent player-item ID allocator.
+    /// </summary>
+    /// <remarks>
+    /// NPC equipment descriptors are never saved to the player items table.
+    /// Allocating every spawned NPC part through ItemIdManager exhausted its
+    /// current BitSet window and made new-character starter equipment fail with
+    /// "Ran out of valid Id's". The target wire field is u64, so combine the
+    /// live NPC object id and slot into a stable, non-zero identity that cannot
+    /// collide between slots of the same live object.
+    /// </remarks>
+    private static ulong BuildNpcEquipmentRuntimeId(Npc npc, EquipmentItemSlot slot)
+    {
+        return ((ulong)npc.ObjId << 32) | ((uint)slot + 1u);
+    }
+
+    private static Item CreateClientOnlyNpcEquipmentDescriptor(
+        uint templateId,
+        byte grade,
+        EquipmentItemSlot slot)
+    {
+        var wireSlot = Protocol1810EquipmentLayout.ToWireSlot((int)slot);
+        Item item = Protocol1810EquipmentLayout.IsNpcFullItemWireSlot(wireSlot)
+            ? new EquipItem()
+            : new Item();
+
+        item.TemplateId = templateId;
+        item.Count = 1;
+        item.Grade = grade;
+        item.CreateTime = DateTime.UtcNow;
+        item.UnsecureTime = DateTime.MinValue;
+        item.UnpackTime = DateTime.MinValue;
+        item.ChargeUseSkillTime = DateTime.MinValue;
+        return item;
+    }
+
     private void SetEquipItemTemplate(Npc npc, uint templateId, EquipmentItemSlot slot, byte grade = 0, bool npcOnly = false)
     {
+        if (templateId == 0)
+            return;
+
         if (npcOnly && npc.Equipment.GetItemBySlot((int)slot) != null)
             return;
 
-        if (templateId > 0 && _itemsWithoutArmorVisual.Contains(templateId))
-            templateId = 0;
-
-        Item item = null;
-        if (templateId > 0)
+        // ItemManager loads the common item layer plus its subtype tables. A small
+        // set of valid client-authored NPC-only equipment rows exists only in the
+        // subtype table; Create() therefore returns null even though the target
+        // client can resolve and render the template from its complete DB. For NPC
+        // spawn serialization, compact slots need template/id/grade only and full
+        // cosplay slots need a normal Equipment detail block. Build that transient
+        // descriptor instead of silently dropping the visual item.
+        var item = ItemManager.Instance.Create(templateId, 1, grade, false);
+        var usedClientOnlyDescriptor = false;
+        if (item == null)
         {
-            item = ItemManager.Instance.Create(templateId, 1, grade, false);
-            item.SlotType = SlotType.Equipment;
-            item.Slot = (int)slot;
+            item = CreateClientOnlyNpcEquipmentDescriptor(templateId, grade, slot);
+            usedClientOnlyDescriptor = true;
         }
 
-        // npc.Equip[(int)slot] = item;
-        npc.Equipment.AddOrMoveExistingItem(0, item, (int)slot);
+        item.Id = BuildNpcEquipmentRuntimeId(npc, slot);
+        item.SlotType = SlotType.Equipment;
+        item.Slot = (int)slot;
+
+        if (!npc.Equipment.AddOrMoveExistingItem(0, item, (int)slot))
+        {
+            Logger.Error(
+                "Failed to equip NPC visual item: npc={0}, slot={1}, template={2}, grade={3}, clientOnly={4}",
+                npc.TemplateId, slot, templateId, grade, usedClientOnlyDescriptor ? 1 : 0);
+            return;
+        }
+
+        if (usedClientOnlyDescriptor)
+        {
+            Logger.Warn(
+                "Using client-only NPC equipment descriptor: npc={0}, slot={1}, wireSlot={2}, template={3}, grade={4}",
+                npc.TemplateId, slot, Protocol1810EquipmentLayout.ToWireSlot((int)slot), templateId, grade);
+        }
     }
+
 
     public void BindSkillsToTemplate(uint templateId, List<NpcSkill> skills)
     {

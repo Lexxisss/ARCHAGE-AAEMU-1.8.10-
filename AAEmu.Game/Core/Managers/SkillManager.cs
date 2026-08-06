@@ -374,13 +374,13 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
         _effects.Add("SpawnFishEffect", new Dictionary<uint, EffectTemplate>()); // missing from the effect table
         _effects.Add("ResetAoeDiminishingEffect", new Dictionary<uint, EffectTemplate>()); // missing from the effect table
         _effects.Add("MoveToLocationEffect", new Dictionary<uint, EffectTemplate>()); // missing from the effect table
+        _effects.Add("WorldMessageEffect", new Dictionary<uint, EffectTemplate>());
+        _effects.Add("SkillMapEffect", new Dictionary<uint, EffectTemplate>());
+        _effects.Add("ExtendChargeEffect", new Dictionary<uint, EffectTemplate>());
+        _effects.Add("TargetHistoryClearEffect", new Dictionary<uint, EffectTemplate>());
+        _effects.Add("PlayLogEffect", new Dictionary<uint, EffectTemplate>());
 
         _buffs = new Dictionary<uint, BuffTemplate>();
-        // TODO 
-        /*
-            _effects.Add("PlayLogEffect", new Dictionary<uint, EffectTemplate>()); // missing from the effect table
-        */
-
         _buffTags = new Dictionary<uint, List<uint>>();
         _taggedBuffs = new Dictionary<uint, List<uint>>();
         _skillModifiers = new Dictionary<uint, List<SkillModifier>>();
@@ -588,6 +588,17 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                         template.StopCastingByTurn = reader.GetBoolean("stop_casting_by_turn", true);
                         template.TargetMyNpc = reader.GetBoolean("target_my_npc", true);
                         template.TargetFishing = reader.GetBoolean("target_fishing", true);
+
+                        // Target skill 20297 (Escape) is a server-timed special action.
+                        // Its target DB description explicitly specifies a 30-second
+                        // preparation, while casting_time is zero because the delay is
+                        // normally supplied by the official server-side special handler.
+                        // Without restoring it here, Escape fires in the same tick.
+                        if (template.Id == 20297 && template.CastingTime <= 0)
+                        {
+                            template.CastingTime = 30_000;
+                            Logger.Info("Restored target Escape cast time: skill=20297, castTime={0}ms", template.CastingTime);
+                        }
 
                         _skills.Add(template.Id, template);
                     }
@@ -1886,6 +1897,140 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
             catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
             {
                 Logger.Warn("Table combat_resource_effects is missing; resource effects are disabled.");
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM world_message_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new WorldMessageEffect
+                    {
+                        Id = reader.GetUInt32("id"),
+                        ChatMessage = reader.GetBoolean("chat_msg", true),
+                        FactionScopeId = reader.GetUInt32("faction_scope_id", 0),
+                        IconKey = reader.GetString("icon_key"),
+                        KillHero = reader.GetBoolean("kill_hero", true),
+                        KillStreakCount = reader.GetInt32("kill_streak_count"),
+                        Message = reader.GetString("message"),
+                        NameWithForeignWorld = reader.GetBoolean("name_with_foreign_world", true),
+                        ZoneGroupOnly = reader.GetBoolean("zone_group_only", true),
+                        ZoneGroupWarState = reader.GetBoolean("zone_group_war_state", true)
+                    };
+                    _effects["WorldMessageEffect"][template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table world_message_effects is missing; world-message plot effects are disabled.");
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM skill_map_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new SkillMapEffect
+                    {
+                        Id = reader.GetUInt32("id"),
+                        Radius = reader.GetInt32("radius"),
+                        TextureColorKey = reader.GetString("texture_color_key"),
+                        TextureKey = reader.GetString("texture_key"),
+                        TexturePath = reader.GetString("texture_path"),
+                        UseFactionColor = reader.GetBoolean("use_faction_color", true),
+                        UseUiEffect = reader.GetBoolean("use_ui_effect", true),
+                        ViewTime = reader.GetInt32("view_time")
+                    };
+                    _effects["SkillMapEffect"][template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table skill_map_effects is missing; map-marker plot effects are disabled.");
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM extend_charge_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new ExtendChargeEffect
+                    {
+                        Id = reader.GetUInt32("id"),
+                        ChargeBuffId = reader.GetUInt32("charge_buff_id", 0),
+                        DamageType = (DamageType)reader.GetInt32("damage_type_id"),
+                        DpsIncMultiplier = reader.GetFloat("dps_inc_multiplier"),
+                        DpsMultiplier = reader.GetFloat("dps_multiplier"),
+                        FixedMax = reader.GetInt32("fixed_max"),
+                        FixedMin = reader.GetInt32("fixed_min"),
+                        LevelMd = reader.GetFloat("level_md"),
+                        LevelVaEnd = reader.GetInt32("level_va_end"),
+                        LevelVaStart = reader.GetInt32("level_va_start"),
+                        PercentDamageResourceTypeId = reader.GetUInt32("percent_damage_resource_type_id", 0),
+                        PercentMax = reader.GetInt32("percent_max"),
+                        PercentMin = reader.GetInt32("percent_min"),
+                        UseDpsCharge = reader.GetBoolean("use_dps_charge", true),
+                        UseFixedCharge = reader.GetBoolean("use_fixed_charge", true),
+                        UseLevelCharge = reader.GetBoolean("use_level_charge", true),
+                        UseMainhandWeapon = reader.GetBoolean("use_mainhand_weapon", true),
+                        UseOffhandWeapon = reader.GetBoolean("use_offhand_weapon", true),
+                        UsePercentCharge = reader.GetBoolean("use_percent_charge", true),
+                        UseRangedWeapon = reader.GetBoolean("use_ranged_weapon", true),
+                        UseSourceHealth = reader.GetBoolean("use_source_health", true)
+                    };
+                    _effects["ExtendChargeEffect"][template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table extend_charge_effects is missing; charge plot effects are disabled.");
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM target_history_clear_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new TargetHistoryClearEffect { Id = reader.GetUInt32("id") };
+                    _effects["TargetHistoryClearEffect"][template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table target_history_clear_effects is missing; plot target-history resets are disabled.");
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM play_log_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var template = new PlayLogEffect
+                    {
+                        Id = reader.GetUInt32("id"),
+                        Message = reader.GetString("message")
+                    };
+                    _effects["PlayLogEffect"][template.Id] = template;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table play_log_effects is missing; plot log markers are disabled.");
             }
 
             try {

@@ -5,6 +5,7 @@ using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Core.Packets.G2C;
 using System.Collections.Generic;
 using AAEmu.Game.Models.Game.Teleport;
+using AAEmu.Game.Models.Game.World.Transform;
 using AAEmu.Game.Utils.Scripts;
 
 namespace AAEmu.Game.Scripts.Commands;
@@ -609,9 +610,15 @@ public class Teleport : ICommand
                     {
                         height += 2.5f; // compensate a bit for terrain irregularities
                         character.SendMessage("Teleporting to |cFFFFFFFFX:" + character.LocalPingPosition.X + " Y:" + character.LocalPingPosition.Y + " Z:" + height + "|r");
-                        character.ForceDismount();
-                        character.DisabledSetPosition = true;
-                        character.SendPacket(new SCTeleportUnitPacket(TeleportReason.Portal, ErrorMessageType.NoErrorMessage, character.LocalPingPosition.X, character.LocalPingPosition.Y, height, 0));
+                        CharacterTeleportManager.Teleport(character, new WorldSpawnPosition
+                        {
+                            WorldId = character.Transform.WorldId,
+                            ZoneId = 0,
+                            X = character.LocalPingPosition.X,
+                            Y = character.LocalPingPosition.Y,
+                            Z = height,
+                            Yaw = 0f
+                        }, TeleportReason.Portal);
                     }
                 }
             }
@@ -643,9 +650,15 @@ public class Teleport : ICommand
                     if (foundIt)
                     {
                         character.SendMessage("Teleporting to |cFFFFFFFF" + item.Info + "|r");
-                        character.ForceDismount();
-                        character.DisabledSetPosition = true;
-                        character.SendPacket(new SCTeleportUnitPacket(TeleportReason.Portal, ErrorMessageType.NoErrorMessage, item.X, item.Y, item.Z, 0));
+                        CharacterTeleportManager.Teleport(character, new WorldSpawnPosition
+                        {
+                            WorldId = character.Transform.WorldId,
+                            ZoneId = 0,
+                            X = item.X,
+                            Y = item.Y,
+                            Z = item.Z,
+                            Yaw = 0f
+                        }, TeleportReason.Portal);
 
                         break;
                     }

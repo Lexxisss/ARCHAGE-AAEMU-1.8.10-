@@ -150,6 +150,25 @@ public abstract class GamePacket : PacketBase<GameConnection>
             {
                 Read(ps);
 
+                // Whatever the reader did not touch. A layout that is wrong in the middle usually
+                // announces itself further along, as nonsense in a field we can recognise - but one
+                // that is wrong at the very end leaves bytes lying there and says nothing at all.
+                // This is the only thing that catches that, and it costs a comparison.
+                var unread = ps.Count - ps.Pos;
+                if (unread > 0)
+                {
+                    var tail = new byte[unread <= 32 ? unread : 32];
+                    var at = ps.Pos;
+                    for (var i = 0; i < tail.Length; i++)
+                        tail[i] = ps.ReadByte();
+                    ps.Pos = at;
+
+                    Logger.Warn(
+                        "Packet 0x{0:X3} {1}: {2} bytes left unread at {3}: {4}{5}",
+                        TypeId, GetType().Name, unread, at, BitConverter.ToString(tail),
+                        unread > tail.Length ? "..." : "");
+                }
+
                 var logString = $"GamePacket: C->S type [{Level}:{TypeId:X3}] {ToString()?.Substring(23)}{Verbose()}";
                 switch (LogLevel)
                 {

@@ -21,7 +21,7 @@ public class FloatingSkillController : SkillController
     {
         Template = template;
         Owner = owner as Unit;
-        Target = target as Unit;
+        Target = target;
         _durationMs = Math.Max(template.Value[0], 1000);
         // Floating controllers from data are tuned too low for a visible launch in our movement
         // model, so keep the same source value but raise it conservatively.

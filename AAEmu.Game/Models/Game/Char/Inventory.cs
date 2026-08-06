@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -47,7 +47,8 @@ public class Inventory
         {
             var st = (SlotType)stv;
 
-            if (st == SlotType.EquipmentMate)
+            if (st is SlotType.EquipmentMate or SlotType.EquipmentMateBattle or
+                SlotType.EquipmentSlavePreliminary or SlotType.EquipmentSlave)
                 continue;
 
             // Take Equipment Container from Parent Unit's Equipment
@@ -709,8 +710,11 @@ public class Inventory
         if (toType == SlotType.Equipment && (fromType != SlotType.Equipment || toSlot != fromSlot))
             changedSlots.Add((toSlot, Equipment.GetItemBySlot(toSlot)));
 
-        if (changedSlots.Count > 0)
-            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, changedSlots.ToArray()), true);
+        // Do not publish the visual equipment delta yet. The target client applies the
+        // inventory transaction first and resolves its source/destination item objects from
+        // the pre-change slot state. Sending SCUnitEquipmentsChanged before action 8/6 or 9
+        // clears/replaces the equipment slot too early, so the following task cannot resolve
+        // the move and leaves a ghost icon or an unusable empty-looking bag cell.
 
         // Send ItemContainer events
         if (sourceContainer != targetContainer)
@@ -738,6 +742,19 @@ public class Inventory
                     new List<ulong>()));
         }
 
+        // Only after the client has moved/removed/created the item object do we update the
+        // character model. This is the order used by the target inventory state machine: the
+        // item transaction owns container membership; the equipment packet is only its visual
+        // projection on the unit.
+        if (changedSlots.Count > 0)
+        {
+            Owner.BroadcastPacket(new SCUnitEquipmentsChangedPacket(Owner.ObjId, changedSlots.ToArray()), true);
+            Logger.Info(
+                "Equipment inventory sync: owner={0}, from={1}:{2}/{3}, to={4}:{5}/{6}, tasks={7}, visualSlots={8}",
+                Owner.Id, fromType, fromSlot, fromItemId, toType, toSlot, toItemId,
+                itemTasks.Count, changedSlots.Count);
+        }
+
         sourceContainer.ApplyBindRules(taskType);
         if (targetContainer != sourceContainer)
             targetContainer.ApplyBindRules(taskType);
@@ -749,12 +766,12 @@ public class Inventory
     /// Announces one item arriving in a slot that was empty, leaving another behind it.
     /// </summary>
     /// <remarks>
-    /// A move task names both slots and resolves both of the client's slot objects before it does
-    /// anything, giving up when either is missing. A bag has all of its slots standing, so a move
-    /// is right there and stays. An equipment slot that has never held anything need not, and a
-    /// move into one is dropped without a word - the item leaves its old slot on this side and
-    /// the client keeps showing the old picture. Emptying a slot and filling one are separate
-    /// tasks precisely so they do not depend on the other end already existing.
+    /// The target action-9 handler resolves both client slot objects before applying the swap.
+    /// Bag slots are materialized up front, but a never-used equipment slot may not yet have a
+    /// client item object. In that case action 9 is dropped and the server-only move produces an
+    /// invisible, unusable bag cell. For moves touching an equipment container, use the target
+    /// store-remove (8) plus full take/gain (6) pair; for ordinary bag/bank moves, action 9 is
+    /// still the correct compact transaction.
     /// </remarks>
     private static void AnnounceMoveIntoEmptySlot(List<ItemTask> tasks, Item item, SlotType vacatedType,
         byte vacatedSlot, ItemMove ordinaryMove)
@@ -769,13 +786,10 @@ public class Inventory
         tasks.Add(new ItemGain(item));
     }
 
-    /// <summary>
-    /// Whether this is one of the containers the client keeps its worn gear in, rather than a bag
-    /// or a warehouse. A mate has one of its own per family.
-    /// </summary>
     private static bool IsEquipmentContainer(SlotType slotType)
     {
-        return slotType is SlotType.Equipment or SlotType.EquipmentMate or SlotType.EquipmentMateBattle;
+        return slotType is SlotType.Equipment or SlotType.EquipmentMate or SlotType.EquipmentMateBattle or
+            SlotType.EquipmentSlavePreliminary or SlotType.EquipmentSlave;
     }
 
     /// <summary>
@@ -1204,115 +1218,79 @@ public class Inventory
         switch (unit)
         {
             case Character character:
-                {
-                    items = character.Inventory.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    var itemFlags = CalculateItemFlags(items);
-                    stream.Write(itemFlags); // ItemFlags flags for 3.0.3.0
-                    break;
-                }
+                items = character.Inventory.Equipment.GetSlottedItemsList();
+                WriteProtocol1810Equip(stream, items);
+                var itemFlags = CalculateItemFlags(items);
+                stream.Write(itemFlags);
+                break;
+
             case House house:
-                {
-                    items = house.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    break;
-                }
+                WriteProtocol1810Equip(stream, house.Equipment.GetSlottedItemsList());
+                break;
+
             case Units.Mate mate:
-                {
-                    items = mate.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    break;
-                }
+                WriteProtocol1810Equip(stream, mate.Equipment.GetSlottedItemsList());
+                break;
+
             case Slave slave:
-                {
-                    items = slave.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    break;
-                }
+                WriteProtocol1810Equip(stream, slave.Equipment.GetSlottedItemsList());
+                break;
+
             case Npc npc:
+            {
+                items = npc.Equipment.GetSlottedItemsList();
+                var wireItems = Protocol1810EquipmentLayout.ToWireItems(items);
+                var validFlags = BuildWireMask(wireItems);
+                stream.Write(validFlags);
+
+                foreach (var (item, wireSlot) in wireItems.Select((item, wireSlot) => (item, wireSlot)))
                 {
-                    items = npc.Equipment.GetSlottedItemsList();
-                    var validFlags = CalculateValidFlags(items);
-                    // Target 0x3996AB80 builds and serializes a 64-bit mask for
-                    // 35 equipment slots. Our container currently exposes 29,
-                    // so the upper target bits remain zero but must be present.
-                    stream.Write(validFlags);
+                    if (item == null)
+                        continue;
 
-                    if (validFlags <= 0)
+                    if (Protocol1810EquipmentLayout.IsBodyPartWireSlot(wireSlot))
+                        stream.Write(item.TemplateId);
+                    else if (Protocol1810EquipmentLayout.IsNpcFullItemWireSlot(wireSlot))
+                        stream.Write(item);
+                    else
                     {
-                        unit.ModelParams.SetType(UnitCustomModelType.Skin); // additional check that the NPC does not have a body or face
-                        return;
+                        stream.Write(item.TemplateId);
+                        stream.Write(item.Id);
+                        stream.Write(item.Grade);
                     }
-
-                    for (var i = 0; i < items.Count; i++)
-                    {
-                        var item = npc.Equipment.GetItemBySlot(i);
-
-                        if (item is BodyPart)
-                        {
-                            stream.Write(item.TemplateId);
-                        }
-                        else if (item != null)
-                        {
-                            if (i == 27) // Cosplay
-                            {
-                                stream.Write(item);
-                            }
-                            else
-                            {
-                                // Target NPC item serializer 0x39968880 and the
-                                // capture corpus agree on this 13-byte order.
-                                stream.Write(item.TemplateId);
-                                stream.Write(0UL);
-                                stream.Write(item.Grade);
-                            }
-                        }
-                    }
-                    break;
                 }
-            // for transfer and Shipyard
+                break;
+            }
+
             default:
-                {
-                    stream.Write(0UL); // target 35-slot validFlags
-                    break;
-                }
+                stream.Write(0UL);
+                break;
         }
     }
 
-    private static void WriteEquip(PacketStream stream, List<Item> items)
+    private static void WriteProtocol1810Equip(PacketStream stream, IReadOnlyList<Item> serverItems)
     {
-        var validFlags = CalculateValidFlags(items);
-        stream.Write(validFlags); // target 35-slot validFlags
-        WriteItems(stream, items);
-    }
-
-    private static void WriteItems(PacketStream stream, List<Item> items)
-    {
-        foreach (var item in items)
+        var wireItems = Protocol1810EquipmentLayout.ToWireItems(serverItems);
+        stream.Write(BuildWireMask(wireItems));
+        foreach (var item in wireItems)
         {
             if (item != null)
-            {
                 stream.Write(item);
-            }
         }
     }
 
-    private static ulong CalculateValidFlags(List<Item> items)
+    private static ulong BuildWireMask(IReadOnlyList<Item> wireItems)
     {
-        var validFlags = 0UL;
-        var index = 0;
-        foreach (var item in items)
+        ulong mask = 0;
+        var count = Math.Min(wireItems.Count, Protocol1810EquipmentLayout.SlotCount);
+        for (var wireSlot = 0; wireSlot < count; wireSlot++)
         {
-            if (item != null)
-            {
-                validFlags |= 1UL << index;
-            }
-
-            index++;
+            if (wireItems[wireSlot] != null)
+                mask |= 1UL << wireSlot;
         }
-
-        return validFlags;
+        return mask;
     }
+
 
     private static int CalculateItemFlags(List<Item> items)
     {

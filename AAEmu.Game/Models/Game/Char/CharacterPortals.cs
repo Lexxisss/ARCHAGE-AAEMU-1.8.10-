@@ -109,12 +109,18 @@ public class CharacterPortals
             Owner.SendPacket(new SCCharacterPortalsPacket(portals));
         }
 
-        if (DistrictPortals.Count > 0)
-        {
-            var portals = DistrictPortals.Values.ToArray();
-            var ReturnPointId = PortalManager.Instance.GetDistrictReturnPoint(Owner.ReturnDistrictId, Owner.Faction.Id);
-            Owner.SendPacket(new SCCharacterReturnDistrictsPacket(portals, ReturnPointId)); // INFO - What is returnDistrictId? Table district_return_point, field district_id => return_point_id
-        }
+        // Recall is enabled by the selected return-point id carried in this packet. The selected
+        // Memory Tome is allowed to be the character's only known district, so do not suppress the
+        // packet merely because the visited-district collection is still empty.
+        var returnPointId = PortalManager.Instance.GetDistrictReturnPoint(
+            Owner.ReturnDistrictId, Owner.Faction.Id);
+        var districtPortals = DistrictPortals.Values.ToList();
+        var selectedPortal = returnPointId == 0 ? null : PortalManager.Instance.GetRecallById(returnPointId);
+        if (selectedPortal != null && districtPortals.All(portal => portal.Id != selectedPortal.Id))
+            districtPortals.Add(selectedPortal);
+
+        if (districtPortals.Count > 0 || returnPointId != 0)
+            Owner.SendPacket(new SCCharacterReturnDistrictsPacket(districtPortals.ToArray(), returnPointId));
     }
 
     public void Load(MySqlConnection connection)

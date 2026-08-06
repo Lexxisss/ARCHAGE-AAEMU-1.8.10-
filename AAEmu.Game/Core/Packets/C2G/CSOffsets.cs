@@ -1,4 +1,4 @@
-﻿namespace AAEmu.Game.Core.Packets.C2G;
+namespace AAEmu.Game.Core.Packets.C2G;
 
 public static class CSOffsets
 {
@@ -535,7 +535,7 @@ public static class CSOffsets
     public const ushort CSRequestHouseTaxPacket = 0x20F;
     public const ushort CSRequestSpecialtyCurrentPacket = 0xfff;
     public const ushort CSResetSkillsPacket = 0x05D; // target x2game.dll constructor
-    public const ushort CSResurrectCharacterPacket = 0xfff;
+    public const ushort CSResurrectCharacterPacket = 0x00F;
     public const ushort CSRollDicePacket = 0xfff;
     public const ushort CSSecurityReportPacket = 0x08A; // target 10.8 x2game.dll [confirmed_serializer]
     public const ushort CSSelectInteractionExPacket = 0x013; // target 10.8 x2game.dll
@@ -545,7 +545,7 @@ public static class CSOffsets
     public const ushort CSSendMailPacket = 0x099;
     public const ushort CSSetCraftingPayPacket = 0xfff;
     public const ushort CSSetForceAttackPacket = 0xfff;
-    public const ushort CSTeleportEndedPacket = 0xfff;
+    public const ushort CSTeleportEndedPacket = 0x1EE; // target 10.8 x2game.dll
     public const ushort CSTradeOkPacket = 0xfff;
     public const ushort CSUnMountMatePacket = 0x003;
     public const ushort CSUseTeleportPacket = 0xfff;

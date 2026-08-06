@@ -1,4 +1,6 @@
-﻿using AAEmu.Commons.Network;
+using System.Collections.Generic;
+
+using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Skills.Plots;
 
@@ -15,10 +17,12 @@ public class SCPlotEventPacket : GamePacket
     private readonly ushort _castingTime;
     private readonly byte _flag;
     private readonly ulong _itemId;
-    private readonly byte _targetUnitCount;
+    private readonly IReadOnlyList<uint> _targetUnitIds;
+    private readonly byte _inputDirection;
 
     public SCPlotEventPacket(ushort tl, uint eventId, uint skillId, PlotObject caster, PlotObject target,
-        uint objId, ushort castingTime, byte flag, ulong itemId = 0L, byte targetUnitCount = 1)
+        uint objId, ushort castingTime, byte flag, ulong itemId = 0L,
+        IReadOnlyList<uint> targetUnitIds = null, byte inputDirection = 0)
         : base(SCOffsets.SCPlotEventPacket, 5)
     {
         _tl = tl;
@@ -30,7 +34,8 @@ public class SCPlotEventPacket : GamePacket
         _castingTime = castingTime;
         _flag = flag;
         _itemId = itemId;
-        _targetUnitCount = targetUnitCount;
+        _targetUnitIds = targetUnitIds ?? [];
+        _inputDirection = inputDirection;
     }
 
     public override PacketStream Write(PacketStream stream)
@@ -49,23 +54,19 @@ public class SCPlotEventPacket : GamePacket
         stream.Write(_castingTime); // msec, castingTime / 10
         stream.WriteBc(0);      // objId
         stream.Write((short)0); // msec
-        stream.Write(_targetUnitCount); // targetUnitCount // TODO if aoe, list of units
-        if (_targetUnitCount > 0)
-        {
-            for (var i = 0; i < _targetUnitCount; i++)
-            {
-                stream.WriteBc(_target.UnitId); // targetId TODO targetUnitCount > 0 -> do->while() stream.WriteBc(0);
-            }
-        }
+        var targetUnitCount = (byte)System.Math.Min(_targetUnitIds.Count, byte.MaxValue);
+        stream.Write(targetUnitCount); // targetUnitCount
+        for (var i = 0; i < targetUnitCount; i++)
+            stream.WriteBc(_targetUnitIds[i]);
         stream.Write(_flag);
-        if (((_flag >> 3) & 1) != 1)
+        if (((_flag >> 3) & 1) == 1)
         {
-            return stream;           // flag = 2 | 6
+            for (var i = 0; i < 13; i++) // flag = 8
+                stream.Write(0); // v
         }
-        for (var i = 0; i < 13; i++) // flag = 8
-        {
-            stream.Write(0); // v
-        }
+
+        // Target x2game.dll serializes inputDirection after flag/optional values.
+        stream.Write(_inputDirection);
         return stream;
     }
 }

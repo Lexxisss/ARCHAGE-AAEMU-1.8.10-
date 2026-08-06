@@ -1,4 +1,4 @@
-﻿using AAEmu.Commons.Network;
+using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
 
 namespace AAEmu.Game.Core.Packets.G2C;
@@ -24,7 +24,7 @@ public class SCCharacterResurrectedPacket : GamePacket
     public override PacketStream Write(PacketStream stream)
     {
         stream.WriteBc(_unitId);
-        stream.WritePosition(_x, _y, _z);
+        stream.WriteWorldPosition(_x, _y, _z);
         stream.Write(_zRot);
         return stream;
     }

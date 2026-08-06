@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using AAEmu.Commons.Exceptions;
 using AAEmu.Commons.Utils;
@@ -28,6 +29,7 @@ public class PlotCondition
     public int Param2 { get; set; }
     public int Param3 { get; set; }
     public int Param4 { get; set; }
+    public List<PlotUnitRequirement> UnitRequirements { get; } = [];
 
     /// <summary>
     /// Checks if this PlotCondition is true
@@ -52,7 +54,11 @@ public class PlotCondition
             PlotConditionType.Stealth => ConditionStealth(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
             PlotConditionType.Visible => ConditionVisible(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
             PlotConditionType.ABLevel => ConditionAbLevel(caster, casterCaster, target, targetCaster, skillObject, Param1, Param2, Param3, Param4),
-            _ => true
+            PlotConditionType.CastingProgress => ConditionCastingProgress(skill, Param1, Param2),
+            PlotConditionType.CombatResourceRange => ConditionCombatResourceRange(caster, target, skill, Param1, Param2, Param3),
+            PlotConditionType.UnitReqs => ConditionUnitReqs(caster, target),
+            PlotConditionType.KillerFaction => ConditionKillerFaction(target, Param1),
+            _ => UnsupportedCondition()
         };
 
         Logger.Trace($"PlotCondition : {Kind} | Params : {Param1}, {Param2}, {Param3}, {Param4} | Result : {(NotCondition ? "NOT" : "")} {res}");
@@ -319,6 +325,61 @@ public class PlotCondition
         }
 
         //Should this ever not be a character using this condition?
+        return false;
+    }
+
+
+    // 18 - target DB uses inclusive 0..100 launch/charge bands. The same per-cast
+    // roll is already used by skill-effect relations, so plot branches and ordinary
+    // effects now make the same deterministic choice for a cast.
+    private static bool ConditionCastingProgress(Skill skill, int minimum, int maximum)
+    {
+        if (skill == null)
+            return false;
+        return skill.CastingUseChance >= minimum && skill.CastingUseChance <= maximum;
+    }
+
+    // 19 - inclusive combat-resource range; param3 is the explicit resource id.
+    // A zero id means the resource mapped by the current skill/ability.
+    private static bool ConditionCombatResourceRange(BaseUnit caster, BaseUnit target, Skill skill, int minimum, int maximum, int resourceId)
+    {
+        var unit = target as Unit ?? caster as Unit;
+        if (unit == null)
+            return false;
+
+        var resolvedId = resourceId > 0
+            ? (uint)resourceId
+            : SkillManager.Instance.ResolveCombatResourceId(skill?.Template);
+        if (resolvedId == 0)
+            return false;
+
+        var value = unit.GetCombatResource(resolvedId);
+        return value >= minimum && value <= maximum;
+    }
+
+    // 20 - data-driven unit requirements loaded from unit_reqs(owner_type=PlotCondition).
+    private bool ConditionUnitReqs(BaseUnit caster, BaseUnit target)
+    {
+        if (UnitRequirements.Count == 0)
+        {
+            PlotDiagnostics.UnsupportedCondition(KindId, Id, Param1, Param2, Param3, Param4);
+            return false;
+        }
+
+        return OrUnitReqs
+            ? UnitRequirements.Any(requirement => requirement.Check(caster, target))
+            : UnitRequirements.All(requirement => requirement.Check(caster, target));
+    }
+
+    // 21 - faction of the unit that delivered the most recent killing blow.
+    private static bool ConditionKillerFaction(BaseUnit target, int factionId)
+    {
+        return target is Unit unit && unit.LastKillerFactionId == (uint)factionId;
+    }
+
+    private bool UnsupportedCondition()
+    {
+        PlotDiagnostics.UnsupportedCondition(KindId, Id, Param1, Param2, Param3, Param4);
         return false;
     }
 

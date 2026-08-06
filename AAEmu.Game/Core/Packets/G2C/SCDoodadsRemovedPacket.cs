@@ -31,11 +31,11 @@ public class SCDoodadsRemovedPacket : GamePacket
                 stream.WriteBc(_ids[index]);
                 index++;
 
-                es |= 1 << jndex;
+                // Bit clear is the ordinary delete operation, matching SCDoodadRemovedPacket.
                 jndex++;
             }
             while (jndex < doodadsToRemoveNow);
-            stream.Write((byte)es); // es - BitFlags of doodads that have been set for removal in this block
+            stream.Write((byte)es); // one e-bit per id; zero means delete
             doodadsToRemove -= doodadsToRemoveNow;
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
@@ -119,14 +119,6 @@ public class CraftEffect : EffectTemplate
                             true
                         );
 
-                        // When done, spawn all attached doodads like doors and windows
-                        if (house.CurrentStep == -1)
-                        {
-                            var doodads = house.AttachedDoodads.ToArray();
-                            foreach (var doodad in doodads)
-                                doodad.Spawn();
-                        }
-
                         // Every stage the building passes swaps the model it is drawn with, and
                         // the build progress message does not carry one. The client applies the
                         // progress to the scene object it already has, so the state has to follow
@@ -136,7 +128,7 @@ public class CraftEffect : EffectTemplate
                         // Respawning the object instead is not an option: the spawn message is
                         // ignored outright for an object the client already knows.
                         if (house.CurrentStep != stepBefore)
-                            house.BroadcastPacket(new SCHouseStatePacket(house), true);
+                            house.ScheduleStateFollowUpForVisibleCharacters();
                     }
                     break;
                 default:

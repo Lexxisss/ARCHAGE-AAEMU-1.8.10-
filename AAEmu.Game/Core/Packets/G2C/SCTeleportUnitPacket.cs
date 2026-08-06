@@ -1,4 +1,4 @@
-﻿using AAEmu.Commons.Network;
+using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game;
 using AAEmu.Game.Models.Game.Teleport;
@@ -29,7 +29,7 @@ public class SCTeleportUnitPacket : GamePacket
     {
         stream.Write(_reason);
         stream.Write(_errorMessage);
-        stream.WritePosition(_x, _y, _z);
+        stream.WriteWorldPosition(_x, _y, _z);
         stream.Write(_z2);
         return stream;
     }

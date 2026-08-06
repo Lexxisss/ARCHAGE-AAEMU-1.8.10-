@@ -1567,14 +1567,23 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
 
     public static void ResendVisibleObjectsToCharacter(Character character)
     {
-        // Re-send visible flags to character getting out of cinema
+        if (character?.Connection == null)
+            return;
+
+        // The target client drops its rendered NPC set while cinema/directing
+        // mode is active. Server-side protocol tracking must be invalidated as
+        // well, otherwise Npc.AddVisibleObject sees every nearby NPC as already
+        // sent and emits no SCUnitState after the cinema ends.
+        character.Connection.Protocol1810VisibleNpcObjIds.Clear();
+        character.Connection.Protocol1810NpcVisibilityAnchorValid = false;
+
         var stuffs = GetAround<GameObject>(character, REGION_NEIGHBORHOOD_SIZE * REGION_SIZE);
         var doodads = new List<Doodad>();
         foreach (var stuff in stuffs)
         {
-            if (stuff is Doodad d)
-                doodads.Add(d);
-            else
+            if (stuff is Doodad doodad)
+                doodads.Add(doodad);
+            else if (stuff is not Npc)
                 stuff.AddVisibleObject(character);
         }
 
@@ -1585,7 +1594,17 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
             character.SendPacket(new SCDoodadsCreatedPacket(temp));
         }
 
+        // NPCs use the target 10.8 world-distance publication path, not the
+        // legacy region list used above. This also covers migrated NPC spawns
+        // whose Region link is missing even though their world coordinates are valid.
+        var npcCount = Instance.PublishProtocol1810NearbyNpcs(character);
         character.Quests.RefreshQuestNotifier();
+
+        Logger.Info(
+            "Cinema visibility restored: characterId={0}, npcs={1}, doodads={2}",
+            character.Id,
+            npcCount,
+            doodads.Count);
     }
 
     public List<Character> GetAllCharacters()

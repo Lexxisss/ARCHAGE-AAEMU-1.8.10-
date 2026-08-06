@@ -27,6 +27,7 @@ public class ItemContainer
     public bool IsDirty { get; set; }
     private SlotType _containerType;
     private ulong _containerId;
+    private uint _mateId;
 
     public ICharacter Owner
     {
@@ -67,7 +68,18 @@ public class ItemContainer
         }
     }
 
-    public uint MateId { get; set; }
+    public uint MateId
+    {
+        get => _mateId;
+        set
+        {
+            if (value != _mateId)
+            {
+                _mateId = value;
+                IsDirty = true;
+            }
+        }
+    }
 
     public SlotType ContainerType
     {
@@ -111,6 +123,9 @@ public class ItemContainer
                 SlotType.Mail => false,
                 SlotType.System => false,
                 SlotType.EquipmentMate => false,
+                SlotType.EquipmentMateBattle => false,
+                SlotType.EquipmentSlavePreliminary => false,
+                SlotType.EquipmentSlave => false,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -1047,6 +1062,9 @@ public class ItemContainer
     /// <returns></returns>
     public static ItemContainer CreateByTypeName(string containerTypeName, uint ownerId, SlotType slotType, bool createWithNewId)
     {
+        if (containerTypeName.EndsWith("SlaveEquipmentContainer"))
+            return new SlaveEquipmentContainer(ownerId, slotType, createWithNewId);
+
         if (containerTypeName.EndsWith("MateEquipmentContainer"))
             return new MateEquipmentContainer(ownerId, slotType, createWithNewId);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,6 @@ using System.Numerics;
 using AAEmu.Commons.IO;
 using AAEmu.Commons.Utils;
 using AAEmu.Commons.Utils.DB;
-using AAEmu.Game.Core.Managers.AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
@@ -19,6 +18,7 @@ using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
+using AAEmu.Game.Models.Game.Items.Containers;
 using AAEmu.Game.Models.Game.Items.Templates;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Skills.Buffs;
@@ -35,6 +35,7 @@ using AAEmu.Game.Utils.DB;
 #pragma warning disable CA2000 // Dispose objects before losing scope
 
 using NLog;
+using Newtonsoft.Json.Linq;
 
 namespace AAEmu.Game.Core.Managers;
 
@@ -47,6 +48,28 @@ public class SlaveManager : Singleton<SlaveManager>
     private Dictionary<uint, Slave> _tlSlaves;
     public Dictionary<uint, Dictionary<AttachPointKind, WorldSpawnPosition>> _attachPoints;
     public Dictionary<uint, List<SlaveInitialItems>> _slaveInitialItems; // PackId and List<Slot/ItemData>
+
+    // Client slave-equipment metadata. The full database also contains kind/pack requirement
+    // graphs; for the runtime wire layer we need the authoritative set of slave equipment item
+    // templates and the protocol slots exposed by each slave.
+    private HashSet<uint> _slaveEquipmentItemTemplates;
+    private Dictionary<uint, HashSet<byte>> _slaveEquipmentSlots;
+    private Dictionary<uint, Dictionary<byte, SlaveEquipmentSlotInfo>> _slaveEquipmentSlotInfo;
+    private Dictionary<ulong, SlaveEquipmentSpawnInfo> _slaveEquipmentGradeSpawns;
+
+    private sealed class SlaveEquipmentSlotInfo
+    {
+        public AttachPointKind AttachPoint { get; init; }
+        public int RequireBuffTagId { get; init; }
+        public int RequireSlotId { get; init; }
+    }
+
+    private sealed class SlaveEquipmentSpawnInfo
+    {
+        public uint DoodadId { get; init; }
+        public uint ChildSlaveId { get; init; }
+    }
+
     //public Dictionary<uint, SlaveMountSkills> _slaveMountSkills;
     public Dictionary<uint, List<uint>> _slaveMountSkills;
     public Dictionary<uint, uint> _repairableSlaves; // SlaveId, RepairEffectId
@@ -184,6 +207,302 @@ public class SlaveManager : Singleton<SlaveManager>
         return null;
     }
 
+    /// <summary>Returns true when the client database classifies the item as slave equipment.</summary>
+    public bool IsKnownSlaveEquipmentItem(uint itemTemplateId)
+    {
+        return _slaveEquipmentItemTemplates?.Contains(itemTemplateId) == true;
+    }
+
+    /// <summary>
+    /// Validates the safe, recovered part of a ship/vehicle equipment request.
+    /// </summary>
+    /// <remarks>
+    /// The client database contains additional pack, kind and requirement graphs whose exact
+    /// runtime precedence is not fully recovered. We therefore reject non-slave items and
+    /// out-of-range slots, while treating a missing direct slave_equip_slots row as diagnostic
+    /// rather than fatal: dual slots and pack-provided slots legitimately omit a direct row.
+    /// </remarks>
+    public bool CanEquipSlaveItem(uint slaveTemplateId, uint itemTemplateId, int targetSlot)
+    {
+        if (targetSlot < 0 || targetSlot >= SlaveEquipmentContainer.ProtocolSlotCount)
+            return false;
+
+        if (!IsKnownSlaveEquipmentItem(itemTemplateId))
+        {
+            Logger.Warn(
+                "Slave equipment rejected: slave={0}, itemTemplate={1}, slot={2} is not present in item_slave_equipments",
+                slaveTemplateId, itemTemplateId, targetSlot);
+            return false;
+        }
+
+        if (_slaveEquipmentSlots != null &&
+            _slaveEquipmentSlots.TryGetValue(slaveTemplateId, out var slots) &&
+            !slots.Contains((byte)targetSlot))
+        {
+            Logger.Debug(
+                "Slave equipment slot {0} is not a direct slave_equip_slots row for slave {1}; " +
+                "allowing known slave equipment because dual/pack slots are represented indirectly",
+                targetSlot, slaveTemplateId);
+        }
+
+        return true;
+    }
+
+    private static ulong MakeEquipmentGradeKey(uint itemTemplateId, byte grade)
+    {
+        return ((ulong)itemTemplateId << 8) | grade;
+    }
+
+    private bool TryGetEquipmentAttachPoint(uint slaveTemplateId, byte slot, out AttachPointKind attachPoint)
+    {
+        attachPoint = AttachPointKind.None;
+        return _slaveEquipmentSlotInfo != null &&
+               _slaveEquipmentSlotInfo.TryGetValue(slaveTemplateId, out var slots) &&
+               slots.TryGetValue(slot, out var slotInfo) &&
+               (attachPoint = slotInfo.AttachPoint) != AttachPointKind.None;
+    }
+
+    private SlaveEquipmentSpawnInfo ResolveEquipmentSpawn(Item item, SlaveEquipmentTemplate template)
+    {
+        if (item != null && _slaveEquipmentGradeSpawns != null &&
+            _slaveEquipmentGradeSpawns.TryGetValue(MakeEquipmentGradeKey(item.TemplateId, item.Grade), out var gradeSpawn))
+            return gradeSpawn;
+
+        return new SlaveEquipmentSpawnInfo
+        {
+            DoodadId = template?.DoodadId ?? 0,
+            ChildSlaveId = template?.ChildSlaveId ?? 0
+        };
+    }
+
+    /// <summary>
+    /// Rebuilds the actual world components represented by EquipmentSlave item slots.
+    /// The parent SCUnitState carries item instances, while sails/cannons/rudders are separate
+    /// attached Doodad or Slave world objects selected by item_slave_equipments and grade spawns.
+    /// </summary>
+    public void SynchronizeEquipmentComponents(Slave slave)
+    {
+        if (slave?.Equipment == null || slave.Template == null || slave.Transform == null)
+            return;
+
+        RemoveEquipmentComponents(slave);
+
+        var spawnedDoodads = 0;
+        var spawnedSlaves = 0;
+        foreach (var item in slave.Equipment.GetSlottedItemsList()
+                     .Where(x => x != null)
+                     .OrderBy(x => x.Slot))
+        {
+            if (item.Slot < 0 || item.Slot >= SlaveEquipmentContainer.ProtocolSlotCount)
+                continue;
+
+            var slot = (byte)item.Slot;
+            if (!TryGetEquipmentAttachPoint(slave.TemplateId, slot, out var attachPoint))
+            {
+                Logger.Warn(
+                    "Slave equipment component skipped: parent={0}/{1}, slot={2}, item={3}; " +
+                    "slave_equip_slots has no attach point",
+                    slave.TemplateId, slave.ObjId, slot, item.TemplateId);
+                continue;
+            }
+
+            if (item.Template is not SlaveEquipmentTemplate equipmentTemplate)
+            {
+                Logger.Warn(
+                    "Slave equipment component skipped: parent={0}/{1}, slot={2}, item={3}; " +
+                    "template class is {4}",
+                    slave.TemplateId, slave.ObjId, slot, item.TemplateId,
+                    item.Template?.GetType().Name ?? "null");
+                continue;
+            }
+
+            var spawn = ResolveEquipmentSpawn(item, equipmentTemplate);
+            if (spawn.DoodadId != 0 && spawn.ChildSlaveId != 0)
+            {
+                Logger.Error(
+                    "Slave equipment item resolves to both doodad and slave: parent={0}, slot={1}, item={2}, " +
+                    "doodad={3}, childSlave={4}",
+                    slave.TemplateId, slot, item.TemplateId, spawn.DoodadId, spawn.ChildSlaveId);
+                continue;
+            }
+
+            if (spawn.DoodadId != 0)
+            {
+                var component = SpawnEquipmentDoodad(slave, item, slot, attachPoint, spawn.DoodadId,
+                    equipmentTemplate.DoodadScale <= 0f ? 1f : equipmentTemplate.DoodadScale);
+                if (component != null)
+                {
+                    slave.EquipmentDoodads[slot] = component;
+                    spawnedDoodads++;
+                }
+                continue;
+            }
+
+            if (spawn.ChildSlaveId != 0)
+            {
+                var component = SpawnEquipmentSlave(slave, item, slot, attachPoint, spawn.ChildSlaveId);
+                if (component != null)
+                {
+                    slave.EquipmentSlaves[slot] = component;
+                    spawnedSlaves++;
+                }
+                continue;
+            }
+
+            Logger.Warn(
+                "Slave equipment item has no runtime component: parent={0}/{1}, slot={2}, item={3}, grade={4}",
+                slave.TemplateId, slave.ObjId, slot, item.TemplateId, item.Grade);
+        }
+
+        Logger.Info(
+            "Slave equipment components synchronized: parent={0}/{1}, dbId={2}, items={3}, doodads={4}, childSlaves={5}",
+            slave.TemplateId, slave.ObjId, slave.Id, slave.Equipment.Items.Count, spawnedDoodads, spawnedSlaves);
+    }
+
+    private Doodad SpawnEquipmentDoodad(
+        Slave parent, Item equipmentItem, byte slot, AttachPointKind attachPoint, uint doodadId, float scale)
+    {
+        var doodadTemplate = DoodadManager.Instance.GetTemplate(doodadId);
+        if (doodadTemplate == null)
+        {
+            Logger.Error(
+                "Slave equipment doodad template missing: parent={0}, slot={1}, item={2}, doodad={3}",
+                parent.TemplateId, slot, equipmentItem.TemplateId, doodadId);
+            return null;
+        }
+
+        var doodad = new Doodad
+        {
+            ObjId = ObjectIdManager.Instance.GetNextId(),
+            TemplateId = doodadId,
+            OwnerObjId = parent.Summoner?.ObjId ?? parent.OwnerObjId,
+            ParentObjId = parent.ObjId,
+            AttachPoint = attachPoint,
+            OwnerId = parent.OwnerId,
+            PlantTime = parent.SpawnTime,
+            OwnerType = DoodadOwnerType.Slave,
+            OwnerDbId = parent.Id,
+            Template = doodadTemplate,
+            Data = (byte)attachPoint,
+            ParentObj = parent,
+            Faction = parent.Faction,
+            Type2 = 1u,
+            Spawner = null,
+            IsPersistent = false
+        };
+
+        doodad.SetScale(scale);
+        doodad.FuncGroupId = doodad.GetFuncGroupId();
+        doodad.Transform = parent.Transform.CloneAttached(doodad);
+        doodad.Transform.Parent = parent.Transform;
+        if (equipmentItem.HasFlag(ItemFlag.HasUCC) && equipmentItem.UccId > 0)
+            doodad.UccId = equipmentItem.UccId;
+
+        ApplyAttachPointLocation(parent, doodad, attachPoint);
+        parent.AttachedDoodads.Add(doodad);
+
+        // Initialise before publication so SCDoodadCreated contains the active FuncGroupId and
+        // non-zero TimeLeft. Sending create first made the growth task run server-side while the
+        // target client still displayed an idle, uncharged breathing device.
+        doodad.InitDoodad(false);
+        doodad.Spawn();
+
+        Logger.Info(
+            "Slave equipment doodad spawned: parent={0}/{1}, slot={2}, item={3}, grade={4}, attach={5}, doodad={6}/{7}",
+            parent.TemplateId, parent.ObjId, slot, equipmentItem.TemplateId, equipmentItem.Grade,
+            (int)attachPoint, doodadId, doodad.ObjId);
+        return doodad;
+    }
+
+    private Slave SpawnEquipmentSlave(
+        Slave parent, Item equipmentItem, byte slot, AttachPointKind attachPoint, uint childTemplateId)
+    {
+        var childTemplate = GetSlaveTemplate(childTemplateId);
+        if (childTemplate == null)
+        {
+            Logger.Error(
+                "Slave equipment child template missing: parent={0}, slot={1}, item={2}, childSlave={3}",
+                parent.TemplateId, slot, equipmentItem.TemplateId, childTemplateId);
+            return null;
+        }
+
+        var childTlId = (ushort)TlIdManager.Instance.GetNextId();
+        var childObjId = ObjectIdManager.Instance.GetNextId();
+        var child = new Slave
+        {
+            TlId = childTlId,
+            ObjId = childObjId,
+            ParentObj = parent,
+            TemplateId = childTemplate.Id,
+            Name = childTemplate.Name,
+            Level = (byte)childTemplate.Level,
+            ModelId = childTemplate.ModelId,
+            Template = childTemplate,
+            Hp = 1,
+            Mp = 1,
+            ModelParams = new UnitCustomModelParams(),
+            Faction = parent.Faction,
+            // Attached sail/cannon components are world children, not independently owned personal
+            // slaves. Sending the parent's summoner/db identity in SCSlaveStatus makes the target
+            // client replace its current controllable slave with this child component.
+            Id = 0,
+            Summoner = null,
+            OwnerObjId = parent.ObjId,
+            OwnerId = parent.OwnerId,
+            SpawnTime = DateTime.UtcNow,
+            AttachPointId = (sbyte)attachPoint,
+            Skills = new List<uint>()
+        };
+
+        var childSkills = MateManager.Instance.GetMateSkills(childTemplate.Id);
+        if (childSkills is { Count: > 0 })
+            child.Skills.AddRange(childSkills);
+
+        ApplySlaveBonuses(child);
+        child.Hp = child.MaxHp;
+        child.Mp = child.MaxMp;
+        child.Transform = parent.Transform.CloneDetached(child);
+        child.Transform.Parent = parent.Transform;
+        ApplyAttachPointLocation(parent, child, attachPoint);
+
+        parent.AttachedSlaves.Add(child);
+        lock (_slaveListLock)
+            _tlSlaves[child.TlId] = child;
+        child.Spawn();
+        child.PostUpdateCurrentHp(child, 0, child.Hp, KillReason.Unknown);
+
+        Logger.Info(
+            "Slave equipment child spawned: parent={0}/{1}, slot={2}, item={3}, grade={4}, attach={5}, child={6}/{7}, tl={8}",
+            parent.TemplateId, parent.ObjId, slot, equipmentItem.TemplateId, equipmentItem.Grade,
+            (int)attachPoint, childTemplateId, child.ObjId, child.TlId);
+        return child;
+    }
+
+    private void RemoveEquipmentComponents(Slave slave)
+    {
+        foreach (var pair in slave.EquipmentDoodads.ToList())
+        {
+            var doodad = pair.Value;
+            slave.AttachedDoodads.Remove(doodad);
+            doodad.IsPersistent = false;
+            doodad.Delete();
+            ObjectIdManager.Instance.ReleaseId(doodad.ObjId);
+        }
+        slave.EquipmentDoodads.Clear();
+
+        foreach (var pair in slave.EquipmentSlaves.ToList())
+        {
+            var child = pair.Value;
+            slave.AttachedSlaves.Remove(child);
+            lock (_slaveListLock)
+                _tlSlaves.Remove(child.TlId);
+            child.Delete();
+            TlIdManager.Instance.ReleaseId(child.TlId);
+            ObjectIdManager.Instance.ReleaseId(child.ObjId);
+        }
+        slave.EquipmentSlaves.Clear();
+    }
+
     public void UnbindSlave(Character character, uint tlId, AttachUnitReason reason)
     {
         Slave slave;
@@ -265,16 +584,38 @@ public class SlaveManager : Singleton<SlaveManager>
         // replace Slave with test ones from Mirage
         activeSlaveInfo ??= testSlaveInfo;
         if (activeSlaveInfo == null) return;
+
+        Logger.Info(
+            "Slave delete requested: owner={0}, template={1}, objId={2}, tl={3}, dbId={4}, " +
+            "attachedDoodads={5}, attachedSlaves={6}, equipmentDoodads={7}, equipmentSlaves={8}",
+            owner?.Id ?? 0, activeSlaveInfo.TemplateId, activeSlaveInfo.ObjId, activeSlaveInfo.TlId,
+            activeSlaveInfo.Id, activeSlaveInfo.AttachedDoodads.Count, activeSlaveInfo.AttachedSlaves.Count,
+            activeSlaveInfo.EquipmentDoodads.Count, activeSlaveInfo.EquipmentSlaves.Count);
+
         activeSlaveInfo.Save();
         // Remove passengers
         foreach (var character in activeSlaveInfo.AttachedCharacters.Values.ToList())
             UnbindSlave(character, activeSlaveInfo.TlId, AttachUnitReason.SlaveBinding);
 
-        // Check if one of the slave doodads is holding a item
+        // Check if one of the ordinary cargo doodads is holding an item. Runtime equipment
+        // components are classified separately and must never block recall even if a template or
+        // later code happens to populate their item-looking fields.
+        var equipmentDoodadIds = activeSlaveInfo.EquipmentDoodads.Values
+            .Where(component => component != null)
+            .Select(component => component.ObjId)
+            .ToHashSet();
         foreach (var doodad in activeSlaveInfo.AttachedDoodads)
         {
+            if (equipmentDoodadIds.Contains(doodad.ObjId))
+                continue;
+
             if ((doodad.ItemId != 0) || (doodad.ItemTemplateId != 0))
             {
+                Logger.Warn(
+                    "Slave delete blocked by loaded doodad: slave={0}/{1}, doodad={2}/{3}, " +
+                    "itemId={4}, itemTemplateId={5}, attach={6}",
+                    activeSlaveInfo.TemplateId, activeSlaveInfo.ObjId, doodad.TemplateId, doodad.ObjId,
+                    doodad.ItemId, doodad.ItemTemplateId, (int)doodad.AttachPoint);
                 owner?.SendErrorMessage(ErrorMessageType.SlaveEquipmentLoadedItem); // TODO: Do we need this error? Client already mentions it.
                 return; // don't allow un-summon if some it's holding a item (should be a trade-pack)
             }
@@ -304,16 +645,28 @@ public class SlaveManager : Singleton<SlaveManager>
             //attachedSlave.Delete();
         }
 
+        // These maps only classify runtime parts; the objects themselves are already scheduled
+        // through AttachedDoodads/AttachedSlaves above.
+        activeSlaveInfo.EquipmentDoodads.Clear();
+        activeSlaveInfo.EquipmentSlaves.Clear();
+
         var world = WorldManager.Instance.GetWorld(activeSlaveInfo.Transform.WorldId);
-        world.Physics.RemoveShip(activeSlaveInfo);
+        if (world != null && activeSlaveInfo.Template.IsABoat())
+            world.Physics.RemoveShip(activeSlaveInfo);
         owner?.BroadcastPacket(new SCSlaveDespawnPacket(objId), true);
         owner?.BroadcastPacket(new SCSlaveRemovedPacket(owner.ObjId, activeSlaveInfo.TlId), true);
         lock (_slaveListLock)
         {
+            _tlSlaves.Remove(activeSlaveInfo.TlId);
             if (testSlaveInfo == null)
-                _activeSlaves.Remove(owner.ObjId); // remove only the ones that we spawn from items
+            {
+                if (owner != null)
+                    _activeSlaves.Remove(owner.ObjId); // remove only the ones that we spawn from items
+            }
             else
+            {
                 _testSlaves.Remove(activeSlaveInfo); // remove only the ones that we spawn from Mirage.
+            }
         }
 
         activeSlaveInfo.Despawn = DateTime.UtcNow.AddSeconds(activeSlaveInfo.Template.PortalTime + 0.5f);
@@ -465,6 +818,17 @@ public class SlaveManager : Singleton<SlaveManager>
 
                 // temporary grab ship information so that we can use it to find a suitable spot in front to summon it
                 var tempShipModel = ModelManager.Instance.GetShipModel(slaveTemplate.ModelId);
+                if (tempShipModel == null)
+                {
+                    Logger.Error(
+                        "Cannot summon boat slave {0} ({1}): model {2} does not resolve to ShipModel",
+                        slaveTemplate.Name, slaveTemplate.Id, slaveTemplate.ModelId);
+                    owner?.SendErrorMessage(ErrorMessageType.SlaveCannotSpawn);
+                    TlIdManager.Instance.ReleaseId(tlId);
+                    ObjectIdManager.Instance.ReleaseId(objId);
+                    return null;
+                }
+
                 var minDepth = tempShipModel.MassBoxSizeZ - tempShipModel.MassCenterZ + 1f;
 
                 // Somehow take into account where the ship will end up related to it's mass center (also check boat physics)
@@ -505,29 +869,23 @@ public class SlaveManager : Singleton<SlaveManager>
             spawnPos.Local.SetRotation(0f, 0f, owner?.Transform.World.Rotation.Z + MathF.PI / 2 ?? useSpawner.Position.Yaw);
         }
 
-        if (item is SummonSlave slaveSummonItem)
+        if (item is SummonSlave cooldownItem &&
+            ((cooldownItem.IsDestroyed > 0) || (cooldownItem.RepairStartTime > DateTime.MinValue)))
         {
-            slaveSummonItem.SlaveType = 0x02;
-            slaveSummonItem.SlaveDbId = dbId;
-            if ((slaveSummonItem.IsDestroyed > 0) || (slaveSummonItem.RepairStartTime > DateTime.MinValue))
+            var secondsLeft = (cooldownItem.RepairStartTime.AddMinutes(10) - DateTime.UtcNow).TotalSeconds;
+            if (secondsLeft > 0.0)
             {
-                var secondsLeft = (slaveSummonItem.RepairStartTime.AddMinutes(10) - DateTime.UtcNow).TotalSeconds;
-                if (secondsLeft > 0.0)
-                {
-                    // Slave was destroyed and is on cooldown
-                    owner?.SendErrorMessage(ErrorMessageType.SlaveSpawnErrorNeedRepairTime, (uint)Math.Round(secondsLeft));
-                    return null;
-                }
+                // Slave was destroyed and is on cooldown.
+                owner?.SendErrorMessage(
+                    ErrorMessageType.SlaveSpawnErrorNeedRepairTime,
+                    (uint)Math.Round(secondsLeft));
+                return null;
             }
-            slaveSummonItem.SummonLocation = spawnPos.World.Position;
-            slaveSummonItem.RepairStartTime = DateTime.MinValue; // reset timer here
-            slaveSummonItem.IsDirty = true;
-            owner?.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.UpdateSummonMateItem, new ItemUpdate(item), new List<ulong>()));
         }
 
-        owner?.BroadcastPacket(new SCSlaveCreatedPacket(owner.ObjId, tlId, objId, item?.Id ?? 0ul, owner.Name), true);
-
-        // Get new Id to save if it has a player as owner
+        // A new player slave needs its persistent id before the source item is announced. Sending
+        // SlaveDbId=0 and allocating the id afterwards leaves the summon item detached from the
+        // equipment container and the client-side slave record that use that id.
         if ((owner?.Id > 0) && (dbId <= 0))
             dbId = CharacterIdManager.Instance.GetNextId(); // dbId = SlaveIdManager.Instance.GetNextId();
 
@@ -551,6 +909,31 @@ public class SlaveManager : Singleton<SlaveManager>
         summonedSlave.SpawnTime = DateTime.UtcNow;
         summonedSlave.Spawner = useSpawner;
         summonedSlave.Skills = new List<uint>();
+
+        // Ships and land vehicles use the client-side slave equipment container (0xF2), not the
+        // character equipment container (0x01). Persist it by the slave DB id so custom sails,
+        // cannons and other rigging survive despawn/re-summon and server restarts.
+        if (owner != null && dbId > 0)
+        {
+            var persistentEquipment = ItemManager.Instance.GetItemContainerForCharacter(
+                owner.Id, SlotType.EquipmentSlave, dbId);
+            if (persistentEquipment is not SlaveEquipmentContainer slaveEquipment)
+            {
+                Logger.Error(
+                    "Persistent equipment container {0} for slave {1} was {2}, expected SlaveEquipmentContainer",
+                    persistentEquipment.ContainerId, dbId, persistentEquipment.GetType().Name);
+                return null;
+            }
+
+            slaveEquipment.Wearer = summonedSlave;
+            slaveEquipment.MateId = dbId;
+            summonedSlave.Equipment = slaveEquipment;
+        }
+        else
+        {
+            summonedSlave.Equipment = new SlaveEquipmentContainer(owner?.Id ?? 0, summonedSlave, false);
+        }
+
         var slaveSkills = MateManager.Instance.GetMateSkills(slaveTemplate.Id);
         if (slaveSkills is { Count: > 0 })
             summonedSlave.Skills.AddRange(slaveSkills);
@@ -563,14 +946,34 @@ public class SlaveManager : Singleton<SlaveManager>
             summonedSlave.Mp = summonedSlave.MaxMp;
         }
 
-        if (_slaveInitialItems.TryGetValue(summonedSlave.Template.SlaveInitialItemPackId, out var itemPack))
+        var createdInitialEquipment = false;
+        if (summonedSlave.Equipment.Items.Count == 0 &&
+            _slaveInitialItems.TryGetValue(summonedSlave.Template.SlaveInitialItemPackId, out var itemPack))
         {
             foreach (var initialItem in itemPack)
             {
-                // var newItem = new Item(WorldManager.DefaultWorldId,ItemManager.Instance.GetTemplate(initialItem.itemId),1);
-                var newItem = ItemManager.Instance.Create(initialItem.itemId, 1, 0, false);
-                summonedSlave.Equipment.AddOrMoveExistingItem(ItemTaskType.Invalid, newItem, initialItem.equipSlotId);
+                var newItem = ItemManager.Instance.Create(initialItem.itemId, 1, 0, true);
+                if (newItem == null || !summonedSlave.Equipment.AddOrMoveExistingItem(
+                        ItemTaskType.Invalid, newItem, initialItem.equipSlotId))
+                {
+                    Logger.Error(
+                        "Failed to place initial slave equipment: slave={0}, pack={1}, item={2}, slot={3}",
+                        summonedSlave.TemplateId, summonedSlave.Template.SlaveInitialItemPackId,
+                        initialItem.itemId, initialItem.equipSlotId);
+                    if (newItem?.Id > 0)
+                        ItemManager.Instance.ReleaseId(newItem.Id);
+                }
+                else
+                {
+                    createdInitialEquipment = true;
+                }
             }
+        }
+        else if (summonedSlave.Equipment.Items.Count > 0)
+        {
+            Logger.Debug(
+                "Loaded {0} persisted equipment items for slave dbId={1}, template={2}",
+                summonedSlave.Equipment.Items.Count, summonedSlave.Id, summonedSlave.TemplateId);
         }
 
         summonedSlave.Hp = Math.Min(summonedSlave.Hp, summonedSlave.MaxHp);
@@ -581,9 +984,130 @@ public class SlaveManager : Singleton<SlaveManager>
             summonedSlave.Hp = summonedSlave.MaxHp;
 
         summonedSlave.Transform = spawnPos.CloneDetached(summonedSlave);
-        summonedSlave.Spawn();
+
+        // The source item, the persistent 0xF2 container and its initial equipment must reach
+        // MySQL before the client sees a summon success. They all share the same dbSlaveId.
+        if (item is SummonSlave slaveSummonItem)
+        {
+            slaveSummonItem.SlaveType = 0x02;
+            slaveSummonItem.SlaveDbId = dbId;
+            slaveSummonItem.SummonLocation = spawnPos.World.Position;
+            slaveSummonItem.RepairStartTime = DateTime.MinValue;
+            slaveSummonItem.IsDirty = true;
+        }
+
+        if (owner != null && dbId > 0 &&
+            !SaveManager.Instance.SaveItemsForOwner(
+                owner.Id,
+                createdInitialEquipment
+                    ? $"create initial slave equipment dbSlaveId={dbId}"
+                    : $"bind slave source item dbSlaveId={dbId}"))
+        {
+            Logger.Error(
+                "Cannot publish slave summon because its source item/equipment was not persisted: " +
+                "owner={0}, slave={1}, container={2}",
+                owner.Id, dbId, summonedSlave.Equipment.ContainerId);
+            spawnPos.Dispose();
+            TlIdManager.Instance.ReleaseId(tlId);
+            ObjectIdManager.Instance.ReleaseId(objId);
+            return null;
+        }
+
+        // The target client can resolve ownership/control while processing the creation and
+        // status packets. Publish only after the parent is authoritative in both registries and,
+        // for ships, in the physics world. Previously this happened after SCUnitState and after all
+        // child parts, so the client had no valid controllable parent at the decisive moment.
+        lock (_slaveListLock)
+        {
+            _tlSlaves[summonedSlave.TlId] = summonedSlave;
+            if (owner != null)
+                _activeSlaves[owner.ObjId] = summonedSlave;
+        }
+
+        if (item is SummonSlave)
+        {
+            owner?.SendPacket(new SCItemTaskSuccessPacket(
+                ItemTaskType.UpdateSummonMateItem,
+                new ItemUpdate(item),
+                new List<ulong>()));
+        }
+
+        Logger.Info(
+            "Slave summon ready: owner={0}, template={1}, kind={2}, objId={3}, tl={4}, dbId={5}, " +
+            "sourceItem={6}, equipmentContainer={7}, equipmentCount={8}",
+            owner?.Id ?? 0, summonedSlave.TemplateId, summonedSlave.Template.SlaveKind,
+            summonedSlave.ObjId, summonedSlave.TlId, summonedSlave.Id,
+            summonedSlave.SummoningItem?.Id ?? 0,
+            summonedSlave.Equipment.ContainerType,
+            summonedSlave.Equipment.Items.Count);
+
+        // SCSlaveCreated starts the client-side portal effect. Retail does not publish the
+        // actual unit state until the template portal interval has elapsed; publishing it in the
+        // same tick makes both vehicles and ships pop into existence without the vortex.
+        owner?.BroadcastPacket(new SCSlaveCreatedPacket(
+            owner.ObjId, summonedSlave.TlId, summonedSlave.ObjId, owner.Id, owner.Name), true);
 
         spawnPos.Dispose();
+        var portalDelay = Math.Max(0f, summonedSlave.Template.PortalTime);
+        if (portalDelay > 0.05f)
+        {
+            TaskManager.Instance.Schedule(
+                new CompleteSlaveSpawnTask(summonedSlave),
+                TimeSpan.FromSeconds(portalDelay));
+        }
+        else
+        {
+            CompleteSpawnPublication(summonedSlave);
+        }
+
+        return summonedSlave;
+    }
+
+    /// <summary>
+    /// Publishes a slave after the client has had time to play the portal-spawn effect announced
+    /// by <see cref="SCSlaveCreatedPacket"/>.
+    /// </summary>
+    public void CompleteSpawnPublication(Slave summonedSlave)
+    {
+        if (summonedSlave == null)
+            return;
+
+        lock (_slaveListLock)
+        {
+            if (!_tlSlaves.TryGetValue(summonedSlave.TlId, out var registered) ||
+                !ReferenceEquals(registered, summonedSlave))
+            {
+                Logger.Debug(
+                    "Delayed slave publication skipped because the summon was recalled: template={0}, objId={1}, tl={2}",
+                    summonedSlave.TemplateId, summonedSlave.ObjId, summonedSlave.TlId);
+                return;
+            }
+        }
+
+        var owner = summonedSlave.Summoner;
+        var item = summonedSlave.SummoningItem;
+
+        if (summonedSlave.Template.IsABoat())
+        {
+            var world = WorldManager.Instance.GetWorld(summonedSlave.Transform.WorldId);
+            if (world == null)
+            {
+                Logger.Error(
+                    "Cannot register boat physics: slave={0}, objId={1}, world={2} was not found",
+                    summonedSlave.TemplateId, summonedSlave.ObjId, summonedSlave.Transform.WorldId);
+            }
+            else
+            {
+                world.Physics.AddShip(summonedSlave);
+            }
+        }
+
+        summonedSlave.Spawn();
+
+        // Equipment entries in the parent state are inventory records only. The target database
+        // resolves each occupied slot to a separate attached doodad or child slave, which must be
+        // published as world objects before the ship becomes functionally complete.
+        SynchronizeEquipmentComponents(summonedSlave);
 
         // If this was a previously saved slave, load doodads from DB and spawn them
         var doodadSpawnCount = SpawnManager.Instance.SpawnPersistentDoodads(DoodadOwnerType.Slave, (int)summonedSlave.Id, summonedSlave, true);
@@ -593,7 +1117,8 @@ public class SlaveManager : Singleton<SlaveManager>
         foreach (var doodadBinding in summonedSlave.Template.DoodadBindings)
         {
             // If this AttachPoint has already been spawned, skip it's creation
-            if (summonedSlave.AttachedDoodads.Any(d => d.AttachPoint == doodadBinding.AttachPointId))
+            if (summonedSlave.AttachedDoodads.Any(d => d.AttachPoint == doodadBinding.AttachPointId) ||
+                summonedSlave.AttachedSlaves.Any(x => x.AttachPointId == (sbyte)doodadBinding.AttachPointId))
                 continue;
 
             var doodad = new Doodad();
@@ -627,6 +1152,11 @@ public class SlaveManager : Singleton<SlaveManager>
             ApplyAttachPointLocation(summonedSlave, doodad, doodadBinding.AttachPointId);
 
             summonedSlave.AttachedDoodads.Add(doodad);
+
+            // Slave template bindings are also built directly and need their phase/timer in the
+            // initial create record. This covers default breathing devices as well as equipment
+            // slots resolved to doodads.
+            doodad.InitDoodad(false);
             doodad.Spawn();
 
             // Only set IsPersistent if the binding is defined as such
@@ -640,6 +1170,9 @@ public class SlaveManager : Singleton<SlaveManager>
         foreach (var slaveBinding in summonedSlave.Template.SlaveBindings)
         { 
             if (slaveBinding.OwnerType != "Slave")
+                continue;
+            if (summonedSlave.AttachedDoodads.Any(d => d.AttachPoint == slaveBinding.AttachPointId) ||
+                summonedSlave.AttachedSlaves.Any(x => x.AttachPointId == (sbyte)slaveBinding.AttachPointId))
                 continue;
             var childSlaveTemplate = GetSlaveTemplate(slaveBinding.SlaveId);
             var childTlId = (ushort)TlIdManager.Instance.GetNextId();
@@ -657,8 +1190,10 @@ public class SlaveManager : Singleton<SlaveManager>
             childSlave.Mp = 1;
             childSlave.ModelParams = new UnitCustomModelParams();
             childSlave.Faction = owner?.Faction ?? summonedSlave.Faction;
-            childSlave.Id = 11; // TODO
-            childSlave.Summoner = owner;
+            // Attached runtime components are not persistent personal slaves. Keep ownership
+            // fields for faction/interaction checks, but send no summoner/db identity in status.
+            childSlave.Id = 0;
+            childSlave.Summoner = null;
             childSlave.OwnerObjId = owner?.ObjId ?? 0;
             childSlave.OwnerId = owner?.Id ?? 0;
             //childSlave.SummoningItem = item;
@@ -682,19 +1217,6 @@ public class SlaveManager : Singleton<SlaveManager>
             childSlave.PostUpdateCurrentHp(childSlave, 0, childSlave.Hp, KillReason.Unknown);
         }
 
-        lock (_slaveListLock)
-        {
-            _tlSlaves.Add(summonedSlave.TlId, summonedSlave);
-            if (owner != null)
-                _activeSlaves.TryAdd(owner.ObjId, summonedSlave);
-        }
-
-        if (summonedSlave.Template.IsABoat())
-        {
-            var world = WorldManager.Instance.GetWorld(owner.Transform.WorldId);
-            world.Physics.AddShip(summonedSlave);
-        }
-
         owner?.SendPacket(new SCMySlavePacket(summonedSlave.ObjId, summonedSlave.TlId, summonedSlave.Name,
             summonedSlave.TemplateId,
             summonedSlave.Hp, summonedSlave.MaxHp,
@@ -709,7 +1231,6 @@ public class SlaveManager : Singleton<SlaveManager>
         summonedSlave.PostUpdateCurrentHp(summonedSlave, 0, summonedSlave.Hp, KillReason.Unknown);
         UpdateSlaveRepairPoints(summonedSlave);
 
-        return summonedSlave;
     }
 
     /// <summary>
@@ -779,30 +1300,121 @@ public class SlaveManager : Singleton<SlaveManager>
         var filePath = Path.Combine(FileManager.AppPath, "Data", "slave_attach_points.json");
         var contents = FileManager.GetFileContents(filePath);
         if (string.IsNullOrWhiteSpace(contents))
-            throw new IOException(
-                $"File {filePath} doesn't exists or is empty.");
-
-        if (JsonHelper.TryDeserializeObject(contents, out List<SlaveModelAttachPoint> attachPoints, out _))
-            Logger.Info("Slave model attach points loaded...");
-        else
-            Logger.Warn("Slave model attach points not loaded...");
-
-        // Convert degrees from json to radian
-        foreach (var vehicle in attachPoints)
-        {
-            foreach (var pos in vehicle.AttachPoints)
-            {
-                pos.Value.Roll = pos.Value.Roll.DegToRad();
-                pos.Value.Pitch = pos.Value.Pitch.DegToRad();
-                pos.Value.Yaw = pos.Value.Yaw.DegToRad();
-            }
-        }
+            throw new IOException($"File {filePath} doesn't exist or is empty.");
 
         _attachPoints = new Dictionary<uint, Dictionary<AttachPointKind, WorldSpawnPosition>>();
-        foreach (var set in attachPoints)
+
+        var loadedSets = 0;
+        var loadedModels = 0;
+        var loadedPoints = 0;
+        var skippedSets = 0;
+
+        try
         {
-            _attachPoints[set.ModelId] = set.AttachPoints;
+            var root = JArray.Parse(contents);
+            foreach (var token in root)
+            {
+                if (token is not JObject set)
+                {
+                    skippedSets++;
+                    Logger.Warn("Slave attach-point entry is not an object and was skipped");
+                    continue;
+                }
+
+                var modelToken = set["ModelId"];
+                var pointsToken = set["AttachPoints"];
+                if (modelToken == null || pointsToken == null)
+                {
+                    skippedSets++;
+                    Logger.Warn("Slave attach-point entry is missing ModelId or AttachPoints and was skipped");
+                    continue;
+                }
+
+                var modelIds = new List<uint>();
+                if (modelToken.Type == JTokenType.Array)
+                {
+                    foreach (var modelIdToken in modelToken.Children())
+                    {
+                        if (uint.TryParse(modelIdToken.ToString(), out var modelId))
+                            modelIds.Add(modelId);
+                        else
+                            Logger.Warn("Invalid slave model id '{0}' in {1}", modelIdToken, filePath);
+                    }
+                }
+                else if (uint.TryParse(modelToken.ToString(), out var singleModelId))
+                {
+                    // Backward compatibility with the old schema: "ModelId": 128.
+                    modelIds.Add(singleModelId);
+                }
+
+                if (modelIds.Count == 0)
+                {
+                    skippedSets++;
+                    Logger.Warn("Slave attach-point entry has no valid model ids and was skipped");
+                    continue;
+                }
+
+                var positions = pointsToken.ToObject<Dictionary<AttachPointKind, WorldSpawnPosition>>();
+                if (positions == null || positions.Count == 0)
+                {
+                    skippedSets++;
+                    Logger.Warn("Slave attach-point entry for model(s) {0} has no valid points and was skipped",
+                        string.Join(",", modelIds));
+                    continue;
+                }
+
+                // JSON stores Euler angles in degrees; transforms use radians.
+                foreach (var position in positions.Values)
+                {
+                    position.Roll = position.Roll.DegToRad();
+                    position.Pitch = position.Pitch.DegToRad();
+                    position.Yaw = position.Yaw.DegToRad();
+                }
+
+                foreach (var modelId in modelIds.Distinct())
+                {
+                    if (!_attachPoints.TryGetValue(modelId, out var targetPoints))
+                    {
+                        targetPoints = new Dictionary<AttachPointKind, WorldSpawnPosition>();
+                        _attachPoints.Add(modelId, targetPoints);
+                        loadedModels++;
+                    }
+                    else
+                    {
+                        Logger.Warn("Slave model {0} appears more than once; attachment points will be merged", modelId);
+                    }
+
+                    foreach (var (attachPoint, position) in positions)
+                    {
+                        if (targetPoints.ContainsKey(attachPoint))
+                            Logger.Warn("Slave model {0} attach point {1} is duplicated; using the last value",
+                                modelId, attachPoint);
+
+                        // Each model gets its own mutable transform data, even when several model ids
+                        // share one coordinate set in the new JSON schema.
+                        targetPoints[attachPoint] = position.Clone();
+                    }
+
+                    loadedPoints += positions.Count;
+                }
+
+                loadedSets++;
+            }
         }
+        catch (Exception e)
+        {
+            _attachPoints.Clear();
+            throw new InvalidDataException(
+                $"Failed to load {filePath}. Supported schemas are ModelId as a number or an array, with an AttachPoints object.",
+                e);
+        }
+
+        if (_attachPoints.Count == 0)
+            throw new InvalidDataException($"File {filePath} did not contain any usable slave attachment points.");
+
+        Logger.Info(
+            "Slave model attach points loaded: sets={0}, models={1}, points={2}, skippedSets={3}",
+            loadedSets, loadedModels, loadedPoints, skippedSets);
     }
 
     public void Load()
@@ -816,6 +1428,10 @@ public class SlaveManager : Singleton<SlaveManager>
             _tlSlaves = new Dictionary<uint, Slave>();
         }
         _slaveInitialItems = new Dictionary<uint, List<SlaveInitialItems>>();
+        _slaveEquipmentItemTemplates = new HashSet<uint>();
+        _slaveEquipmentSlots = new Dictionary<uint, HashSet<byte>>();
+        _slaveEquipmentSlotInfo = new Dictionary<uint, Dictionary<byte, SlaveEquipmentSlotInfo>>();
+        _slaveEquipmentGradeSpawns = new Dictionary<ulong, SlaveEquipmentSpawnInfo>();
         //_slaveMountSkills = new Dictionary<uint, SlaveMountSkills>();
         _slaveMountSkills = new Dictionary<uint, List<uint>>();
         _repairableSlaves = new Dictionary<uint, uint>();
@@ -852,6 +1468,9 @@ public class SlaveManager : Singleton<SlaveManager>
                             SlaveCustomizingId = reader.GetUInt32("slave_customizing_id", 0),
                             Customizable = reader.GetBoolean("customizable", false),
                             PortalTime = reader.GetFloat("portal_time"),
+                            PortalSpawnFxId = reader.GetUInt32("portal_spawn_fx_id", 0),
+                            PortalDespawnFxId = reader.GetUInt32("portal_despawn_fx_id", 0),
+                            PortalScale = reader.GetFloat("portal_scale", 1f),
                             Hp25DoodadCount = reader.GetInt32("hp25_doodad_count"),
                             Hp50DoodadCount = reader.GetInt32("hp50_doodad_count"),
                             Hp75DoodadCount = reader.GetInt32("hp75_doodad_count"),
@@ -896,6 +1515,10 @@ public class SlaveManager : Singleton<SlaveManager>
                         var SlotId = reader.GetByte("equip_slot_id");
                         var item = reader.GetUInt32("item_id");
 
+                        // Initial equipment is authoritative even when an old client table omits
+                        // the matching item_slave_equipments row (item 43000 is such a case).
+                        _slaveEquipmentItemTemplates.Add(item);
+
                         if (_slaveInitialItems.TryGetValue(ItemPackId, out var key))
                         {
                             key.Add(new SlaveInitialItems() { slaveInitialItemPackId = ItemPackId, equipSlotId = SlotId, itemId = item });
@@ -916,6 +1539,75 @@ public class SlaveManager : Singleton<SlaveManager>
                     }
                 }
             }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT item_id FROM item_slave_equipments";
+                command.Prepare();
+
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                    _slaveEquipmentItemTemplates.Add(reader.GetUInt32("item_id"));
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                    "SELECT slave_id, equip_slot_id, attach_point_id, require_buff_tag_id, require_slot_id " +
+                    "FROM slave_equip_slots";
+                command.Prepare();
+
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var slaveId = reader.GetUInt32("slave_id");
+                    var slot = reader.GetByte("equip_slot_id");
+                    if (!_slaveEquipmentSlots.TryGetValue(slaveId, out var slots))
+                    {
+                        slots = new HashSet<byte>();
+                        _slaveEquipmentSlots.Add(slaveId, slots);
+                    }
+                    slots.Add(slot);
+
+                    if (!_slaveEquipmentSlotInfo.TryGetValue(slaveId, out var definitions))
+                    {
+                        definitions = new Dictionary<byte, SlaveEquipmentSlotInfo>();
+                        _slaveEquipmentSlotInfo.Add(slaveId, definitions);
+                    }
+                    definitions[slot] = new SlaveEquipmentSlotInfo
+                    {
+                        AttachPoint = (AttachPointKind)reader.GetInt32("attach_point_id"),
+                        RequireBuffTagId = reader.GetInt32("require_buff_tag_id"),
+                        RequireSlotId = reader.GetInt32("require_slot_id")
+                    };
+                }
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                    "SELECT item_id, item_grade_id, doodad_id, slave_id " +
+                    "FROM item_slave_equipment_grade_spawns";
+                command.Prepare();
+
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var itemId = reader.GetUInt32("item_id");
+                    var grade = reader.GetByte("item_grade_id");
+                    _slaveEquipmentGradeSpawns[MakeEquipmentGradeKey(itemId, grade)] =
+                        new SlaveEquipmentSpawnInfo
+                        {
+                            DoodadId = reader.GetUInt32("doodad_id"),
+                            ChildSlaveId = reader.GetUInt32("slave_id")
+                        };
+                }
+            }
+
+            Logger.Info(
+                "Loaded slave equipment metadata: itemTemplates={0}, slaveSlotSets={1}, slotDefinitions={2}, gradeSpawns={3}",
+                _slaveEquipmentItemTemplates.Count, _slaveEquipmentSlots.Count,
+                _slaveEquipmentSlotInfo.Sum(x => x.Value.Count), _slaveEquipmentGradeSpawns.Count);
 
             using (var command = connection.CreateCommand())
             {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 using AAEmu.Commons.Utils;
@@ -7,10 +8,8 @@ using AAEmu.Game.Utils.DB;
 
 namespace AAEmu.Game.Core.Managers
 {
-    namespace AAEmu.Game.Core.Managers
+    public class ModelManager : Singleton<ModelManager>
     {
-        public class ModelManager : Singleton<ModelManager>
-        {
 
             private Dictionary<string, Dictionary<uint, Model>> _models;
             private Dictionary<uint, ModelType> _modelTypes;
@@ -145,8 +144,9 @@ namespace AAEmu.Game.Core.Managers
                                     WaterDensity = reader.GetFloat("water_density", 1f),
                                     WaterResistance = reader.GetFloat("water_resistance", 1f),
                                     SteerVel = reader.GetFloat("steer_vel"),
-                                    Accel = reader.GetFloat("accel"),
-                                    ReverseAccel = reader.GetFloat("reverse_accel"),
+                                    AccelExponent = reader.GetFloat("accel_exponent", 1f),
+                                    MaxRpmSec = reader.GetFloat("max_rpm_sec", 1f),
+                                    MinRpmSec = reader.GetFloat("min_rpm_sec", 1f),
                                     ReverseVelocity = reader.GetFloat("reverse_velocity"),
                                     TurnAccel = reader.GetFloat("turn_accel"),
                                     TubeLength = reader.GetFloat("tube_length"),
@@ -156,6 +156,16 @@ namespace AAEmu.Game.Core.Managers
                                     KeelHeight = reader.GetFloat("keel_height"),
                                     KeelOffsetZ = reader.GetFloat("keel_offset_z")
                                 };
+
+                                // Legacy physics used columns named accel/reverse_accel. They are absent
+                                // from the target database, and SQLiteWrapperReader therefore returned zero.
+                                // Keep the compatibility properties meaningful while the runtime uses the
+                                // target RPM timing fields directly.
+                                model.AccelExponent = Math.Max(0.01f, model.AccelExponent);
+                                model.MaxRpmSec = Math.Max(0.1f, model.MaxRpmSec);
+                                model.MinRpmSec = Math.Max(0.1f, model.MinRpmSec);
+                                model.Accel = model.Velocity / model.MaxRpmSec;
+                                model.ReverseAccel = model.ReverseVelocity / model.MinRpmSec;
 
                                 _models["ShipModel"].TryAdd(model.Id, model);
                             }
@@ -263,4 +273,3 @@ namespace AAEmu.Game.Core.Managers
             }
         }
     }
-}

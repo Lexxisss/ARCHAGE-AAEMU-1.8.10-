@@ -6,6 +6,7 @@ using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Housing;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Utils.Logging;
 namespace AAEmu.Game.Core.Packets.C2G;
 
 public class CSChangeTargetPacket : GamePacket
@@ -42,17 +43,12 @@ public class CSChangeTargetPacket : GamePacket
             Connection.ActiveChar.SendMessage($"ObjId: {targetId}, TemplateId: {portal.TemplateId}\nPos: {portal.Transform}");
         else if (Connection.ActiveChar.CurrentTarget is Npc npc)
         {
-            var spawnerId = npc.Spawner != null && npc.Spawner.NpcSpawnerIds.Count > 0
-                ? npc.Spawner.NpcSpawnerIds[0]
-                : 0u;
-
-            Connection.ActiveChar.SendMessage(string.Format("ObjId: {0}, TemplateId: {1}, Ai: {2}, @{3} SpawnerId: {4} Stance: {6}, Speed: {7:F1}\nPos: {5}",
-                targetId,
-                npc.TemplateId,
-                npc.Ai?.GetType().Name.Replace("AiCharacter", ""),
-                npc.Ai?.GetCurrentBehavior()?.GetType().Name.Replace("Behavior", ""), spawnerId,
-                npc.Transform,
-                npc.CurrentGameStance, npc.BaseMoveSpeed));
+            // Keep NPC diagnostics in the dedicated file logger. Chat delivery is
+            // client-channel/version dependent and was not reliable on 1.8.1.0.
+            // Selection is diagnostic only. Never replay NPC equipment or visual
+            // options on click: the target client treats those packets as live
+            // deltas and may rebuild/hide already attached slots.
+            NpcDebugLogger.Snapshot("target-selected", Connection.ActiveChar, npc);
         }
         else if (Connection.ActiveChar.CurrentTarget is House house)
             Connection.ActiveChar.SendMessage($"ObjId: {targetId}, HouseId: {house.Id}, Pos: {house.Transform}," +

@@ -145,7 +145,14 @@ public static class SCOffsets
     public const ushort off_3A10856C = 0x04A;
     public const ushort SCSkillStartedPacket = 0x10F;
     public const ushort SCSkillFiredPacket = 0x34E;
-    public const ushort SCSkillEndedPacket = 0x02A;
+    // The message that ends a skill, and the only thing that walks its effect descriptors, lets go
+    // of whatever they were holding and drops the active record. Without it the gesture finishes,
+    // the flower changes, and the water keeps pouring, because the emitter belongs to the record
+    // and nothing else takes it down.
+    //
+    // It was going out one number early, on a slot this client uses for something else, so it was
+    // never received at all.
+    public const ushort SCSkillEndedPacket = 0x02B;
     public const ushort SCSkillStoppedPacket = 0x1FE;
     public const ushort SCCastingStoppedPacket = 0x2E6;
     public const ushort SCCastingDelayedPacket = 0x0F1;
@@ -474,7 +481,7 @@ public static class SCOffsets
     public const ushort SCRestrictPacket = 0x029;
     public const ushort off_3A109A6C = 0x153;
     public const ushort SCResponseUIDataPacket = 0x2FD;
-    public const ushort SCUnitVisualOptionsPacket = 0x214;
+    public const ushort SCUnitVisualOptionsPacket = 0x215; // target dispatcher table+0x10A8 => 0x215
     public const ushort SCUnitOpenEquipInfoPacket = 0x302;
     public const ushort SCNotifyAppealUpdatePacket = 0x259;
     public const ushort SCResultRestrictCheckPacket = 0x35A;
@@ -538,7 +545,6 @@ public static class SCOffsets
     public const ushort SCSysIndunStatPacket = 0x2B8;
     public const ushort SCSysIndunIndexPacket = 0x200;
     public const ushort SCProtectSensitiveOperationPacket = 0x05F;
-    public const ushort SCSensitiveOperationVerifyUrlPacket = 0x02B;
     public const ushort SCSensitiveOperationVerifySuccessPacket = 0x0FE;
     public const ushort SCAntibotPunishPacket = 0x282;
     public const ushort off_3A109EBC = 0x04C;
@@ -979,7 +985,10 @@ public static class SCOffsets
     public const ushort SCTelescopeToggledPacket = 0xfff;
     public const ushort SCTransferTelescopeToggledPacket = 0xfff;
     public const ushort SCTutorialSavedPacket = 0xfff;
-    public const ushort SCDetachFromDoodadPacket = 0xfff;
+    // Target 1.8.1.0 registers the response under its canonical name
+    // SCUnbondDoodadPacket. Keep the old server-side name as an opcode alias so no caller can
+    // silently fall back to the invalid 0xFFF placeholder.
+    public const ushort SCDetachFromDoodadPacket = SCUnbondDoodadPacket;
     public const ushort SCUnitBountyMoneyPacket = 0xfff;
     public const ushort SCUnitPointsPacket = 0x187;
     public const ushort SCAccountAttributePacket = 0xfff;

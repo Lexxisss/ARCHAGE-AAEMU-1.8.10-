@@ -5,6 +5,7 @@ using AAEmu.Commons.Utils;
 using AAEmu.Commons.Utils.DB;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Models;
+using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Tasks.SaveTask;
 
 using NLog;
@@ -164,6 +165,79 @@ public class SaveManager : Singleton<SaveManager>
         }
         _isSaving = false;
         return saved;
+    }
+
+    /// <summary>
+    /// Persists all dirty item containers and items belonging to one character immediately.
+    /// </summary>
+    /// <remarks>
+    /// Slave equipment changes must be durable before the success packet is sent. Otherwise a
+    /// server stop between the equipment swap and the next world autosave restores the old ship
+    /// loadout. The same lock used by the global save serializes both transactions.
+    /// </remarks>
+    public bool SaveItemsForOwner(uint ownerId, string reason)
+    {
+        if (ownerId == 0)
+            return false;
+
+        lock (_lock)
+        {
+            try
+            {
+                using var connection = MySQL.CreateConnection();
+                using var transaction = connection.BeginTransaction();
+
+                var saved = ItemManager.Instance.Save(connection, transaction, ownerId);
+                transaction.Commit();
+
+                Logger.Info(
+                    "Persisted owner item state: owner={0}, reason={1}, items={2}, deleted={3}, containers={4}",
+                    ownerId, reason ?? string.Empty, saved.Item1, saved.Item2, saved.Item3);
+                return true;
+            }
+            catch (Exception e)
+            {
+                // ItemManager marks rows clean after the SQL statement succeeds, before the
+                // transaction commit. Re-mark them when the transaction fails so a later save can
+                // retry instead of silently treating rolled-back data as durable.
+                ItemManager.Instance.MarkOwnerItemsDirty(ownerId);
+                Logger.Error(e,
+                    "Failed to persist owner item state: owner={0}, reason={1}",
+                    ownerId, reason ?? string.Empty);
+                return false;
+            }
+        }
+    }
+
+    /// <summary>Persists one character immediately, including return_district and portal book.</summary>
+    public bool SaveCharacter(Character character, string reason)
+    {
+        if (character == null || character.Id == 0)
+            return false;
+
+        lock (_lock)
+        {
+            try
+            {
+                using var connection = MySQL.CreateConnection();
+                using var transaction = connection.BeginTransaction();
+                if (!character.Save(connection, transaction))
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+                transaction.Commit();
+                Logger.Info("Persisted character state: character={0}, reason={1}",
+                    character.Id, reason ?? string.Empty);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Logger.Error(exception, "Failed to persist character={0}, reason={1}",
+                    character.Id, reason ?? string.Empty);
+                return false;
+            }
+        }
     }
 
     public void SaveTick()

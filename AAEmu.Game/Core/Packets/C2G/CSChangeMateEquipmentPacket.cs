@@ -115,15 +115,18 @@ public class CSChangeMateEquipmentPacket : GamePacket
                     {
                         AddChange(reply, invItems[i], equipItems[i]);
 
+                        // SCItemTaskSuccess resolves its owner as the character in the target
+                        // client. Announcing EquipmentMate here therefore inserts the same item
+                        // into the character model as well. The mate-side swap is authoritative in
+                        // SCMateEquipmentChangedPacket; this generic task must describe only the
+                        // character-owned inventory half.
                         var tasks = new List<ItemTask>
                         {
-                            new ItemRemove(movedItem, invItems[i].Item1, invItems[i].Item2),
-                            new ItemGain(movedItem, equipItems[i].Item1, equipItems[i].Item2)
+                            new ItemRemove(movedItem, invItems[i].Item1, invItems[i].Item2)
                         };
 
-                        // Gear replacing gear: whatever was in the slot has been pushed somewhere
-                        // else, and it carries its new home itself.
-                        if (slotBefore != null)
+                        // Replacing mate gear pushes the former piece back into the character bag.
+                        if (slotBefore != null && slotBefore.SlotType == SlotType.Inventory)
                             tasks.Add(new ItemGain(slotBefore));
 
                         Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems, tasks, []));
@@ -141,21 +144,32 @@ public class CSChangeMateEquipmentPacket : GamePacket
                     {
                         AddChange(reply, invItems[i], equipItems[i]);
 
-                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems,
-                            [
-                                new ItemRemove(movedItem, equipItems[i].Item1, equipItems[i].Item2),
-                                new ItemGain(movedItem, invItems[i].Item1, invItems[i].Item2)
-                            ],
-                            []));
+                        var tasks = new List<ItemTask>();
+
+                        // If the requested inventory slot was occupied, that item left the
+                        // character-owned bag as part of the swap. Do not announce where it went
+                        // here; the mate-specific packet owns that side.
+                        if (invItems[i].Item3 != null)
+                            tasks.Add(new ItemRemove(invItems[i].Item3, invItems[i].Item1, invItems[i].Item2));
+
+                        tasks.Add(new ItemGain(movedItem, invItems[i].Item1, invItems[i].Item2));
+                        Connection.SendPacket(new SCItemTaskSuccessPacket(ItemTaskType.SwapItems, tasks, []));
                         touchedSlots.Add(equipItems[i].Item2);
                     }
                 }
             }
         }
 
+        // The request has a 21-byte reserved zero tail in the target build. Its fields are not
+        // assigned semantics, but the bytes belong to this packet and must be consumed.
+        if (stream.LeftBytes > 0)
+            stream.ReadBytes(stream.LeftBytes);
+
         if (reply.Changes.Count > 0)
             Connection.SendPacket(new SCMateEquipmentChangedPacket(reply, true));
 
+        // Required: this is the visual equipment delta for the mate ObjId, not a character item
+        // task. Keep it after the mate-container reconciliation packet.
         BroadcastWornChange(character, mate, touchedSlots);
     }
 

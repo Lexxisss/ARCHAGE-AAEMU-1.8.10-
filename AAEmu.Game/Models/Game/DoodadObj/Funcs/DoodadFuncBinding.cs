@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using AAEmu.Game.Core.Managers;
+﻿using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj.Templates;
@@ -19,27 +18,31 @@ public class DoodadFuncBinding : DoodadFuncTemplate
         if (caster is not Character character) { return; }
 
         var returnPointId = PortalManager.Instance.GetDistrictReturnPoint(DistrictId, character.Faction.Id);
-
-        Logger.Trace($"DoodadFuncBinding: DistrictId {DistrictId} ==> ReturnPointId {returnPointId}, SubZonesId {character.SubZoneId}");
-        character.SendMessage($"DoodadFuncBinding: DistrictId {DistrictId} ==> ReturnPointId {returnPointId}, SubZonesId {character.SubZoneId}");
-
-        if (returnPointId == 0) { return; }
+        if (returnPointId == 0)
+        {
+            Logger.Warn("DoodadFuncBinding: no return point for district={0}, faction={1}",
+                DistrictId, character.Faction.Id);
+            return;
+        }
 
         var portal = PortalManager.Instance.GetRecallById(returnPointId);
+        if (portal == null)
+        {
+            Logger.Warn("DoodadFuncBinding: recall point {0} for district {1} was not loaded",
+                returnPointId, DistrictId);
+            return;
+        }
 
-        if (portal != null)
-        {
-            character.ReturnDistrictId = DistrictId;
-            var portals = character.Portals.DistrictPortals.Values.ToArray();
-            character.SendPacket(new SCCharacterReturnDistrictsPacket(portals, portal.Id));
-            Logger.Trace($"DoodadFuncBinding: ReturnPointId {returnPointId} ==> Portal.Id {portal.Id}");
-            character.SendMessage($"DoodadFuncBinding: ReturnPointId {returnPointId} ==> Portal.Id {portal.Id}");
-        }
+        // One character has exactly one active Recall destination. Assigning another Memory Tome
+        // overwrites this field and the same row is persisted immediately.
+        character.ReturnDistrictId = DistrictId;
+        character.Portals.Send();
+        if (!SaveManager.Instance.SaveCharacter(character, "set Recall district"))
+            Logger.Error("DoodadFuncBinding: failed to persist Recall district for character={0}", character.Id);
         else
-        {
-            Logger.Warn($"DoodadFuncBinding: Recall point {DistrictId} not found!");
-            character.SendMessage($"DoodadFuncBinding: Recall point {DistrictId} not found!");
-        }
+            Logger.Info("Recall point persisted: character={0}, district={1}, returnPoint={2}",
+                character.Id, DistrictId, returnPointId);
+
         owner.ToNextPhase = true;
     }
 }

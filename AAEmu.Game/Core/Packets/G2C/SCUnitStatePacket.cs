@@ -13,6 +13,8 @@ using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Gimmicks;
 using AAEmu.Game.Models.Game.Housing;
 using AAEmu.Game.Models.Game.Items;
+using AAEmu.Game.Models.Game.Items.Containers;
+using AAEmu.Game.Models.Game.Items.Templates;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Shipyard;
 using AAEmu.Game.Models.Game.Skills;
@@ -86,10 +88,14 @@ public class SCUnitStatePacket : GamePacket
 
         #region NetUnit
         stream.WriteBc(_unit.ObjId);
-        // Target NPC states carry an empty runtime name. The client resolves
-        // the localized name from npc.TemplateId; serializing the server-side
-        // name shifts BaseUnitType and every following field.
-        stream.Write(_unit is Npc ? string.Empty : _unit.Name);
+        // The target archive string is length-prefixed. Keep the established
+        // empty-name path for ordinary NPCs that resolve their label from the
+        // client template. Only rows whose static show_name_tag path is disabled
+        // receive the explicit runtime name; this cannot shift following fields.
+        var runtimeName = _unit is Npc namedNpc && namedNpc.Template.ShowNameTag
+            ? string.Empty
+            : _unit.Name ?? string.Empty;
+        stream.Write(runtimeName);
 
         // Target 10.8.1 NetUnit header (x2game.dll serializer 0x39A069D0).
         // These fields precede BaseUnitType and were absent from the legacy packet.
@@ -216,80 +222,27 @@ public class SCUnitStatePacket : GamePacket
 
         #region CharacterInfo_3EB0
 
-        //Inventory_Equip1(stream, _unit); // Equip character
-        //Inventory_Equip2(stream, _unit, _baseUnitType); // Equip character
-        //Inventory_Equip0(stream, _unit); // Equip character
-        Inventory_Equip3(stream, _unit); // Equip character
+        Inventory_Equip3(stream, _unit); // target 1.8.1.0 equipment layout
         equipEnd = stream.Count;
 
         #endregion CharacterInfo_3EB0
 
-        // Humanoid NPCs get the Skin variant of this block. Nothing else gets an override at
-        // all: sending one broadly put TEST text and black hands back, including on the 2583
-        // NPCs whose look comes from a genuine total_character_customs row, so the fault is
-        // not confined to the appearances LoadCustom invents.
+        // Target x2game.dll keeps equipment and UnitCustomModelParams as separate
+        // state, but its model builder treats Face.VisualRace != 0 as an active
+        // visual-race transformation. The previous NPC code incorrectly copied the
+        // normal race into VisualRace, which switched equipment construction to the
+        // transformed-model path and dropped Head/Cosplay.
         //
-        // In this client's layout the Skin discriminator stops the block after three colour
-        // fields:
-        //
-        //     type:u8, hairColorId:u32, hornColorId:u32, skinColorId:u32   - 13 bytes
-        //
-        // No model id, no body normal map, and no Face sub-block. That is enough for the
-        // races whose NPCs read acceptably without one.
-        //
-        // Firran get the full Face variant, because for them it is not optional. Their
-        // customs all name face_id 0, so every Firran NPC of a gender wears the same face
-        // body part; everything that makes one differ from the next lives in the Face block
-        // and nowhere else. Across the 114 male rows: 98 distinct morph modifiers, 81
-        // distinct pupil colours, 13 face normal maps. Suppress the block and every male
-        // Firran is necessarily identical - which is exactly what it looked like.
-        //
-        // The layout used here matches the verified 0x0133 field order end to end, including
-        // bodyNormalMapId/Weight sitting after the two-tone fields and immediately before the
-        // face payload, the modifier written as a u16 length followed by its bytes rather
-        // than as a bare 128-byte run, and the 20-byte visual-race/wing tail after it. Any
-        // of those three wrong shifts everything that follows.
-        //
-        // The skin colour is sent as stored. It used to be zeroed together with the body
-        // normal map, and the two are not equivalent - the data says so. body_normal_maps is
-        // numbered from 1, yet 0 is what every Nuian, Elf, Hariharan and Firran custom
-        // actually stores: it is that field's "no override" sentinel. skin_colors is numbered
-        // 1..171 with no row 0 at all, so zeroing it handed the client an id that cannot
-        // resolve. An NPC whose skin colour did not resolve gets no block rather than a zero.
-        //
-        // The copy is packet-local on purpose: never mutate the NPC template or player data.
-        var modelParams = _unit.ModelParams ?? new UnitCustomModelParams(UnitCustomModelType.None);
-        if (npc != null)
-        {
-            if (npc.ModelId is 20 or 21 && modelParams.Face != null && modelParams.SkinColorId != 0)
-            {
-                modelParams = new UnitCustomModelParams(UnitCustomModelType.Face)
-                    .SetId(modelParams.Id)
-                    .SetHairColorId(modelParams.HairColorId)
-                    .SetHornColorId(modelParams.HornColorId)
-                    .SetSkinColorId(modelParams.SkinColorId)
-                    .SetModelId(modelParams.ModelId)
-                    .SetDefaultHairColor(modelParams.DefaultHairColor)
-                    .SetTwoToneHair(modelParams.TwoToneHair)
-                    .SetTwoToneFirstWidth(modelParams.TwoToneFirstWidth)
-                    .SetTwoToneSecondWidth(modelParams.TwoToneSecondWidth)
-                    .SetBodyNormalMapId(0)
-                    .SetBodyNormalMapWeight(0f)
-                    .SetFace(modelParams.Face);
-            }
-            else if (npc.ModelId is 10 or 11 or 14 or 15 or 16 or 17 or 18 or 19 or 24 or 25
-                     && modelParams.SkinColorId != 0)
-            {
-                modelParams = new UnitCustomModelParams(UnitCustomModelType.Skin)
-                    .SetHairColorId(modelParams.HairColorId)
-                    .SetHornColorId(modelParams.HornColorId)
-                    .SetSkinColorId(modelParams.SkinColorId);
-            }
-            else
-            {
-                modelParams = new UnitCustomModelParams(UnitCustomModelType.None);
-            }
-        }
+        // Send the complete authored Face data (skin tone, maps, pupils, decals and
+        // Modifier[128]) through a deep packet-local copy. BaseRace/BaseGender hold
+        // the ordinary NPC identity; VisualRace/VisualGender remain zero.
+        var sourceModelParams = _unit.ModelParams ?? new UnitCustomModelParams(UnitCustomModelType.None);
+        var modelParams = npc != null
+            ? new UnitCustomModelParams(UnitCustomModelType.None)
+            : sourceModelParams;
+
+        if (npc != null && npc.ModelId is 10 or 11 or 14 or 15 or 16 or 17 or 18 or 19 or 20 or 21 or 24 or 25)
+            modelParams = sourceModelParams.CloneForNpcWire(npc.Template.Race, npc.Template.Gender);
 
         stream.Write(modelParams);
         modelParamsEnd = stream.Count;
@@ -868,585 +821,177 @@ public class SCUnitStatePacket : GamePacket
 
     #region CharacterInfo_3EB0
 
-    private void Inventory_Equip0(PacketStream stream, Unit unit)
-    {
-        var index = 0;
-        var validFlags = 0;
-        if (unit is Character character1)
-        {
-            // calculate validFlags
-            var items = character1.Inventory.Equipment.GetSlottedItemsList();
-            validFlags = CalculateValidFlags(items);
-            stream.Write((uint)validFlags); // validFlags for 3.0.3.0
-            var itemSlot = EquipmentItemSlot.Head;
-            foreach (var item in items)
-            {
-                if (item == null)
-                {
-                    itemSlot++;
-                    continue;
-                }
-                switch (itemSlot)
-                {
-                    case EquipmentItemSlot.Head:
-                    case EquipmentItemSlot.Neck:
-                    case EquipmentItemSlot.Chest:
-                    case EquipmentItemSlot.Waist:
-                    case EquipmentItemSlot.Legs:
-                    case EquipmentItemSlot.Hands:
-                    case EquipmentItemSlot.Feet:
-                    case EquipmentItemSlot.Arms:
-                    case EquipmentItemSlot.Back:
-                    case EquipmentItemSlot.Undershirt:
-                    case EquipmentItemSlot.Underpants:
-                    case EquipmentItemSlot.Mainhand:
-                    case EquipmentItemSlot.Offhand:
-                    case EquipmentItemSlot.Ranged:
-                    case EquipmentItemSlot.Musical:
-                    case EquipmentItemSlot.Stabilizer:
-                    case EquipmentItemSlot.Cosplay:
-                        {
-                            stream.Write(item);
-                            break;
-                        }
-                    case EquipmentItemSlot.Face:
-                    case EquipmentItemSlot.Hair:
-                    case EquipmentItemSlot.Glasses:
-                    case EquipmentItemSlot.Horns:
-                    case EquipmentItemSlot.Tail:
-                    case EquipmentItemSlot.Body:
-                    case EquipmentItemSlot.Beard:
-                        {
-                            stream.Write(item.TemplateId);
-                            break;
-                        }
-                    case EquipmentItemSlot.Ear1:
-                    case EquipmentItemSlot.Ear2:
-                    case EquipmentItemSlot.Finger1:
-                    case EquipmentItemSlot.Finger2:
-                    case EquipmentItemSlot.Backpack:
-                        {
-                            break;
-                        }
-                }
-                itemSlot++;
-            }
-        }
-        else if (unit is Npc npc)
-        {
-            // calculate validFlags for 3.0.3.0
-            for (var i = 0; i < npc.Equipment.GetSlottedItemsList().Count; i++)
-            {
-                var item = npc.Equipment.GetItemBySlot(i);
-                if (item != null)
-                {
-                    validFlags |= 1 << index;
-                }
-
-                index++;
-            }
-            stream.Write((uint)validFlags); // validFlags for 3.0.3.0
-            if (validFlags <= 0)
-            {
-                unit.ModelParams.SetType(UnitCustomModelType.Skin); // дополнительная проверка, что у NPC нет тела и лица
-                return;
-            }
-            var itemSlot = EquipmentItemSlot.Head;
-            var items = npc.Equipment.GetSlottedItemsList();
-            foreach (var item in items)
-            {
-                if (item == null)
-                {
-                    itemSlot++;
-                    continue;
-                }
-                switch (itemSlot)
-                {
-                    case EquipmentItemSlot.Head:
-                    case EquipmentItemSlot.Neck:
-                    case EquipmentItemSlot.Chest:
-                    case EquipmentItemSlot.Waist:
-                    case EquipmentItemSlot.Legs:
-                    case EquipmentItemSlot.Hands:
-                    case EquipmentItemSlot.Feet:
-                    case EquipmentItemSlot.Arms:
-                    case EquipmentItemSlot.Back:
-                    case EquipmentItemSlot.Undershirt:
-                    case EquipmentItemSlot.Underpants:
-                    case EquipmentItemSlot.Mainhand:
-                    case EquipmentItemSlot.Offhand:
-                    case EquipmentItemSlot.Ranged:
-                    case EquipmentItemSlot.Musical:
-                        {
-                            stream.Write(item.TemplateId);
-                            stream.Write(0L);
-                            stream.Write((byte)0);
-                            break;
-                        }
-                    case EquipmentItemSlot.Cosplay:
-                        {
-                            stream.Write(item);
-                            break;
-                        }
-                    case EquipmentItemSlot.Face:
-                    case EquipmentItemSlot.Hair:
-                    case EquipmentItemSlot.Glasses:
-                    case EquipmentItemSlot.Horns:
-                    case EquipmentItemSlot.Tail:
-                    case EquipmentItemSlot.Body:
-                    case EquipmentItemSlot.Beard:
-                        {
-                            stream.Write(item.TemplateId);
-                            break;
-                        }
-                    case EquipmentItemSlot.Ear1:
-                    case EquipmentItemSlot.Ear2:
-                    case EquipmentItemSlot.Finger1:
-                    case EquipmentItemSlot.Finger2:
-                    case EquipmentItemSlot.Backpack:
-                    case EquipmentItemSlot.Stabilizer:
-                        {
-                            break;
-                        }
-                }
-                itemSlot++;
-            }
-        }
-        else // for transfer and Shipyard
-        {
-            stream.Write(0u); // validFlags for 3.0.3.0
-        }
-
-        if (_unit is Character chrUnit)
-        {
-            index = 0;
-            var ItemFlags = 0;
-            var items = chrUnit.Inventory.Equipment.GetSlottedItemsList();
-            foreach (var item in items)
-            {
-                if (item != null)
-                {
-                    var v15 = (int)item.ItemFlags << index;
-                    ++index;
-                    ItemFlags |= v15;
-                }
-            }
-            stream.Write(ItemFlags); //  ItemFlags flags for 3.0.3.0
-        }
-    }
-    private void Inventory_Equip1(PacketStream stream, Unit unit0, BaseUnitType baseUnitType)
-    {
-        var unit = new Unit();
-        switch (baseUnitType)
-        {
-            case BaseUnitType.Character:
-                {
-                    unit = (Character)unit0;
-                    break;
-                }
-            case BaseUnitType.Npc:
-                {
-                    unit = (Npc)unit0;
-                    break;
-                }
-            case BaseUnitType.Slave:
-                {
-                    unit = (Slave)_unit;
-                    break;
-                }
-            case BaseUnitType.Housing:
-                {
-                    unit = (House)_unit;
-                    break;
-                }
-            case BaseUnitType.Transfer:
-                {
-                    unit = (Transfer)_unit;
-                    break;
-                }
-            case BaseUnitType.Mate:
-                {
-                    unit = (Mate)_unit;
-                    break;
-                }
-            case BaseUnitType.Shipyard:
-                {
-                    unit = (Shipyard)_unit;
-                    break;
-                }
-            default:
-                {
-                    break;
-                }
-        }
-
-        var items = unit.Equipment.GetSlottedItemsList();
-        var validFlags = CalculateValidFlags(items);
-        stream.Write((uint)validFlags); // validFlags for 3.0.3.0
-
-        if (validFlags <= 0)
-        {
-            unit.ModelParams.SetType(UnitCustomModelType.Skin); // дополнительная проверка, что у NPC нет тела и лица
-            return;
-        }
-
-        var index = 0;
-        do
-        {
-            if (((validFlags >> index) & 1) != 0)
-            {
-                Item item;
-                //if ((index - 19 >= 0 && index - 19 <= 6) || baseUnitType == BaseUnitType.Slave) // Slave
-                if (index - 19 < 0 || index - 19 > 6)
-                {
-                    //if (index != 27 || baseUnitType != BaseUnitType.Npc)  // not CosPlay || not Npc
-                    if (index != 27) // not CosPlay
-                    {
-                        switch (baseUnitType)
-                        {
-                            case BaseUnitType.Character: // Character
-                            case BaseUnitType.Housing: // Housing
-                            case BaseUnitType.Mate: // Mate
-                            case BaseUnitType.Slave: // Slave
-                                {
-                                    item = unit.Equipment.GetItemBySlot(index);
-                                    stream.Write(item);
-                                    break;
-                                }
-                            case BaseUnitType.Npc: // Npc
-                                {
-                                    item = unit.Equipment.GetItemBySlot(index);
-                                    stream.Write(item.TemplateId);
-                                    stream.Write(item.Id);
-                                    stream.Write(item.Grade);
-                                    break;
-                                }
-                            case BaseUnitType.Transfer:
-                            case BaseUnitType.Shipyard:
-                                {
-                                    break;
-                                }
-                            default:
-                                {
-                                    break;
-                                }
-                        }
-                    }
-                    else
-                    {
-                        item = unit.Equipment.GetItemBySlot(index);
-                        stream.Write(item); // Cosplay [27]
-                    }
-                }
-                else
-                {
-                    item = unit.Equipment.GetItemBySlot(index);
-                    stream.Write(item.TemplateId); // somehow_special [19..26]
-                }
-            }
-
-            ++index;
-        } while (index < 29);
-
-        if (baseUnitType != BaseUnitType.Character) { return; }
-
-        var itemFlags = CalculateItemFlags(items);
-        stream.Write(itemFlags); // ItemFlags flags for 3.0.3.0
-    }
-    private void Inventory_Equip2(PacketStream stream, Unit unit0, BaseUnitType baseUnitType)
-    {
-        var unit = new Unit();
-        switch (baseUnitType)
-        {
-            case BaseUnitType.Character:
-                {
-                    unit = (Character)unit0;
-                    break;
-                }
-            case BaseUnitType.Npc:
-                {
-                    unit = (Npc)unit0;
-                    break;
-                }
-            case BaseUnitType.Slave:
-                {
-                    unit = (Slave)_unit;
-                    break;
-                }
-            case BaseUnitType.Housing:
-                {
-                    unit = (House)_unit;
-                    break;
-                }
-            case BaseUnitType.Transfer:
-                {
-                    unit = (Transfer)_unit;
-                    break;
-                }
-            case BaseUnitType.Mate:
-                {
-                    unit = (Mate)_unit;
-                    break;
-                }
-            case BaseUnitType.Shipyard:
-                {
-                    unit = (Shipyard)_unit;
-                    break;
-                }
-            default:
-                {
-                    break;
-                }
-        }
-
-        // calculate validFlags
-        var items = unit.Equipment.GetSlottedItemsList();
-        var validFlags = CalculateValidFlags(items);
-        stream.Write((uint)validFlags); // validFlags for 3.0.3.0
-
-        if (validFlags <= 0)
-        {
-            unit.ModelParams.SetType(UnitCustomModelType.Skin); // дополнительная проверка, что у NPC нет тела и лица
-            return;
-        }
-
-        var index = 0;
-        do
-        {
-            if (((validFlags >> index) & 1) != 0)
-            {
-                Item item;
-                switch (index)
-                {
-                    case 0: // Head
-                    case 1: // Neck
-                    case 2: // Chest
-                    case 3: // Waist
-                    case 4: // Legs
-                    case 5: // Hands
-                    case 6: // Feet
-                    case 7: // Arms
-                    case 8: // Back
-                    case 9: // Ear1
-                    case 10: // Ear2
-                    case 11: // Finger1
-                    case 12: // Finger2
-                    case 13: // Undershirt
-                    case 14: // Underpants
-                    case 15: // Mainhand
-                    case 16: // Offhand
-                    case 17: // Ranged
-                    case 18: // Musical
-                    case 26: // Backpack
-                    case 28: // Stabilizer
-                        {
-                            switch (baseUnitType)
-                            {
-                                case BaseUnitType.Character: // Character
-                                case BaseUnitType.Housing:   // Housing
-                                case BaseUnitType.Mate:      // Mate
-                                case BaseUnitType.Slave:     // Slave
-                                    {
-                                        item = unit.Equipment.GetItemBySlot(index);
-                                        stream.Write(item);
-                                        break;
-                                    }
-                                case BaseUnitType.Npc:       // Npc
-                                    {
-                                        item = unit.Equipment.GetItemBySlot(index);
-                                        stream.Write(item.TemplateId);
-                                        stream.Write(item.Id);
-                                        stream.Write(item.Grade);
-                                        break;
-                                    }
-                                case BaseUnitType.Transfer:
-                                case BaseUnitType.Shipyard:
-                                default:
-                                    {
-                                        break;
-                                    }
-                            }
-                            break;
-                        }
-                    case 19: // Face
-                    case 20: // Hair
-                    case 21: // Glasses
-                    case 22: // Horns
-                    case 23: // Tail
-                    case 24: // Body
-                    case 25: // Beard
-                        {
-                            item = unit.Equipment.GetItemBySlot(index);
-                            stream.Write(item.TemplateId); // somehow_special [19..25]
-                            break;
-                        }
-                    case 27: // Cosplay
-                        {
-                            item = unit.Equipment.GetItemBySlot(index);
-                            stream.Write(item); // Cosplay [27]
-                            break;
-                        }
-                }
-            }
-
-            ++index;
-        } while (index < 29);
-
-        if (baseUnitType != BaseUnitType.Character) { return; }
-
-        var itemFlags = CalculateItemFlags(items);
-        stream.Write(itemFlags); // ItemFlags flags for 3.0.3.0
-    }
-
     private void Inventory_Equip3(PacketStream stream, Unit unit)
     {
-        var items = new List<Item>();
+        List<Item> items;
 
         switch (unit)
         {
             case Character character:
-                {
-                    items = character.Inventory.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    // Target 10.8.1 character captures use a fixed 60-bit
-                    // equipment capability/visibility mask here. This is not
-                    // the legacy per-item ItemFlags aggregation.
-                    stream.Write(0x0FFFFFFFFFFFFFFFUL);
-                    break;
-                }
+                items = character.Inventory.Equipment.GetSlottedItemsList();
+                WriteProtocol1810Equip(stream, items);
+                // Target character captures carry the fixed capability/visibility mask here.
+                stream.Write(0x0FFFFFFFFFFFFFFFUL);
+                break;
+
             case House house:
-                {
-                    items = house.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    break;
-                }
-            // A mate is the one family that does not describe slots 19 to 25 in full. Those are
-            // the body-part references, and for a mate the client reads nothing but the type
-            // from them - writing the whole item record there puts everything after it out of
-            // place. A slave uses the ordinary full record for the same slots.
+                items = house.Equipment.GetSlottedItemsList();
+                WriteProtocol1810Equip(stream, items);
+                break;
+
             case Mate mate:
+            {
+                items = mate.Equipment.GetSlottedItemsList();
+                var wireItems = Protocol1810EquipmentLayout.ToWireItems(items);
+                var validFlags = BuildWireMask(wireItems);
+                stream.Write(validFlags);
+
+                for (var wireSlot = 0; wireSlot < Protocol1810EquipmentLayout.SlotCount; wireSlot++)
                 {
-                    items = mate.Equipment.GetSlottedItemsList();
-                    var mateValidFlags = CalculateProtocol1810ValidFlags(items);
-                    stream.Write(mateValidFlags);
+                    var item = wireItems[wireSlot];
+                    if (item == null)
+                        continue;
 
-                    for (var slot = 0; slot < Protocol1810EquipmentSlots; slot++)
-                    {
-                        if ((mateValidFlags & (1UL << slot)) == 0)
-                            continue;
-
-                        if (slot is >= 19 and <= 25)
-                            stream.Write(items[slot].TemplateId);
-                        else
-                            stream.Write(items[slot]);
-                    }
-                    break;
+                    // Target serializer 0x3996AB80 has a mate-specific body-part path.
+                    if (Protocol1810EquipmentLayout.IsBodyPartWireSlot(wireSlot))
+                        stream.Write(item.TemplateId);
+                    else
+                        stream.Write(item);
                 }
+                break;
+            }
+
             case Slave slave:
-                {
-                    items = slave.Equipment.GetSlottedItemsList();
-                    WriteEquip(stream, items);
-                    break;
-                }
-            case Npc npc:
-                {
-                    items = npc.Equipment.GetSlottedItemsList();
-                    var validFlags = CalculateProtocol1810ValidFlags(items);
-                    stream.Write(validFlags); // target 35-slot mask is uint64
+                items = slave.Equipment.GetSlottedItemsList();
 
-                    if (validFlags == 0)
-                        return;
-
-                    // Target serializer 0x3996AB80 iterates all 35 mask
-                    // bits and selects the NPC entry shape by protocol slot,
-                    // not by the server-side runtime Item subclass.
-                    for (var slot = 0; slot < Protocol1810EquipmentSlots; slot++)
+                var slaveEquipmentSummary = string.Join(
+                    ",",
+                    items.Select((equippedItem, slot) =>
                     {
-                        if ((validFlags & (1UL << slot)) == 0)
-                            continue;
+                        if (equippedItem == null)
+                            return null;
 
-                        var item = npc.Equipment.GetItemBySlot(slot);
-                        if (item == null)
-                            throw new InvalidOperationException(
-                                $"NPC equipment mask references empty slot {slot} for template {npc.TemplateId}");
+                        var visual = equippedItem.Template as SlaveEquipmentTemplate;
+                        var visualKind = visual == null
+                            ? "unmapped"
+                            : visual.DoodadId != 0
+                                ? $"doodad:{visual.DoodadId}"
+                                : visual.ChildSlaveId != 0
+                                    ? $"slave:{visual.ChildSlaveId}"
+                                    : "metadata-only";
 
-                        if (slot is >= 19 and <= 25)
-                        {
-                            // FACE..BEARD are body-part references.
-                            stream.Write(item.TemplateId);
-                        }
-                        else if (slot == 27 || slot is >= 30 and <= 33)
-                        {
-                            // COSPLAY plus target visual/full-item slots.
-                            stream.Write(item);
-                        }
-                        else
-                        {
-                            // Compact NPC item: templateId:u32, iid:u64, grade:u8.
-                            stream.Write(item.TemplateId);
-                            stream.Write(item.Id);
-                            stream.Write(item.Grade);
-                        }
-                    }
-                    break;
-                }
-            // for transfer and Shipyard
-            default:
+                        var detailState = equippedItem is SlaveEquipmentItem
+                            ? Convert.ToHexString(equippedItem.Detail ?? Array.Empty<byte>())
+                            : "-";
+                        return $"s{slot}=tpl{equippedItem.TemplateId}/detail{(byte)equippedItem.DetailType}:{detailState}/{visualKind}";
+                    }).Where(entry => entry != null));
+
+                if (items.Any(equippedItem =>
+                        equippedItem != null &&
+                        equippedItem.DetailType != ItemDetailType.SlaveEquipment))
                 {
-                    stream.Write(0UL); // target 10.8.1 valid-slot mask
-                    break;
+                    Logger.Warn(
+                        "SCUnitState slave equipment contains a non-target item detail: " +
+                        $"template={slave.TemplateId}, objId={slave.ObjId}, items=[{slaveEquipmentSummary}]");
                 }
+                else
+                {
+                    Logger.Info(
+                        "SCUnitState slave equipment: " +
+                        $"template={slave.TemplateId}, objId={slave.ObjId}, slots={SlaveEquipmentContainer.ProtocolSlotCount}, " +
+                        $"items=[{slaveEquipmentSummary}]");
+                }
+
+                // Target x2game.dll walks 35 slave slots (0..34). The database equip_slot_id
+                // is already the slave wire slot, so do not apply the character/NPC permutation.
+                WriteSlaveProtocol1810Equip(stream, items);
+                break;
+
+            case Npc npc:
+            {
+                items = npc.Equipment.GetSlottedItemsList();
+                var wireItems = Protocol1810EquipmentLayout.ToWireItems(items);
+                var validFlags = BuildWireMask(wireItems);
+                stream.Write(validFlags);
+
+                for (var wireSlot = 0; wireSlot < Protocol1810EquipmentLayout.SlotCount; wireSlot++)
+                {
+                    var item = wireItems[wireSlot];
+                    if (item == null)
+                        continue;
+
+                    if (Protocol1810EquipmentLayout.IsBodyPartWireSlot(wireSlot))
+                    {
+                        // FACE..BEARD: template reference only.
+                        stream.Write(item.TemplateId);
+                    }
+                    else if (Protocol1810EquipmentLayout.IsNpcFullItemWireSlot(wireSlot))
+                    {
+                        // COSPLAY, COSPLAYLOOKS, RACE_COSPLAY, RACE_COSPLAYLOOKS.
+                        stream.Write(item);
+                    }
+                    else
+                    {
+                        // Compact NPC item: templateId:u32, runtimeId:u64, grade:u8.
+                        stream.Write(item.TemplateId);
+                        stream.Write(item.Id);
+                        stream.Write(item.Grade);
+                    }
+                }
+                break;
+            }
+
+            default:
+                stream.Write(0UL);
+                break;
         }
     }
 
-    private static void WriteEquip(PacketStream stream, List<Item> items)
+    private static void WriteProtocol1810Equip(PacketStream stream, IReadOnlyList<Item> serverItems)
     {
-        var validFlags = CalculateProtocol1810ValidFlags(items);
-        stream.Write(validFlags); // target 10.8.1 35-slot mask is uint64
-        WriteItems(stream, items);
-    }
-
-    private static void WriteItems(PacketStream stream, List<Item> items)
-    {
-        foreach (var item in items)
+        var wireItems = Protocol1810EquipmentLayout.ToWireItems(serverItems);
+        stream.Write(BuildWireMask(wireItems));
+        foreach (var item in wireItems)
         {
             if (item != null)
-            {
                 stream.Write(item);
-            }
         }
     }
 
-    private static int CalculateValidFlags(List<Item> items)
+    private static void WriteSlaveProtocol1810Equip(PacketStream stream, IReadOnlyList<Item> slaveItems)
     {
-        var validFlags = 0;
-        var index = 0;
-        foreach (var item in items)
-        {
-            if (item != null)
-            {
-                validFlags |= 1 << index;
-            }
-
-            index++;
-        }
-
-        return validFlags;
-    }
-
-    private static ulong CalculateProtocol1810ValidFlags(List<Item> items)
-    {
+        // EquipmentSlave is indexed directly as the target slave array: 35 slots, 0..34.
+        // Applying the character/NPC late-slot permutation here would corrupt ship slots.
         ulong validFlags = 0;
-        var count = Math.Min(items.Count, Protocol1810EquipmentSlots);
-        for (var index = 0; index < count; index++)
+        var count = Math.Min(slaveItems?.Count ?? 0, SlaveEquipmentContainer.ProtocolSlotCount);
+
+        for (var slot = 0; slot < count; slot++)
         {
-            if (items[index] != null)
-                validFlags |= 1UL << index;
+            if (slaveItems[slot] != null)
+                validFlags |= 1UL << slot;
         }
 
-        return validFlags;
+        stream.Write(validFlags);
+
+        for (var slot = 0; slot < count; slot++)
+        {
+            var item = slaveItems[slot];
+            if (item != null)
+                stream.Write(item);
+        }
     }
 
+    private static ulong BuildWireMask(IReadOnlyList<Item> wireItems)
+    {
+        ulong mask = 0;
+        var count = Math.Min(wireItems.Count, Protocol1810EquipmentLayout.SlotCount);
+        for (var wireSlot = 0; wireSlot < count; wireSlot++)
+        {
+            if (wireItems[wireSlot] != null)
+                mask |= 1UL << wireSlot;
+        }
+        return mask;
+    }
 
     private static void WriteProtocol1810Position(PacketStream stream, Vector3 position)
     {

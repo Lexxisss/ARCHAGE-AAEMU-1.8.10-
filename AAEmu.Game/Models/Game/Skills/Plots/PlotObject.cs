@@ -15,6 +15,10 @@ public class PlotObject : PacketMarshaler
     public PlotObjectType Type { get; set; }
     public uint UnitId { get; set; }
     public Transform Position { get; set; }
+    public Transform LinePosition { get; set; }
+    public uint PositionId0 { get; set; }
+    public uint PositionId1 { get; set; }
+    public uint PositionId2 { get; set; }
 
     public PlotObject(BaseUnit unit)
     {
@@ -28,10 +32,24 @@ public class PlotObject : PacketMarshaler
         UnitId = unitId;
     }
 
-    public PlotObject(Transform position)
+    /// <summary>
+    /// Creates the target 1.8.1.0 POSITION plot object.
+    /// </summary>
+    /// <remarks>
+    /// The wire object contains two complete compressed transforms: the endpoint (<c>pos</c>)
+    /// and the line/source transform (<c>linePos</c>), followed by three BC identifiers. Older
+    /// code stopped after the first transform, shifting every field that followed in
+    /// SCPlotEventPacket.
+    /// </remarks>
+    public PlotObject(Transform position, Transform linePosition = null,
+        uint positionId0 = 0, uint positionId1 = 0, uint positionId2 = 0)
     {
         Type = PlotObjectType.POSITION;
         Position = position.CloneDetached();
+        LinePosition = (linePosition ?? position).CloneDetached();
+        PositionId0 = positionId0;
+        PositionId1 = positionId1;
+        PositionId2 = positionId2;
     }
 
     public override PacketStream Write(PacketStream stream)
@@ -44,14 +62,23 @@ public class PlotObject : PacketMarshaler
                 stream.WriteBc(UnitId);
                 break;
             case PlotObjectType.POSITION:
-                stream.WritePosition(Position.Local.Position);
-                var ypr = Position.Local.ToRollPitchYawSBytes();
-                stream.Write(ypr.Item1); // rotx
-                stream.Write(ypr.Item2); // roty
-                stream.Write(ypr.Item3); // rotz
+                WritePositionAndRotation(stream, Position);     // pos + rot
+                WritePositionAndRotation(stream, LinePosition); // linePos + lineRot
+                stream.WriteBc(PositionId0);
+                stream.WriteBc(PositionId1);
+                stream.WriteBc(PositionId2);
                 break;
         }
 
         return stream;
+    }
+
+    private static void WritePositionAndRotation(PacketStream stream, Transform transform)
+    {
+        stream.WritePosition(transform.Local.Position);
+        var ypr = transform.Local.ToRollPitchYawSBytes();
+        stream.Write(ypr.Item1); // rot.x : i8
+        stream.Write(ypr.Item2); // rot.y : i8
+        stream.Write(ypr.Item3); // rot.z : i8
     }
 }

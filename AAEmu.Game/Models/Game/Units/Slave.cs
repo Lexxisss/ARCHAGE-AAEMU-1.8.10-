@@ -53,6 +53,10 @@ public class Slave : Unit
     public Item SummoningItem { get; set; }
     public List<Doodad> AttachedDoodads { get; set; }
     public List<Slave> AttachedSlaves { get; set; }
+    /// <summary>Runtime doodad components created from the EquipmentSlave item slots.</summary>
+    public Dictionary<byte, Doodad> EquipmentDoodads { get; set; }
+    /// <summary>Runtime child-slave components created from the EquipmentSlave item slots.</summary>
+    public Dictionary<byte, Slave> EquipmentSlaves { get; set; }
     public Dictionary<AttachPointKind, Character> AttachedCharacters { get; set; }
     public DateTime SpawnTime { get; set; }
     public sbyte ThrottleRequest { get; set; }
@@ -76,6 +80,8 @@ public class Slave : Unit
     {
         AttachedDoodads = new List<Doodad>();
         AttachedSlaves = new List<Slave>();
+        EquipmentDoodads = new Dictionary<byte, Doodad>();
+        EquipmentSlaves = new Dictionary<byte, Slave>();
         AttachedCharacters = new Dictionary<AttachPointKind, Character>();
         HpTriggerPointsPercent.Add(0);
         HpTriggerPointsPercent.Add(25);
@@ -628,6 +634,16 @@ public class Slave : Unit
         character.SendPacket(new SCUnitPointsPacket(ObjId, Hp, Mp, HighAbilityRsc));
         //character.SendPacket(new SCSlaveStatusPacket(ObjId, TlId, Summoner?.Name ?? string.Empty, Summoner?.ObjId ?? 0, Id));
         character.SendPacket(new SCSlaveStatusPacket(this));
+
+        if (SummoningItem != null && Summoner != null && character.Id == Summoner.Id)
+        {
+            character.SendPacket(new SCUpdateSlaveSourceItemPacket(
+                ObjId,
+                SummoningItem.Id,
+                Hp,
+                SummoningItem.SlotType,
+                (byte)Math.Clamp(SummoningItem.Slot, 0, byte.MaxValue)));
+        }
 
         base.AddVisibleObject(character);
 

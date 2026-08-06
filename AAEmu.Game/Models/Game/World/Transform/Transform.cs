@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -240,6 +240,16 @@ public class Transform : IDisposable
     public void DetachAll(bool keepStickyParent = false)
     {
         Parent = null;
+
+        // StickyParent is a separate link from Parent. The old implementation only
+        // detached this transform's sticky children and accidentally left this
+        // transform stuck to a ship/transfer. A later FinalizeTransform on that
+        // vehicle then added its world delta to a freshly teleported position.
+        // For example, teleporting to (15400,11543) while still sticky to a ship
+        // near (15920,18775) produced the invalid server position (31320,30318).
+        if (!keepStickyParent)
+            StickyParent = null;
+
         for (var i = Children.Count - 1; i >= 0; i--)
             Children[i].Parent = null;
         if (!keepStickyParent)

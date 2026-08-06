@@ -1086,6 +1086,54 @@ public class ItemManager : Singleton<ItemManager>
                 }
             }
 
+            // Target ship/vehicle equipment is not an ordinary generic item. x2game.dll
+            // expects detail type 10 with a fixed 12-byte payload, then resolves the visible
+            // component through item_slave_equipments (either doodad_id or slave_id).
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM item_slave_equipments";
+                command.Prepare();
+                using (var sqliteReader = command.ExecuteReader())
+                using (var reader = new SQLiteWrapperReader(sqliteReader))
+                {
+                    while (reader.Read())
+                    {
+                        var template = new SlaveEquipmentTemplate
+                        {
+                            Id = reader.GetUInt32("item_id"),
+                            DoodadScale = reader.GetFloat("doodad_scale"),
+                            DoodadId = reader.GetUInt32("doodad_id"),
+                            RequireItemId = reader.GetUInt32("require_item_id"),
+                            SlaveEquipKindId = reader.GetUInt32("slave_equip_kind_id"),
+                            SlaveEquipPackId = reader.GetUInt32("slave_equip_pack_id"),
+                            ChildSlaveId = reader.GetUInt32("slave_id"),
+                            SlotPackId = reader.GetUInt32("slot_pack_id")
+                        };
+                        _templates.Add(template.Id, template);
+                    }
+                }
+            }
+
+            // One target initial-equipment row (currently item 43000) is intentionally absent
+            // from item_slave_equipments. It is still ship equipment on the wire and therefore
+            // must use the same detail discriminator rather than falling back to detail type 0.
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText =
+                    "SELECT DISTINCT item_id FROM slave_initial_items " +
+                    "WHERE item_id NOT IN (SELECT item_id FROM item_slave_equipments)";
+                command.Prepare();
+                using (var sqliteReader = command.ExecuteReader())
+                using (var reader = new SQLiteWrapperReader(sqliteReader))
+                {
+                    while (reader.Read())
+                    {
+                        var itemId = reader.GetUInt32("item_id");
+                        _templates.TryAdd(itemId, new SlaveEquipmentTemplate { Id = itemId });
+                    }
+                }
+            }
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT * FROM item_summon_mates";
@@ -1789,6 +1837,30 @@ public class ItemManager : Singleton<ItemManager>
         return (updateCount, deleteCount, containerUpdateCount);
     }
 
+    /// <summary>
+    /// Marks one character's persistent item state dirty after a rolled-back database transaction.
+    /// </summary>
+    public void MarkOwnerItemsDirty(uint ownerId)
+    {
+        lock (_allPersistantContainers)
+        {
+            foreach (var container in _allPersistantContainers.Values)
+            {
+                if (container.OwnerId == ownerId)
+                    container.IsDirty = true;
+            }
+        }
+
+        lock (_allItems)
+        {
+            foreach (var item in _allItems.Values)
+            {
+                if (item != null && item.OwnerId == ownerId)
+                    item.IsDirty = true;
+            }
+        }
+    }
+
     public ItemContainer GetItemContainerForCharacter(uint characterId, SlotType slotType, uint mateId = 0)
     {
         foreach (var c in _allPersistantContainers)
@@ -1800,7 +1872,8 @@ public class ItemManager : Singleton<ItemManager>
         var newContainerType = slotType switch
         {
             SlotType.Equipment => "EquipmentContainer",
-            SlotType.EquipmentMate => "MateEquipmentContainer",
+            SlotType.EquipmentMate or SlotType.EquipmentMateBattle => "MateEquipmentContainer",
+            SlotType.EquipmentSlave or SlotType.EquipmentSlavePreliminary => "SlaveEquipmentContainer",
             _ => "ItemContainer"
         };
 
@@ -1921,6 +1994,7 @@ public class ItemManager : Singleton<ItemManager>
                     var itemType = reader.GetString("type");
                     var itemId = reader.GetUInt64("id");
                     var itemTemplateId = reader.GetUInt32("template_id");
+                    var itemTemplate = GetTemplate(itemTemplateId);
                     Type nClass = null;
                     try
                     {
@@ -1934,13 +2008,25 @@ public class ItemManager : Singleton<ItemManager>
                     if (nClass == null)
                     {
                         Logger.Warn($"Item type {itemType} not found for id {itemId}!");
-                        var itemTemplate = GetTemplate(itemTemplateId);
                         if (itemTemplate == null)
                         {
                             Logger.Error($"Unable to restore template {itemTemplateId} for item {itemId}, item will not be loaded!");
                             continue;
                         }
                         Logger.Info($"Item {itemId} defined as {itemType} in the database is being restored using template {itemTemplate.Id} with class {itemTemplate.ClassType}");
+                        nClass = itemTemplate.ClassType;
+                    }
+
+                    // Previous builds persisted ship equipment as the generic Item class. That
+                    // type is valid and therefore would not trigger the missing-type fallback
+                    // above, but it writes detail discriminator 0 and the target client discards
+                    // the equipment record. Upgrade those existing rows in memory without
+                    // requiring a destructive database migration.
+                    if (itemTemplate is SlaveEquipmentTemplate && nClass != itemTemplate.ClassType)
+                    {
+                        Logger.Info(
+                            $"Restoring slave equipment item {itemId} template {itemTemplateId} " +
+                            $"as {itemTemplate.ClassType} instead of persisted type {itemType}");
                         nClass = itemTemplate.ClassType;
                     }
 
@@ -1964,7 +2050,7 @@ public class ItemManager : Singleton<ItemManager>
                     item.Id = itemId;
                     item.OwnerId = reader.GetUInt64("owner");
                     item.TemplateId = itemTemplateId;
-                    item.Template = GetTemplate(item.TemplateId);
+                    item.Template = itemTemplate;
                     if (item.Template == null)
                     {
                         // BodyPart items (default character appearance, e.g. the starting shirt) can
@@ -2023,7 +2109,22 @@ public class ItemManager : Singleton<ItemManager>
                     {
                         // Move item to it's container (if defined)
                         if (container.AddOrMoveExistingItem(ItemTaskType.Invalid, item, item.Slot))
-                            item.IsDirty = false;
+                        {
+                            // Keep migrated ship-equipment details dirty so the healthy 12-byte
+                            // state replaces the old empty/zero blob in MySQL.
+                            item.IsDirty = item is SlaveEquipmentItem { DetailWasMigrated: true };
+                            if (item.IsDirty)
+                            {
+                                Logger.Info(
+                                    "Migrated slave equipment detail: owner={0}, item={1}, template={2}, container={3}, slot={4}, detail={5}",
+                                    item.OwnerId,
+                                    item.Id,
+                                    item.TemplateId,
+                                    container.ContainerId,
+                                    item.Slot,
+                                    Convert.ToHexString(item.Detail));
+                            }
+                        }
                         else
                             Logger.Fatal($"Failed to add item {item} to existing container {container.ContainerId} !");
                     }

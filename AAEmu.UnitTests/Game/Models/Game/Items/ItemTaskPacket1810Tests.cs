@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using AAEmu.Commons.Network;
@@ -110,6 +110,31 @@ public class ItemTaskPacket1810Tests
         // The item record starts with its template id, not its instance id.
         Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 4));
         Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 8));
+    }
+
+
+    /// <summary>
+    /// SwapSlot is used only when both client slot objects already exist. Its target body is
+    /// four slot bytes, two instance ids and a 32-bit flags field after the action header.
+    /// </summary>
+    [Fact]
+    public void SwapSlotUsesTargetActionNineLayout()
+    {
+        var stream = new PacketStream();
+        new ItemMove(
+            SlotType.Inventory, 4, 0x0102030405060708UL,
+            SlotType.Equipment, 7, 0x1112131415161718UL).Write(stream);
+        var bytes = stream.GetBytes();
+
+        Assert.Equal(26, bytes.Length);
+        Assert.Equal((byte)ItemAction.SwapSlot, bytes[0]);
+        Assert.Equal((byte)SlotType.Inventory, bytes[2]);
+        Assert.Equal(4, bytes[3]);
+        Assert.Equal((byte)SlotType.Equipment, bytes[4]);
+        Assert.Equal(7, bytes[5]);
+        Assert.Equal(0x0102030405060708UL, BitConverter.ToUInt64(bytes, 6));
+        Assert.Equal(0x1112131415161718UL, BitConverter.ToUInt64(bytes, 14));
+        Assert.Equal(0, BitConverter.ToInt32(bytes, 22));
     }
 
     /// <summary>

@@ -75,8 +75,13 @@ public class CSSelectCharacterPacket : GamePacket
             Connection.ActiveChar.Inventory.Send();
             Connection.SendPacket(new SCActionSlotsPacket(Connection.ActiveChar.Slots));
 
-            Connection.ActiveChar.Quests.Send();
+            // Both completed history and active contexts must be registered while
+            // the target client is still building the quest journal index. Sending
+            // completed bitsets only at CSWorldEntryReady correctly hid rewarded
+            // quests, but their chapter/step labels had already been built as "???".
+            // Target order: completed history first, then active contexts, then notifier.
             Connection.ActiveChar.Quests.SendCompleted();
+            Connection.ActiveChar.Quests.Send();
             Connection.ActiveChar.Quests.RefreshQuestNotifier();
             Connection.ActiveChar.Quests.RecallEvents();
 

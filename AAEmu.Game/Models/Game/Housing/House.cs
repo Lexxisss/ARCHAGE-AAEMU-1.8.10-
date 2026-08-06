@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,6 +7,7 @@ using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Managers.UnitManagers;
+using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj;
@@ -21,7 +22,8 @@ namespace AAEmu.Game.Models.Game.Housing;
 public sealed class House : Unit
 {
     public override UnitTypeFlag TypeFlag { get; } = UnitTypeFlag.Housing;
-    private object _lock = new();
+    private readonly object _lock = new();
+    private readonly Dictionary<uint, int> _statePublicationVersions = new();
     private HousingTemplate _template;
     private int _currentStep;
     private int _allAction;
@@ -244,7 +246,7 @@ public sealed class House : Unit
     {
         base.Spawn();
         foreach (var doodad in AttachedDoodads)
-            doodad.Spawn();
+            doodad.SpawnForBatch();
     }
 
     public override void Delete()
@@ -293,19 +295,54 @@ public sealed class House : Unit
         // has not happened yet - it drops the state whole, owner and all, and hangs the doors on
         // nothing. See HouseStateFollowUpTask.
         character.SendPacket(new SCUnitStatePacket(this));
-        TaskManager.Instance.Schedule(new HouseStateFollowUpTask(this, character), StateFollowUpDelay);
+        ScheduleStateFollowUp(character);
 
         base.AddVisibleObject(character);
     }
 
-    // The doors, windows and chests fixed to a building are not sent from here, and there is no
-    // method left that does. Each announces itself when it is put into the world, and a second copy
-    // of a handle the client already holds is thrown away - taking the good one with it.
-    //
-    // That was one half of it. A building raised in one go sent them twice and its fixtures came
-    // out dead; one raised stage by stage sent them once, because it was already in sight by then,
-    // and its fixtures worked - until the player came back, when the second copy finally went out
-    // and they vanished.
+    private void ScheduleStateFollowUp(Character character)
+    {
+        int version;
+        lock (_lock)
+        {
+            _statePublicationVersions.TryGetValue(character.ObjId, out version);
+            version++;
+            _statePublicationVersions[character.ObjId] = version;
+        }
+
+        TaskManager.Instance.Schedule(
+            new HouseStateFollowUpTask(this, character, version),
+            StateFollowUpDelay);
+    }
+
+    /// <summary>
+    /// Re-sends the state to every viewer through the same ordered two-stage path used on spawn.
+    /// Repeated build actions are coalesced per viewer, so only the newest state may publish fixtures.
+    /// </summary>
+    public void ScheduleStateFollowUpForVisibleCharacters()
+    {
+        foreach (var character in WorldManager.GetAround<Character>(this))
+            ScheduleStateFollowUp(character);
+    }
+
+    public bool IsStatePublicationCurrent(uint characterObjId, int version)
+    {
+        lock (_lock)
+            return _statePublicationVersions.TryGetValue(characterObjId, out var current) && current == version;
+    }
+
+    public void CompleteStatePublication(uint characterObjId, int version)
+    {
+        lock (_lock)
+        {
+            if (_statePublicationVersions.TryGetValue(characterObjId, out var current) && current == version)
+                _statePublicationVersions.Remove(characterObjId);
+        }
+    }
+
+    // Built-in fixtures are registered silently and then published by
+    // HouseFixturesFollowUpTask. This avoids both duplicate 0x017A records and the race where a
+    // child arrives before the client has created the house-model it must attach to.
 
     /// <summary>
     /// Makes this building's doors, windows and chests, if it is finished and has none yet.
@@ -326,28 +363,68 @@ public sealed class House : Unit
     /// </remarks>
     public void EnsureAttachedDoodads()
     {
-        if (CurrentStep != -1 || AttachedDoodads.Count > 0 || Template?.HousingBindingDoodad == null)
+        lock (_lock)
+        {
+            if (CurrentStep != -1 || AttachedDoodads.Count > 0 || Template?.HousingBindingDoodad == null)
+                return;
+
+            foreach (var bindingDoodad in Template.HousingBindingDoodad)
+            {
+                var doodad = DoodadManager.Instance.Create(0, bindingDoodad.DoodadId, this, true);
+                if (doodad == null)
+                {
+                    Logger.Error("House {0}: cannot create binding doodad template={1}, attachPoint={2}",
+                        Id, bindingDoodad.DoodadId, bindingDoodad.AttachPointId);
+                    continue;
+                }
+
+                doodad.AttachPoint = bindingDoodad.AttachPointId;
+                doodad.ParentObj = this;
+                doodad.ParentObjId = ObjId;
+                doodad.OwnerId = OwnerId;
+                doodad.OwnerDbId = Id;
+                doodad.OwnerType = DoodadOwnerType.Housing;
+                doodad.Transform = Transform.CloneDetached(doodad);
+                doodad.Transform.Parent = Transform;
+                doodad.Transform.Local.ApplyWorldSpawnPositionWithDeg(bindingDoodad.Position);
+                doodad.InitDoodad();
+
+                AttachedDoodads.Add(doodad);
+
+                // Register in WorldManager now, but do not emit 0x017A. The fixture task sends all
+                // records with 0x0198 after SCHouseState has had its own client processing turn.
+                doodad.SpawnForBatch();
+
+                Logger.Info(
+                    "House fixture ready: house={0}, objId={1}, template={2}, funcGroup={3}, itemTemplate={4}, parent={5}, attach={6}, local=({7:F4},{8:F4},{9:F4}), rotDeg=({10:F2},{11:F2},{12:F2})",
+                    Id, doodad.ObjId, doodad.TemplateId, doodad.FuncGroupId, doodad.ItemTemplateId,
+                    doodad.ParentObjId, doodad.AttachPoint,
+                    doodad.Transform.Local.Position.X, doodad.Transform.Local.Position.Y,
+                    doodad.Transform.Local.Position.Z,
+                    bindingDoodad.Position.Roll, bindingDoodad.Position.Pitch, bindingDoodad.Position.Yaw);
+            }
+
+            Logger.Info("House {0}: created {1} built-in fixtures for delayed batch publication",
+                Id, AttachedDoodads.Count);
+        }
+    }
+
+    /// <summary>Sends this house's built-in fixtures to one viewer in target-sized batches.</summary>
+    public void SendAttachedDoodads(Character character)
+    {
+        if (character == null || AttachedDoodads.Count == 0)
             return;
 
-        foreach (var bindingDoodad in Template.HousingBindingDoodad)
+        var doodads = AttachedDoodads.Where(d => d != null && d.ObjId > 0).ToArray();
+        for (var offset = 0; offset < doodads.Length; offset += SCDoodadsCreatedPacket.MaxCountPerPacket)
         {
-            var doodad = DoodadManager.Instance.Create(0, bindingDoodad.DoodadId, this, true);
-            doodad.AttachPoint = bindingDoodad.AttachPointId;
-            doodad.ParentObj = this;
-            doodad.Transform = Transform.CloneDetached(doodad);
-            doodad.Transform.Parent = Transform;
-            doodad.Transform.Local.ApplyWorldSpawnPositionWithDeg(bindingDoodad.Position);
-            doodad.InitDoodad();
-
-            AttachedDoodads.Add(doodad);
-
-            // Into the world by hand. Spawn walks this list, but it has already run by now - the
-            // building had to exist at the far end before its fixtures could be made at all - so
-            // anything made here would otherwise sit in the list and never reach anyone.
-            doodad.Spawn();
+            var count = Math.Min(SCDoodadsCreatedPacket.MaxCountPerPacket, doodads.Length - offset);
+            var batch = new Doodad[count];
+            Array.Copy(doodads, offset, batch, 0, count);
+            character.SendPacket(new SCDoodadsCreatedPacket(batch));
+            Logger.Info("House {0}: sent fixture batch to {1}, offset={2}, count={3}",
+                Id, character.Name, offset, count);
         }
-
-        Logger.Info("House {0}: made {1} fixtures now that its record has been sent", Id, AttachedDoodads.Count);
     }
 
     /// <summary>
@@ -363,13 +440,20 @@ public sealed class House : Unit
     /// </remarks>
     public override void RemoveVisibleObject(Character character)
     {
-        base.RemoveVisibleObject(character);
+        var doodadIds = AttachedDoodads
+            .Where(d => d != null && d.ObjId > 0)
+            .Select(d => d.ObjId)
+            .ToArray();
 
-        // TODO: This should be handled in base.RemoveVisibleObject
-        var doodadIds = new uint[AttachedDoodads.Count];
-        for (var i = 0; i < AttachedDoodads.Count; i++)
-            doodadIds[i] = AttachedDoodads[i].ObjId;
+        if (character.CurrentTarget == this ||
+            (character.CurrentTarget != null && doodadIds.Contains(character.CurrentTarget.ObjId)))
+        {
+            character.CurrentTarget = null;
+            character.SendPacket(new SCTargetChangedPacket(character.ObjId, 0));
+        }
 
+        // Children first. Calling base here would recursively emit one 0x013B per child before this
+        // batch and then the same handles would be removed a second time.
         for (var offset = 0; offset < doodadIds.Length; offset += SCDoodadsRemovedPacket.MaxCountPerPacket)
         {
             var remaining = doodadIds.Length - offset;
@@ -542,19 +626,10 @@ public sealed class House : Unit
             stream.Write(i + 1);                   // ucc_position : i32, 1..5
         }
 
-        // Two world positions, twenty bytes each. What they anchor was never recovered - only that
-        // they are positions and that nobody found a building that needed them filled.
-        //
-        // EXPERIMENT. They went out at the origin, and the client refuses to let the owner put
-        // furniture down on ground it says is not theirs, while agreeing the building itself is.
-        // If these two say where the building's ground is, then at the origin its ground is a mile
-        // away and belongs to nobody, which would explain exactly that. The building's own position
-        // goes in both until somebody can name them.
-        //
-        // If the building stops appearing, or its state stops arriving, put the zeros back first -
-        // this is the last field in the message and the cheapest thing to undo.
+        // The dedicate writer initializes both unknown anchor positions to zero. Their semantic
+        // purpose is still unresolved, so do not feed the house world position into them.
         for (var i = 0; i < TrailingPositionCount; i++)
-            WriteWorldPosition(stream, Transform.World.Position); // tailPosition0..1 : 20 bytes each
+            WriteWorldPosition(stream, Vector3.Zero); // tailPosition0..1 : 20 bytes each
 
         return stream;
     }

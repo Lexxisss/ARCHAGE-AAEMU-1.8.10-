@@ -61,11 +61,8 @@ public class BuildHouse : ICommand
             );
         }
 
-        if (targetHouse.CurrentStep == -1)
-        {
-            var doodads = targetHouse.AttachedDoodads.ToArray();
-            foreach (var doodad in doodads)
-                doodad.Spawn();
-        }
+        // Use the normal two-stage house finalizer. It updates the finished state first and only
+        // then creates/publishes the built-in fixtures.
+        targetHouse.ScheduleStateFollowUpForVisibleCharacters();
     }
 }

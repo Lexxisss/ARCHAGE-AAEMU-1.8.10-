@@ -12,6 +12,7 @@ using AAEmu.Game.Models.Game.Skills.Utils;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.World;
 using AAEmu.Game.Utils;
+using MateUnit = AAEmu.Game.Models.Game.Units.Mate;
 
 namespace AAEmu.Game.Models.Game.Skills.Plots.Tree;
 
@@ -71,19 +72,19 @@ public class PlotTargetInfo
         {
             case PlotTargetUpdateMethodType.OriginalSource:
                 Target = state.Caster;
-                EffectedTargets.Add(Target);
+                AddEffectedTarget(Target);
                 break;
             case PlotTargetUpdateMethodType.OriginalTarget:
                 Target = state.Target;
-                EffectedTargets.Add(Target);
+                AddEffectedTarget(Target);
                 break;
             case PlotTargetUpdateMethodType.PreviousSource:
                 Target = PreviousSource;
-                EffectedTargets.Add(Target);
+                AddEffectedTarget(Target);
                 break;
             case PlotTargetUpdateMethodType.PreviousTarget:
                 Target = PreviousTarget;
-                EffectedTargets.Add(Target);
+                AddEffectedTarget(Target);
                 break;
             case PlotTargetUpdateMethodType.Area:
                 Target = UpdateAreaTarget(new PlotTargetAreaParams(template), state, template);
@@ -99,10 +100,14 @@ public class PlotTargetInfo
 
     private BaseUnit UpdateAreaTarget(PlotTargetAreaParams args, PlotState state, PlotEventTemplate plotEvent)
     {
+        var anchor = PreviousTarget ?? Target ?? Source ?? state.Target ?? state.Caster;
+        if (anchor?.Transform == null)
+            return null;
+
         var posUnit = new BaseUnit();
         posUnit.ObjId = uint.MaxValue;
-        posUnit.Region = PreviousTarget.Region;
-        posUnit.Transform = PreviousTarget.Transform.CloneDetached(posUnit);
+        posUnit.Region = anchor.Region;
+        posUnit.Transform = anchor.Transform.CloneDetached(posUnit);
         var degrees = (float)(args.Angle);
         posUnit.Transform.Local.Rotate(0, 0, degrees.DegToRad() * -1f);
         // posUnit.Transform.Local.Rotate(Quaternion.CreateFromYawPitchRoll(((float)args.Angle).DegToRad() * -1f, 0f, 0f));
@@ -110,7 +115,7 @@ public class PlotTargetInfo
         {
             posUnit.Transform.Local.AddDistanceToFront((args.Distance / 1000f) - 0.01f);
         }
-        posUnit.Transform.Local.SetHeight(Math.Max(PreviousTarget.Transform.World.Position.Z + (args.HeightOffset / 1000f), WorldManager.Instance.GetHeight(posUnit.Transform)));
+        posUnit.Transform.Local.SetHeight(Math.Max(anchor.Transform.World.Position.Z + (args.HeightOffset / 1000f), WorldManager.Instance.GetHeight(posUnit.Transform)));
         // posUnit.Transform.Local.SetHeight(WorldManager.Instance.GetHeight(posUnit.Transform));
 
         if (args.MaxTargets == 0)
@@ -144,18 +149,21 @@ public class PlotTargetInfo
     private Unit UpdateRandomUnitTarget(PlotTargetRandomUnitParams args, PlotState state, PlotEventTemplate plotEvent)
     {
         //TODO for now we get all units in a 5 meters radius
-        var randomUnits = WorldManager.GetAroundByShape<Unit>(Source, args.Shape);
-
-        var filteredUnits = FilterTargets(randomUnits, state, args, plotEvent);
-        if (args.HitOnce)
-            filteredUnits = filteredUnits.Where(unit => unit.ObjId != PreviousTarget.ObjId);
-
-        var index = Rand.Next(0, filteredUnits.Count());
-
-        if (!filteredUnits.Any())
+        var anchor = Source ?? PreviousSource ?? state.Caster;
+        if (anchor?.Transform == null)
             return null;
 
-        var randomUnit = filteredUnits.ElementAt(index);
+        var randomUnits = WorldManager.GetAroundByShape<Unit>(anchor, args.Shape);
+
+        var filteredUnits = FilterTargets(randomUnits, state, args, plotEvent);
+        if (args.HitOnce && PreviousTarget != null)
+            filteredUnits = filteredUnits.Where(unit => unit.ObjId != PreviousTarget.ObjId);
+
+        var candidates = filteredUnits.ToList();
+        if (candidates.Count == 0)
+            return null;
+
+        var randomUnit = candidates[Rand.Next(0, candidates.Count)];
 
         EffectedTargets.Add(randomUnit);
         if (state.HitObjects.TryGetValue(plotEvent.Id, out var o))
@@ -172,15 +180,19 @@ public class PlotTargetInfo
 
     private BaseUnit UpdateRandomAreaTarget(PlotTargetRandomAreaParams args, PlotState state, PlotEventTemplate plotEvent)
     {
+        var anchor = PreviousTarget ?? Target ?? Source ?? state.Target ?? state.Caster;
+        if (anchor?.Transform == null)
+            return null;
+
         var posUnit = new BaseUnit();
         posUnit.ObjId = uint.MaxValue;
-        posUnit.Region = PreviousTarget.Region;
-        posUnit.Transform = PreviousTarget.Transform.CloneDetached(posUnit);
-        posUnit.Transform.ZoneId = PreviousTarget.Transform.ZoneId;
-        posUnit.Transform.WorldId = PreviousTarget.Transform.WorldId;
+        posUnit.Region = anchor.Region;
+        posUnit.Transform = anchor.Transform.CloneDetached(posUnit);
+        posUnit.Transform.ZoneId = anchor.Transform.ZoneId;
+        posUnit.Transform.WorldId = anchor.Transform.WorldId;
         posUnit.Transform.Local.SetZRotation(((float)Rand.Next(-180, 180)).DegToRad());
         posUnit.Transform.Local.AddDistanceToFront(args.Distance / 1000f);
-        posUnit.Transform.Local.SetHeight(Math.Max(PreviousTarget.Transform.World.Position.Z + (args.HeightOffset / 1000f), WorldManager.Instance.GetHeight(posUnit.Transform)));
+        posUnit.Transform.Local.SetHeight(Math.Max(anchor.Transform.World.Position.Z + (args.HeightOffset / 1000f), WorldManager.Instance.GetHeight(posUnit.Transform)));
         //posUnit.Transform.Local.SetHeight(WorldManager.Instance.GetHeight(posUnit.Transform));
 
         if (args.MaxTargets == 0)
@@ -212,6 +224,12 @@ public class PlotTargetInfo
         return posUnit;
     }
 
+    private void AddEffectedTarget(BaseUnit unit)
+    {
+        if (unit != null)
+            EffectedTargets.Add(unit);
+    }
+
     private static IEnumerable<Unit> FilterTargets(IEnumerable<Unit> units, PlotState state, IPlotTargetParams args, PlotEventTemplate plotEvent)
     {
         var template = state.ActiveSkill.Template;
@@ -231,17 +249,37 @@ public class PlotTargetInfo
             });
         }
 
-        filtered = filtered
-            .Where(o =>
-            {
-                var relationState = state.Caster.GetRelationStateTo(o);
-                if (relationState == RelationState.Neutral) // TODO ?
-                    return false;
-                return true;
-            });
-
+        // Relation filtering belongs to the data-selected relation mode. Neutral units
+        // are valid for several support and scripted plot events and must not be removed
+        // unconditionally before that filter runs.
         filtered = SkillTargetingUtil.FilterWithRelation(args.UnitRelationType, state.Caster, filtered);
-        filtered = filtered.Where(o => ((byte)o.TypeFlag & args.UnitTypeFlag) != 0);
+
+        // A zero mask in the target DB means "all unit kinds", not "no units".
+        if (args.UnitTypeFlag != 0)
+            filtered = filtered.Where(o => ((byte)o.TypeFlag & args.UnitTypeFlag) != 0);
+
+        if (plotEvent.OnlyDieUnit)
+            filtered = filtered.Where(o => o.Hp <= 0);
+
+        if (plotEvent.OnlyMyPet)
+            filtered = filtered.Where(o => o is MateUnit mate && mate.OwnerObjId == state.Caster.ObjId);
+
+        if (plotEvent.OnlyMySlave)
+            filtered = filtered.Where(o => o is Slave slave &&
+                (slave.OwnerObjId == state.Caster.ObjId || slave.Summoner?.ObjId == state.Caster.ObjId));
+
+        if (plotEvent.OnlyPetOwner)
+        {
+            var petOwnerId = state.Target switch
+            {
+                MateUnit mate => mate.OwnerObjId,
+                Slave slave => slave.OwnerObjId != 0 ? slave.OwnerObjId : slave.Summoner?.ObjId ?? 0,
+                _ => 0u
+            };
+            filtered = petOwnerId == 0
+                ? Enumerable.Empty<Unit>()
+                : filtered.Where(o => o.ObjId == petOwnerId);
+        }
 
         return filtered;
     }

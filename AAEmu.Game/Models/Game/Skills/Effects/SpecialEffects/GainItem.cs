@@ -27,7 +27,7 @@ public class GainItem : SpecialEffectAction
 
         if (caster is Character character)
         {
-            character.Inventory.Bag.AcquireDefaultItem(ItemTaskType.Loot, (uint)value1, 1, 0);
+            character.Inventory.Bag.AcquireDefaultItem(ItemTaskType.Loot, (uint)value1, Math.Max(1, value2), 0);
         }
     }
 }

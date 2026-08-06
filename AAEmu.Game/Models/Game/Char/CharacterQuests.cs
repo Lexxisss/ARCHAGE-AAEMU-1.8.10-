@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
+using AAEmu.Commons.Utils.DB;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Managers.UnitManagers;
@@ -142,18 +143,6 @@ public partial class CharacterQuests
 
         Owner.SendPacket(new SCQuestContextStartedPacket(quest, quest.CurrentComponentId));
 
-        // Starting the quest is what hands over whatever it sends the player off with, and that
-        // happens above, before the client has heard of the quest at all: the goods arrive, the
-        // client counts them against nothing, and the objective that asks for them sits at zero
-        // while they are plainly in the bag.
-        //
-        // The message that carries progress is a merge onto a quest the client already knows, and
-        // it is dropped without a word when there is none - so it could not be sent any earlier
-        // than this. Sent here it restates the objectives against what the player is actually
-        // holding, which is what the count should have been all along.
-        if (quest.HasStartingSupply())
-            quest.SendRuntimeUpdate();
-
         RefreshQuestNotifier();
         Logger.Info("Quest {0} started for {1}, runtime={2}, component={3}, status={4}, source={5}:{6}",
             questId, Owner.Name, quest.Id, quest.CurrentComponentId, quest.Status, sourceType, sourceTemplateId);
@@ -227,7 +216,22 @@ public partial class CharacterQuests
                 completedBlock = new CompletedQuest(blockId);
                 CompletedQuests[blockId] = completedBlock;
             }
-            completedBlock.Body.Set((int)(questId % CompletedQuestsPerBlock), true);
+            var completedBitIndex = (int)(questId % CompletedQuestsPerBlock);
+            var wasAlreadyCompleted = completedBlock.Body.Get(completedBitIndex);
+            completedBlock.Body.Set(completedBitIndex, true);
+
+            // Completion must survive a disconnect immediately after hand-in. Persist the completed
+            // bit and remove the active quest row in one transaction before rewards/client success.
+            if (!PersistCompletedQuest(questId, completedBlock))
+            {
+                completedBlock.Body.Set(completedBitIndex, wasAlreadyCompleted);
+                if (!wasAlreadyCompleted && completedBlock.Body.Cast<bool>().All(value => !value))
+                    CompletedQuests.Remove(blockId);
+
+                Logger.Error("Quest {0} completion could not be persisted for {1}", questId, Owner.Name);
+                Owner.SendPacket(new SCQuestContextFailedPacket(questId, 1));
+                return false;
+            }
 
             quest.MarkRuntimeCompleted(componentId);
             ActiveQuests.Remove(questId);
@@ -903,46 +907,53 @@ public partial class CharacterQuests
     }
 
     /// <summary>
-    /// Tells the client which quests this player has already finished.
+    /// Sends the target client the database-shaped completed-quest bitsets.
+    /// Each record covers 64 quest ids: idx selects the block and body contains
+    /// the completion bits.
     /// </summary>
-    /// <remarks>
-    /// We keep them packed - one record per sixty-four quests, a bit each - and the client wants
-    /// them one by one, so they are unpacked here. Sending our own packing instead left the client
-    /// with no idea which quests were done, so a giver went on offering a finished quest that the
-    /// server then refused to hand out: visible, unclickable, forever.
-    ///
-    /// Numbers no design exists for are left out. They cost a lookup each, once per login, and the
-    /// client would only discard them after doing the same lookup itself.
-    /// </remarks>
     public void SendCompleted()
     {
-        var questIds = new List<uint>();
-        foreach (var (blockId, block) in CompletedQuests)
-        {
-            for (var bit = 0; bit < CompletedQuestsPerBlock; bit++)
-            {
-                if (!block.Body[bit])
-                    continue;
+        var blocks = CompletedQuests
+            .OrderBy(pair => pair.Key)
+            .Select(pair => new CompletedQuestBlock(pair.Key, PackCompletedQuestBody(pair.Value.Body)))
+            .ToArray();
 
-                var questId = (uint)blockId * CompletedQuestsPerBlock + (uint)bit;
-                if (QuestManager.Instance.GetTemplate(questId) == null)
-                    continue;
-
-                questIds.Add(questId);
-            }
-        }
-
-        if (questIds.Count == 0)
+        if (blocks.Length == 0)
         {
             Owner.SendPacket(new SCCompletedQuestsPacket([]));
+            Logger.Info("Completed quest sync: characterId={0}, blocks=0", Owner.Id);
             return;
         }
 
-        for (var i = 0; i < questIds.Count; i += SCCompletedQuestsPacket.MaxEntries)
+        for (var offset = 0; offset < blocks.Length; offset += SCCompletedQuestsPacket.MaxEntries)
         {
-            var size = Math.Min(SCCompletedQuestsPacket.MaxEntries, questIds.Count - i);
-            Owner.SendPacket(new SCCompletedQuestsPacket(questIds.GetRange(i, size).ToArray()));
+            var count = Math.Min(SCCompletedQuestsPacket.MaxEntries, blocks.Length - offset);
+            var chunk = new CompletedQuestBlock[count];
+            Array.Copy(blocks, offset, chunk, 0, count);
+            Owner.SendPacket(new SCCompletedQuestsPacket(chunk));
         }
+
+        Logger.Info(
+            "Completed quest sync: characterId={0}, blocks={1}, records=[{2}]",
+            Owner.Id,
+            blocks.Length,
+            string.Join(",", blocks.Select(block => $"{block.Index}:0x{block.Body:X16}")));
+    }
+
+    private static ulong PackCompletedQuestBody(BitArray body)
+    {
+        if (body == null)
+            return 0;
+
+        ulong packed = 0;
+        var bitCount = Math.Min(CompletedQuestsPerBlock, body.Length);
+        for (var bit = 0; bit < bitCount; bit++)
+        {
+            if (body[bit])
+                packed |= 1UL << bit;
+        }
+
+        return packed;
     }
 
     public void ResetQuests(QuestDetail questDetail, bool sendIfChanged = true) => ResetQuests(new QuestDetail[] { questDetail }, sendIfChanged);
@@ -980,6 +991,50 @@ public partial class CharacterQuests
         }
     }
 
+    private bool PersistCompletedQuest(uint questId, CompletedQuest completedBlock)
+    {
+        try
+        {
+            using var connection = MySQL.CreateConnection();
+            if (connection == null)
+                return false;
+
+            using var transaction = connection.BeginTransaction();
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText =
+                    "REPLACE INTO completed_quests(`id`,`data`,`owner`) VALUES(@id,@data,@owner)";
+                command.Parameters.AddWithValue("@id", completedBlock.Id);
+                var body = new byte[8];
+                completedBlock.Body.CopyTo(body, 0);
+                command.Parameters.AddWithValue("@data", body);
+                command.Parameters.AddWithValue("@owner", Owner.Id);
+                command.ExecuteNonQuery();
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText =
+                    "DELETE FROM quests WHERE owner = @owner AND template_id = @templateId";
+                command.Parameters.AddWithValue("@owner", Owner.Id);
+                command.Parameters.AddWithValue("@templateId", questId);
+                command.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Logger.Error(exception,
+                "PersistCompletedQuest failed: owner={0}, quest={1}, block={2}",
+                Owner.Id, questId, completedBlock.Id);
+            return false;
+        }
+    }
+
     public void Load(MySqlConnection connection)
     {
         using (var command = connection.CreateCommand())
@@ -998,6 +1053,7 @@ public partial class CharacterQuests
             }
         }
 
+        var staleCompletedQuestRows = new List<uint>();
         using (var command = connection.CreateCommand())
         {
             command.CommandText = "SELECT * FROM quests WHERE `owner` = @owner";
@@ -1012,6 +1068,18 @@ public partial class CharacterQuests
                     Logger.Warn("Skipping persisted quest {0}: target template is missing", templateId);
                     continue;
                 }
+
+                // Repair rows left by older builds: a completed non-repeatable quest must never be
+                // restored as active, otherwise its giver offers it again after relog.
+                if (HasQuestCompleted(templateId) && !template.Repeatable)
+                {
+                    staleCompletedQuestRows.Add(templateId);
+                    Logger.Warn(
+                        "Removing stale active row for completed quest {0}, owner={1}",
+                        templateId, Owner.Id);
+                    continue;
+                }
+
                 var quest = new Quest(template)
                 {
                     Id = reader.GetUInt32("id"),
@@ -1023,6 +1091,15 @@ public partial class CharacterQuests
                 quest.RestoreRuntimeAfterLoad();
                 ActiveQuests[templateId] = quest;
             }
+        }
+
+        if (staleCompletedQuestRows.Count > 0)
+        {
+            using var cleanup = connection.CreateCommand();
+            cleanup.CommandText =
+                $"DELETE FROM quests WHERE owner = @owner AND template_id IN ({string.Join(",", staleCompletedQuestRows.Distinct())})";
+            cleanup.Parameters.AddWithValue("@owner", Owner.Id);
+            cleanup.ExecuteNonQuery();
         }
     }
 

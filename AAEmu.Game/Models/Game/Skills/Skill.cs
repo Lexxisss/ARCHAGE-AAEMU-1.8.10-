@@ -48,6 +48,7 @@ public class Skill
     public BaseUnit InitialTarget { get; set; }//Temp Hack Fix. Replace this with UnitsEffected
     private bool _bypassGcd;
     private readonly int _castingUseChance = Rand.Next(1, 101);
+    public int CastingUseChance => _castingUseChance;
     public bool Cancelled { get; set; } = false;
     public Action Callback { get; set; }
 

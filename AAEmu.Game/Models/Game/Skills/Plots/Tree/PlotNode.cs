@@ -59,7 +59,7 @@ public class PlotNode
         {
             try
             {
-                eff.ApplyEffect(state, targetInfo, Event, ref flag, IsChannelStart());
+                eff.ApplyEffect(state, targetInfo, Event, ref flag, IsChannelStart(), packets);
             }
             catch (Exception e)
             {
@@ -96,18 +96,53 @@ public class PlotNode
             ? state.Caster.ObjId
             : 0;
 
-        var casterPlotObj = targetInfo.Source.ObjId == uint.MaxValue
-            ? new PlotObject(targetInfo.Source.Transform)
-            : new PlotObject(targetInfo.Source);
+        var packetSource = targetInfo.Source ?? state.Caster;
+        var packetTarget = targetInfo.Target ?? state.Target ?? packetSource;
+        if (packetSource?.Transform == null || packetTarget?.Transform == null)
+        {
+            Logger.Warn("Plot event packet skipped due to missing source/target transform: skill={0}, plot={1}, event={2}",
+                skill.Template.Id, Event.PlotId, Event.Id);
+            return;
+        }
 
-        var targetPlotObj = targetInfo.Target.ObjId == uint.MaxValue
-            ? new PlotObject(targetInfo.Target.Transform)
-            : new PlotObject(targetInfo.Target);
+        var casterPlotObj = packetSource.ObjId == uint.MaxValue
+            ? new PlotObject(packetSource.Transform, packetSource.Transform)
+            : new PlotObject(packetSource);
 
-        var targetCount = (byte)targetInfo.EffectedTargets.Count;
+        // A POSITION target carries both the endpoint and the line origin. The latter is the
+        // packet source/caster transform; omitting it made Nitro and both somersault controllers
+        // land on the same shifted SCPlotEvent layout client-side.
+        var targetPlotObj = packetTarget.ObjId == uint.MaxValue
+            ? new PlotObject(packetTarget.Transform, packetSource.Transform)
+            : new PlotObject(packetTarget);
+
+        if (packetTarget.ObjId == uint.MaxValue)
+        {
+            var endpoint = packetTarget.Transform.World.Position;
+            var lineOrigin = packetSource.Transform.World.Position;
+            Logger.Debug(
+                "Plot POSITION: skill={0}, event={1}, endpoint=({2:F2},{3:F2},{4:F2}), line=({5:F2},{6:F2},{7:F2})",
+                skill.Template.Id,
+                Event.Id,
+                endpoint.X,
+                endpoint.Y,
+                endpoint.Z,
+                lineOrigin.X,
+                lineOrigin.Y,
+                lineOrigin.Z);
+        }
+
+        // targetUnitCount is a list of real unit object ids. Location pseudo-targets
+        // use uint.MaxValue and must not be serialized as a fake BC target.
+        var targetUnitIds = targetInfo.EffectedTargets
+            .Where(target => target != null && target.ObjId != 0 && target.ObjId != uint.MaxValue)
+            .Select(target => target.ObjId)
+            .Distinct()
+            .ToArray();
 
         var packet = new SCPlotEventPacket(skill.TlId, Event.Id, skill.Template.Id, casterPlotObj,
-            targetPlotObj, unkId, (ushort)castTime, flag, 0, targetCount);
+            targetPlotObj, unkId, (ushort)castTime, flag, 0, targetUnitIds,
+            state.SkillObject?.InputDirection ?? 0);
 
         if (packets != null)
             packets.AddPacket(packet);

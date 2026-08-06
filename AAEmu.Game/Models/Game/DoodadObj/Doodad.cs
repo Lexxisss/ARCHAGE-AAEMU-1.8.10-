@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -219,6 +219,7 @@ public class Doodad : BaseUnit
     public DateTime OverridePhaseTime { get; set; } = DateTime.MinValue;
 
     private bool _deleted = false;
+    private bool _suppressPhaseChangePacket;
     public VehicleSeat Seat { get; set; }
     private List<uint> ListGroupId { get; set; }
     public List<AreaTrigger> AttachAreaTriggers { get; set; } = new();
@@ -539,6 +540,47 @@ public class Doodad : BaseUnit
     }
 
     /// <summary>
+    /// Whether this object's current phase is one the client can be told about.
+    /// </summary>
+    /// <remarks>
+    /// A phase the object's own design does not own passes the wire intact and fails later, when
+    /// the client goes looking for the model and the actions that go with it - and what it does
+    /// then is stop where it stands. That is the plant that grows, freezes, and answers to nothing:
+    /// nothing was refused, nothing was logged, it simply had nowhere left to go.
+    ///
+    /// So the phase is checked against the design before anyone is told about it. A phase that does
+    /// not belong is not sent, and it is written down instead, which is the difference between a
+    /// fault we can find and one we cannot.
+    /// </remarks>
+    private bool CanAnnouncePhase()
+    {
+        if (ObjId == 0)
+            return false;
+
+        if (FuncGroupId == 0 || FuncGroupId == uint.MaxValue)
+        {
+            Logger.Warn(
+                "Doodad phase not announced: objId={0}, templateId={1}, funcGroupId={2} is not a phase",
+                ObjId, TemplateId, FuncGroupId);
+            return false;
+        }
+
+        // A group the design owns has functions, phase functions, or both. One with neither is a
+        // number this object was never meant to be in.
+        var hasFuncs = CurrentFuncs is { Count: > 0 };
+        var hasPhaseFuncs = CurrentPhaseFuncs is { Count: > 0 };
+        if (!hasFuncs && !hasPhaseFuncs)
+        {
+            Logger.Warn(
+                "Doodad phase not announced: objId={0}, templateId={1}, funcGroupId={2} has neither functions nor phase functions",
+                ObjId, TemplateId, FuncGroupId);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Start phase functions and phase change
     /// </summary>
     /// <param name="caster"></param>
@@ -568,7 +610,8 @@ public class Doodad : BaseUnit
         var stop = DoPhaseFuncs(caster, ref nextPhase);
 
         // the phase change packet call must be after the phase functions to have the correct FuncGroupId in the packet
-        BroadcastPacket(new SCDoodadPhaseChangedPacket(this), true); // change the phase to display doodad
+        if (!_suppressPhaseChangePacket && CanAnnouncePhase())
+            BroadcastPacket(new SCDoodadPhaseChangedPacket(this), true); // change the phase to display doodad
 
         // Quest markers are selected locally by the target client from the current Doodad func group.
         // Force the client to recalculate after entering or leaving a quest-bearing group.
@@ -630,7 +673,7 @@ public class Doodad : BaseUnit
     /// <summary>
     /// initialization of the current doodad phase
     /// </summary>
-    public void InitDoodad()
+    public void InitDoodad(bool announcePhase = true)
     {
         // Apply Climate settings
         var growTime = Template.TotalDoodadGrowthTime / AppConfiguration.Instance.World.GrowthRate;
@@ -641,9 +684,21 @@ public class Doodad : BaseUnit
 
         GrowthTime = PlantTime.AddMilliseconds(growTime);
 
-        // Actually do the phase change
-        var unit = WorldManager.Instance.GetUnit(OwnerObjId);
-        DoChangePhase(unit, (int)FuncGroupId);
+        // Directly constructed slave components must initialise their phase before the create
+        // packet is emitted, otherwise DoodadInfo.TimeLeft is zero and the target client never
+        // starts the charging/growth display. Suppress the phase packet only for that initial
+        // pre-spawn pass; the scheduled transition is still announced normally.
+        var previousSuppression = _suppressPhaseChangePacket;
+        _suppressPhaseChangePacket = !announcePhase;
+        try
+        {
+            var unit = WorldManager.Instance.GetUnit(OwnerObjId);
+            DoChangePhase(unit, (int)FuncGroupId);
+        }
+        finally
+        {
+            _suppressPhaseChangePacket = previousSuppression;
+        }
     }
 
     public override void BroadcastPacket(GamePacket packet, bool self)
@@ -659,11 +714,33 @@ public class Doodad : BaseUnit
         return CurrentFuncs?.Any(x => x.FuncType == nameof(DoodadFuncQuest)) == true;
     }
 
+    private bool _suppressCreatePacket;
+
+    /// <summary>
+    /// Registers this doodad in the world without emitting the one-object create packet.
+    /// Houses use this for their built-in fixtures: the fixtures are published together only
+    /// after the client's house record has had a separate processing turn.
+    /// </summary>
+    public void SpawnForBatch()
+    {
+        _suppressCreatePacket = true;
+        try
+        {
+            Spawn();
+        }
+        finally
+        {
+            _suppressCreatePacket = false;
+        }
+    }
+
     public override void AddVisibleObject(Character character)
     {
-        character.SendPacket(new SCDoodadCreatedPacket(this));
+        if (!_suppressCreatePacket)
+            character.SendPacket(new SCDoodadCreatedPacket(this));
+
         base.AddVisibleObject(character);
-        if (HasQuestFunction())
+        if (!_suppressCreatePacket && HasQuestFunction())
             character.Quests.RefreshQuestNotifier();
     }
 
@@ -691,17 +768,14 @@ public class Doodad : BaseUnit
         // +0x00: objectId (target BC helper: fixed three-byte little-endian)
         stream.WriteBc(ObjId);
 
-        // +0x04, +0x44, +0x60, +0x78 share one PISC/PISH header.
-        // The fourth value is commonFarmId, not quest glow or owner id.
+        // The packed values must stay in this measured wire order. The second value is the
+        // current function group and the third is the optional item template. Swapping them makes
+        // the client interpret FuncGroupId as an item template. It can then expect the conditional
+        // goods extension while the server correctly omits it for a built-in fixture, desynchronizing
+        // the remainder of the record and causing the whole SCDoodadsCreated batch to be discarded.
         //
-        // The order here is measured. Do not reorder it on an offset table alone.
-        //
-        // A reverse of the fixtures a building carries found that the client decides what belongs
-        // to a building by a value it read at a byte offset it called the third of these, and the
-        // middle two were swapped to suit. In play the swap sent every object's look through the
-        // wrong number: a stone came out drawn as a fish, and the fixtures a building carries
-        // stopped arriving at all. Whatever offset that reading names, it is not this slot; until
-        // someone can say which slot it is, the working order stands.
+        // Do not infer PISC argument order directly from the offsets of the expanded client struct:
+        // the archive helper expands packed values into non-sequential members.
         stream.WritePisc(TemplateId, FuncGroupId, ItemTemplateId, CommonFarmId);
 
         // bit0=field +0x90, bit1=+0x91, bit2=+0x48, bit3=+0x92.

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Numerics;
 using System.Threading;
 
-using AAEmu.Game.Core.Managers.AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Slaves;
@@ -184,6 +184,12 @@ public class BoatPhysicsManager//: Singleton<BoatPhysicsManager>
         var moveType = (ShipMoveType)MoveType.GetType(MoveTypeEnum.Ship);
         moveType.UseSlaveBase(slave);
         var shipModel = ModelManager.Instance.GetShipModel(slave.Template.ModelId);
+        if (shipModel == null)
+        {
+            Logger.Warn("Boat physics skipped: no ShipModel for slave={0}/{1}, modelId={2}",
+                slave.TemplateId, slave.ObjId, slave.Template.ModelId);
+            return;
+        }
 
         // If no driver, then no steering allowed
         if (!slave.AttachedCharacters.ContainsKey(AttachPointKind.Driver))
@@ -192,39 +198,59 @@ public class BoatPhysicsManager//: Singleton<BoatPhysicsManager>
             slave.SteeringRequest = 0;
         }
 
-        slave.Throttle = ComputeThrottledInput(slave.ThrottleRequest, slave.Throttle, (int)Math.Ceiling(shipModel.Velocity / shipModel.Accel));
-        slave.Steering = ComputeThrottledInput(slave.SteeringRequest, slave.Steering, (int)Math.Ceiling(shipModel.SteerVel / shipModel.TurnAccel));
+        // The target ship_models table describes throttle response with accel_exponent and the
+        // seconds needed to reach forward/reverse RPM. The legacy code read absent columns named
+        // accel/reverse_accel, received zero and consequently added exactly zero speed forever.
+        var requestedRpmSeconds = slave.ThrottleRequest < 0 ? shipModel.MinRpmSec : shipModel.MaxRpmSec;
+        var throttleStep = InputStepForSeconds(requestedRpmSeconds);
+        var steeringStep = InputStepForSeconds(shipModel.TurnAccel);
+        slave.Throttle = ComputeThrottledInput(slave.ThrottleRequest, slave.Throttle, throttleStep);
+        slave.Steering = ComputeThrottledInput(slave.SteeringRequest, slave.Steering, steeringStep);
         slave.RigidBody.IsActive = true;
 
-        // Provide minimum speed of 1 when Throttle is used
-        if (slave.Throttle > 0 && slave.Speed < 1f)
-            slave.Speed = 1f;
-        if (slave.Throttle < 0 && slave.Speed > -1f)
-            slave.Speed = -1f;
+        var throttleFloatVal = slave.Throttle / 127f;
+        var steeringFloatVal = slave.Steering / 127f;
+        var throttleMagnitude = MathF.Pow(MathF.Abs(throttleFloatVal), shipModel.AccelExponent);
+        var shapedThrottle = MathF.Sign(throttleFloatVal) * throttleMagnitude;
 
-        var throttleFloatVal = slave.Throttle * 0.00787401575f; // sbyte -> float
-        var steeringFloatVal = slave.Steering * 0.00787401575f; // sbyte -> float
+        if (slave.Throttle != 0)
+        {
+            var directionalMaxSpeed = shapedThrottle >= 0f
+                ? shipModel.Velocity
+                : shipModel.ReverseVelocity;
+            var secondsToLimit = shapedThrottle >= 0f
+                ? shipModel.MaxRpmSec
+                : shipModel.MinRpmSec;
+            var accelerationPerTick = directionalMaxSpeed / (secondsToLimit * TargetPhysicsTps);
+            slave.Speed += shapedThrottle * accelerationPerTick;
+        }
 
-        // Calculate speed
-        slave.Speed += throttleFloatVal * (shipModel.Accel / 10f);
-        // Clamp speed between min and max Velocity
+        if ((slave.ThrottleRequest != 0 || slave.SteeringRequest != 0) && _tickCount % (uint)TargetPhysicsTps == 0)
+        {
+            Logger.Debug(
+                "Boat physics input: slave={0}/{1}, throttle={2}->{3}, steering={4}->{5}, speed={6:F2}, " +
+                "model={7}, maxRpmSec={8:F2}, minRpmSec={9:F2}, exponent={10:F2}",
+                slave.TemplateId, slave.ObjId, slave.ThrottleRequest, slave.Throttle,
+                slave.SteeringRequest, slave.Steering, slave.Speed, slave.Template.ModelId,
+                shipModel.MaxRpmSec, shipModel.MinRpmSec, shipModel.AccelExponent);
+        }
+
+        // Clamp speed between target reverse and forward limits.
         slave.Speed = Math.Min(slave.Speed, shipModel.Velocity);
         slave.Speed = Math.Max(slave.Speed, -shipModel.ReverseVelocity);
 
-        // Calculate rotation speed
-        slave.RotSpeed += steeringFloatVal * (slave.TurnSpeed / 100f) * (shipModel.TurnAccel / 360f);
+        // turn_accel in the target table is a response time/curve value rather than degrees per
+        // frame. Build a stable angular target from steer_vel and approach it each physics tick.
+        var targetRotSpeed = steeringFloatVal * shipModel.SteerVel;
+        var rotationResponse = Math.Max(0.1f, shipModel.TurnAccel) * TargetPhysicsTps;
+        slave.RotSpeed += (targetRotSpeed - slave.RotSpeed) / rotationResponse;
         // Clamp to Steer Velocity
         slave.RotSpeed = Math.Min(slave.RotSpeed, shipModel.SteerVel);
         slave.RotSpeed = Math.Max(slave.RotSpeed, -shipModel.SteerVel);
 
-        // Slow down turning if no steering active
-        if (slave.Steering == 0)
-        {
-            slave.RotSpeed -= slave.RotSpeed / (TargetPhysicsTps * 5);
-            if (Math.Abs(slave.RotSpeed) <= 0.01)
-                slave.RotSpeed = 0;
-        }
-        slave.RotSpeed = Math.Clamp(slave.RotSpeed, -1f, 1f);
+        if (Math.Abs(slave.RotSpeed) <= 0.001f)
+            slave.RotSpeed = 0f;
+        slave.RotSpeed = Math.Clamp(slave.RotSpeed, -shipModel.SteerVel, shipModel.SteerVel);
 
         // this needs to be fixed : ships need to apply a static drag, and slowly ship away at the speed instead of doing it like this
         if (slave.Throttle == 0)
@@ -340,32 +366,21 @@ public class BoatPhysicsManager//: Singleton<BoatPhysicsManager>
     /// </summary>
     /// <param name="inputRequest">New request value</param>
     /// <param name="currentValue">Current calculated value</param>
-    /// <param name="acceleration">Step size</param>
+    /// <param name="maxStep">Maximum signed-input change per physics tick</param>
     /// <returns></returns>
-    private static sbyte ComputeThrottledInput(sbyte inputRequest, sbyte currentValue, int acceleration)
+    private int InputStepForSeconds(float seconds)
     {
-        var inputSign = Math.Sign(inputRequest);
-        var inputVal = Math.Abs(inputRequest);
+        var safeSeconds = Math.Max(0.1f, seconds);
+        return Math.Max(1, (int)Math.Ceiling(sbyte.MaxValue / (safeSeconds * TargetPhysicsTps)));
+    }
 
-        var curSign = Math.Sign(currentValue);
-        var curVal = Math.Abs(currentValue);
+    private static sbyte ComputeThrottledInput(sbyte inputRequest, sbyte currentValue, int maxStep)
+    {
+        var delta = inputRequest - currentValue;
+        if (delta == 0)
+            return currentValue;
 
-        var sameDirectionPush = ((inputSign > 0) && (curSign >= 0)) || ((inputSign < 0) && (curSign <= 0));
-        var oppositeDirectionPush = ((inputSign < 0) && (curSign >= 0)) || ((inputSign > 0) && (curSign <= 0));
-
-        // Slowing down?
-        if (sameDirectionPush && inputVal < curVal)
-        {
-            sameDirectionPush = false;
-            oppositeDirectionPush = true;
-        }
-
-        if (sameDirectionPush)
-            return (sbyte)(Math.Clamp(Math.Max(inputVal, curVal) + acceleration, sbyte.MinValue, sbyte.MaxValue) * inputSign);
-
-        if (oppositeDirectionPush)
-            return (sbyte)(Math.Clamp(Math.Max(inputVal, curVal) - acceleration, sbyte.MinValue, sbyte.MaxValue) * inputSign);
-
-        return 0;
+        var step = Math.Clamp(delta, -Math.Max(1, maxStep), Math.Max(1, maxStep));
+        return (sbyte)Math.Clamp(currentValue + step, sbyte.MinValue, sbyte.MaxValue);
     }
 }

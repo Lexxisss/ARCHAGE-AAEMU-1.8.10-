@@ -33,7 +33,7 @@ public class CSCreateCharacterPacket : GamePacket
         var introZoneId = stream.ReadInt32();
 
         Logger.Info(
-            "CSCreateCharacter 0x{0:X3}: name={1}, race={2}, gender={3}, abilities={4}/{5}/{6}, requestedLevel={7}, introZoneId={8}",
+            "CSCreateCharacter 0x{0:X3}: name={1}, race={2}, gender={3}, abilities={4}/{5}/{6}, requestedLevel={7}, introZoneId={8}, remaining={9}",
             TypeId,
             name,
             race,
@@ -42,7 +42,8 @@ public class CSCreateCharacterPacket : GamePacket
             ability2,
             ability3,
             level,
-            introZoneId);
+            introZoneId,
+            stream.LeftBytes);
 
         CharacterManager.Instance.Create(Connection, name, race, gender, items, customModel, ability1, ability2, ability3, level);
     }

@@ -309,7 +309,7 @@ CREATE TABLE `items` (
   `type` varchar(100) NOT NULL,
   `template_id` int unsigned NOT NULL,
   `container_id` int unsigned NOT NULL DEFAULT '0',
-  `slot_type` ENUM('None','Equipment','Inventory','Bank','Trade','Mail','System','EquipmentMate','EquipmentMateBattle') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Internal Container Type',
+  `slot_type` ENUM('None','Equipment','Inventory','Bank','Trade','Mail','System','EquipmentMate','EquipmentMateBattle','EquipmentSlavePreliminary','EquipmentSlave') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Internal Container Type',
   `slot` int NOT NULL,
   `count` int NOT NULL,
   `details` blob,
@@ -472,7 +472,7 @@ DROP TABLE IF EXISTS `item_containers`;
 CREATE TABLE `item_containers` (
   `container_id` int unsigned NOT NULL,
   `container_type` varchar(64) COLLATE 'utf8mb4_general_ci' NOT NULL DEFAULT 'ItemContainer' COMMENT 'Partial Container Class Name',
-  `slot_type` ENUM('None','Equipment','Inventory','Bank','Trade','Mail','System','EquipmentMate','EquipmentMateBattle') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Internal Container Type',
+  `slot_type` ENUM('None','Equipment','Inventory','Bank','Trade','Mail','System','EquipmentMate','EquipmentMateBattle','EquipmentSlavePreliminary','EquipmentSlave') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Internal Container Type',
   `container_size` int NOT NULL DEFAULT '50' COMMENT 'Maximum Container Size',
   `owner_id` int unsigned NOT NULL COMMENT 'Owning Character Id',
   `mate_id` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owning Mate Id',

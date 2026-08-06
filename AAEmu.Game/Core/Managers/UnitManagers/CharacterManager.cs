@@ -439,7 +439,30 @@ public class CharacterManager : Singleton<CharacterManager>
         {
             var characterId = CharacterIdManager.Instance.GetNextId();
             NameManager.Instance.AddCharacterName(characterId, name, connection.AccountId);
-            var template = GetTemplate(race, gender);
+
+            var templateKey = (byte)(16 * gender + race);
+            if (!_templates.TryGetValue(templateKey, out var template))
+            {
+                Logger.Error(
+                    "Character creation rejected: invalid race/gender layout race={0}, gender={1}, templateKey={2}",
+                    race, gender, templateKey);
+                connection.SendPacket(new SCCharacterCreationFailedPacket(3));
+                CharacterIdManager.Instance.ReleaseId(characterId);
+                NameManager.Instance.RemoveCharacterName(characterId);
+                return;
+            }
+
+            if (!_abilityItems.TryGetValue(ability1, out var items) || items?.Items == null)
+            {
+                Logger.Error(
+                    "Character creation rejected: starter pack is missing for ability1={0}; " +
+                    "abilities={1}/{2}/{3}. This usually means the appearance block was parsed at the wrong offset.",
+                    ability1, ability1, ability2, ability3);
+                connection.SendPacket(new SCCharacterCreationFailedPacket(3));
+                CharacterIdManager.Instance.ReleaseId(characterId);
+                NameManager.Instance.RemoveCharacterName(characterId);
+                return;
+            }
 
             var character = new Character(customModel);
             character.Id = characterId; // duplicate Id
@@ -475,7 +498,6 @@ public class CharacterManager : Singleton<CharacterManager>
             for (var i = 0; i < character.Slots.Length; i++)
                 character.Slots[i] = new ActionSlot();
 
-            var items = _abilityItems[ability1];
             SetEquipItemTemplate(character.Inventory, items.Items.Headgear, EquipmentItemSlot.Head, items.Items.HeadgearGrade);
             SetEquipItemTemplate(character.Inventory, items.Items.Necklace, EquipmentItemSlot.Neck, items.Items.NecklaceGrade);
             SetEquipItemTemplate(character.Inventory, items.Items.Shirt, EquipmentItemSlot.Chest, items.Items.ShirtGrade);
@@ -511,9 +533,8 @@ public class CharacterManager : Singleton<CharacterManager>
                 slot++;
             }
 
-            items = _abilityItems[0];
-            if (items != null)
-                foreach (var item in items.Supplies)
+            if (_abilityItems.TryGetValue(0, out var generalItems) && generalItems != null)
+                foreach (var item in generalItems.Supplies)
                 {
                     character.Inventory.Bag.AcquireDefaultItem(ItemTaskType.Invalid, item.Id, item.Amount, item.Grade);
                     //var createdItem = ItemManager.Instance.Create(item.Id, item.Amount, item.Grade);

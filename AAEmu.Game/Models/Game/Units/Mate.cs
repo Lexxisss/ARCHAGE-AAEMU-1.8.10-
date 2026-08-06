@@ -669,15 +669,22 @@ public sealed class Mate : Unit
 
     public void AddExp(int exp)
     {
-
         if (exp == 0)
             return;
+
+        var appliedExp = exp;
         if (exp > 0)
         {
-            var totalExp = (int)Math.Round(AppConfiguration.Instance.World.ExpRate * exp);
-            Experience += totalExp;
+            appliedExp = (int)Math.Round(AppConfiguration.Instance.World.ExpRate * exp);
+            Experience += appliedExp;
         }
-        SendPacket(new SCExpChangedPacket(ObjId, exp, false));
+
+        // Mate has no GameConnection of its own. Unit.SendPacket therefore drops this runtime
+        // update. The target SCExpChangedPacket still names the mate ObjId, but must travel over
+        // the owning character's connection.
+        var owner = WorldManager.Instance.GetCharacterByObjId(OwnerObjId);
+        owner?.SendPacket(new SCExpChangedPacket(ObjId, appliedExp, false));
+
         CheckLevelUp();
     }
 

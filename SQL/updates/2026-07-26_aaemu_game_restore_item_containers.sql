@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `item_containers` (
   `container_id` INT UNSIGNED NOT NULL,
   `container_type` VARCHAR(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ItemContainer'
     COMMENT 'Partial Container Class Name',
-  `slot_type` ENUM('Equipment','Inventory','Bank','Trade','Mail','System','EquipmentMate')
+  `slot_type` ENUM('None','Equipment','Inventory','Bank','Trade','Mail','System','EquipmentMate','EquipmentMateBattle','EquipmentSlavePreliminary','EquipmentSlave')
     CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
     COMMENT 'Internal Container Type',
   `container_size` INT NOT NULL DEFAULT 50 COMMENT 'Maximum Container Size',

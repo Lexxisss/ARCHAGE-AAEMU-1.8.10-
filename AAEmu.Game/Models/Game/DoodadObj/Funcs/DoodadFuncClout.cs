@@ -66,10 +66,32 @@ public class DoodadFuncClout : DoodadPhaseFuncTemplate
             areaTrigger.Owner = owner;
         }
         areaTrigger.Caster = caster as Unit;
+        areaTrigger.AllowCasterlessTargets = areaTrigger.Caster == null &&
+                                             TargetRelation is SkillTargetRelation.Any or SkillTargetRelation.Others;
         areaTrigger.InsideBuffTemplate = SkillManager.Instance.GetBuffTemplate(BuffId);
         areaTrigger.TargetRelation = TargetRelation;
         areaTrigger.TickRate = Tick;
-        areaTrigger.EffectPerTick = Effects.Select(eid => SkillManager.Instance.GetEffectTemplate(eid)).ToList(); //SkillId = skillId
+        areaTrigger.EffectPerTick = Effects
+            .Select(eid => SkillManager.Instance.GetEffectTemplate(eid))
+            .Where(effect => effect != null)
+            .ToList(); // SkillId = skillId
+
+        if (BuffId > 0 && areaTrigger.InsideBuffTemplate == null)
+        {
+            Logger.Warn("Skipping DoodadFuncClout {0}: buff {1} was not found", Id, BuffId);
+            return false;
+        }
+
+        Logger.Trace(
+            "DoodadFuncClout active: func={0}, owner={1}/{2}, shape={3}, buff={4}, relation={5}, caster={6}, casterless={7}",
+            Id,
+            areaTrigger.Owner?.TemplateId ?? 0,
+            areaTrigger.Owner?.ObjId ?? 0,
+            AoeShapeId,
+            BuffId,
+            TargetRelation,
+            areaTrigger.Caster?.ObjId ?? 0,
+            areaTrigger.AllowCasterlessTargets);
 
         AreaTriggerManager.Instance.AddAreaTrigger(areaTrigger);
 

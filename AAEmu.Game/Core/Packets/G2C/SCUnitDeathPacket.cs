@@ -24,6 +24,7 @@ public class SCUnitDeathPacket : GamePacket
         stream.Write((byte)_killReason); // killReason
         // ---------------
         stream.Write(15000u);  // resurrectionWaitingTime
+        stream.Write(0u);      // specialResurrectionWaitingTime
         stream.Write(75000u);  // autoResurrectionWaitingTime
         stream.Write(0);       // lostExp
         stream.Write((byte)0); // deathDurabilityLossRatio
@@ -37,7 +38,7 @@ public class SCUnitDeathPacket : GamePacket
             stream.Write((ushort)0);    // killStreak
             stream.Write((byte)0);      // param1
             stream.Write((byte)0);      // param2
-            stream.Write((byte)0);      // param3
+            stream.Write(0u);           // type / param3 (u32 in target)
             stream.Write(_killer.Name); // killerName
 
         }

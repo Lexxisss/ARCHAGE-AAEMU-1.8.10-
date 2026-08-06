@@ -73,6 +73,12 @@ public class NpcTemplate
     public int MateKindId { get; set; }
     public uint EngageCombatGiveQuestId { get; set; }
     public bool NoApplyTotalCustom { get; set; }
+
+    /// <summary>Whether this model is one people are built on, and so has a look to describe at all.</summary>
+    public bool IsHumanoidModel { get; set; }
+
+    /// <summary>The look this model wears when the design does not choose one.</summary>
+    public uint DefaultCustomId { get; set; }
     public bool BaseSkillStrafe { get; set; }
     public float BaseSkillDelay { get; set; }
     public int NpcInteractionSetId { get; set; }
@@ -91,20 +97,35 @@ public class NpcTemplate
     public UnitCustomModelParams ModelParams { get; set; }
     public EquipItemsTemplate Items { get; set; }
     public (uint ItemId, bool NpcOnly)[] BodyItems { get; set; }
+    public (uint ItemId, bool NpcOnly) WingItem { get; set; }
     public List<uint> Buffs { get; set; }
     public List<BonusTemplate> Bonuses { get; set; }
     public AiParams AiParams { get; set; }
     public Dictionary<SkillUseConditionKind, List<NpcSkill>> Skills { get; set; }
     public List<NpcPassiveBuff> PassiveBuffs { get; set; }
     public uint TotalCustomId { get; set; }
+    public uint ResolvedCustomId { get; set; }
+    public uint ResolvedCustomModelId { get; set; }
+    public string CustomResolution { get; set; }
+    public uint EquipClothsId { get; set; }
+    public uint EquipWeaponsId { get; set; }
+    public byte CosplayVisual { get; set; }
+    public string CosplayVisualResolution { get; set; }
+    public string CosplayPrimaryAssetPath { get; set; }
+    public string CosplaySecondaryAssetPath { get; set; }
 
     public NpcTemplate()
     {
         HairId = 0;
+        CustomResolution = "unresolved";
+        CosplayVisualResolution = "unresolved";
+        CosplayPrimaryAssetPath = string.Empty;
+        CosplaySecondaryAssetPath = string.Empty;
         HornId = 0;
         Items = new EquipItemsTemplate();
         ModelParams = new UnitCustomModelParams();
         BodyItems = new (uint, bool)[7];
+        WingItem = default;
         Buffs = new List<uint>();
         Bonuses = new List<BonusTemplate>();
         Skills = new Dictionary<SkillUseConditionKind, List<NpcSkill>>();

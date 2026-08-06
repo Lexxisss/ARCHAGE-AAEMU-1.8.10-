@@ -130,6 +130,35 @@ public class PlotManager : Singleton<PlotManager>
                 }
             }
 
+            // PlotCondition kind 20 is a container for one or more records from unit_reqs.
+            // Load them before event conditions are attached so checks never silently pass.
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"SELECT owner_id, display_msg, kind_id, value1, value2, value3
+                                        FROM unit_reqs
+                                        WHERE owner_type = 'PlotCondition'
+                                          AND (enable = 1 OR enable = 't' OR enable = 'true')";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var conditionId = reader.GetUInt32("owner_id");
+                        if (!_conditions.TryGetValue(conditionId, out var condition))
+                            continue;
+
+                        condition.UnitRequirements.Add(new PlotUnitRequirement
+                        {
+                            DisplayMessage = reader.GetBoolean("display_msg", true),
+                            KindId = reader.GetInt32("kind_id"),
+                            Value1 = reader.GetInt32("value1"),
+                            Value2 = reader.GetInt32("value2"),
+                            Value3 = reader.GetInt32("value3")
+                        });
+                    }
+                }
+            }
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "SELECT * FROM plot_event_conditions";

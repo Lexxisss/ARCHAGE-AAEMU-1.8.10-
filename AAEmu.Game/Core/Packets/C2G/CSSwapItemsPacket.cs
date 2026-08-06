@@ -1,4 +1,4 @@
-﻿using AAEmu.Commons.Network;
+using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Items;
 
@@ -20,6 +20,17 @@ public class CSSwapItemsPacket : GamePacket
 
         var toSlotType = (SlotType)stream.ReadByte();  // type
         var toSlot = stream.ReadByte();            // index
+
+        // The target core serializer ends here (20 bytes). Captured 10.8 packets carry an
+        // additional nine-byte transport/request tail. It is not part of the swap structure,
+        // but it must be consumed so PacketMarshaler does not report a false partial decode.
+        var tailLength = stream.LeftBytes;
+        if (tailLength > 0)
+            stream.ReadBytes(tailLength);
+
+        Logger.Debug(
+            "CSSwapItems 10.8: from={0}:{1}/{2} to={3}:{4}/{5}, tailLen={6}",
+            fromSlotType, fromSlot, fromItemId, toSlotType, toSlot, toItemId, tailLength);
 
         Connection.ActiveChar.Inventory.SplitOrMoveItem(Models.Game.Items.Actions.ItemTaskType.SwapItems, fromItemId, fromSlotType, fromSlot, toItemId, toSlotType, toSlot);
         // Connection.ActiveChar.Inventory.Move(fromItemId, fromSlotType, fromSlot, toItemId, toSlotType, toSlot);

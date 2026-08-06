@@ -39,10 +39,18 @@ public class BaseUnit : GameObject, IBaseUnit
 
     public bool CanAttack(BaseUnit target)
     {
-        if (this.Faction == null || target.Faction == null)
-            return true;
-        if (this.ObjId == target.ObjId)
+        if (target == null || ObjId == target.ObjId)
             return false;
+
+        // Nui Peace Zone and every other NoFight-tagged aura are authoritative on the server too.
+        // Check both sides: a protected unit cannot attack and cannot be attacked.
+        if ((Buffs?.CheckBuffTag((uint)TagsEnum.NoFight) ?? false) ||
+            (target.Buffs?.CheckBuffTag((uint)TagsEnum.NoFight) ?? false))
+            return false;
+
+        if (Faction == null || target.Faction == null)
+            return true;
+
         var relation = GetRelationStateTo(target);
 
         var zone = ZoneManager.Instance.GetZoneByKey(target.Transform.ZoneId);

@@ -43,8 +43,14 @@ public class SCSlaveStatusPacket : GamePacket
         // SkillState: three separate collections, each a count followed by that many triples.
         stream.Write(_skillCount);
         if (_skillCount > 0)
+        {
             foreach (var skill in _slave.Skills)
-                stream.Write(skill);
+            {
+                stream.Write(skill); // skillId
+                stream.Write(0u);    // skill-state value/flags, semantics not yet named
+                stream.Write(0u);    // skill-state auxiliary value, semantics not yet named
+            }
+        }
 
         stream.Write(_tagCount);
         for (var i = 0; i < _tagCount; i++)

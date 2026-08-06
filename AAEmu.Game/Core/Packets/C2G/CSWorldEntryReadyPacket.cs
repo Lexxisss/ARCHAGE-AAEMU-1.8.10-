@@ -1,4 +1,4 @@
-using AAEmu.Commons.Network;
+﻿using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
@@ -21,11 +21,19 @@ public class CSWorldEntryReadyPacket : GamePacket
         Connection.WorldEntryReady = true;
         Connection.SendPacket(new SCDetailedTimeOfDayPacket(TimeManager.Instance.GetTime()));
 
-        var doodadCount = WorldManager.Instance.PublishProtocol1810CurrentRegionDoodads(Connection.ActiveChar);
-        Connection.ActiveChar?.Quests.RefreshQuestNotifier();
+        var character = Connection.ActiveChar;
+        var doodadCount = WorldManager.Instance.PublishProtocol1810CurrentRegionDoodads(character);
+
+        // Quest history and active contexts were sent during character selection,
+        // before the client built the journal name/chapter index. At world-ready
+        // only refresh map/NPC markers; re-sending the state here is too late.
+        if (character != null)
+            character.Quests.RefreshQuestNotifier();
+
         Logger.Info(
-            "World-ready signal received for characterId={0}; publishedDoodads={1}",
-            Connection.ActiveChar?.Id ?? 0,
-            doodadCount);
+            "World-ready signal received for characterId={0}; publishedDoodads={1}; questStateSynced={2}",
+            character?.Id ?? 0,
+            doodadCount,
+            character != null);
     }
 }

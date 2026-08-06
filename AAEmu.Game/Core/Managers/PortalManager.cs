@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -426,13 +426,18 @@ public class PortalManager : Singleton<PortalManager>
         var portalInfo = (Models.Game.Units.Portal)WorldManager.Instance.GetNpc(objId);
         if (portalInfo == null) return;
 
-        character.DisabledSetPosition = true;
-        // TODO - UnitPortalUsed
-        // TODO - Maybe need unitState?
-        // TODO - Reason, ErrorMessage
-        character.SendPacket(new SCTeleportUnitPacket(TeleportReason.Portal, ErrorMessageType.NoErrorMessage, portalInfo.TeleportPosition.World.Position.X,
-            portalInfo.TeleportPosition.World.Position.Y, portalInfo.TeleportPosition.World.Position.Z,
-            portalInfo.TeleportPosition.World.Rotation.Z.DegToRad()));
+        var destination = new WorldSpawnPosition
+        {
+            WorldId = portalInfo.TeleportPosition.WorldId,
+            ZoneId = portalInfo.TeleportPosition.ZoneId,
+            X = portalInfo.TeleportPosition.World.Position.X,
+            Y = portalInfo.TeleportPosition.World.Position.Y,
+            Z = portalInfo.TeleportPosition.World.Position.Z,
+            Yaw = portalInfo.TeleportPosition.World.Rotation.Z.DegToRad()
+        };
+
+        CharacterTeleportManager.Teleport(character, destination, TeleportReason.Portal,
+            portalInfo.TeleportPosition.InstanceId);
     }
 
     public static void DeletePortal(Character owner, byte type, uint id)
@@ -445,19 +450,35 @@ public class PortalManager : Singleton<PortalManager>
 
     public Portal GetClosestReturnPortal(Character character)
     {
-        var cxyz = character.Transform.World.Position;
-        var distance = 5000f;
-        var portal = new Portal();
+        if (character == null || _respawns == null || _respawns.Count == 0)
+            return null;
 
-        foreach (var (_, value) in _respawns)
+        // The sub-zone mapping is authoritative when present. Falling back to a raw nearest-point
+        // search across every world can select a Nui from another continent/instance whose local
+        // coordinates merely happen to be closer.
+        if (_respawns.TryGetValue(character.SubZoneId, out var localRespawn) &&
+            (localRespawn.WorldId == 0 || localRespawn.WorldId == character.Transform.WorldId))
+            return localRespawn;
+
+        var characterPosition = character.Transform.World.Position;
+        var bestDistance = float.MaxValue;
+        Portal closest = null;
+
+        foreach (var value in _respawns.Values)
         {
-            //if (!value.Name.ToLower().Contains("respawn")) { continue; }
-            var pxyz = new Vector3(value.X, value.Y, value.Z);
-            var dist = MathUtil.CalculateDistance(cxyz, pxyz);
-            if (!(dist < distance)) { continue; }
-            distance = dist;
-            portal = value;
+            if (value == null ||
+                (value.WorldId != 0 && value.WorldId != character.Transform.WorldId))
+                continue;
+
+            var portalPosition = new Vector3(value.X, value.Y, value.Z);
+            var distance = MathUtil.CalculateDistance(characterPosition, portalPosition);
+            if (distance >= bestDistance)
+                continue;
+
+            bestDistance = distance;
+            closest = value;
         }
-        return portal;
+
+        return closest;
     }
 }

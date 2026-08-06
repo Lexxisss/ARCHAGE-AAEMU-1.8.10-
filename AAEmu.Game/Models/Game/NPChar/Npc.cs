@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Numerics;
 
 using AAEmu.Game.Core.Managers;
-using AAEmu.Game.Core.Managers.AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.AI.AStar;
@@ -55,7 +54,17 @@ public class Npc : Unit
     public NpcSpawner Spawner { get; set; }
     public Gimmick Gimmick { get; set; }
 
-    public override UnitCustomModelParams ModelParams => Template.ModelParams;
+    public override UnitCustomModelParams ModelParams
+    {
+        get => Template?.ModelParams ?? base.ModelParams;
+        set
+        {
+            if (Template != null)
+                Template.ModelParams = value;
+            else
+                base.ModelParams = value;
+        }
+    }
     public override float Scale => Template.Scale;
 
     public override byte RaceGender => (byte)(16 * Template.Gender + Template.Race);
@@ -787,6 +796,11 @@ public class Npc : Unit
             // Verified target 10.8 initial NPC visibility chain. The old 3.x
             // SCUnitPoints/SCUnitModelPostureChanged tail is not present here.
             character.SendPacket(new SCUnitStatePacket(this));
+
+            // SCUnitState owns the complete initial appearance and equipment set.
+            // Do not append SCUnitVisualOptions here: target testing proved that it
+            // does not restore equipment lost through an invalid visual-race path.
+
             SendActiveBuffs(character);
             character.SendPacket(new SCOneUnitMovementPacket(this));
             visibleNpcIds?.Add(ObjId);

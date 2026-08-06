@@ -20,7 +20,7 @@ public class StopChanneling : SpecialEffectAction
         int value3,
         int value4)
     {
-        // TODO ...
-        if (caster is Character) { Logger.Debug("Special effects: StopChanneling value1 {0}, value2 {1}, value3 {2}, value4 {3}", value1, value2, value3, value4); }
+        Logger.Debug("Special effects: StopChanneling skill={0}, caster={1}", skill?.Template?.Id ?? 0, caster?.ObjId ?? 0);
+        (skill?.ActivePlotState ?? (caster as Unit)?.ActivePlotState)?.RequestCancellation();
     }
 }

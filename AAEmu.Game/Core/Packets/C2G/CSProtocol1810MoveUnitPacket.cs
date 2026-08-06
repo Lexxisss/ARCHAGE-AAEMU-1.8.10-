@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 using AAEmu.Commons.Network;
 using AAEmu.Commons.Utils;
@@ -7,6 +8,7 @@ using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.Units.Movements;
 using AAEmu.Game.Utils;
@@ -64,7 +66,7 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
     public override void Read(PacketStream stream)
     {
         _body = stream.LeftBytes > 0 ? stream.ReadBytes(stream.LeftBytes) : Array.Empty<byte>();
-        if (_body.Length < BaseHeaderLength + PackedPositionLength)
+        if (_body.Length < BaseHeaderLength)
             return;
 
         try
@@ -84,10 +86,22 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
                 _phase = bodyStream.ReadByte();
             }
 
+            // ShipRequest is the short control-only variant:
+            //   bc objId + type + time + flags + throttle + steering
+            // It has no position block. The previous universal 18-byte minimum rejected every
+            // helm input before Execute(), leaving both requests permanently at zero.
+            if (_moveType == MoveTypeEnum.ShipRequest)
+            {
+                _movement = ReadVariantBody();
+                _valid = _movement is ShipRequestMoveType;
+                return;
+            }
+
             var positionOffset = BaseHeaderLength;
             if ((_flags & 0x10) != 0)
                 positionOffset += OptionalScTypeAndPhaseLength;
 
+            var positionLength = PackedPositionLength;
             if (_body.Length >= positionOffset + PaddedPositionLength &&
                 _body[positionOffset + 3] == 0 &&
                 _body[positionOffset + 7] == 0)
@@ -107,6 +121,7 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
 
                 (_x, _y, _z) = Helpers.ConvertPosition(packedPosition);
                 _usedPaddedPosition = true;
+                positionLength = PaddedPositionLength;
             }
             else if (_body.Length >= positionOffset + PackedPositionLength)
             {
@@ -120,13 +135,61 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
             }
 
             _valid = float.IsFinite(_x) && float.IsFinite(_y) && float.IsFinite(_z);
-            _movement = ReadVariantBody();
+
+            // The target Unit variant uses the same two pad bytes as the position probe above.
+            // The generic UnitMoveType reader consumes nine bytes and shifts velocity, rotation
+            // and deltaMovement by two. Parse the fixed portion explicitly so attached movement
+            // and the helm fallback receive the actual signed input bytes.
+            _movement = _moveType == MoveTypeEnum.Unit && _usedPaddedPosition
+                ? ReadPaddedUnitBody(positionOffset + positionLength)
+                : ReadVariantBody();
         }
         catch (Exception exception)
         {
             Logger.Warn(exception, "Failed to decode target 0x0104 movement body, length={0}", _body.Length);
             _valid = false;
         }
+    }
+
+    private UnitMoveType ReadPaddedUnitBody(int tailOffset)
+    {
+        // Fixed bytes after the 11-byte position:
+        // velocity[3]:i16, rotation[3]:i8, deltaMovement[3]:i8,
+        // stance:i8, alertness:i8, actorFlags:u16.
+        const int fixedTailLength = 6 + 3 + 3 + 1 + 1 + 2;
+        if (tailOffset < 0 || _body.Length < tailOffset + fixedTailLength)
+            return null;
+
+        var tail = new byte[_body.Length - tailOffset];
+        Buffer.BlockCopy(_body, tailOffset, tail, 0, tail.Length);
+        var stream = new PacketStream(tail);
+
+        return new UnitMoveType
+        {
+            Type = MoveTypeEnum.Unit,
+            Time = _time,
+            Flags = _flags,
+            ScType = _scType,
+            Phase = _phase,
+            X = _x,
+            Y = _y,
+            Z = _z,
+            VelX = stream.ReadInt16(),
+            VelY = stream.ReadInt16(),
+            VelZ = stream.ReadInt16(),
+            RotationX = stream.ReadSByte(),
+            RotationY = stream.ReadSByte(),
+            RotationZ = stream.ReadSByte(),
+            DeltaMovement =
+            [
+                stream.ReadSByte(),
+                stream.ReadSByte(),
+                stream.ReadSByte()
+            ],
+            Stance = stream.ReadSByte(),
+            Alertness = stream.ReadSByte(),
+            ActorFlags = stream.ReadUInt16()
+        };
     }
 
     /// <summary>
@@ -160,10 +223,30 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
     public override void Execute()
     {
         var character = Connection.ActiveChar;
-        if (!_valid || character == null || character.DisabledSetPosition)
+        if (!_valid || character == null)
             return;
 
-        // Anything that is not the player's own step is something they are driving or riding.
+        // DisabledSetPosition protects free-world coordinates while a teleport is in flight. It
+        // must not suppress control-only ShipRequest packets or parent-local movement from a
+        // character already attached to a vehicle; neither path changes the authoritative world
+        // position directly. A stale teleport guard therefore cannot freeze the helm.
+        var isAttachedLocalMovement =
+            _objId == character.ObjId && _moveType == MoveTypeEnum.Unit && character.Transform.Parent != null;
+        var isControlledMovement = _objId != character.ObjId || _moveType != MoveTypeEnum.Unit;
+        if (character.DisabledSetPosition && !isAttachedLocalMovement && !isControlledMovement)
+            return;
+
+        // While attached to a helm, seat, ladder or other slave component the target client sends
+        // the character's own Unit movement in parent-local coordinates. Comparing those small
+        // values with world coordinates (15k, 15k, ...) produced a fake 22 km teleport and dropped
+        // every steering attempt before ship physics could see it.
+        if (_objId == character.ObjId && _moveType == MoveTypeEnum.Unit && character.Transform.Parent != null)
+        {
+            ExecuteAttachedCharacterMovement(character);
+            return;
+        }
+
+        // Anything that is not the player's own free-world step is something they are driving or riding.
         if (_objId != character.ObjId || _moveType != MoveTypeEnum.Unit)
         {
             ExecuteControlledObject(character);
@@ -267,6 +350,109 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
         }
     }
 
+    private void ExecuteAttachedCharacterMovement(Character character)
+    {
+        if (_movement is not UnitMoveType movement || character.Transform.Parent == null)
+            return;
+
+        // Target 1.8 sends the driver's steering input in the attached character's Unit
+        // movement instead of a separate ShipRequest body. DeltaMovement[1] is forward/back
+        // throttle and DeltaMovement[0] is left/right steering. The old handler accepted the
+        // local seat coordinates but discarded these three bytes, so BoatPhysicsManager always
+        // saw zero input even though the player was correctly bound to the helm.
+        if (character.AttachedPoint == AttachPointKind.Driver &&
+            character.Transform.Parent.GameObject is Slave ship &&
+            ship.Template?.IsABoat() == true &&
+            movement.DeltaMovement is { Length: >= 2 })
+        {
+            ship.SteeringRequest = movement.DeltaMovement[0];
+            ship.ThrottleRequest = movement.DeltaMovement[1];
+
+            if (System.Threading.Interlocked.Increment(ref _movementProbeCount) <= 60)
+            {
+                Logger.Debug(
+                    "Ship helm input accepted: characterId={0}, ship={1}/{2}, steering={3}, throttle={4}",
+                    character.Id,
+                    ship.TemplateId,
+                    ship.ObjId,
+                    ship.SteeringRequest,
+                    ship.ThrottleRequest);
+            }
+        }
+
+        var movementRotation = new Vector3(
+            (float)MathUtil.ConvertDirectionToRadian(movement.RotationX),
+            (float)MathUtil.ConvertDirectionToRadian(movement.RotationY),
+            (float)MathUtil.ConvertDirectionToRadian(movement.RotationZ));
+
+        if (character.Bonding != null &&
+            character.Transform.Parent.GameObject is AAEmu.Game.Models.Game.DoodadObj.Doodad seatDoodad &&
+            seatDoodad.Transform.Parent == null)
+        {
+            // Target 1.8 reports a character seated on a static doodad in WORLD coordinates,
+            // even though the client expects the unit to remain attached to that doodad. The
+            // generic attached path used to store these values directly in Local; detaching then
+            // added the chair world position a second time and produced exactly doubled X/Y/Z.
+            // Convert the incoming world position to the local position expected by Transform.
+            var parentWorld = seatDoodad.Transform.World;
+            var localPosition = new Vector3(movement.X, movement.Y, movement.Z) - parentWorld.Position;
+            var inverseParentYaw = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -parentWorld.Rotation.Z);
+            localPosition = Vector3.Transform(localPosition, inverseParentYaw);
+
+            // InternalDetachChild adds parent rotation on detach, so store relative rotation here.
+            var localRotation = movementRotation - parentWorld.Rotation;
+
+            character.Transform.Local.SetPosition(
+                localPosition.X,
+                localPosition.Y,
+                localPosition.Z,
+                localRotation.X,
+                localRotation.Y,
+                localRotation.Z);
+
+            if (System.Threading.Interlocked.Increment(ref _movementProbeCount) <= 60)
+            {
+                Logger.Debug(
+                    "Static doodad seated movement accepted: characterId={0}, doodad={1}, world=({2:F2},{3:F2},{4:F2}), local=({5:F2},{6:F2},{7:F2})",
+                    character.Id,
+                    seatDoodad.ObjId,
+                    movement.X,
+                    movement.Y,
+                    movement.Z,
+                    localPosition.X,
+                    localPosition.Y,
+                    localPosition.Z);
+            }
+        }
+        else
+        {
+            character.Transform.Local.SetPosition(
+                movement.X,
+                movement.Y,
+                movement.Z,
+                movementRotation.X,
+                movementRotation.Y,
+                movementRotation.Z);
+        }
+
+        // Echo the exact client movement while attached. This acknowledgement is required for a
+        // stable first-click seat; only the server-side stored transform is converted above.
+        character.BroadcastPacket(new SCOneUnitMovementPacket(character.ObjId, movement), true);
+
+        if (System.Threading.Interlocked.Increment(ref _movementProbeCount) <= 40)
+        {
+            Logger.Debug(
+                "Attached movement accepted: characterId={0}, parent={1}/{2}, local=({3:F1},{4:F1},{5:F1}), type={6}",
+                character.Id,
+                character.Transform.Parent.GameObject?.GetType().Name ?? "Transform",
+                character.Transform.Parent.GameObject?.ObjId ?? 0,
+                movement.X,
+                movement.Y,
+                movement.Z,
+                _moveType);
+        }
+    }
+
     /// <summary>
     /// Applies a step the player made on something else - a cart, a ship, the animal under them.
     /// </summary>
@@ -280,30 +466,64 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
             return;
 
         var targetUnit = WorldManager.Instance.GetBaseUnit(_objId);
-        if (targetUnit == null)
-        {
-            Logger.Warn("Movement for an object that is not here: characterId={0}, objId={1}, type={2}",
-                character.Id, _objId, _moveType);
-            return;
-        }
 
         switch (_movement)
         {
             // Steering and throttle only - the ship's own position comes from the physics step,
-            // not from here.
+            // not from here. Some client paths name the ship, while the attached-character path
+            // keeps the character id in the common movement header. Resolve the authoritative
+            // driver parent in either case, but never allow control without the driver binding.
             case ShipRequestMoveType shipRequest:
-                if (targetUnit is not Slave ship)
-                    return;
+            {
+                var ship = targetUnit as Slave;
+                if (ship == null &&
+                    character.AttachedPoint == AttachPointKind.Driver &&
+                    character.Transform.Parent?.GameObject is Slave attachedShip)
+                {
+                    ship = attachedShip;
+                }
 
-                ship.ThrottleRequest = shipRequest.Throttle;
+                if (ship == null || ship.Template?.IsABoat() != true)
+                {
+                    Logger.Warn(
+                        "Ship request has no controllable ship: characterId={0}, packetObjId={1}, target={2}",
+                        character.Id, _objId, targetUnit?.GetType().Name ?? "<null>");
+                    return;
+                }
+
+                if (!ship.AttachedCharacters.TryGetValue(AttachPointKind.Driver, out var driver) ||
+                    !ReferenceEquals(driver, character))
+                {
+                    Logger.Warn(
+                        "Rejected ship request without driver binding: characterId={0}, ship={1}/{2}, attachedPoint={3}",
+                        character.Id, ship.TemplateId, ship.ObjId, character.AttachedPoint);
+                    return;
+                }
+
                 ship.SteeringRequest = shipRequest.Steering;
-                character.Transform.Parent = ship.Transform;
+                ship.ThrottleRequest = shipRequest.Throttle;
+                if (character.Transform.Parent != ship.Transform)
+                    character.Transform.Parent = ship.Transform;
+
+                if (System.Threading.Interlocked.Increment(ref _movementProbeCount) <= 100)
+                {
+                    Logger.Info(
+                        "Ship request accepted: characterId={0}, packetObjId={1}, ship={2}/{3}, steering={4}, throttle={5}, bodyLen={6}",
+                        character.Id, _objId, ship.TemplateId, ship.ObjId,
+                        ship.SteeringRequest, ship.ThrottleRequest, _body.Length);
+                }
+
                 break;
+            }
 
             // Carts and cars. Their position is whatever the driver's client says it is.
             case VehicleMoveType vehicle:
                 if (targetUnit is not Slave car)
+                {
+                    Logger.Warn("Movement for an object that is not here: characterId={0}, objId={1}, type={2}",
+                        character.Id, _objId, _moveType);
                     return;
+                }
 
                 var (rotationX, rotationY, rotationZ) =
                     MathUtil.GetSlaveRotationInDegrees(vehicle.RotationX, vehicle.RotationY, vehicle.RotationZ);
@@ -335,7 +555,7 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
 
             default:
                 Logger.Warn("Unhandled controlled movement: characterId={0}, objId={1}, type={2}, unit={3}",
-                    character.Id, _objId, _moveType, targetUnit.GetType().Name);
+                    character.Id, _objId, _moveType, targetUnit?.GetType().Name ?? "<null>");
                 break;
         }
     }

@@ -88,6 +88,53 @@ public class FaceModel : PacketMarshaler
         return true;
     }
 
+    /// <summary>
+    /// Creates the complete Face payload used by an NPC SCUnitState while keeping
+    /// the unit on its ordinary race/equipment model path. In target x2game.dll
+    /// 0x39580C60, VisualRace != 0 becomes the visual-race-active flag passed to
+    /// equipment construction at 0x39578D30. BaseRace/BaseGender describe the
+    /// ordinary model; VisualRace/VisualGender are only for a temporary visual-race
+    /// transformation and therefore must remain zero for a normal NPC.
+    /// </summary>
+    public FaceModel CloneForNpcWire(byte baseRace, byte baseGender)
+    {
+        var modifierCopy = (byte[])NormalizeModifier(Modifier).Clone();
+        var clone = new FaceModel
+        {
+            MovableDecalAssetId = MovableDecalAssetId,
+            MovableDecalWeight = MovableDecalWeight,
+            MovableDecalScale = MovableDecalScale,
+            MovableDecalRotate = MovableDecalRotate,
+            MovableDecalMoveX = MovableDecalMoveX,
+            MovableDecalMoveY = MovableDecalMoveY,
+            DiffuseMapId = DiffuseMapId,
+            NormalMapId = NormalMapId,
+            EyelashMapId = EyelashMapId,
+            NormalMapWeight = NormalMapWeight,
+            LipColor = LipColor,
+            LeftPupilColor = LeftPupilColor,
+            RightPupilColor = RightPupilColor,
+            EyebrowColor = EyebrowColor,
+            DecoColor = DecoColor,
+            Modifier = modifierCopy,
+            BaseRace = baseRace,
+            BaseGender = baseGender,
+            VisualRaceExpiredTime = default,
+            VisualRace = 0,
+            VisualGender = 0,
+            WingColor = WingColor,
+            WingScale = WingScale,
+            WingOffsetX = WingOffsetX,
+            WingOffsetY = WingOffsetY,
+            WingOffsetZ = WingOffsetZ
+        };
+
+        for (var index = 0; index < FixedDecalAsset.Length; index++)
+            clone.SetFixedDecalAsset((byte)index, FixedDecalAsset[index].AssetId, FixedDecalAsset[index].AssetWeight);
+
+        return clone;
+    }
+
     public override void Read(PacketStream stream)
     {
         MovableDecalAssetId = stream.ReadUInt32(); // type
@@ -130,12 +177,14 @@ public class FaceModel : PacketMarshaler
         EyebrowColor = stream.ReadUInt32();       // eyebrow
         DecoColor = stream.ReadUInt32();          // deco
 
-        Modifier = stream.ReadBytes();            // modifiers [128]
-        VisualRace = stream.ReadByte();
-        VisualGender = stream.ReadByte();
-        VisualRaceExpiredTime = stream.ReadDateTime();
+        // Target client prefixes modifier with its ushort byte length (normally 128).
+        // Read the prefix so BaseRace and every following appearance field remain aligned.
+        Modifier = stream.ReadBytes();
         BaseRace = stream.ReadByte();
         BaseGender = stream.ReadByte();
+        VisualRaceExpiredTime = stream.ReadDateTime();
+        VisualRace = stream.ReadByte();
+        VisualGender = stream.ReadByte();
         WingColor = stream.ReadUInt32();
         WingScale = stream.ReadByte();
         WingOffsetX = stream.ReadSByte();
@@ -165,14 +214,16 @@ public class FaceModel : PacketMarshaler
         stream.Write(EyebrowColor);
         stream.Write(DecoColor);
 
+        // Target client expects a ushort size before the modifier bytes.
+        // Keep the payload normalized to 128 bytes and restore the two-byte prefix.
         stream.Write(NormalizeModifier(Modifier), true);
         // Target UnitCustomModel serializer 0x39969450 includes this
         // visual-race/wing tail in SCUnitState immediately after Modifier.
-        stream.Write(VisualRace);
-        stream.Write(VisualGender);
-        stream.Write(VisualRaceExpiredTime);
         stream.Write(BaseRace);
         stream.Write(BaseGender);
+        stream.Write(VisualRaceExpiredTime);
+        stream.Write(VisualRace);
+        stream.Write(VisualGender);
         stream.Write(WingColor);
         // Captured target characters use 100 as the neutral/default scale.
         // Older database blobs can contain zero because this tail was not
@@ -206,8 +257,17 @@ public class FaceModel : PacketMarshaler
 public class UnitCustomModelParams : PacketMarshaler
 {
     private UnitCustomModelType _type;
+    public UnitCustomModelType Type => _type;
     public uint Id { get; private set; }
-    public uint ModelId { get; private set; }
+    /// <summary>
+    /// Target appearance field +0x0C. This is not the NPC model_id.
+    /// The target total-custom copier leaves it untouched and the client-created
+    /// control packet uses zero.
+    /// </summary>
+    public uint BodyDiffuseOrModelDefaultId { get; private set; }
+
+    // Compatibility alias for older code. Do not feed TotalCharacterCustom.ModelId here.
+    public uint ModelId => BodyDiffuseOrModelDefaultId;
     public uint BodyNormalMapId { get; private set; }
     public uint HairColorId { get; private set; }
     public uint HornColorId { get; private set; }
@@ -238,10 +298,19 @@ public class UnitCustomModelParams : PacketMarshaler
         return this;
     }
 
-    public UnitCustomModelParams SetModelId(uint modelId)
+    public UnitCustomModelParams SetBodyDiffuseOrModelDefaultId(uint value)
     {
-        ModelId = modelId;
+        BodyDiffuseOrModelDefaultId = value;
         return this;
+    }
+
+    /// <summary>
+    /// Compatibility alias. The value is the target +0x0C appearance slot,
+    /// not the actor/NPC model id.
+    /// </summary>
+    public UnitCustomModelParams SetModelId(uint value)
+    {
+        return SetBodyDiffuseOrModelDefaultId(value);
     }
 
     public UnitCustomModelParams SetBodyNormalMapId(uint bodyNormalMapId)
@@ -304,6 +373,32 @@ public class UnitCustomModelParams : PacketMarshaler
         return this;
     }
 
+    /// <summary>
+    /// Deep packet-local copy for a normal humanoid NPC. All authored appearance
+    /// values are preserved, including skin tone, face maps, pupils, decals and the
+    /// 128-byte modifier. Only the visual-race transformation tail is neutralized
+    /// by FaceModel.CloneForNpcWire.
+    /// </summary>
+    public UnitCustomModelParams CloneForNpcWire(byte baseRace, byte baseGender)
+    {
+        if (_type != UnitCustomModelType.Face || Face == null)
+            return new UnitCustomModelParams(UnitCustomModelType.None);
+
+        return new UnitCustomModelParams(UnitCustomModelType.Face)
+            .SetId(Id)
+            .SetHairColorId(HairColorId)
+            .SetSkinColorId(SkinColorId)
+            .SetBodyDiffuseOrModelDefaultId(BodyDiffuseOrModelDefaultId)
+            .SetHornColorId(HornColorId)
+            .SetDefaultHairColor(DefaultHairColor)
+            .SetTwoToneHair(TwoToneHair)
+            .SetTwoToneFirstWidth(TwoToneFirstWidth)
+            .SetTwoToneSecondWidth(TwoToneSecondWidth)
+            .SetBodyNormalMapId(BodyNormalMapId)
+            .SetBodyNormalMapWeight(BodyNormalMapWeight)
+            .SetFace(Face.CloneForNpcWire(baseRace, baseGender));
+    }
+
     public override void Read(PacketStream stream)
     {
         SetType((UnitCustomModelType)stream.ReadByte());
@@ -316,12 +411,15 @@ public class UnitCustomModelParams : PacketMarshaler
         if (_type == UnitCustomModelType.Hair)
             return;
 
-        HornColorId = stream.ReadUInt32();
+        // Mirrors Write. Both sides of the wire use one function, so what a creation request
+        // carries and what a unit state carries are the same shape - which makes the client's own
+        // packets a control sample for both.
         SkinColorId = stream.ReadUInt32();
+        BodyDiffuseOrModelDefaultId = stream.ReadUInt32(); // +0x0C, not NPC model_id
         if (_type == UnitCustomModelType.Skin)
             return;
 
-        ModelId = stream.ReadUInt32();
+        HornColorId = stream.ReadUInt32();
         DefaultHairColor = stream.ReadUInt32();
         TwoToneHair = stream.ReadUInt32();
         TwoToneFirstWidth = stream.ReadSingle();
@@ -341,12 +439,17 @@ public class UnitCustomModelParams : PacketMarshaler
         if (_type == UnitCustomModelType.Hair)
             return stream;
 
-        stream.Write(HornColorId);
+        // Skin, then a slot the client fills from its own defaults, then horns. The horn colour was
+        // going out where the skin is read and the skin one place further on, so every person was
+        // described with a skin colour of nothing - and there is no colour numbered nothing; the
+        // table starts at one. A colour that cannot be looked up leaves the client holding a
+        // stand-in, which is what black hands are.
         stream.Write(SkinColorId);
+        stream.Write(BodyDiffuseOrModelDefaultId); // +0x0C; zero in target client-created packets
         if (_type == UnitCustomModelType.Skin)
             return stream;
 
-        stream.Write(ModelId);
+        stream.Write(HornColorId);
         stream.Write(DefaultHairColor);
         stream.Write(TwoToneHair);
         stream.Write(TwoToneFirstWidth);
@@ -380,7 +483,7 @@ public class UnitCustomModelParams : PacketMarshaler
         if (_type == UnitCustomModelType.Hair) { return; }
 
         SkinColorId = stream.ReadUInt32();          // type
-        ModelId = stream.ReadUInt32();              // type for 3.0.3.0
+        BodyDiffuseOrModelDefaultId = stream.ReadUInt32(); // legacy +0x0C slot
         BodyNormalMapId = stream.ReadUInt32();      // type for 3.0.3.0
         BodyNormalMapWeight = stream.ReadSingle();  // weight
 
@@ -406,7 +509,7 @@ public class UnitCustomModelParams : PacketMarshaler
         if (_type == UnitCustomModelType.Hair) { return stream; }
 
         stream.Write(SkinColorId);          // type
-        stream.Write(ModelId);              // type for 3.0.3.0
+        stream.Write(BodyDiffuseOrModelDefaultId); // legacy +0x0C slot
         stream.Write(BodyNormalMapId);      // type for 3.0.3.0
         stream.Write(BodyNormalMapWeight);  // weight
 

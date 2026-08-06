@@ -1,4 +1,5 @@
-﻿using AAEmu.Commons.Network;
+using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
@@ -17,17 +18,28 @@ public class CSUnhangPacket : GamePacket
         // var targetObjId = stream.ReadBc(); // Not used in 1.2
         var targetObjId = 0u;
         var reason = stream.ReadUInt32();
+        // Target 10.8 appends six currently-reserved bytes.
+        var tail = stream.LeftBytes > 0 ? stream.ReadBytes(stream.LeftBytes) : System.Array.Empty<byte>();
         // 0 climbed off from bottom
         // 2 climbed off on top
         // 7 jumped off
 
-        Logger.Trace($"Unhang, unitObjId: {unitObjId}, targetObjId: {targetObjId}, Reason: {reason}");
+        Logger.Trace($"Unhang, unitObjId: {unitObjId}, targetObjId: {targetObjId}, Reason: {reason}, Tail: {System.BitConverter.ToString(tail)}");
         // For 1.2 the targetObjId is not sent, so we will need to grab our saved value from Transform
         // Later this can also be used to verify if it's the correct object
         var character = WorldManager.Instance.GetBaseUnit(unitObjId);
         if (character != null)
         {
-            targetObjId = character.Transform.StickyParent?.GameObject?.ObjId ?? 0;
+            targetObjId = character.Transform.StickyParent?.GameObject?.ObjId ??
+                          character.Transform.Parent?.GameObject?.ObjId ?? 0;
+
+            if (character is AAEmu.Game.Models.Game.Char.Character player &&
+                character.Transform.Parent?.GameObject is AAEmu.Game.Models.Game.Units.Slave slave)
+            {
+                SlaveManager.Instance.UnbindSlave(player, slave.TlId, AAEmu.Game.Models.Game.DoodadObj.Static.AttachUnitReason.UnmountNormal);
+                return;
+            }
+
             character.Transform.StickyParent = null;
         }
 

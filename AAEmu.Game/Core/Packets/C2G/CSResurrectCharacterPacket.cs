@@ -1,11 +1,9 @@
-﻿using System.Linq;
+﻿using System;
 using AAEmu.Commons.Network;
-using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
-using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
-using AAEmu.Game.Models.Game;
+using AAEmu.Game.Models.Game.Teleport;
 using AAEmu.Game.Models.Game.Units.Static;
 
 namespace AAEmu.Game.Core.Packets.C2G;
@@ -18,85 +16,71 @@ public class CSResurrectCharacterPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
+        // Target 10.8 sends one bool followed by twelve currently-reserved bytes. Consume the
+        // complete body so packet diagnostics and the next packet remain aligned.
         var inPlace = stream.ReadBoolean();
+        if (stream.LeftBytes > 0)
+            stream.ReadBytes(stream.LeftBytes);
 
-        Logger.Debug("ResurrectCharacter, InPlace: {0}", inPlace);
+        var character = Connection.ActiveChar;
+        if (character == null)
+            return;
 
-        var portal = new Portal();
+        Logger.Debug("ResurrectCharacter: character={0}, inPlace={1}", character.Id, inPlace);
 
-        // поищем сначала "UnitId": 502, "Title": "Temple Priestess",
-        if (Connection.ActiveChar.Transform.WorldId > 0)
-        {
-            var npcs = WorldManager.Instance.GetAllNpcsFromWorld(Connection.ActiveChar.Transform.WorldId);
-            foreach (var npc in npcs.Where(npc => npc.TemplateId == 502))
-            {
-                portal.WorldId = Connection.ActiveChar.Transform.WorldId;
-                portal.ZoneId = npc.Transform.ZoneId;
-                portal.X = npc.Transform.World.Position.X + Rand.Next(1, 3);
-                portal.Y = npc.Transform.World.Position.Y + Rand.Next(1, 3);
-                portal.Z = npc.Transform.World.Position.Z;
-                portal.ZRot = npc.Transform.World.Rotation.Z;
-                portal.Yaw = npc.Transform.World.Rotation.Z;
-            }
-        }
-        else
-        {
-            portal = PortalManager.Instance.GetClosestReturnPortal(Connection.ActiveChar);
-        }
+        float x;
+        float y;
+        float z;
+        float yaw;
+        CharacterTeleportManager.Transition transition = null;
 
         if (inPlace)
         {
-            Connection.ActiveChar.Hp = (int)(Connection.ActiveChar.MaxHp * (Connection.ActiveChar.ResurrectHpPercent / 100.0f));
-            Connection.ActiveChar.Mp = (int)(Connection.ActiveChar.MaxMp * (Connection.ActiveChar.ResurrectMpPercent / 100.0f));
-            Connection.ActiveChar.ResurrectHpPercent = 1;
-            Connection.ActiveChar.ResurrectMpPercent = 1;
-            Connection.ActiveChar.PostUpdateCurrentHp(Connection.ActiveChar, 0, Connection.ActiveChar.Hp, KillReason.Unknown);
+            x = character.Transform.World.Position.X;
+            y = character.Transform.World.Position.Y;
+            z = character.Transform.World.Position.Z;
+            yaw = character.Transform.World.Rotation.Z;
+
+            character.Hp = (int)(character.MaxHp * (character.ResurrectHpPercent / 100.0f));
+            character.Mp = (int)(character.MaxMp * (character.ResurrectMpPercent / 100.0f));
+            character.ResurrectHpPercent = 1;
+            character.ResurrectMpPercent = 1;
         }
         else
         {
-            Connection.ActiveChar.Hp = (int)(Connection.ActiveChar.MaxHp * 0.1);
-            Connection.ActiveChar.Mp = (int)(Connection.ActiveChar.MaxMp * 0.1);
-            Connection.ActiveChar.PostUpdateCurrentHp(Connection.ActiveChar, 0, Connection.ActiveChar.Hp, KillReason.Unknown);
+            var portal = PortalManager.Instance.GetClosestReturnPortal(character);
+            var destination = CharacterTeleportManager.FromPortal(portal, character.Transform.WorldId);
+            if (destination != null)
+            {
+                transition = CharacterTeleportManager.Prepare(character, destination);
+                x = destination.X;
+                y = destination.Y;
+                z = destination.Z;
+                yaw = destination.Yaw;
+            }
+            else
+            {
+                Logger.Warn(
+                    "ResurrectCharacter: no return portal for character={0}, world={1}, zone={2}; resurrecting at corpse",
+                    character.Id, character.Transform.WorldId, character.Transform.ZoneId);
+                x = character.Transform.World.Position.X;
+                y = character.Transform.World.Position.Y;
+                z = character.Transform.World.Position.Z;
+                yaw = character.Transform.World.Rotation.Z;
+            }
+
+            character.Hp = Math.Max(1, (int)(character.MaxHp * 0.1f));
+            character.Mp = Math.Max(1, (int)(character.MaxMp * 0.1f));
         }
 
-        if (portal.X != 0)
-        {
-            Connection.ActiveChar.BroadcastPacket(
-                new SCCharacterResurrectedPacket(
-                    Connection.ActiveChar.ObjId,
-                    portal.X,
-                    portal.Y,
-                    portal.Z,
-                    portal.ZRot
-                ),
-                true
-            );
-        }
-        else
-        {
-            Connection.ActiveChar.BroadcastPacket(
-                new SCCharacterResurrectedPacket(
-                    Connection.ActiveChar.ObjId,
-                    Connection.ActiveChar.Transform.World.Position.X,
-                    Connection.ActiveChar.Transform.World.Position.Y,
-                    Connection.ActiveChar.Transform.World.Position.Z,
-                    0
-                ),
-                true
-            );
-        }
+        character.PostUpdateCurrentHp(character, 0, character.Hp, KillReason.Unknown);
+        character.BroadcastPacket(new SCCharacterResurrectedPacket(character.ObjId, x, y, z, yaw), true);
+        if (transition != null)
+            CharacterTeleportManager.Complete(character, transition, TeleportReason.MoveToLocation);
+        character.BroadcastPacket(
+            new SCUnitPointsPacket(character.ObjId, character.Hp, character.Mp, character.HighAbilityRsc), true);
 
-        Connection.ActiveChar.BroadcastPacket(
-            new SCUnitPointsPacket(
-                Connection.ActiveChar.ObjId,
-                Connection.ActiveChar.Hp,
-                Connection.ActiveChar.Mp,
-                Connection.ActiveChar.HighAbilityRsc
-            ),
-            true
-        );
-        Connection.ActiveChar.IsUnderWater = false;
-        //Connection.ActiveChar.StartRegen();
-        Connection.ActiveChar.Breath = Connection.ActiveChar.LungCapacity;
+        character.IsUnderWater = false;
+        character.Breath = character.LungCapacity;
     }
 }

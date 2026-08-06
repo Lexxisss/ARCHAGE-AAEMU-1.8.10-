@@ -124,6 +124,11 @@ public class EquipmentContainer : ItemContainer
             case EquipmentItemSlotType.Cosplay:
                 allowedSlots.Add(EquipmentItemSlot.Cosplay);
                 break;
+            case EquipmentItemSlotType.Stabilizer:
+                // AAEmu persists this as CosplayLooks (server slot 28). The
+                // 1.8.1.0 wire serializer remaps it to target internal slot 31.
+                allowedSlots.Add(EquipmentItemSlot.Stabilizer);
+                break;
         }
         return allowedSlots;
     }

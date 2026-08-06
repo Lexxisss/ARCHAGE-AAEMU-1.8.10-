@@ -32,14 +32,15 @@ public enum EquipmentItemSlot : byte
     // ---- somehow_special
     Backpack = 26,
     Cosplay = 27,
+    // These are AAEmu's persisted/server slot numbers, not the target wire
+    // indices for the late range. Protocol1810EquipmentLayout maps them to
+    // target slots 31/32/33 at serialization time. Standard slots 0..27 are
+    // already identical to SCUnitState and must not be shifted.
     CosplayLooks = 28,
-    // Legacy AAEmu data currently places equip_pack_cloths.stabilizer_id in
-    // this compact slot. The target script enum names bit 28 COSPLAYLOOKS.
     Stabilizer = CosplayLooks,
     RaceCosplay = 29,
     RaceCosplayLooks = 30,
-    // The target equipment serializer iterates four additional internal bits,
-    // but the target binary exposes no public ES_* names for them.
+    // Persisted placeholders which map back to the target unnamed 28..30.
     ProtocolSlot31 = 31,
     ProtocolSlot32 = 32,
     ProtocolSlot33 = 33,

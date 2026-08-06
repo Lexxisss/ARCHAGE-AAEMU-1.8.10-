@@ -13,9 +13,12 @@ public enum SlotType : byte
     // model, so the kind a mate's gear is announced under has to match the mate: a saddle sent
     // under the ride container never reaches a battle pet's slots.
     //
-    // 0xF2 is the slave and vehicle container, and 0x07 a preliminary one; neither is modelled
-    // here yet.
+    // Ships and land vehicles use their own equipment model. 0x07 is the short-lived
+    // preliminary container used while the equipment window is being prepared; 0xF2 is the
+    // persistent slave/vehicle equipment container used by the final model.
+    EquipmentSlavePreliminary = 0x07,
     EquipmentMateBattle = 0xED, // 237, MATE_TYPE_BATTLE
+    EquipmentSlave = 0xF2,      // 242, ship / land-vehicle equipment
     EquipmentMate = 0xFC,       // 252, MATE_TYPE_RIDE
     System = 0xFF
 }

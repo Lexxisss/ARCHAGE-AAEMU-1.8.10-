@@ -19,9 +19,10 @@ public enum PlotConditionType
     Stealth = 15,
     Visible = 16,
     ABLevel = 17,
-    CastingUseable = 18,
-    HighAbilityResource = 19,
-    UnitReqs = 20
+    CastingProgress = 18,
+    CombatResourceRange = 19,
+    UnitReqs = 20,
+    KillerFaction = 21
 }
 
 // No clue what that shit does fam

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
@@ -18,9 +19,8 @@ namespace AAEmu.Game.Models.Tasks.Housing;
 /// owner, the name and the permissions with it. Sending both in one breath only worked when the
 /// client happened to finish the first before starting the second. This gives it the gap.
 ///
-/// The doors and windows are not sent from here, and must not be: each announces itself when it is
-/// put into the world, and sending them again on top of that is a second copy of a handle the
-/// client already holds, which it throws away - taking the good one with it.
+/// Doors and windows are deliberately not sent in the same execution turn. A second scheduled task
+/// creates/registers them silently and publishes one batched record after this state has been applied.
 /// </remarks>
 public class HouseStateFollowUpTask : Task
 {
@@ -28,11 +28,13 @@ public class HouseStateFollowUpTask : Task
 
     private readonly House _house;
     private readonly uint _characterObjId;
+    private readonly int _publicationVersion;
 
-    public HouseStateFollowUpTask(House house, Character character)
+    public HouseStateFollowUpTask(House house, Character character, int publicationVersion)
     {
         _house = house;
         _characterObjId = character.ObjId;
+        _publicationVersion = publicationVersion;
     }
 
     public override void Execute()
@@ -40,8 +42,15 @@ public class HouseStateFollowUpTask : Task
         // The player may have walked away, logged out, or the building may be gone - in which case
         // the client has already been told to forget it and this would only confuse matters.
         var character = WorldManager.Instance.GetCharacterByObjId(_characterObjId);
-        if (character == null || _house == null || _house.ObjId == 0)
+        if (character == null || _house == null || _house.ObjId == 0 ||
+            !_house.IsStatePublicationCurrent(_characterObjId, _publicationVersion))
             return;
+
+        if (!WorldManager.GetAround<Character>(_house).Any(c => c.ObjId == _characterObjId))
+        {
+            _house.CompleteStatePublication(_characterObjId, _publicationVersion);
+            return;
+        }
 
         // The four numbers ownership turns on, written down where they are certain to be reached.
         // They lived behind the tax request until now, which is exactly the path that stops working
@@ -60,8 +69,11 @@ public class HouseStateFollowUpTask : Task
 
         character.SendPacket(new SCHouseStatePacket(_house));
 
-        // Now that the building has a record at the other end, it may have its doors and windows.
-        // Made any earlier they are fitted to nothing, and nothing fits them afterwards.
-        _house.EnsureAttachedDoodads();
+        // Do not create/send fixtures in the same execution turn as the state. The target client
+        // applies SCHouseState asynchronously; a child sent immediately afterwards can still see
+        // no house-model and remains a visible but non-interactive orphan forever.
+        TaskManager.Instance.Schedule(
+            new HouseFixturesFollowUpTask(_house, character, _publicationVersion),
+            TimeSpan.FromMilliseconds(500));
     }
 }

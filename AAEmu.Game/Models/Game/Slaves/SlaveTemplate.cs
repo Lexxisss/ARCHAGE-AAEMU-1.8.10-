@@ -21,6 +21,9 @@ public class SlaveTemplate
     public uint SlaveCustomizingId { get; set; }
     public bool Customizable { get; set; }
     public float PortalTime { get; set; }
+    public uint PortalSpawnFxId { get; set; }
+    public uint PortalDespawnFxId { get; set; }
+    public float PortalScale { get; set; }
     public int Hp25DoodadCount { get; set; }
     public int Hp50DoodadCount { get; set; }
     public int Hp75DoodadCount { get; set; }

@@ -556,7 +556,7 @@ public class SpawnManager : Singleton<SpawnManager>
             command.CommandText = "SELECT * FROM doodads  WHERE owner_type = @OwnerType";
             if (ownerToSpawnId >= 0)
                 command.CommandText += " AND house_id = @OwnerId";
-            command.CommandText += " ORDER BY `plant_time`";
+            command.CommandText += " ORDER BY `plant_time`, `id`";
             command.Parameters.AddWithValue("OwnerType", (byte)ownerTypeToSpawn);
             if (ownerToSpawnId >= 0)
                 command.Parameters.AddWithValue("OwnerId", ownerToSpawnId);
@@ -691,6 +691,9 @@ public class SpawnManager : Singleton<SpawnManager>
         // Save Coffer Doodads that had a new ItemContainer created for them (should only happen on first run if there were already coffers placed)
         foreach (var coffer in newCoffers)
             coffer.Save();
+
+        if (ownerTypeToSpawn == DoodadOwnerType.Housing)
+            Logger.Info("Loaded {0} persistent housing decoration doodads from the server database", spawnCount);
 
         return spawnCount;
     }

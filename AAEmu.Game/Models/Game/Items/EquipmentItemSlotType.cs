@@ -35,5 +35,7 @@ public enum EquipmentItemSlotType : byte
     // ---- somehow_special
     Backpack = 30,
     Cosplay = 31,
-    Stabilizer = 32
+    Stabilizer = 32,
+    // Target client body-part table uses slot_type_id=34 for wings.
+    Wings = 34
 }

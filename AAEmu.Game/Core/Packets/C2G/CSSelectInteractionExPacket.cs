@@ -11,7 +11,6 @@ namespace AAEmu.Game.Core.Packets.C2G;
 
 /// <summary>
 /// Target 10.8 CS_SELECT_INTERACTION_EX (0x0013).
-/// Exact target serializer 0x399D12B0 contains two BC/object-id fields only.
 /// </summary>
 public class CSSelectInteractionExPacket : GamePacket
 {
@@ -21,52 +20,41 @@ public class CSSelectInteractionExPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var firstId = stream.ReadBc();
-        var secondId = stream.ReadBc();
+        // Target capture: source unit BC, target doodad BC, followed by seven option bytes.
+        // The previous reader treated the source unit as the doodad and therefore cancelled
+        // ladder/helm interactions before the selected function could run.
+        var sourceObjId = stream.ReadBc();
+        var targetObjId = stream.ReadBc();
+        var tail = stream.LeftBytes > 0 ? stream.ReadBytes(stream.LeftBytes) : System.Array.Empty<byte>();
 
-        var targetObjId = firstId;
-        var interactionId = secondId;
-
-        // The target call-site associates the packet with the active world
-        // interaction. Keep a tolerant swap only for captures/builds where the
-        // two semantic arguments were forwarded in reverse order.
-        if (Connection.ActiveDoodadInteractionTargetObjId != 0 &&
-            targetObjId != Connection.ActiveDoodadInteractionTargetObjId &&
-            secondId == Connection.ActiveDoodadInteractionTargetObjId)
-        {
-            targetObjId = secondId;
-            interactionId = firstId;
-        }
-
-        if (targetObjId == 0)
-            targetObjId = Connection.ActiveDoodadInteractionTargetObjId;
-
+        var character = Connection.ActiveChar;
         var doodad = WorldManager.Instance.GetDoodad(targetObjId);
-        if (doodad == null || Connection.ActiveChar == null)
+        if (character == null || doodad == null)
         {
             Logger.Warn(
-                "SelectInteractionEx 10.8: missing doodad, first={0}, second={1}, sessionTarget={2}",
-                firstId,
-                secondId,
-                Connection.ActiveDoodadInteractionTargetObjId);
+                "SelectInteractionEx 10.8: missing target, source={0}, target={1}, tail={2}",
+                sourceObjId,
+                targetObjId,
+                System.BitConverter.ToString(tail));
             CancelInteraction(targetObjId);
             return;
         }
 
-        if (Connection.ActiveDoodadInteractionTargetObjId != doodad.ObjId)
+        if (sourceObjId != 0 && sourceObjId != character.ObjId)
         {
             Logger.Warn(
-                "SelectInteractionEx 10.8: target is outside active session, target={0}, sessionTarget={1}",
-                doodad.ObjId,
-                Connection.ActiveDoodadInteractionTargetObjId);
-            CancelInteraction(doodad.ObjId);
+                "SelectInteractionEx 10.8: source mismatch, source={0}, character={1}, target={2}",
+                sourceObjId,
+                character.ObjId,
+                targetObjId);
+            CancelInteraction(targetObjId);
             return;
         }
 
         var distance = MathUtil.CalculateDistance(
-            Connection.ActiveChar.Transform.World.Position,
+            character.Transform.World.Position,
             doodad.Transform.World.Position);
-        if (distance > 6f)
+        if (distance > 8f)
         {
             Logger.Warn(
                 "SelectInteractionEx 10.8: doodad too far, objId={0}, distance={1:F2}",
@@ -76,45 +64,47 @@ public class CSSelectInteractionExPacket : GamePacket
             return;
         }
 
-        // The selected action must have been advertised by the current func
-        // group loaded from Data/base.sqlite3. Zero is allowed because several
-        // client-side world interactions use zero as the action value.
-        if (!Connection.ActiveDoodadInteractionSkills.Contains(interactionId))
+        var currentSkills = DoodadManager.Instance.GetInteractionSkills(doodad.FuncGroupId);
+        uint interactionId = 0;
+
+        // When CSStartInteraction preceded this packet, preserve the action selected from the
+        // exact list sent to the client. The seven-byte tail is zero for direct ladder/seat use.
+        if (Connection.ActiveDoodadInteractionTargetObjId == doodad.ObjId &&
+            Connection.ActiveDoodadInteractionSkills.Count == 1)
         {
-            Logger.Warn(
-                "SelectInteractionEx 10.8: action not in session, objId={0}, interaction={1}, allowed=[{2}]",
-                doodad.ObjId,
-                interactionId,
-                string.Join(",", Connection.ActiveDoodadInteractionSkills));
-            CancelInteraction(doodad.ObjId);
-            return;
+            interactionId = Connection.ActiveDoodadInteractionSkills.First();
+        }
+        else if (currentSkills.Length == 1)
+        {
+            interactionId = currentSkills[0];
+        }
+        else if (tail.Length >= 4)
+        {
+            interactionId = System.BitConverter.ToUInt32(tail, 0);
         }
 
-        // Revalidate against the doodad's current phase. A phase may have
-        // changed after SC_WORLD_INTERACTION_SKILL_LIST was sent.
-        var currentSkills = DoodadManager.Instance.GetInteractionSkills(doodad.FuncGroupId);
-        if (!currentSkills.Contains(interactionId))
+        if (interactionId != 0 && !currentSkills.Contains(interactionId))
         {
             Logger.Warn(
-                "SelectInteractionEx 10.8: action no longer belongs to current func group, objId={0}, group={1}, interaction={2}",
+                "SelectInteractionEx 10.8: invalid action, target={0}, interaction={1}, allowed=[{2}], tail={3}",
                 doodad.ObjId,
-                doodad.FuncGroupId,
-                interactionId);
+                interactionId,
+                string.Join(",", currentSkills),
+                System.BitConverter.ToString(tail));
             CancelInteraction(doodad.ObjId);
             return;
         }
 
         Logger.Info(
-            "SelectInteractionEx 10.8: character={0}, doodad={1}, template={2}, group={3}, interaction={4}",
-            Connection.ActiveChar.Id,
+            "SelectInteractionEx 10.8: character={0}, target={1}, template={2}, group={3}, interaction={4}, tail={5}",
+            character.Id,
             doodad.ObjId,
             doodad.TemplateId,
             doodad.FuncGroupId,
-            interactionId);
+            interactionId,
+            System.BitConverter.ToString(tail));
 
-        // This is the existing server-side doodad function chain. It resolves
-        // actual_func_type/actual_func_id/next_phase from base.sqlite3.
-        doodad.Use(Connection.ActiveChar, interactionId);
+        doodad.Use(character, interactionId);
         CancelInteraction(doodad.ObjId);
     }
 

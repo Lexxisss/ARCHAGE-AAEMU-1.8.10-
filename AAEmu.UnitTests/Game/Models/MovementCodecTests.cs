@@ -3,6 +3,7 @@ using System.Numerics;
 
 using AAEmu.Commons.Network;
 using AAEmu.Commons.Utils;
+using AAEmu.Game.Models.Game.Units.Movements;
 using AAEmu.Game.Models.Game.World.Transform;
 
 using Xunit;
@@ -151,6 +152,33 @@ public class MovementCodecTests
         var (_, _, decodedZ) = Helpers.ConvertPosition(packed);
 
         Assert.True(decodedZ > 4000f, $"height above the range came back as {decodedZ}");
+    }
+
+
+    /// <summary>
+    /// Target move type 5 is control-only. After the common time/flags header it carries
+    /// throttle first and steering second, with no position block.
+    /// </summary>
+    [Fact]
+    public void ShipRequest_UsesShortThrottleThenSteeringLayout()
+    {
+        var movement = new ShipRequestMoveType
+        {
+            Time = 0x11223344,
+            Flags = 0,
+            Throttle = -7,
+            Steering = 9
+        };
+        var stream = new PacketStream();
+
+        movement.Write(stream);
+        var bytes = stream.GetBytes();
+
+        Assert.Equal(7, bytes.Length);
+        Assert.Equal(0x11223344U, BitConverter.ToUInt32(bytes, 0));
+        Assert.Equal(0, bytes[4]);
+        Assert.Equal(unchecked((byte)-7), bytes[5]);
+        Assert.Equal(9, bytes[6]);
     }
 
     private static float WrapPi(float radians)

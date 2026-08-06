@@ -36,6 +36,10 @@ public partial class Quest
     private readonly object _runtimeLock = new();
     private readonly Dictionary<uint, int> _runtimeActProgress = new();
     private readonly HashSet<uint> _runtimeCompletedComponents = new();
+    // Supply acts run before the next Progress component becomes active. Keep
+    // only those quest-generated item events long enough to apply them to that
+    // next component; pre-existing inventory is deliberately not included.
+    private readonly List<QuestRuntimeEvent> _deferredSupplyEvents = new();
     private uint _objectiveComponentId;
     private uint _acceptedSourceObjectId;
     private uint _acceptedSourceTemplateId;
@@ -72,6 +76,7 @@ public partial class Quest
 
             _runtimeActProgress.Clear();
             _runtimeCompletedComponents.Clear();
+            _deferredSupplyEvents.Clear();
             _objectiveComponentId = 0;
             _runtimeScore = 0;
             _acceptedAt = DateTime.UtcNow;
@@ -447,6 +452,7 @@ public partial class Quest
         {
             if (next == null)
             {
+                _deferredSupplyEvents.Clear();
                 Status = QuestStatus.Ready;
                 Step = QuestComponentKind.Ready;
                 return true;
@@ -493,19 +499,23 @@ public partial class Quest
                     return true;
 
                 case QuestComponentKind.Ready:
+                    _deferredSupplyEvents.Clear();
                     Status = QuestStatus.Ready;
                     InitializeCurrentComponent(false);
                     return true;
 
                 case QuestComponentKind.Reward:
+                    _deferredSupplyEvents.Clear();
                     Status = QuestStatus.Ready;
                     return true;
 
                 case QuestComponentKind.Fail:
+                    _deferredSupplyEvents.Clear();
                     Status = QuestStatus.Failed;
                     return true;
 
                 case QuestComponentKind.Drop:
+                    _deferredSupplyEvents.Clear();
                     Status = QuestStatus.Dropped;
                     return true;
 
@@ -545,12 +555,67 @@ public partial class Quest
 
     private void InitializeProgressComponent(QuestComponent component)
     {
-        foreach (var act in component.Acts.OfType<QuestAct>().OrderBy(x => x.Id))
+        var objectiveActs = component.Acts.OfType<QuestAct>().OrderBy(x => x.Id).ToArray();
+        foreach (var act in objectiveActs)
         {
             if (!_runtimeActProgress.ContainsKey(act.Id))
                 _runtimeActProgress[act.Id] = GetInitialProgress(act);
         }
+
+        ApplyDeferredSupplyEvents(component, objectiveActs);
         RebuildClientObjectives();
+    }
+
+    /// <summary>
+    /// Replays items granted by the immediately preceding Supply component
+    /// after the Progress component exists. The normal inventory event fires
+    /// too early (Status is not Progress yet), while counting the whole bag
+    /// would incorrectly credit items owned before accepting the quest.
+    /// </summary>
+    private void ApplyDeferredSupplyEvents(QuestComponent component, QuestAct[] acts)
+    {
+        if (_deferredSupplyEvents.Count == 0)
+            return;
+
+        var changed = false;
+        foreach (var runtimeEvent in _deferredSupplyEvents)
+        {
+            foreach (var act in acts)
+            {
+                if (!IsObjectiveAct(act) || !ShouldReplaySupplyEvent(act) || !MatchesRuntimeEvent(act, runtimeEvent))
+                    continue;
+
+                var oldValue = GetActProgress(act.Id);
+                var newValue = CalculateProgressAfterEvent(act, runtimeEvent, oldValue);
+                if (newValue == oldValue)
+                    continue;
+
+                _runtimeActProgress[act.Id] = newValue;
+                changed = true;
+                Logger.Info(
+                    "Quest {0}: supplied item seeded progress component={1}, act={2}, item={3}, count={4}, progress={5}->{6}",
+                    TemplateId,
+                    component.Id,
+                    act.Id,
+                    runtimeEvent.TemplateId,
+                    runtimeEvent.Count,
+                    oldValue,
+                    newValue);
+            }
+        }
+
+        _deferredSupplyEvents.Clear();
+        if (changed && Template.Score > 0)
+            _runtimeScore = CalculateScore(component);
+    }
+
+    private static bool ShouldReplaySupplyEvent(QuestAct act)
+    {
+        var definition = act.Definition;
+        if (definition == null || definition.GetBoolean("check_exist"))
+            return false;
+
+        return act.DetailType is "QuestActObjItemGather" or "QuestActObjItemGroupGather";
     }
 
     private int GetInitialProgress(QuestAct act)
@@ -928,24 +993,6 @@ public partial class Quest
     private static int NormalizeSelectiveRewardIndex(int selected) => selected <= 0 ? 0 : selected - 1;
 
     /// <summary>
-    /// Whether accepting this quest hands the player anything.
-    /// </summary>
-    /// <remarks>
-    /// Only such a quest needs its objectives restated once the client knows about it: the goods
-    /// are handed over while the quest is still being started, so the client sees them arrive
-    /// against a quest it has not been told about yet.
-    /// </remarks>
-    public bool HasStartingSupply()
-    {
-        return Template.GetComponents(QuestComponentKind.Supply)
-            .SelectMany(component => component.Acts)
-            .Any(act => act.DetailType is "QuestActSupplyItem"
-                or "QuestActSupplySelectiveItem"
-                or "QuestActSupplyRankedItem"
-                or "QuestActSupplyResultRankedItem");
-    }
-
-    /// <summary>
     /// Which component the turn-in is reported under, worked out without paying anything.
     /// </summary>
     /// <remarks>
@@ -1050,7 +1097,19 @@ public partial class Quest
                 var grade = d.GetInt32("grade_id", 0);
                 if (rewardPhase)
                     count = Math.Max(1, ScaleReward(count, scale));
-                return AcquireQuestItem(itemId, count, grade);
+
+                var acquired = AcquireQuestItem(itemId, count, grade);
+                if (acquired && !rewardPhase)
+                {
+                    _deferredSupplyEvents.Add(new QuestRuntimeEvent
+                    {
+                        Type = QuestRuntimeEventType.ItemGather,
+                        TemplateId = itemId,
+                        Count = count,
+                        Grade = grade
+                    });
+                }
+                return acquired;
             }
             case "QuestActSupplyRemoveItem":
                 return ConsumeQuestItem(d.GetUInt32("item_id"), Math.Max(1, d.GetInt32("count", 1)));

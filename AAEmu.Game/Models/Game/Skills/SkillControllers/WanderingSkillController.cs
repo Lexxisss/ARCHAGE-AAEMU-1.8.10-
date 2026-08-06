@@ -20,7 +20,7 @@ public class WanderingSkillController : SkillController
     {
         Template = template;
         Owner = owner as Unit;
-        Target = target as Unit;
+        Target = target;
         _tickMs = Math.Max(template.Value[0], 300);
     }
 

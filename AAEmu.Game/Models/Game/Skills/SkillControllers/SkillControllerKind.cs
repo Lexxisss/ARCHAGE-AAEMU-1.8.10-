@@ -11,4 +11,7 @@ internal enum SkillControllerKind
     Anchor = 0x6,
     Rotate = 0x7,
     Flowgraph = 0x8,
-};
+    Impulse = 0x9,
+    Move = 0xA,
+    Crawl = 0xB
+}

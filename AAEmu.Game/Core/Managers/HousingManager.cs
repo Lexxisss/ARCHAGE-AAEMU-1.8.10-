@@ -23,6 +23,7 @@ using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
 using AAEmu.Game.Models.Game.Mails;
 using AAEmu.Game.Models.Game.Skills;
+using AAEmu.Game.Models.Game.World;
 using AAEmu.Game.Models.Game.World.Transform;
 using AAEmu.Game.Models.StaticValues;
 using AAEmu.Game.Models.Tasks.Housing;
@@ -77,6 +78,80 @@ public class HousingManager : Singleton<HousingManager>
     private List<uint> _removedHousings;
 
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+
+    private static readonly string[] DecorationPersistenceColumns =
+    {
+        "id", "owner_id", "owner_type", "attach_point", "template_id", "current_phase_id",
+        "plant_time", "growth_time", "phase_time", "x", "y", "z", "roll", "pitch", "yaw",
+        "scale", "item_id", "house_id", "parent_doodad", "item_template_id", "item_container_id", "data"
+    };
+
+    /// <summary>
+    /// Ensures that the server database can persist player-placed housing decorations.
+    /// Housing furniture uses the general persistent <c>doodads</c> table with
+    /// <c>owner_type = Housing</c> and <c>house_id</c> equal to the owning house DB id.
+    /// </summary>
+    private static void EnsureDecorationPersistenceSchema()
+    {
+        using var connection = MySQL.CreateConnection();
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = @"
+CREATE TABLE IF NOT EXISTS `doodads` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `owner_id` int DEFAULT NULL COMMENT 'Character DB Id',
+  `owner_type` tinyint unsigned NOT NULL DEFAULT '255',
+  `attach_point` int unsigned NOT NULL DEFAULT '0' COMMENT 'Slot this doodad fits in on the owner',
+  `template_id` int unsigned NOT NULL,
+  `current_phase_id` int unsigned NOT NULL DEFAULT '0',
+  `plant_time` datetime NOT NULL,
+  `growth_time` datetime NOT NULL,
+  `phase_time` datetime NOT NULL,
+  `x` float NOT NULL DEFAULT '0',
+  `y` float NOT NULL DEFAULT '0',
+  `z` float NOT NULL DEFAULT '0',
+  `roll` float NOT NULL DEFAULT '0',
+  `pitch` float NOT NULL DEFAULT '0',
+  `yaw` float NOT NULL DEFAULT '0',
+  `scale` float NOT NULL DEFAULT '1',
+  `item_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT 'Item DB Id of the associated item',
+  `house_id` int unsigned NOT NULL DEFAULT '0' COMMENT 'House DB Id if it is on actual house land',
+  `parent_doodad` int unsigned NOT NULL DEFAULT '0' COMMENT 'Parent doodad DB Id',
+  `item_template_id` int unsigned NOT NULL DEFAULT '0',
+  `item_container_id` bigint unsigned NOT NULL DEFAULT '0',
+  `data` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_doodads_owner_house` (`owner_type`,`house_id`),
+  KEY `idx_doodads_parent` (`parent_doodad`),
+  KEY `idx_doodads_item` (`item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Persistent doodads, including housing decoration';";
+            command.ExecuteNonQuery();
+        }
+
+        var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = @"
+SELECT `COLUMN_NAME`
+FROM `INFORMATION_SCHEMA`.`COLUMNS`
+WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'doodads';";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+                existingColumns.Add(reader.GetString(0));
+        }
+
+        var missingColumns = DecorationPersistenceColumns.Where(column => !existingColumns.Contains(column)).ToArray();
+        if (missingColumns.Length > 0)
+        {
+            throw new InvalidDataException(
+                "The server table `doodads` is missing columns required for housing decoration persistence: " +
+                string.Join(", ", missingColumns) +
+                ". Apply SQL/updates/2026-08-03_aaemu_game_house_decor_persistence.sql.");
+        }
+
+        Logger.Info("Housing decoration persistence schema ready: table=doodads, owner_type={0}",
+            (byte)DoodadOwnerType.Housing);
+    }
 
     /// <summary>
     /// Gets all houses for a given Account
@@ -145,6 +220,8 @@ public class HousingManager : Singleton<HousingManager>
     /// <exception cref="IOException"></exception>
     public void Load()
     {
+        EnsureDecorationPersistenceSchema();
+
         _housingTemplates = new Dictionary<uint, HousingTemplate>();
         _houses = new Dictionary<uint, House>();
         _housesTl = new Dictionary<ushort, House>();
@@ -218,7 +295,68 @@ public class HousingManager : Singleton<HousingManager>
             if (JsonHelper.TryDeserializeObject(contents, out List<HousingBindingTemplate> binding, out _))
                 Logger.Info("Housing bindings loaded...");
             else
+            {
                 Logger.Warn("Housing bindings not loaded...");
+                binding = new List<HousingBindingTemplate>();
+            }
+
+            // housing_bindings.json only names a subset of designs. Complete/rebuild/special-project
+            // variants commonly reuse the exact same client model and sockets but have another housing
+            // id, so an exact-id lookup silently gave every child (0,0,0). That is why plant-heavy
+            // houses put all plants in their centre and why their doors/nameplate appeared dead: the
+            // clickable fixtures existed, but were buried at the model origin.
+            //
+            // Build both indices up front. Exact id wins. A main-model fallback is safe only when the
+            // model maps to one unambiguous binding map; ambiguous models are deliberately left
+            // unresolved rather than guessed.
+            var housingMainModelById = new Dictionary<uint, uint>();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT id, main_model_id FROM housings";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                    housingMainModelById[reader.GetUInt32("id")] = reader.GetUInt32("main_model_id");
+            }
+
+            var bindingByHousingId = new Dictionary<uint, HousingBindingTemplate>();
+            var bindingByMainModelId = new Dictionary<uint, HousingBindingTemplate>();
+            var ambiguousBindingModels = new HashSet<uint>();
+            foreach (var bindingTemplate in binding)
+            {
+                if (bindingTemplate?.TemplateId == null)
+                    continue;
+
+                foreach (var sourceHousingId in bindingTemplate.TemplateId)
+                {
+                    if (!bindingByHousingId.TryAdd(sourceHousingId, bindingTemplate))
+                    {
+                        Logger.Warn(
+                            "Duplicate housing binding coordinate map for design {0}; keeping the first map",
+                            sourceHousingId);
+                        continue;
+                    }
+
+                    if (!housingMainModelById.TryGetValue(sourceHousingId, out var sourceMainModelId))
+                        continue;
+
+                    if (ambiguousBindingModels.Contains(sourceMainModelId))
+                        continue;
+
+                    if (bindingByMainModelId.TryGetValue(sourceMainModelId, out var existing) &&
+                        !ReferenceEquals(existing, bindingTemplate))
+                    {
+                        bindingByMainModelId.Remove(sourceMainModelId);
+                        ambiguousBindingModels.Add(sourceMainModelId);
+                        Logger.Warn("Housing binding model {0} has more than one coordinate map; model fallback disabled",
+                            sourceMainModelId);
+                    }
+                    else
+                    {
+                        bindingByMainModelId[sourceMainModelId] = bindingTemplate;
+                    }
+                }
+            }
 
             // A design no longer carries its garden radius itself - it points at a size row that
             // does. Reading the old column found nothing, which is how every building ended up
@@ -292,7 +430,19 @@ public class HousingManager : Singleton<HousingManager>
                         template.AlwaysPublic = reader.GetBoolean("always_public", true);
                         _housingTemplates.Add(template.Id, template);
 
-                        var templateBindings = binding.Find(x => x.TemplateId.Contains(template.Id));
+                        var bindingSourceHousingId = template.Id;
+                        bindingByHousingId.TryGetValue(template.Id, out var templateBindings);
+                        if (templateBindings == null &&
+                            !ambiguousBindingModels.Contains(template.MainModelId) &&
+                            bindingByMainModelId.TryGetValue(template.MainModelId, out var modelBindings))
+                        {
+                            templateBindings = modelBindings;
+                            bindingSourceHousingId = modelBindings.TemplateId.FirstOrDefault();
+                            Logger.Info(
+                                "Housing binding fallback: design={0}, model={1}, sourceDesign={2}, family={3}",
+                                template.Id, template.MainModelId, bindingSourceHousingId, template.Family);
+                        }
+
                         using (var command2 = connection.CreateCommand())
                         {
                             command2.CommandText = "SELECT * FROM housing_binding_doodads WHERE housing_id=@housing_id";
@@ -303,14 +453,28 @@ public class HousingManager : Singleton<HousingManager>
                                 var doodads = new List<HousingBindingDoodad>();
                                 while (reader2.Read())
                                 {
-                                    var bindingDoodad = new HousingBindingDoodad();
-                                    bindingDoodad.AttachPointId = (AttachPointKind)reader2.GetUInt32("attach_point_id");
-                                    bindingDoodad.DoodadId = reader2.GetUInt32("doodad_id");
+                                    var bindingDoodad = new HousingBindingDoodad
+                                    {
+                                        AttachPointId = (AttachPointKind)reader2.GetUInt32("attach_point_id"),
+                                        DoodadId = reader2.GetUInt32("doodad_id")
+                                    };
 
-                                    if (templateBindings != null && templateBindings.AttachPointId.TryGetValue(bindingDoodad.AttachPointId, out var pos))
-                                        bindingDoodad.Position = pos.Clone();
-
-                                    bindingDoodad.Position ??= new WorldSpawnPosition();
+                                    if (templateBindings?.AttachPointId != null &&
+                                        templateBindings.AttachPointId.TryGetValue(bindingDoodad.AttachPointId, out var pos))
+                                    {
+                                        bindingDoodad.Position = NormalizeHousingBindingPosition(
+                                            pos, template.Id, bindingSourceHousingId, bindingDoodad.AttachPointId);
+                                    }
+                                    else
+                                    {
+                                        // Keep the object visible for diagnostics, but never hide the missing source:
+                                        // zero is the model origin and is not a valid generic socket position.
+                                        bindingDoodad.Position = new WorldSpawnPosition();
+                                        Logger.Warn(
+                                            "Housing binding position missing: design={0}, model={1}, attachPoint={2}, doodad={3}",
+                                            template.Id, template.MainModelId, bindingDoodad.AttachPointId,
+                                            bindingDoodad.DoodadId);
+                                    }
 
                                     doodads.Add(bindingDoodad);
                                 }
@@ -640,6 +804,28 @@ public class HousingManager : Singleton<HousingManager>
     /// A plot carries no shape here - see <see cref="HousingAreas"/> - so what this buys is the
     /// zone a placement lands in and everything that follows from the plots of that zone.
     /// </remarks>
+    private static WorldSpawnPosition NormalizeHousingBindingPosition(
+        WorldSpawnPosition source, uint designId, uint sourceDesignId, AttachPointKind attachPoint)
+    {
+        var result = source.Clone();
+
+        // Two extracted binding groups contain values such as 4205.623, 8391.406 and 12593.98.
+        // Their neighbouring sockets and the repeated 4.2/8.4/12.59 pattern show a lost decimal
+        // separator during the old extraction. These are local house coordinates, so kilometre-high
+        // offsets are impossible. Restore the intended metres without changing legitimate large
+        // buildings (the normal data stays far below this threshold).
+        if (MathF.Abs(result.Z) > 1000f)
+        {
+            var encodedZ = result.Z;
+            result.Z /= 1000f;
+            Logger.Warn(
+                "Housing binding Z normalized: design={0}, sourceDesign={1}, attachPoint={2}, {3} -> {4}",
+                designId, sourceDesignId, attachPoint, encodedZ, result.Z);
+        }
+
+        return result;
+    }
+
     private void LoadHousingAreas(SqliteConnection connection)
     {
         using (var command = connection.CreateCommand())
@@ -911,10 +1097,20 @@ public class HousingManager : Singleton<HousingManager>
     /// </summary>
     /// <param name="connection"></param>
     /// <param name="tlId"></param>
-    public void HouseTaxInfo(GameConnection connection, ushort tlId, uint objId)
+    public void HouseTaxInfo(GameConnection connection, uint tlId, uint objId)
     {
-        if (!_housesTl.TryGetValue(tlId, out var house))
+        House house = null;
+        if (tlId <= ushort.MaxValue)
+            _housesTl.TryGetValue((ushort)tlId, out house);
+
+        if (house == null && objId > 0)
+            house = _houses.Values.FirstOrDefault(h => h.ObjId == objId);
+
+        if (house == null)
+        {
+            Logger.Warn("HouseTaxInfo: house not found, tl={0}, objId={1}", tlId, objId);
             return;
+        }
 
         // Asking about a building's tax means having the building, which is the nearest thing to
         // proof that it was registered - there is no message that says so outright. The state goes
@@ -930,27 +1126,21 @@ public class HousingManager : Singleton<HousingManager>
         var baseTax = (int)(house.Template.Taxation?.Tax ?? 0);
         var depositTax = baseTax * 2;
 
-        // Note: I'm sure this can be done better, but it works and displays correctly
-        var requiresPayment = false;
-        var weeksWithoutPay = -1;
-        if (house.TaxDueDate <= DateTime.UtcNow)
-        {
-            requiresPayment = true;
-            weeksWithoutPay = 0;
-        }
-        else if (house.ProtectionEndDate <= DateTime.UtcNow)
-        {
-            requiresPayment = true;
-            weeksWithoutPay = 1;
-        }
+        var now = DateTime.UtcNow;
+        var isTaxDue = house.TaxDueDate <= now;
+        var weeksWithoutPay = isTaxDue
+            ? Math.Max(0, (int)Math.Floor((now - house.TaxDueDate).TotalDays / TaxPaysForDays))
+            : 0;
+        var amountDue = isTaxDue
+            ? (long)totalTaxAmountDue * (weeksWithoutPay + 1L)
+            : 0L;
+        var isAlreadyPaid = !isTaxDue;
 
-        // Logger.Debug($"SCHouseTaxInfoPacket; tlId:{house.TlId}, domTaxRate: 0, deposit: {depositTax}, taxDue:{totalTaxAmountDue}, protectEnd:{house.ProtectionEndDate}, isPaid:{requiresPayment}, weeksWithoutPay:{weeksWithoutPay}, isHeavy:{house.Template.HeavyTax}");
-        
         Logger.Info(
-            "HouseTaxInfo: house={0} tl={1} design={2} baseTax={3} deposit={4} due={5} " +
-            "protectionEnd={6} taxDue={7} requiresPayment={8} weeksWithoutPay={9} heavy={10}",
-            house.Id, house.TlId, house.TemplateId, baseTax, depositTax, totalTaxAmountDue,
-            house.ProtectionEndDate, house.TaxDueDate, requiresPayment, weeksWithoutPay,
+            "HouseTaxInfo: house={0} tl={1} design={2} baseTax={3} deposit={4} weeklyTax={5} " +
+            "amountDue={6} protectionEnd={7} taxDue={8} isAlreadyPaid={9} weeksWithoutPay={10} heavy={11}",
+            house.Id, house.TlId, house.TemplateId, baseTax, depositTax, totalTaxAmountDue, amountDue,
+            house.ProtectionEndDate, house.TaxDueDate, isAlreadyPaid, weeksWithoutPay,
             house.Template.HeavyTax);
 
         connection.SendPacket(
@@ -959,10 +1149,10 @@ public class HousingManager : Singleton<HousingManager>
                 0,  // TODO: implement when castles are added
                 0,
                 depositTax, // this is used in the help text on (?) when you hover your mouse over it to display deposit tax for this building
-                totalTaxAmountDue, // Amount Due
-                house.ProtectionEndDate,
-                requiresPayment,
-                (byte)Math.Clamp(weeksWithoutPay, 0, byte.MaxValue),  // TODO: do proper calculation ?
+                amountDue, // current unpaid amount; zero during the paid protection period
+                house.TaxDueDate,
+                isAlreadyPaid,
+                (byte)Math.Clamp(weeksWithoutPay, 0, byte.MaxValue),
                 0,   // weeksPrepay: a single byte on the wire, so -1 is not expressible here
                 house.Template.HeavyTax
             )
@@ -1020,6 +1210,10 @@ public class HousingManager : Singleton<HousingManager>
         }
         CalculateBuildingTaxInfo(connection.ActiveChar.AccountId, houseTemplate, true, out var totalTaxAmountDue, out _, out _, out _, out _);
 
+        if (moneyAmount != totalTaxAmountDue)
+            Logger.Warn("Build tax quote mismatch: design={0}, client={1}, server={2}; charging authoritative server value",
+                designId, moneyAmount, totalTaxAmountDue);
+
         if (!ChargePlacementTax(connection, houseTemplate, totalTaxAmountDue))
             return;
 
@@ -1052,7 +1246,7 @@ public class HousingManager : Singleton<HousingManager>
         house.Permission = HousingPermission.Private;
         house.AllowRecover = true;
         house.PlaceDate = DateTime.UtcNow;
-        house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays);
+        house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays * 2);
 
         // Last, because a design with no stages is finished on the spot and builds its doors and
         // chests here - and those take the building's ownership as it stands at that moment.
@@ -1381,7 +1575,7 @@ public class HousingManager : Singleton<HousingManager>
         house.Permission = HousingPermission.Private;
         house.AllowRecover = true;
         house.PlaceDate = DateTime.UtcNow;
-        house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays);
+        house.ProtectionEndDate = DateTime.UtcNow.AddDays(TaxPaysForDays * 2);
 
         house.CurrentStep = house.Template.FirstBuildStep;
 
@@ -1556,11 +1750,16 @@ public class HousingManager : Singleton<HousingManager>
         hostileTaxRate = 0; // NOTE: When castles are added, this needs to be updated depending on ruling guild's settings
         oneWeekTaxCount = 0;
 
-        var userHouses = new Dictionary<uint, House>();
-        if (GetByAccountId(userHouses, accountId) <= 0)
+        if (newHouseTemplate?.Taxation == null)
+        {
+            Logger.Warn("CalculateBuildingTaxInfo: design {0} has no taxation row", newHouseTemplate?.Id ?? 0);
             return false;
+        }
 
-        // Count the houses on this account
+        var userHouses = new Dictionary<uint, House>();
+        GetByAccountId(userHouses, accountId);
+
+        // Count the houses on this account. An empty collection is valid: this is the first house.
         foreach (var h in userHouses)
         {
             if (h.Value.Template.HeavyTax)
@@ -2165,6 +2364,7 @@ public class HousingManager : Singleton<HousingManager>
             if (furniture.AttachPoint != AttachPointKind.None)
                 continue;
             furniture.OwnerId = characterId;
+            furniture.Save();
             furniture.BroadcastPacket(new SCDoodadOriginatorPacket(furniture.ObjId, characterId, 0), true);
             res++;
         }
@@ -2446,6 +2646,12 @@ public class HousingManager : Singleton<HousingManager>
 
         // Create decoration doodad
         var decorationDesign = GetDecorationDesignFromId(designId);
+        if (decorationDesign == null)
+        {
+            Logger.Warn("DecorateHouse: unknown housing decoration design {0}", designId);
+            player.SendErrorMessage(ErrorMessageType.FailedToUseItem);
+            return false;
+        }
 
         if (!HasRoomForDecorationGroup(house, decorationDesign))
         {
@@ -2462,11 +2668,35 @@ public class HousingManager : Singleton<HousingManager>
         }
         */
 
+        GameObject decorationParent = house;
+        if ((parentObjId != 0) && (parentObjId != house.ObjId))
+        {
+            var parentDoodad = WorldManager.Instance.GetDoodad(parentObjId);
+            if ((parentDoodad == null) || (parentDoodad.OwnerDbId != house.Id))
+            {
+                Logger.Warn(
+                    "DecorateHouse: invalid parent objId={0} for house={1}; parent is missing or belongs to another house",
+                    parentObjId, house.Id);
+                player.SendErrorMessage(ErrorMessageType.InvalidHouseInfo);
+                return false;
+            }
+
+            decorationParent = parentDoodad;
+        }
+
         var doodad = DoodadManager.Instance.Create(0, decorationDesign.DoodadId, house, true);
-        doodad.Transform.Parent = house.Transform;
+        if (doodad == null)
+        {
+            Logger.Error("DecorateHouse: doodad template {0} for design {1} is missing", decorationDesign.DoodadId,
+                designId);
+            player.SendErrorMessage(ErrorMessageType.FailedToUseItem);
+            return false;
+        }
+
+        doodad.Transform.Parent = decorationParent.Transform;
         doodad.Transform.Local.SetPosition(pos.X, pos.Y, pos.Z);
         doodad.Transform.Local.ApplyFromQuaternion(quat);
-        doodad.ItemTemplateId = item.TemplateId; // designId;
+        doodad.ItemTemplateId = item.TemplateId;
         doodad.ItemId = (item.Template.MaxCount <= 1) ? itemId : 0;
         doodad.OwnerDbId = house.Id;
 
@@ -2478,36 +2708,72 @@ public class HousingManager : Singleton<HousingManager>
         }
 
         doodad.OwnerId = player.Id;
-        doodad.ParentObjId = house.ObjId;
-        doodad.ParentObj = house;
+        doodad.ParentObjId = decorationParent.ObjId;
+        doodad.ParentObj = decorationParent;
         doodad.AttachPoint = AttachPointKind.None;
         doodad.OwnerType = DoodadOwnerType.Housing;
         doodad.UccId = itemUcc?.Id ?? 0;
         doodad.IsPersistent = true;
 
         if (doodad is DoodadCoffer coffer)
-        {
             coffer.InitializeCoffer(player.Id);
-        }
 
         doodad.InitDoodad();
-        doodad.Spawn();
-        doodad.Save();
 
-        bool res;
+        bool itemStored;
         if (item.Template.MaxCount > 1)
         {
-            // Stackable items are simply consumed
-            res = (player.Inventory.Bag.ConsumeItem(ItemTaskType.DoodadCreate, item.TemplateId, 1, item) == 1);
+            // Stackable decorations do not keep a unique item row; persist the item template instead.
+            itemStored = player.Inventory.Bag.ConsumeItem(ItemTaskType.DoodadCreate, item.TemplateId, 1, item) == 1;
         }
         else
         {
-            // Non-stackable items are stored in the owner's system container as to retain crafter information and such 
-            res = player.Inventory.SystemContainer.AddOrMoveExistingItem(ItemTaskType.DoodadCreate, item);
+            // Keep the exact item in the system container so crafter/UCC/bind information survives a restart.
+            itemStored = player.Inventory.SystemContainer.AddOrMoveExistingItem(ItemTaskType.DoodadCreate, item);
         }
 
-        // Logger.Debug($"DecorateHouse => DoodadTemplate: {doodad.TemplateId} , DoodadId {doodad.ObjId}, Pos: {doodad.Transform}");
-        return res;
+        if (!itemStored)
+        {
+            doodad.ItemId = 0;
+            doodad.ItemTemplateId = 0;
+            doodad.IsPersistent = false;
+            doodad.Delete();
+            Logger.Warn("DecorateHouse: failed to reserve item {0} for house {1}", itemId, house.Id);
+            return false;
+        }
+
+        try
+        {
+            // Save before publishing to the client: a visible decoration must already have a durable DB row.
+            doodad.Save();
+            doodad.Spawn();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex,
+                "DecorateHouse: failed to persist decoration design={0}, doodadTemplate={1}, house={2}",
+                designId, doodad.TemplateId, house.Id);
+
+            var restored = item.Template.MaxCount > 1
+                ? player.Inventory.Bag.AcquireDefaultItem(ItemTaskType.Invalid, item.TemplateId, 1, item.Grade,
+                    player.Id)
+                : player.Inventory.Bag.AddOrMoveExistingItem(ItemTaskType.Invalid, item);
+
+            if (!restored)
+                Logger.Error("DecorateHouse: failed to roll item {0} back to the player's bag", itemId);
+
+            // Prevent Doodad.Delete() from deleting the item that was just restored.
+            doodad.ItemId = 0;
+            doodad.ItemTemplateId = 0;
+            doodad.Delete();
+            return false;
+        }
+
+        Logger.Info(
+            "House decoration persisted: dbId={0}, objId={1}, house={2}, owner={3}, design={4}, template={5}, parentObj={6}, local=({7:F3},{8:F3},{9:F3})",
+            doodad.DbId, doodad.ObjId, house.Id, player.Id, designId, doodad.TemplateId, doodad.ParentObjId,
+            pos.X, pos.Y, pos.Z);
+        return true;
     }
 
     /// <summary>

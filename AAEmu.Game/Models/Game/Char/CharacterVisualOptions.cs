@@ -10,8 +10,8 @@ public class CharacterVisualOptions : PacketMarshaler
     public bool BackHoldable;
     public bool Cosplay;
     public bool CosplayBackpack;
-    public bool Weapon;
-    public bool RangedWeapon;
+    public byte CosplayVisual;
+    public bool Ipnir;
 
     public CharacterVisualOptions()
     {
@@ -24,8 +24,13 @@ public class CharacterVisualOptions : PacketMarshaler
         BackHoldable = true;
         Cosplay = true;
         CosplayBackpack = false;
-        Weapon = false;
-        RangedWeapon = true;
+        CosplayVisual = 0;
+        Ipnir = false;
+    }
+
+    public CharacterVisualOptions(byte flag) : this()
+    {
+        _flag = flag;
     }
 
     public override void Read(PacketStream stream)
@@ -42,9 +47,9 @@ public class CharacterVisualOptions : PacketMarshaler
         if ((_flag & 16) == 16)
             CosplayBackpack = stream.ReadBoolean();
         if ((_flag & 32) == 32)
-            Weapon = stream.ReadBoolean();
+            CosplayVisual = stream.ReadByte();
         if ((_flag & 64) == 64)
-            RangedWeapon = stream.ReadBoolean();
+            Ipnir = stream.ReadBoolean();
     }
 
     public override PacketStream Write(PacketStream stream)
@@ -66,9 +71,9 @@ public class CharacterVisualOptions : PacketMarshaler
         if ((flag & 16) == 16)
             stream.Write(CosplayBackpack);
         if ((flag & 32) == 32)
-            stream.Write(Weapon);
+            stream.Write(CosplayVisual);
         if ((flag & 64) == 64)
-            stream.Write(RangedWeapon);
+            stream.Write(Ipnir);
         return stream;
     }
     public PacketStream WriteOptions(PacketStream stream)
@@ -79,8 +84,8 @@ public class CharacterVisualOptions : PacketMarshaler
         stream.Write(BackHoldable);    // back_holdable
         stream.Write(Cosplay);         // cosplay
         stream.Write(CosplayBackpack); // cosplay_backpack
-        stream.Write(Weapon);          // weapon
-        stream.Write(RangedWeapon);    // ranged weapon
+        stream.Write(CosplayVisual);   // cosplay_visual
+        stream.Write(Ipnir);           // ipnir
 
         return stream;
     }

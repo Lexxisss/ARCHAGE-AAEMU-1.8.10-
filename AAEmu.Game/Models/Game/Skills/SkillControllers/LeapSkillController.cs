@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 
 using AAEmu.Game.Core.Managers;
@@ -31,12 +31,15 @@ public class LeapSkillController : SkillController
     public LeapSkillController(SkillControllerTemplate template, BaseUnit owner, BaseUnit target)
     {
         Template = template;
-        Owner = (Unit)owner;
-        Target = (Unit)target;
+        Owner = owner as Unit;
+        Target = target;
+
+        if (Owner == null || Target?.Transform == null)
+            return;
 
         Angle = template.Value[0];
         Speed = template.Value[1];
-        Duration = template.Value[2];
+        Duration = Math.Max(template.Value[2], 1);
         DistanceOffset = template.Value[3];
         Direction = (LeapDirection)template.Value[6];
 
@@ -61,14 +64,23 @@ public class LeapSkillController : SkillController
 
     public override void Execute()
     {
+        if (Owner == null || Target?.Transform == null)
+        {
+            End();
+            return;
+        }
+
         base.Execute();
-        TickManager.Instance.OnTick.Subscribe(Tick, TimeSpan.FromMilliseconds(100));
+        TickManager.Instance.OnTick.Subscribe(Tick, TimeSpan.FromMilliseconds(50));
     }
 
     public override void End()
     {
-        base.End();
+        if (State == SCState.Ended)
+            return;
+
         TickManager.Instance.OnTick.UnSubscribe(Tick);
+        base.End();
     }
 
     public void MoveTowards(float distance, byte flags = 4)

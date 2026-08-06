@@ -22,6 +22,16 @@ public class PlotEventEffect
     public void ApplyEffect(PlotState state, PlotTargetInfo targetInfo, PlotEventTemplate evt, ref byte flag, bool channeled = false, CompressedGamePackets gamePackets = null)
     {
         var template = SkillManager.Instance.GetEffectTemplate(ActualId, ActualType);
+        if (template == null)
+        {
+            PlotDiagnostics.MissingEffect(
+                ActualType,
+                ActualId,
+                evt?.PlotId ?? 0,
+                evt?.Id ?? EventId,
+                state?.ActiveSkill?.Template?.Id ?? 0);
+            return;
+        }
 
         var buffEffect = template as BuffEffect;
         if (buffEffect != null)
@@ -70,13 +80,11 @@ public class PlotEventEffect
                     throw new InvalidOperationException("This can't happen");
             }
 
+            if (target == null || source == null)
+                continue;
+
             if (channeled && buffEffect != null)
                 state.ChanneledBuffs.Add((target, buffEffect.BuffId));
-
-            if (template == null)
-            {
-                return;
-            }
 
             template.Apply(
                 source,
