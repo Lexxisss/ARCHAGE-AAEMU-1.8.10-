@@ -285,7 +285,12 @@ public class SlaveManager : Singleton<SlaveManager>
         if (slave?.Equipment == null || slave.Template == null || slave.Transform == null)
             return;
 
-        RemoveEquipmentComponents(slave);
+        // The ids of what was taken off are handed back only once everything that stays has been
+        // put on again. Freeing them here let a lamp spawned two lines later take the object id of
+        // the sail that had just been removed, and the client was told, in one breath, that the id
+        // was gone, that it was a new doodad, and that it was still the old rig - so the sail it
+        // had been told to remove stayed on the ship.
+        var releasedIds = RemoveEquipmentComponents(slave);
 
         var spawnedDoodads = 0;
         var spawnedSlaves = 0;
@@ -353,6 +358,9 @@ public class SlaveManager : Singleton<SlaveManager>
                 "Slave equipment item has no runtime component: parent={0}/{1}, slot={2}, item={3}, grade={4}",
                 slave.TemplateId, slave.ObjId, slot, item.TemplateId, item.Grade);
         }
+
+        foreach (var releasedId in releasedIds)
+            ObjectIdManager.Instance.ReleaseId(releasedId);
 
         Logger.Info(
             "Slave equipment components synchronized: parent={0}/{1}, dbId={2}, items={3}, doodads={4}, childSlaves={5}",
@@ -478,15 +486,21 @@ public class SlaveManager : Singleton<SlaveManager>
         return child;
     }
 
-    private void RemoveEquipmentComponents(Slave slave)
+    /// <summary>
+    /// Takes every runtime component off the slave and returns the object ids it freed, for the
+    /// caller to hand back once the components that stay have been spawned again.
+    /// </summary>
+    private List<uint> RemoveEquipmentComponents(Slave slave)
     {
+        var releasedIds = new List<uint>();
+
         foreach (var pair in slave.EquipmentDoodads.ToList())
         {
             var doodad = pair.Value;
             slave.AttachedDoodads.Remove(doodad);
             doodad.IsPersistent = false;
             doodad.Delete();
-            ObjectIdManager.Instance.ReleaseId(doodad.ObjId);
+            releasedIds.Add(doodad.ObjId);
         }
         slave.EquipmentDoodads.Clear();
 
@@ -498,9 +512,11 @@ public class SlaveManager : Singleton<SlaveManager>
                 _tlSlaves.Remove(child.TlId);
             child.Delete();
             TlIdManager.Instance.ReleaseId(child.TlId);
-            ObjectIdManager.Instance.ReleaseId(child.ObjId);
+            releasedIds.Add(child.ObjId);
         }
         slave.EquipmentSlaves.Clear();
+
+        return releasedIds;
     }
 
     public void UnbindSlave(Character character, uint tlId, AttachUnitReason reason)
