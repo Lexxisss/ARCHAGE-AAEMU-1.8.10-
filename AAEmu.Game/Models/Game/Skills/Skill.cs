@@ -920,6 +920,7 @@ public class Skill
         if (caster is not Unit unit)
             return;
         var player = caster as Character;
+        var selectiveItems = SkillManager.Instance.GetSelectiveItems(Template.Id);
         var targets = new List<BaseUnit>(); // TODO crutches
         if (Template.TargetAreaRadius > 0)
         {
@@ -1095,7 +1096,10 @@ public class Skill
                     var grantTemplateId = 0u;
                     var grantTemplateCount = 0;
 
-                    if (casterCaster is SkillItem castItem && player != null)
+                    // Selective boxes are consumed only after the client confirms its choice
+                    // in CSBagHandleSelectiveItemsPacket. Consuming here would either lose the
+                    // box on cancel or consume it twice when the confirmation arrives.
+                    if (selectiveItems == null && casterCaster is SkillItem castItem && player != null)
                     {
                         var useItem = ItemManager.Instance.GetItemByItemId(castItem.ItemId);
                         if (useItem != null && effect.ConsumeItemCount > 0)
@@ -1257,7 +1261,11 @@ public class Skill
             // but has none attached, consume 1 of the source item instead
             // TODO: Check if this is intended behaviour, or if this is a bug in the compact.sqlite3 file
             var item = ItemManager.Instance.GetItemByItemId(skillItem.ItemId);
-            if ((item?.Template.UseSkillAsReagent == true) && (reagents.Count <= 0) && (skillProducts.Count <= 0) && (consumedItems.Count <= 0))
+            if ((item?.Template.UseSkillAsReagent == true)
+                && (reagents.Count <= 0)
+                && (skillProducts.Count <= 0)
+                && (consumedItems.Count <= 0)
+                && selectiveItems == null)
             {
                 consumedItems.Add((item, 1));
                 Logger.Debug($"Consumed item template 1 x {item.TemplateId} ({item.Id}) because of missing reagent information with skill {Template.Id}");

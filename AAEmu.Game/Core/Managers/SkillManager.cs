@@ -18,7 +18,6 @@ using AAEmu.Game.Models.Game.World;
 using AAEmu.Game.Models.StaticValues;
 using AAEmu.Game.Utils.DB;
 
-using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace AAEmu.Game.Core.Managers;
@@ -65,6 +64,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
     private Dictionary<uint, SkillReagent> _skillReagents;
     private Dictionary<uint, SkillProduct> _skillProducts;
     private Dictionary<uint, SelectiveItems> _selectiveItems;
+    private Dictionary<uint, List<uint>> _skillGrantBuffs;
     private Dictionary<uint, CombatResourceTemplate> _combatResources;
     private Dictionary<byte, CombatResourceGroupTemplate> _combatResourceGroups;
     // private HashSet<ushort> _skillIds = new();
@@ -138,6 +138,14 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
     public SelectiveItems GetSelectiveItems(uint skillId)
     {
         return _selectiveItems.GetValueOrDefault(skillId);
+    }
+
+    public bool IsSkillGrantedByActiveBuff(uint skillId, IBuffs buffs)
+    {
+        if (buffs == null || !_skillGrantBuffs.TryGetValue(skillId, out var grantingBuffs))
+            return false;
+
+        return grantingBuffs.Any(buffs.CheckBuff);
     }
 
     public bool IsDefaultSkill(uint id)
@@ -391,6 +399,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
         _skillReagents = new Dictionary<uint, SkillReagent>();
         _skillProducts = new Dictionary<uint, SkillProduct>();
         _selectiveItems = new Dictionary<uint, SelectiveItems>();
+        _skillGrantBuffs = new Dictionary<uint, List<uint>>();
         _combatResources = new Dictionary<uint, CombatResourceTemplate>();
         _combatResourceGroups = new Dictionary<byte, CombatResourceGroupTemplate>();
 
@@ -2364,37 +2373,109 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
             }
             } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
 
-            try {
-            using (var command = connection.CreateCommand())
+            try
             {
-                command.CommandText = "SELECT * from skill_dynamic_effects";
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT buff_id, skill_id, enable FROM buff_skills";
                 command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        var skillId = reader.GetUInt32("skill_id");
-                        var effect = reader.GetString("effect", string.Empty);
-                        if (string.IsNullOrWhiteSpace(effect))
-                            continue;
+                    if (!reader.GetBoolean("enable", true))
+                        continue;
 
-                        try
-                        {
-                            var selectiveItem = new SelectiveItems(JObject.Parse(effect));
-                            if (selectiveItem.Effect != "selective_item" || selectiveItem.ItemSelections.Count <= 0)
-                                continue;
-                            _selectiveItems[skillId] = selectiveItem;
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Warn(e, $"Failed to load selective item dynamic effect for skill {skillId}");
-                        }
+                    var buffId = reader.GetUInt32("buff_id");
+                    var skillId = reader.GetUInt32("skill_id");
+                    if (buffId == 0 || skillId == 0)
+                        continue;
+
+                    if (!_skillGrantBuffs.TryGetValue(skillId, out var buffs))
+                    {
+                        buffs = new List<uint>();
+                        _skillGrantBuffs[skillId] = buffs;
                     }
+                    if (!buffs.Contains(buffId))
+                        buffs.Add(buffId);
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table buff_skills is missing; buff-granted skills are disabled.");
+            }
+            Logger.Info("Loaded {0} buff-granted skill mappings", _skillGrantBuffs.Sum(x => x.Value.Count));
 
-            Logger.Info("Loaded {0} selective item dynamic effects", _selectiveItems.Count);
+            var selectiveEffectsById = new Dictionary<uint, SelectiveItems>();
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText =
+                    "SELECT id, consume_item_count, is_multi, select_count, skill_id FROM selective_item_effects";
+                command.Prepare();
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
+                {
+                    var selectiveItem = new SelectiveItems
+                    {
+                        Id = reader.GetUInt32("id"),
+                        SkillId = reader.GetUInt32("skill_id"),
+                        ConsumeItemCount = reader.GetInt32("consume_item_count"),
+                        IsMulti = reader.GetBoolean("is_multi"),
+                        SelectCount = reader.GetInt32("select_count")
+                    };
+
+                    if (selectiveItem.Id == 0 || selectiveItem.SkillId == 0
+                        || selectiveItem.ConsumeItemCount <= 0 || selectiveItem.SelectCount <= 0)
+                        continue;
+
+                    selectiveEffectsById[selectiveItem.Id] = selectiveItem;
+                }
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                Logger.Warn("Table selective_item_effects is missing; selective item boxes are disabled.");
+            }
+
+            if (selectiveEffectsById.Count > 0)
+            {
+                try
+                {
+                    using var command = connection.CreateCommand();
+                    command.CommandText =
+                        "SELECT id, count, grade_id, item_id, selective_item_effect_id "
+                        + "FROM selective_item_effect_elems ORDER BY selective_item_effect_id, id";
+                    command.Prepare();
+                    using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                    while (reader.Read())
+                    {
+                        var effectId = reader.GetUInt32("selective_item_effect_id");
+                        if (!selectiveEffectsById.TryGetValue(effectId, out var selectiveItem))
+                            continue;
+
+                        var selection = new ItemSelections
+                        {
+                            Id = reader.GetUInt32("id"),
+                            ItemId = reader.GetUInt32("item_id"),
+                            Count = reader.GetInt32("count"),
+                            GradeId = reader.GetInt32("grade_id")
+                        };
+                        if (selection.Id == 0 || selection.ItemId == 0 || selection.Count <= 0)
+                            continue;
+
+                        selectiveItem.ItemSelections.Add(selection);
+                    }
+                }
+                catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+                {
+                    Logger.Warn("Table selective_item_effect_elems is missing; selective item boxes are disabled.");
+                }
+            }
+
+            foreach (var selectiveItem in selectiveEffectsById.Values)
+            {
+                if (selectiveItem.ItemSelections.Count > 0)
+                    _selectiveItems[selectiveItem.SkillId] = selectiveItem;
+            }
+            Logger.Info("Loaded {0} selective item effects", _selectiveItems.Count);
             OnSkillsLoaded?.Invoke(this, new EventArgs());
         }
 

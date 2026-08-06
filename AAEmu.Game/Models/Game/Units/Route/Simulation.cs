@@ -279,8 +279,6 @@ public class Simulation : Patrol
         //Logger.Warn("trying to get on the path...");
         //Character.SendMessage("[MoveTo] trying to get on the path...");
         // first go to the closest checkpoint
-        npc.BroadcastPacket(new SCUnitModelPostureChangedPacket(
-            npc, BaseUnitType.Npc, ModelPostureType.ActorModelState, npc.Template.AnimActionId, false), true);
         Path = GetPaths(MoveFileName);
 
         if (Path.Count == 0)
@@ -324,8 +322,6 @@ public class Simulation : Patrol
         //Logger.Warn("trying to get on the path...");
         //Character.SendMessage("[MoveTo] trying to get on the path...");
         // first go to the closest checkpoint
-        npc.BroadcastPacket(new SCUnitModelPostureChangedPacket(
-            npc, BaseUnitType.Npc, ModelPostureType.ActorModelState, npc.Template.AnimActionId, false), true);
         Path = GetPaths(MoveFileName);
 
         if (Path.Count == 0)
@@ -441,8 +437,8 @@ public class Simulation : Patrol
             moveType.DeltaMovement[1] = (sbyte)(RunningMode ? 127 : 63);
             moveType.DeltaMovement[2] = 0;
             moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
-            moveType.Alertness = 1; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-            moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+            moveType.Alertness = 0; // route movement is relaxed; combat AI sets 2
+            moveType.Time = unchecked((uint)Environment.TickCount64);
 
             npc.CheckMovedPosition(oldPosition);
 

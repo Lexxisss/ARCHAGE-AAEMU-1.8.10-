@@ -2,10 +2,8 @@
 using System.Numerics;
 
 using AAEmu.Commons.Utils;
-using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.AI.Utils;
 using AAEmu.Game.Models.Game.Models;
-using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.AI.v2.Behaviors.Common;
@@ -19,12 +17,9 @@ public class RoamingBehavior : BaseCombatBehavior
     public override void Enter()
     {
         Ai.Owner.InterruptSkills();
-        Ai.Owner.BroadcastPacket(new SCUnitModelPostureChangedPacket(
-            Ai.Owner,
-            BaseUnitType.Npc,
-            ModelPostureType.ActorModelState,
-            Ai.Owner.Template.AnimActionId,
-            false), false);
+        // Do not resend ActorModelState with activate=false when roaming starts.
+        // The initial posture is already carried by SCUnitState; resending it here
+        // resets the animation state exactly when locomotion is about to begin.
         //UpdateRoaming();
         Ai.Owner.CurrentGameStance = GameStanceType.Relaxed;
         _enter = true;
@@ -43,7 +38,7 @@ public class RoamingBehavior : BaseCombatBehavior
         if (_targetRoamPosition.Equals(Vector3.Zero))
             return;
 
-        Ai.Owner.MoveTowards(_targetRoamPosition, Ai.Owner.BaseMoveSpeed * (delta.Milliseconds / 1000.0f), 5);
+        Ai.Owner.MoveTowards(_targetRoamPosition, Ai.Owner.BaseMoveSpeed * (delta.Milliseconds / 1000.0f));
         var dist = MathUtil.CalculateDistance(Ai.Owner.Transform.World.Position, _targetRoamPosition);
         if (dist < 1.0f)
         {

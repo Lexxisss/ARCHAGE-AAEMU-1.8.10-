@@ -23,6 +23,7 @@ public class Line : Patrol
             return;
         }
         var move = false;
+        var oldPosition = npc.Transform.Local.ClonePosition();
         var x = npc.Transform.Local.Position.X - Position.X;
         var y = npc.Transform.Local.Position.Y - Position.Y;
         var z = npc.Transform.Local.Position.Z - Position.Z;
@@ -134,31 +135,36 @@ public class Line : Patrol
         moveType.RotationY = 0;
         moveType.RotationZ = rotZ;
 
-        moveType.ActorFlags = 0;     // gate word for the optional blocks only; carries no walk/run meaning
+        var displacement = npc.Transform.Local.Position - oldPosition;
+        const float updateSeconds = 0.5f;
+        moveType.VelX = move
+            ? (short)Math.Clamp(displacement.X / updateSeconds / 60f * 32768f, short.MinValue, short.MaxValue)
+            : (short)0;
+        moveType.VelY = move
+            ? (short)Math.Clamp(displacement.Y / updateSeconds / 60f * 32768f, short.MinValue, short.MaxValue)
+            : (short)0;
+        moveType.VelZ = move
+            ? (short)Math.Clamp(displacement.Z / updateSeconds / 60f * 32768f, short.MinValue, short.MaxValue)
+            : (short)0;
+        moveType.ActorFlags = 0;
+        moveType.Flags = 0;
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
-        moveType.DeltaMovement[1] = 127;
+        moveType.DeltaMovement[1] = move ? (sbyte)127 : (sbyte)0;
         moveType.DeltaMovement[2] = 0;
-        moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
-        moveType.Alertness = 0; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-        // The same clock every other movement body is stamped with. This used to add fifty to a
-        // field that had just been created at zero, so a unit on a line route announced itself at
-        // time 50 for ever while everything around it counted milliseconds since midnight.
-        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+        moveType.Stance = 0;
+        moveType.Alertness = 0;
+        moveType.Time = unchecked((uint)Environment.TickCount64);
 
         if (move)
         {
-            // 广播移动状态
-            // broadcast mobile status
+            npc.CheckMovedPosition(oldPosition);
             npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
             LoopDelay = 500;
             Repeat(npc);
         }
         else
         {
-            // 停止移动
-            // stop moving
-            moveType.DeltaMovement[1] = 0;
             npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
             LoopAuto(npc);
         }

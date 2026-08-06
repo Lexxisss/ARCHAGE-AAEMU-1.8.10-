@@ -103,7 +103,7 @@ public class GameNetwork : Singleton<GameNetwork>
         RegisterPacket(CSOffsets.CSRequestMusicNotesPacket, 5, typeof(CSRequestMusicNotesPacket));
         RegisterPacket(CSOffsets.CSPauseUserMusicPacket, 5, typeof(CSPauseUserMusicPacket));
         //RegisterPacket(CSOffsets.CSUnknown0x5ePacket, 5, typeof(CSUnknown0x5ePacket));
-        //RegisterPacket(CSOffsets.CSBagHandleSelectiveItemsPacket, 5, typeof(CSBagHandleSelectiveItemsPacket));
+        RegisterPacket(CSOffsets.CSBagHandleSelectiveItemsPacket, 5, typeof(CSBagHandleSelectiveItemsPacket));
         RegisterPacket(CSOffsets.CSSkillControllerStatePacket, 5, typeof(CSSkillControllerStatePacket));
         // Mounting and dismounting are two packet classes that happen to share one serializer,
         // so they cannot be told apart by payload shape - only by their own send sites.

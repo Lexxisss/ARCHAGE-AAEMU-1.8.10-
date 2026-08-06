@@ -638,13 +638,26 @@ public class ItemContainer
         int amountToConsume,
         List<ItemTask> taskCollector,
         List<Item> deferredRemovals = null,
-        List<(Item item, int count)> consumptionCollector = null)
+        List<(Item item, int count)> consumptionCollector = null,
+        Item preferredItem = null)
     {
         if (amountToConsume <= 0 || taskCollector == null)
             return false;
 
         if (!GetAllItemsByTemplate(templateId, -1, out var foundItems, out var totalCount) || totalCount < amountToConsume)
             return false;
+
+        if (preferredItem != null)
+        {
+            if (preferredItem.TemplateId != templateId
+                || preferredItem._holdingContainer != this
+                || !foundItems.Contains(preferredItem))
+                return false;
+
+            foundItems = foundItems
+                .OrderByDescending(item => ReferenceEquals(item, preferredItem))
+                .ToList();
+        }
 
         foreach (var item in foundItems)
         {

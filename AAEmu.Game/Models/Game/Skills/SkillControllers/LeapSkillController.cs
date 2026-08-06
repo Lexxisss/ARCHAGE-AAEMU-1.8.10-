@@ -59,7 +59,8 @@ public class LeapSkillController : SkillController
             End();
             return;
         };
-        MoveTowards(_calculatedSpeed * (float)(delta.TotalMilliseconds / 1000f));
+        var elapsedSeconds = (float)(delta.TotalMilliseconds / 1000f);
+        MoveTowards(_calculatedSpeed * elapsedSeconds, elapsedSeconds);
     }
 
     public override void Execute()
@@ -83,12 +84,11 @@ public class LeapSkillController : SkillController
         base.End();
     }
 
-    public void MoveTowards(float distance, byte flags = 4)
+    public void MoveTowards(float distance, float elapsedSeconds)
     {
-        distance *= Owner.MoveSpeedMul; // Apply speed modifier
-        if (distance < 0.01f)
+        distance *= Owner.MoveSpeedMul;
+        if (distance < 0.01f || elapsedSeconds <= 0f)
         {
-            //TODO End Skill Controller
             End();
             return;
         }
@@ -101,68 +101,79 @@ public class LeapSkillController : SkillController
                 || e.Template.Fastened)
             || Owner.IsDead)
         {
-            //Logger.Debug($"{ObjId} @NPC_NAME({TemplateId}); is stuck in place");
+            End();
             return;
         }
 
-        if (Owner.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId((uint)SkillConstants.Shackle)) ||
-            Owner.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId((uint)SkillConstants.Snare)))
+        if (Owner.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId((uint)SkillConstants.Shackle))
+            || Owner.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId((uint)SkillConstants.Snare)))
         {
+            End();
             return;
         }
 
         var oldPosition = Owner.Transform.Local.ClonePosition();
         var targetDist = MathUtil.CalculateDistance(Owner.Transform.Local.Position, _endPosition, true);
-        if (targetDist <= 1f)
+        var completed = targetDist <= distance || targetDist <= 0.05f;
+        var travelDist = completed ? targetDist : distance;
+
+        if (completed)
         {
-            //TODO End Skill Controller
-            End();
-            return;
+            Owner.Transform.Local.SetPosition(_endPosition.X, _endPosition.Y, _endPosition.Z);
+        }
+        else
+        {
+            var (newX, newY, newZ) = World.Transform.PositionAndRotation.AddDistanceToFront(
+                travelDist, targetDist, Owner.Transform.Local.Position, _endPosition);
+            Owner.Transform.Local.SetPosition(newX, newY, newZ);
+
+            // Plot area targets (ObjId == uint.MaxValue) already carry the height offset
+            // encoded by the glider/leap event. Ground-snapping them erases lift and rolls.
+            var preservesPlotHeight = Target.ObjId == uint.MaxValue
+                                      || Owner.Buffs.HasEffectsMatchingCondition(e => e.Template.Gliding);
+            if (!preservesPlotHeight)
+            {
+                var updZ = WorldManager.Instance.GetHeight(Owner.Transform.ZoneId, newX, newY);
+                if (Math.Abs(newZ - updZ) < 1f)
+                    Owner.Transform.Local.SetHeight(updZ);
+            }
         }
 
-        var moveType = (UnitMoveType)MoveType.GetType(MoveTypeEnum.Unit);
-
-        var travelDist = Math.Min(targetDist, distance);
-
-        // TODO: Implement proper use for Transform.World.AddDistanceToFront
-        var (newX, newY, newZ) = World.Transform.PositionAndRotation.AddDistanceToFront(travelDist, targetDist, Owner.Transform.Local.Position, _endPosition);
-        Owner.Transform.Local.SetPosition(newX, newY, newZ);
-
-        // TODO: Implement Transform.World to do proper movement
-        // try to find Z first in GeoData, and then in HeightMaps, if not found, leave Z as it is
-        var updZ = WorldManager.Instance.GetHeight(Owner.Transform.ZoneId, newX, newY);
-        if (Math.Abs(newZ - updZ) < 1f)
-        {
-            Owner.Transform.Local.SetHeight(updZ);
-        }
-
-        var angle = MathUtil.CalculateAngleFrom(Owner.Transform.Local.Position, _endPosition);
-        var (velX, velY) = MathUtil.AddDistanceToFront(4000, 0, 0, (float)angle.DegToRad());
+        var angle = MathUtil.CalculateAngleFrom(oldPosition, _endPosition);
         Owner.Transform.Local.SetRotationDegree(0f, 0f, (float)angle - 90);
         var (rx, ry, rz) = Owner.Transform.Local.ToRollPitchYawSBytesMovement();
+        var displacement = Owner.Transform.Local.Position - oldPosition;
 
+        var moveType = (UnitMoveType)MoveType.GetType(MoveTypeEnum.Unit);
         moveType.X = Owner.Transform.Local.Position.X;
         moveType.Y = Owner.Transform.Local.Position.Y;
         moveType.Z = Owner.Transform.Local.Position.Z;
-        moveType.VelX = (short)velX;
-        moveType.VelY = (short)velY;
-        //moveType.VelZ = (short)velZ;
+        moveType.VelX = completed
+            ? (short)0
+            : (short)Math.Clamp(displacement.X / elapsedSeconds / 60f * 32768f, short.MinValue, short.MaxValue);
+        moveType.VelY = completed
+            ? (short)0
+            : (short)Math.Clamp(displacement.Y / elapsedSeconds / 60f * 32768f, short.MinValue, short.MaxValue);
+        moveType.VelZ = completed
+            ? (short)0
+            : (short)Math.Clamp(displacement.Z / elapsedSeconds / 60f * 32768f, short.MinValue, short.MaxValue);
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = flags;     // gate word for the optional blocks only
-        moveType.Flags = 4;
-
+        moveType.ActorFlags = 0;
+        // As in NPC movement, common Flags bit 0x04 suppresses the client branch
+        // that consumes stance/locomotion state (target 0x391FF970).
+        moveType.Flags = 0;
         moveType.DeltaMovement = new sbyte[3];
-        moveType.DeltaMovement[0] = 0;
-        moveType.DeltaMovement[1] = 127;
-        moveType.DeltaMovement[2] = 0;
-        moveType.Stance = 0;    // 0 Stand
-        moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+        moveType.DeltaMovement[1] = completed ? (sbyte)0 : (sbyte)127;
+        moveType.Stance = 0;
+        moveType.Alertness = 0;
+        moveType.Time = unchecked((uint)Environment.TickCount64);
 
         Owner.CheckMovedPosition(oldPosition);
-        //SetPosition(Position);
         Owner.BroadcastPacket(new SCOneUnitMovementPacket(Owner.ObjId, moveType), false);
+
+        if (completed)
+            End();
     }
 }

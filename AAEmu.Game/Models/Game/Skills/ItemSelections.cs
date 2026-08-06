@@ -1,12 +1,9 @@
-using Newtonsoft.Json;
-
 namespace AAEmu.Game.Models.Game.Skills;
 
 public class ItemSelections
 {
-    [JsonProperty("item")]
-    public uint Item { get; set; }
-
-    [JsonProperty("count")]
+    public uint Id { get; set; }
+    public uint ItemId { get; set; }
     public int Count { get; set; }
+    public int GradeId { get; set; }
 }

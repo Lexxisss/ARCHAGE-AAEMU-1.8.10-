@@ -115,8 +115,10 @@ public class CSStartSkillPacket : GamePacket
                                     || SkillManager.Instance.IsCommonSkill(skillId);
         var isLearnedSkill = Connection.ActiveChar.Skills.Skills.ContainsKey(skillId);
         var isLearnedVariant = skillId > 0 && Connection.ActiveChar.Skills.IsVariantOfSkill(skillId);
+        var isBuffGrantedSkill = SkillManager.Instance.IsSkillGrantedByActiveBuff(
+            skillId, Connection.ActiveChar.Buffs);
 
-        if (!isServerProvidedSkill && !isLearnedSkill && !isLearnedVariant)
+        if (!isServerProvidedSkill && !isLearnedSkill && !isLearnedVariant && !isBuffGrantedSkill)
         {
             Logger.Warn(
                 "StartSkill: character {0} ({1}) attempted to use unauthorized skill {2}",
@@ -219,7 +221,13 @@ public class CSStartSkillPacket : GamePacket
             return;
         }
 
-        ExecuteSkill(template, Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
+        var result = ExecuteSkill(template, Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
+        if (result == SkillResult.Success && SkillManager.Instance.GetSelectiveItems(template.Id) != null)
+        {
+            Connection.ActiveChar.PendingSelectiveItemId = item.Id;
+            Connection.ActiveChar.PendingSelectiveSkillId = template.Id;
+            Connection.ActiveChar.PendingSelectiveItemExpiresAt = DateTime.UtcNow.AddMinutes(2);
+        }
     }
 
     private SkillResult ExecuteSkill(

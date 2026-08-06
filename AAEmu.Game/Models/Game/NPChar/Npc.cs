@@ -995,7 +995,7 @@ public class Npc : Unit
         */
     }
 
-    public void MoveTowards(Vector3 other, float distance, byte flags = 0)
+    public void MoveTowards(Vector3 other, float distance)
     {
         distance *= Ai.Owner.MoveSpeedMul; // Apply speed modifier
         if (distance < 0.01f)
@@ -1067,16 +1067,18 @@ public class Npc : Unit
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = flags;     // gate word for the optional blocks only
-        moveType.Flags = 4;
+        moveType.ActorFlags = 0; // no optional movement blocks follow
+        // Target x2game.dll 0x391FF970 tests common Flags bit 0x04 at
+        // 0x391FF990 and skips its stance/locomotion branch when it is set.
+        moveType.Flags = 0;
 
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 127;
         moveType.DeltaMovement[2] = 0;
         moveType.Stance = 0;    // 0 Stand
-        moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+        moveType.Alertness = CurrentTarget == null ? (sbyte)0 : (sbyte)2;
+        moveType.Time = unchecked((uint)Environment.TickCount64);
 
         CheckMovedPosition(oldPosition);
         //SetPosition(Position);
@@ -1105,16 +1107,16 @@ public class Npc : Unit
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
-        moveType.ActorFlags = flags;     // gate word for the optional blocks only
-        moveType.Flags = 4;
+        moveType.ActorFlags = 0;
+        moveType.Flags = 0;
 
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 0;
         moveType.DeltaMovement[2] = 0;
         moveType.Stance = 0;    // 0 Stand
-        moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+        moveType.Alertness = CurrentTarget == null ? (sbyte)0 : (sbyte)2;
+        moveType.Time = unchecked((uint)Environment.TickCount64);
 
         CheckMovedPosition(oldPosition);
         //SetPosition(Position);
@@ -1133,14 +1135,15 @@ public class Npc : Unit
         moveType.RotationX = 0;
         moveType.RotationY = 0;
         moveType.RotationZ = Transform.Local.ToRollPitchYawSBytesMovement().Item3;
-        moveType.Flags = 4;
+        moveType.ActorFlags = 0;
+        moveType.Flags = 0;
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[0] = 0;
         moveType.DeltaMovement[1] = 0;
         moveType.DeltaMovement[2] = 0;
         moveType.Stance = 0;    // 0 Stand
-        moveType.Alertness = 2; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
+        moveType.Alertness = CurrentTarget == null ? (sbyte)0 : (sbyte)2;
+        moveType.Time = unchecked((uint)Environment.TickCount64);
         BroadcastPacket(new SCOneUnitMovementPacket(ObjId, moveType), false);
     }
 
