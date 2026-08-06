@@ -76,11 +76,16 @@ public class CSBagHandleSelectiveItemsPacket : GamePacket
             return;
         }
 
-        if (character.PendingSelectiveItemId != sourceItem.Id
-            || character.PendingSelectiveSkillId != sourceItem.Template.UseSkillId
-            || character.PendingSelectiveItemExpiresAt < DateTime.UtcNow)
+        // The picker is the client's own window: it opens it from item data and sends only this
+        // confirmation, so requiring the box to have been "armed" by a preceding skill cast
+        // refused every real attempt. What matters is that this box is a selective one and that
+        // the exchange below is atomic. A pending arm for a different box still loses, since that
+        // is a confirmation answering the wrong window.
+        if (character.PendingSelectiveItemId != 0
+            && character.PendingSelectiveItemId != sourceItem.Id
+            && character.PendingSelectiveItemExpiresAt >= DateTime.UtcNow)
         {
-            Reject(character, slotType, slot, tryCount, selectedCount, "selection_not_armed");
+            Reject(character, slotType, slot, tryCount, selectedCount, "selection_armed_for_another_item");
             return;
         }
 
