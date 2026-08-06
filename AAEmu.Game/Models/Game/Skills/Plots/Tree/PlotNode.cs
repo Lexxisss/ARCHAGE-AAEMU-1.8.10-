@@ -120,7 +120,9 @@ public class PlotNode
         {
             var endpoint = packetTarget.Transform.World.Position;
             var lineOrigin = packetSource.Transform.World.Position;
-            Logger.Debug(
+            // Every scripted world plot writes one of these on every tick, which buries everything
+            // else in the log. Kept, but only for someone who asks for it by turning on Trace.
+            Logger.Trace(
                 "Plot POSITION: skill={0}, event={1}, endpoint=({2:F2},{3:F2},{4:F2}), line=({5:F2},{6:F2},{7:F2})",
                 skill.Template.Id,
                 Event.Id,
