@@ -142,6 +142,16 @@ public class DamageEffect : EffectTemplate
             case DamageType.Siege:
                 hitType = SkillHitType.RangedHit;//No siege type?
                 break;
+            // Damage dealt by healing power - the target database has 118 of these, Holy Bolt
+            // among them. It is a spell as far as landing goes; the client's hit types have no
+            // heal-flavoured member, and leaving it Invalid meant sending a damage packet the
+            // client had no reason to act on.
+            case DamageType.Heal:
+                if (Rand.Next(0f, 100f) < ((Unit)caster).SpellCritical - flexibilityRateMod)
+                    hitType = SkillHitType.SpellCritical;
+                else
+                    hitType = SkillHitType.SpellHit;
+                break;
             default:
                 hitType = SkillHitType.Invalid;
                 break;
@@ -176,6 +186,12 @@ public class DamageEffect : EffectTemplate
             case DamageType.Ranged:
                 dpsInc = ((Unit)caster).RangedDpsInc;
                 break;
+            // Healing power is what this damage is scaled by, the way magic damage is scaled by
+            // spell power. Without it the whole stat contribution was zero and only the level
+            // term survived.
+            case DamageType.Heal:
+                dpsInc = ((Unit)caster).HDps + ((Unit)caster).HDpsInc;
+                break;
         }
 
         max += dpsInc * 0.001f * DpsIncMultiplier;
@@ -205,14 +221,20 @@ public class DamageEffect : EffectTemplate
             min = variableDamage + levelMin;
             max = variableDamage + levelMax;
         }
+        else if (weapon != null)
+        {
+            var scaledDamage = holdable.HoldableTemplate.DamageScale * variableDamage * 0.01f;
+            min = levelMin + (variableDamage - scaledDamage);
+            max = levelMax + (variableDamage + scaledDamage);
+        }
         else
         {
-            if (weapon != null)
-            {
-                var scaledDamage = holdable.HoldableTemplate.DamageScale * variableDamage * 0.01f;
-                min = levelMin + (variableDamage - scaledDamage);
-                max = levelMax + (variableDamage + scaledDamage);
-            }
+            // An empty weapon slot used to leave both bounds at zero, throwing away the level
+            // damage the data had just asked for. The slot decides how the weapon spreads the
+            // damage, not whether the skill does any: with nothing held there is simply no
+            // spread.
+            min = variableDamage + levelMin;
+            max = variableDamage + levelMax;
         }
 
         min *= Multiplier;
