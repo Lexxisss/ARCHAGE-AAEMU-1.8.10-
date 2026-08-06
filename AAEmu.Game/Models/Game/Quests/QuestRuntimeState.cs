@@ -831,7 +831,7 @@ public partial class Quest
 
         if (allowEarly)
             return GetCompletionPercent(component) >= 50;
-        return objectives.All(x => GetActProgress(x.Id) >= GetRequiredProgress(x));
+        return objectives.All(x => GetActProgress(x) >= GetRequiredProgress(x));
     }
 
     private int CalculateScore(QuestComponent component)
@@ -840,7 +840,7 @@ public partial class Quest
         foreach (var act in component.Acts.OfType<QuestAct>().Where(IsObjectiveAct))
         {
             var weight = Math.Max(1, act.Definition?.GetInt32("count", 1) ?? 1);
-            score += (long)GetActProgress(act.Id) * weight;
+            score += (long)GetActProgress(act) * weight;
         }
         return (int)Math.Min(int.MaxValue, score);
     }
@@ -866,7 +866,7 @@ public partial class Quest
         foreach (var act in objectives)
         {
             var required = Math.Max(1, GetRequiredProgress(act));
-            done += Math.Min(100, GetActProgress(act.Id) * 100 / required);
+            done += Math.Min(100, GetActProgress(act) * 100 / required);
         }
         return (int)Math.Clamp(done / objectives.Length, 0, 150);
     }
@@ -1292,11 +1292,52 @@ public partial class Quest
         for (var i = 0; i < acts.Length; i++)
         {
             var slot = Math.Min(i, ClientObjectiveCount - 1);
-            Objectives[slot] = checked(Objectives[slot] + GetActProgress(acts[i].Id));
+            Objectives[slot] = checked(Objectives[slot] + GetActProgress(acts[i]));
         }
     }
 
     private int GetActProgress(uint actId) => _runtimeActProgress.TryGetValue(actId, out var value) ? value : 0;
+
+    /// <summary>
+    /// What an objective has to show for itself right now.
+    /// </summary>
+    /// <remarks>
+    /// A gather objective asks what is in the bag, not what passed through it. Counting only
+    /// items picked up after the quest was accepted left a player who already carried the thing
+    /// looking at an objective that would never fill, and disagreeing with the client, which
+    /// counts its own inventory. The <c>check_exist</c> flag is not the switch for this: the
+    /// target data sets it on two of its 2695 gather acts.
+    /// </remarks>
+    private int GetActProgress(QuestAct act)
+    {
+        if (act == null)
+            return 0;
+        return TryGetInventoryProgress(act, out var owned) ? owned : GetActProgress(act.Id);
+    }
+
+    private bool TryGetInventoryProgress(QuestAct act, out int owned)
+    {
+        owned = 0;
+        var d = act.Definition;
+        if (d == null)
+            return false;
+
+        switch (act.DetailType)
+        {
+            case "QuestActObjItemGather":
+                owned = GetInventoryCount(
+                    d.GetUInt32("item_id"),
+                    d.GetBoolean("use_grade") ? d.GetInt32("item_grade_id") : -1);
+                return true;
+            case "QuestActObjItemGroupGather":
+                owned = QuestManager.Instance
+                    .GetGroupItems(d.GetUInt32("item_group_id"))
+                    .Sum(x => GetInventoryCount(x, -1));
+                return true;
+            default:
+                return false;
+        }
+    }
 
     private static bool IsObjectiveAct(QuestAct act) => act.DetailType.StartsWith("QuestActObj", StringComparison.Ordinal) ||
                                                         act.DetailType == "QuestActEtcItemObtain";
