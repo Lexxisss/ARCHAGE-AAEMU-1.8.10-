@@ -108,8 +108,13 @@ public class PlotTargetInfo
         posUnit.ObjId = uint.MaxValue;
         posUnit.Region = anchor.Region;
         posUnit.Transform = anchor.Transform.CloneDetached(posUnit);
+        // The angle is used as the data states it. Negating it mirrored every plot that aims at an
+        // offset: the glider's somersaults are events 4365 and 4490 with angles +60 and -70, and on
+        // the live client the left roll threw the character right and the right roll threw it left.
+        // Nothing consumed this direction before the client began building the skill controller
+        // from the event, which is why the inverted sign went unnoticed.
         var degrees = (float)(args.Angle);
-        posUnit.Transform.Local.Rotate(0, 0, degrees.DegToRad() * -1f);
+        posUnit.Transform.Local.Rotate(0, 0, degrees.DegToRad());
         // posUnit.Transform.Local.Rotate(Quaternion.CreateFromYawPitchRoll(((float)args.Angle).DegToRad() * -1f, 0f, 0f));
         if (args.Distance != 0)
         {

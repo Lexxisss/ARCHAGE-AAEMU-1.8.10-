@@ -19,7 +19,7 @@ public class PlotEventEffect
     public PlotEffectSource SourceId { get; set; }
     public PlotEffectTarget TargetId { get; set; }
 
-    public void ApplyEffect(PlotState state, PlotTargetInfo targetInfo, PlotEventTemplate evt, ref byte flag, bool channeled = false, CompressedGamePackets gamePackets = null)
+    public void ApplyEffect(PlotState state, PlotTargetInfo targetInfo, PlotEventTemplate evt, bool channeled = false, CompressedGamePackets gamePackets = null)
     {
         var template = SkillManager.Instance.GetEffectTemplate(ActualId, ActualType);
         if (template == null)
@@ -34,8 +34,6 @@ public class PlotEventEffect
         }
 
         var buffEffect = template as BuffEffect;
-        if (buffEffect != null)
-            flag = 6; //idk what this does?
 
         BaseUnit source;
         switch (SourceId)

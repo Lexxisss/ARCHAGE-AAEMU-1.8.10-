@@ -14,6 +14,7 @@ public class SCPlotEndedPacket : GamePacket
 
     public override PacketStream Write(PacketStream stream)
     {
+        // Target x2game.dll 0x399DD570: SCPlotEnded 0x0331 contains only tl:u16.
         stream.Write(_tl);
 
         return stream;

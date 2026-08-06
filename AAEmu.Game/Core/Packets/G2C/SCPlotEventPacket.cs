@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using AAEmu.Commons.Network;
@@ -8,21 +9,27 @@ namespace AAEmu.Game.Core.Packets.G2C;
 
 public class SCPlotEventPacket : GamePacket
 {
+    private const int OptionalValueCount = 13;
+
     private readonly ushort _tl;
     private readonly uint _eventId;
     private readonly uint _skillId;
     private readonly PlotObject _caster;
     private readonly PlotObject _target;
-    private readonly uint _objId;
-    private readonly ushort _castingTime;
-    private readonly byte _flag;
     private readonly ulong _itemId;
+    private readonly uint _castingObjId;
+    private readonly uint _castingTimeMs;
+    private readonly uint _channelingObjId;
+    private readonly uint _channelingTimeMs;
     private readonly IReadOnlyList<uint> _targetUnitIds;
+    private readonly PlotEventFlags _flags;
+    private readonly IReadOnlyList<int> _values;
     private readonly byte _inputDirection;
 
     public SCPlotEventPacket(ushort tl, uint eventId, uint skillId, PlotObject caster, PlotObject target,
-        uint objId, ushort castingTime, byte flag, ulong itemId = 0L,
-        IReadOnlyList<uint> targetUnitIds = null, byte inputDirection = 0)
+        uint castingObjId, uint castingTimeMs, uint channelingObjId, uint channelingTimeMs,
+        PlotEventFlags flags, ulong itemId = 0L, IReadOnlyList<uint> targetUnitIds = null,
+        IReadOnlyList<int> values = null, byte inputDirection = 0)
         : base(SCOffsets.SCPlotEventPacket, 5)
     {
         _tl = tl;
@@ -30,43 +37,58 @@ public class SCPlotEventPacket : GamePacket
         _skillId = skillId;
         _caster = caster;
         _target = target;
-        _objId = objId;
-        _castingTime = castingTime;
-        _flag = flag;
         _itemId = itemId;
+        _castingObjId = castingObjId;
+        _castingTimeMs = castingTimeMs;
+        _channelingObjId = channelingObjId;
+        _channelingTimeMs = channelingTimeMs;
         _targetUnitIds = targetUnitIds ?? [];
+        _flags = flags;
+        _values = values ?? [];
         _inputDirection = inputDirection;
     }
 
     public override PacketStream Write(PacketStream stream)
     {
-        stream.Write(_tl);      // tl
-        stream.Write(_eventId); // eventId
-        stream.Write(_skillId); // skillId
-        stream.Write(_caster);  // PlotObj
-                                // type(b) Unit | Position
-                                // casterId(bc) | XYZ
-        stream.Write(_target);  // PlotObj
-                                // type(b) Unit | Position
-                                // targetId(bc) | XYZ
-        stream.Write(_itemId);  // itemObjId
-        stream.WriteBc(_objId); // обычно 0, но иногда нужно вставлять casterId(bc)
-        stream.Write(_castingTime); // msec, castingTime / 10
-        stream.WriteBc(0);      // objId
-        stream.Write((short)0); // msec
-        var targetUnitCount = (byte)System.Math.Min(_targetUnitIds.Count, byte.MaxValue);
-        stream.Write(targetUnitCount); // targetUnitCount
+        // Full 1.8.1.0 layout: target x2game.dll 0x399EB9A0.
+        stream.Write(_tl);      // tl:u16
+        stream.Write(_eventId); // eventId:u32
+        stream.Write(_skillId); // skillId:u32
+        stream.Write(_caster);  // PlotObject
+        stream.Write(_target);  // PlotObject
+        stream.Write(_itemId);  // itemObjId:u64
+
+        // The client keeps casting and channeling as two independent references.
+        // Both durations are u32 values in 10 ms units. Target x2game.dll
+        // 0x399EBAAA/0x399EBB07 call the same serializer at 0x399CD9B0.
+        stream.WriteBc(_castingObjId);
+        stream.Write(EncodeMilliseconds(_castingTimeMs));
+        stream.WriteBc(_channelingObjId);
+        stream.Write(EncodeMilliseconds(_channelingTimeMs));
+
+        var targetUnitCount = (byte)Math.Min(_targetUnitIds.Count, byte.MaxValue);
+        stream.Write(targetUnitCount);
         for (var i = 0; i < targetUnitCount; i++)
             stream.WriteBc(_targetUnitIds[i]);
-        stream.Write(_flag);
-        if (((_flag >> 3) & 1) == 1)
+
+        stream.Write((byte)_flags);
+        if ((_flags & PlotEventFlags.HasValues) != 0)
         {
-            for (var i = 0; i < 13; i++) // flag = 8
-                stream.Write(0); // v
+            // Target client always reads exactly thirteen i32 runtime plot values when bit 3 is set.
+            // They are not SkillControllerTemplate.Value1..Value13 and are not required by Leap.
+            for (var i = 0; i < OptionalValueCount; i++)
+                stream.Write(i < _values.Count ? _values[i] : 0);
         }
 
-        // Target x2game.dll serializes inputDirection after flag/optional values.
         stream.Write(_inputDirection);
         return stream;
+    }
+
+    private static uint EncodeMilliseconds(uint milliseconds)
+    {
+        // x2game.dll 0x399CD9B0 serializes a dword and stores time in 10 ms wire units.
+        // Using u16 shifted channelingObjId, targetUnitCount, flags and inputDirection by
+        // two bytes for each duration, so the client never reached ConditionOk/effect dispatch.
+        return milliseconds / 10u;
     }
 }
