@@ -1,4 +1,6 @@
 ﻿using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
 
@@ -12,19 +14,49 @@ public class CSInstanceLoadedPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        // Empty struct
-        // TODO Debug
+        // Target 1.8.1 packet is empty. The vtable serializer at x2game.dll
+        // 0x39687BF0 returns immediately. Any remaining bytes are decrypted AES
+        // block padding, not packet fields.
+        if (stream.LeftBytes > 0)
+            stream.ReadBytes(stream.LeftBytes);
+    }
 
-        Connection.SendPacket(new SCUnitStatePacket(Connection.ActiveChar));
-        // The client keeps its own cooldown maps and only draws a hotbar sweep for what is
-        // in them. Without this snapshot it never learns about server-side cooldowns, so it
-        // kept re-sending casts the server was rejecting as CooldownTime. Sent even when the
-        // lists are empty, which is the authoritative "nothing is on cooldown" answer.
-        Connection.SendPacket(SCCooldownsPacket.ForCharacter(Connection.ActiveChar));
-        Connection.SendPacket(new SCDetailedTimeOfDayPacket(12f));
+    public override void Execute()
+    {
+        var character = Connection.ActiveChar;
+        if (character == null)
+        {
+            Logger.Warn("InstanceLoaded received without an active character.");
+            return;
+        }
 
-        Connection.ActiveChar.DisabledSetPosition = false;
+        // The destination transform is prepared when SCLoadInstance is sent, but
+        // visibility is deliberately detached until this acknowledgement. Declare
+        // the local unit first; only then publish the destination region around it.
+        Connection.SendPacket(new SCUnitStatePacket(character));
 
-        Logger.Debug("InstanceLoaded.");
+        character.Transform.ResetFinalizeTransform();
+        WorldManager.Instance.AddVisibleObject(character);
+
+        // Region.AddToCharacters intentionally suppresses legacy doodad creation
+        // while WorldEntryReady is false. InstanceLoaded is the instance equivalent
+        // of the initial CSWorldEntryReady signal, so publish the verified 1.8.1
+        // doodad records after region membership has been rebuilt.
+        var doodadCount = WorldManager.Instance.PublishProtocol1810CurrentRegionDoodads(character);
+        Connection.WorldEntryReady = true;
+
+        Connection.SendPacket(SCCooldownsPacket.ForCharacter(character));
+        Connection.SendPacket(new SCDetailedTimeOfDayPacket(TimeManager.Instance.GetTime()));
+
+        character.DisabledSetPosition = false;
+        character.Quests?.RefreshQuestNotifier();
+
+        Logger.Info(
+            "InstanceLoaded completed: characterId={0}, worldId={1}, instanceId={2}, zoneId={3}, doodads={4}",
+            character.Id,
+            character.Transform.WorldId,
+            character.Transform.InstanceId,
+            character.Transform.ZoneId,
+            doodadCount);
     }
 }

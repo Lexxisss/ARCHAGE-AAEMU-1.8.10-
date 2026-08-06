@@ -99,7 +99,7 @@ public class Dungeon
 
             _zoneInstanceId = new ZoneInstanceId(zoneKeys[0], _world.Id);
             // выводится окошко о том, что создается данжон
-            character.SendPacket(new SCProcessingInstancePacket((int)_zoneInstanceId.ZoneId));
+            character.SendPacket(new SCProcessingInstancePacket(_zoneInstanceId.ZoneId, ProcessingInstanceState.Waiting));
 
             // let's spawn Npc, Doodad, Slave, Gimmick
             Logger.Info($"[Dungeon] spawning Npc, Doodad, Slave, Gimmick...");
@@ -151,7 +151,7 @@ public class Dungeon
             _world = world; // не делаем копию инстанса
             _zoneInstanceId = new ZoneInstanceId(zoneKeys[0], _world.Id);
             // выводится окошко о том, что создается данжон
-            character.SendPacket(new SCProcessingInstancePacket((int)_zoneInstanceId.ZoneId));
+            character.SendPacket(new SCProcessingInstancePacket(_zoneInstanceId.ZoneId, ProcessingInstanceState.Waiting));
 
             RegisterIndunEvents();
         }
@@ -284,6 +284,26 @@ public class Dungeon
 
         }
 
+    private static void BeginInstanceWorldTransition(Character character)
+    {
+        if (character == null)
+            return;
+
+        character.DisabledSetPosition = true;
+
+        // The target client sends the empty CSInstanceLoaded 0x125 only after its
+        // cell stream is complete. Until then the character must not remain in the
+        // old world's region or receive legacy doodad visibility from the new one.
+        if (character.Connection != null)
+        {
+            character.Connection.WorldEntryReady = false;
+            character.Connection.Protocol1810VisibleNpcObjIds.Clear();
+            character.Connection.Protocol1810NpcVisibilityAnchorValid = false;
+        }
+
+        WorldManager.RemoveVisibleObject(character);
+    }
+
     /// <summary>
     /// Moves character to instanced dungeon world
     /// </summary>
@@ -301,7 +321,7 @@ public class Dungeon
             }
             if (_world.SpawnPosition != null)
             {
-                character.DisabledSetPosition = true;
+                BeginInstanceWorldTransition(character);
                 //character.MainWorldPosition = character.Transform.CloneDetached(character); // сохраним координаты для возврата в основной мир
                 character.SendPacket(
                     new SCLoadInstancePacket(
@@ -342,7 +362,7 @@ public class Dungeon
             }
             if (_world.SpawnPosition != null)
             {
-                character.DisabledSetPosition = true;
+                BeginInstanceWorldTransition(character);
                 //character.MainWorldPosition = character.Transform.CloneDetached(character); // сохраним координаты для возврата в основной мир
                 character.SendPacket(
                     new SCLoadInstancePacket(
@@ -391,7 +411,7 @@ public class Dungeon
                 return;
             }
 
-            character.DisabledSetPosition = true;
+            BeginInstanceWorldTransition(character);
             character.SendPacket(
                 new SCLoadInstancePacket(
                     character.MainWorldPosition.WorldId,
@@ -406,6 +426,7 @@ public class Dungeon
             );
             character.InstanceId = character.MainWorldPosition.WorldId;
             character.Transform = character.MainWorldPosition.Clone();
+            character.Transform.ResetFinalizeTransform();
         }
     internal void LeaveSysInstance(Character character)
     {
@@ -421,7 +442,7 @@ public class Dungeon
                 return;
             }
 
-            character.DisabledSetPosition = true;
+            BeginInstanceWorldTransition(character);
             character.SendPacket(
                 new SCLoadInstancePacket(
                     character.MainWorldPosition.WorldId,
@@ -436,6 +457,7 @@ public class Dungeon
             );
             character.InstanceId = character.MainWorldPosition.WorldId;
             character.Transform = character.MainWorldPosition.Clone();
+            character.Transform.ResetFinalizeTransform();
         }
 
     private void OnTeamJoin(object sender, OnTeamJoinArgs args)

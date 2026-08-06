@@ -312,7 +312,9 @@ public static class CSOffsets
     public const ushort CSLeaveTrialAudiencePacket = 0x14F;
     public const ushort CSUnmountMatePacket = 0x003;
     public const ushort CSUnbondPacket = 0x14F;
-    public const ushort CSInstanceLoadedPacket = 0x133;
+    // Target 1.8.1 registration: x2game.dll 0x3960A319 loads the packet vtable and
+    // 0x3960A325 binds it to 0x125. Its serializer is the empty 0x39687BF0.
+    public const ushort CSInstanceLoadedPacket = 0x125;
     public const ushort CSApplyToInstantGamePacket = 0x02A;
     public const ushort CSCancelInstantGamePacket = 0x061;
     public const ushort CSJoinInstantGamePacket = 0x05C;
@@ -344,7 +346,9 @@ public static class CSOffsets
     public const ushort CSDoodadQuestNotiPacket = 0x177;
     public const ushort CSCreateDoodadPacket = 0x10B;
     public const ushort CSNaviTeleportPacket = 0x0BE;
-    public const ushort CSNaviOpenPortalPacket = 0x149;
+    // Signed 1.8.1 RTTI registration: x2game-dev.dll 0x39870629/0x39870635.
+    // 0x133 belongs to CSNaviOpenPortalPacket, not CSInstanceLoadedPacket.
+    public const ushort CSNaviOpenPortalPacket = 0x133;
     public const ushort CSNaviOpenBountyPacket = 0x097;
     public const ushort CSSetLogicDoodadPacket = 0x0D9; // was 0x1EB
     public const ushort CSCleanupLogicLinkPacket = 0x04B;
