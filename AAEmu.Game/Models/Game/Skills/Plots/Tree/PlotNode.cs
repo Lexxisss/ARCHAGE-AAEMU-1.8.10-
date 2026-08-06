@@ -121,18 +121,30 @@ public class PlotNode
         {
             var endpoint = packetTarget.Transform.World.Position;
             var lineOrigin = packetSource.Transform.World.Position;
+
             // Every scripted world plot writes one of these on every tick, which buries everything
-            // else in the log. Kept, but only for someone who asks for it by turning on Trace.
-            Logger.Trace(
-                "Plot POSITION: skill={0}, event={1}, endpoint=({2:F2},{3:F2},{4:F2}), line=({5:F2},{6:F2},{7:F2})",
-                skill.Template.Id,
-                Event.Id,
-                endpoint.X,
-                endpoint.Y,
-                endpoint.Z,
-                lineOrigin.X,
-                lineOrigin.Y,
-                lineOrigin.Z);
+            // else in the log, so the general case stays on Trace. An event that drives a skill
+            // controller is another matter: that is a manoeuvre the player is watching go the wrong
+            // way, and the bearing the server computed is the only way to tell how far off it is.
+            var dx = endpoint.X - lineOrigin.X;
+            var dy = endpoint.Y - lineOrigin.Y;
+            var bearing = MathF.Atan2(dy, dx) * 180f / MathF.PI;
+            var facing = packetSource.Transform.World.Rotation.Z * 180f / MathF.PI;
+            const string format =
+                "Plot POSITION: skill={0}, event={1}, endpoint=({2:F2},{3:F2},{4:F2}), " +
+                "line=({5:F2},{6:F2},{7:F2}), delta=({8:F2},{9:F2},{10:F2}), " +
+                "bearing={11:F1}deg, casterFacing={12:F1}deg";
+
+            if (Event.HasSpecialEffects())
+                Logger.Debug(format, skill.Template.Id, Event.Id,
+                    endpoint.X, endpoint.Y, endpoint.Z,
+                    lineOrigin.X, lineOrigin.Y, lineOrigin.Z,
+                    dx, dy, endpoint.Z - lineOrigin.Z, bearing, facing);
+            else
+                Logger.Trace(format, skill.Template.Id, Event.Id,
+                    endpoint.X, endpoint.Y, endpoint.Z,
+                    lineOrigin.X, lineOrigin.Y, lineOrigin.Z,
+                    dx, dy, endpoint.Z - lineOrigin.Z, bearing, facing);
         }
 
         // targetUnitCount is a list of real unit object ids. Location pseudo-targets
