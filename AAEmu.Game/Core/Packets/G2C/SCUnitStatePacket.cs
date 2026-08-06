@@ -75,6 +75,50 @@ public class SCUnitStatePacket : GamePacket
         }
     }
 
+    /// <summary>
+    /// Returns the identifiers carried by the SCUnitState passive-buff list.
+    /// These are passive_buffs.id values, not the resolved buffs.id values.
+    /// </summary>
+    internal static IReadOnlyList<uint> GetPassiveBuffTypeIds(Unit unit)
+    {
+        return unit switch
+        {
+            Character character => character.Skills.PassiveBuffs.Values
+                .Select(buff => buff.Id)
+                .ToList(),
+            Npc npc => npc.Template.PassiveBuffs
+                .Select(buff => buff.PassiveBuffId)
+                .ToList(),
+            Slave slave when slave.Template != null => slave.Template.PassiveBuffs
+                .Select(buff => buff.PassiveBuffId)
+                .ToList(),
+            _ => Array.Empty<uint>()
+        };
+    }
+
+    /// <summary>Writes the target 1.8.1 PISC list in groups of at most four values.</summary>
+    internal static void WritePiscValues(PacketStream stream, IReadOnlyList<uint> values)
+    {
+        for (var index = 0; index < values.Count; index += 4)
+        {
+            switch (Math.Min(4, values.Count - index))
+            {
+                case 1:
+                    stream.WritePisc(values[index]);
+                    break;
+                case 2:
+                    stream.WritePisc(values[index], values[index + 1]);
+                    break;
+                case 3:
+                    stream.WritePisc(values[index], values[index + 1], values[index + 2]);
+                    break;
+                case 4:
+                    stream.WritePisc(values[index], values[index + 1], values[index + 2], values[index + 3]);
+                    break;
+            }
+        }
+    }
+
     public override PacketStream Write(PacketStream stream)
     {
         var bodyStart = stream.Count;
@@ -341,9 +385,10 @@ public class SCUnitStatePacket : GamePacket
                     if (skillList.Count > 0)
                         Logger.Trace($"Warning! character.learnedSkillCount = {character.Skills.Skills.Count}");
 
-                    stream.Write((byte)character.Skills.PassiveBuffs.Count); // passiveBuffCount
-                    if (character.Skills.PassiveBuffs.Count > 0)
-                        Logger.Trace($"Warning! character.passiveBuffCount = {character.Skills.PassiveBuffs.Count}");
+                    var passiveBuffTypeIds = GetPassiveBuffTypeIds(character);
+                    stream.Write((byte)passiveBuffTypeIds.Count); // passiveBuffCount
+                    if (passiveBuffTypeIds.Count > 0)
+                        Logger.Trace($"Warning! character.passiveBuffCount = {passiveBuffTypeIds.Count}");
 
                     stream.Write(character.HighAbilityRsc);                  // highAbilityRsc
 
@@ -393,52 +438,7 @@ public class SCUnitStatePacket : GamePacket
                         } while (hcount > 0);
                     }
 
-                    var buffList = character.Skills.PassiveBuffs.Values.ToList();
-                    if (buffList.Count > 0)
-                    {
-                        hcount = buffList.Count;
-                        var index = 0;
-                        do
-                        {
-                            var pcount = 4;
-                            if (hcount <= 4)
-                                pcount = hcount;
-                            switch (pcount)
-                            {
-                                case 1:
-                                    {
-                                        stream.WritePisc(buffList[index].Template.BuffId);
-                                        index += 1;
-                                        break;
-                                    }
-                                case 2:
-                                    {
-                                        stream.WritePisc(buffList[index].Template.BuffId,
-                                            buffList[index + 1].Template.BuffId);
-                                        index += 2;
-                                        break;
-                                    }
-                                case 3:
-                                    {
-                                        stream.WritePisc(buffList[index].Template.BuffId,
-                                            buffList[index + 1].Template.BuffId,
-                                            buffList[index + 2].Template.BuffId);
-                                        index += 3;
-                                        break;
-                                    }
-                                case 4:
-                                    {
-                                        stream.WritePisc(buffList[index].Template.BuffId,
-                                            buffList[index + 1].Template.BuffId,
-                                            buffList[index + 2].Template.BuffId,
-                                            buffList[index + 3].Template.BuffId);
-                                        index += 4;
-                                        break;
-                                    }
-                            }
-                            hcount -= pcount;
-                        } while (hcount > 0);
-                    }
+                    WritePiscValues(stream, passiveBuffTypeIds);
                     break;
                 }
             case Npc:
@@ -462,8 +462,9 @@ public class SCUnitStatePacket : GamePacket
                     foreach (var skillList in npc.Template.Skills.Values)
                         skills.AddRange(skillList);
 
+                    var passiveBuffTypeIds = GetPassiveBuffTypeIds(npc);
                     stream.Write((byte)skills.Count);
-                    stream.Write((byte)npc.Template.PassiveBuffs.Count);
+                    stream.Write((byte)passiveBuffTypeIds.Count);
                     stream.Write(npc.HighAbilityRsc);
                     stream.Write(0u);    // appellationStampId
                     stream.Write(0u);    // vehicleDyeing
@@ -490,31 +491,23 @@ public class SCUnitStatePacket : GamePacket
                         }
                     }
 
-                    var passiveBuffs = npc.Template.PassiveBuffs;
-                    for (var index = 0; index < passiveBuffs.Count; index += 4)
-                    {
-                        switch (Math.Min(4, passiveBuffs.Count - index))
-                        {
-                            case 1:
-                                stream.WritePisc(passiveBuffs[index].PassiveBuffId);
-                                break;
-                            case 2:
-                                stream.WritePisc(passiveBuffs[index].PassiveBuffId,
-                                    passiveBuffs[index + 1].PassiveBuffId);
-                                break;
-                            case 3:
-                                stream.WritePisc(passiveBuffs[index].PassiveBuffId,
-                                    passiveBuffs[index + 1].PassiveBuffId,
-                                    passiveBuffs[index + 2].PassiveBuffId);
-                                break;
-                            case 4:
-                                stream.WritePisc(passiveBuffs[index].PassiveBuffId,
-                                    passiveBuffs[index + 1].PassiveBuffId,
-                                    passiveBuffs[index + 2].PassiveBuffId,
-                                    passiveBuffs[index + 3].PassiveBuffId);
-                                break;
-                        }
-                    }
+                    WritePiscValues(stream, passiveBuffTypeIds);
+                    break;
+                }
+            case Slave slave:
+                {
+                    // Target x2game.dll SCUnitState reader 0x39A06DBF reads passiveBuffCount
+                    // unconditionally for every BaseUnitType. 0x39A07026-0x39A072BE then reads
+                    // the PISC values. The handler passes each raw value to the passive_buffs
+                    // type lookup at 0x393B5FA2-0x393B5FD3, so send passive_buffs.id here.
+                    var passiveBuffTypeIds = GetPassiveBuffTypeIds(slave);
+                    stream.Write((byte)0); // learnedSkillCount
+                    stream.Write((byte)passiveBuffTypeIds.Count); // passiveBuffCount
+                    stream.Write(slave.HighAbilityRsc);
+                    stream.Write(0u);      // appellationStampId
+                    stream.Write(0u);      // vehicleDyeing
+                    stream.Write(false);   // isTempFaction
+                    WritePiscValues(stream, passiveBuffTypeIds);
                     break;
                 }
             default:
