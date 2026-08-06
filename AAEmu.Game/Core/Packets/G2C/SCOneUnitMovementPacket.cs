@@ -6,6 +6,7 @@ using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.Units.Movements;
+using AAEmu.Game.Utils.Logging;
 
 namespace AAEmu.Game.Core.Packets.G2C;
 
@@ -39,9 +40,17 @@ public class SCOneUnitMovementPacket : GamePacket
 
     public override PacketStream Write(PacketStream stream)
     {
+        var bodyStart = stream.Count;
+
         stream.WriteBc(_id);
         stream.Write((byte)_type.Type);
         stream.Write(_type);
+
+        // Every movement the server sends passes through here, whoever moved: NPC, patrol route,
+        // character, mate or slave. One place to record them all, and it costs a bool when off.
+        if (MovementDebugLogger.Enabled)
+            MovementDebugLogger.UnitMovement(_id, _type, stream.Buffer[bodyStart..stream.Count]);
+
         return stream;
     }
     public override string Verbose()
