@@ -27,6 +27,34 @@ internal static class SkillSQLiteCatalog
 
     private sealed record ColumnInfo(string Name, int PrimaryKeyOrder);
 
+    /// <summary>
+    /// Tables taken from the client's own database alone, without merging the fallback in.
+    /// </summary>
+    /// <remarks>
+    /// Two reasons, and each is enough on its own.
+    ///
+    /// Cost: merging weighs a row of one side against every row of the other, because the
+    /// anti-join that keeps fallback-only rows is a correlated scan and neither attached file can
+    /// be indexed, being read-only. On the first five that is tens of millions of comparisons
+    /// apiece - the fresh client dump spent six minutes on the skills alone and then sat in the
+    /// effects.
+    ///
+    /// Truth: a vendor is assembled by joining all three merchant tables, and a shop whose rows
+    /// come half from one database and half from another sells what neither of them describes.
+    /// The client's data is the answer for all of these, so there is nothing to fall back to.
+    /// </remarks>
+    private static readonly HashSet<string> TargetOnlyTables = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "skills",
+        "buffs",
+        "effects",
+        "buff_effects",
+        "skill_effects",
+        "merchants",
+        "merchant_packs",
+        "merchant_goods"
+    };
+
     public static SqliteConnection Create(string targetPath, string fallbackPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(targetPath);
@@ -89,7 +117,7 @@ internal static class SkillSQLiteCatalog
             var hasTarget = targetTables.Contains(table);
             var hasFallback = fallbackTables.Contains(table);
 
-            if (hasTarget && hasFallback)
+            if (hasTarget && !TargetOnlyTables.Contains(table) && hasFallback)
             {
                 CreateMergedView(connection, table);
                 mergedCount++;

@@ -613,7 +613,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             Logger.Info("Loaded {0} skills", _skills.Count);
 
@@ -644,7 +644,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -669,7 +669,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             Logger.Info("Loading skill effects/buffs...");
 
@@ -857,7 +857,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
             try {
             using (var command = connection.CreateCommand())
             {
@@ -879,7 +879,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
             try {
             using (var command = connection.CreateCommand())
             {
@@ -906,7 +906,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
             try {
             using (var command = connection.CreateCommand())
             {
@@ -934,7 +934,7 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
             try
             {
                 using (var command = connection.CreateCommand())
@@ -1045,7 +1045,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1068,7 +1068,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1086,7 +1086,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1113,7 +1113,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1131,7 +1131,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             using (var command = connection.CreateCommand())
             {
@@ -1164,7 +1164,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1186,7 +1186,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1204,7 +1204,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1268,7 +1268,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1288,7 +1288,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1306,7 +1306,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1328,7 +1328,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1363,7 +1363,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1381,7 +1381,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1410,7 +1410,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1429,7 +1429,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1450,7 +1450,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1473,7 +1473,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1490,7 +1490,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             using (var command = connection.CreateCommand())
             {
@@ -1526,7 +1526,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1546,7 +1546,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1564,7 +1564,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1585,7 +1585,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1604,7 +1604,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1623,7 +1623,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1640,7 +1640,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1658,7 +1658,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1683,7 +1683,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1703,7 +1703,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1735,7 +1735,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             using (var command = connection.CreateCommand())
             {
@@ -1790,7 +1790,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1822,7 +1822,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1844,7 +1844,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1862,7 +1862,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -1881,7 +1881,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try
             {
@@ -2059,7 +2059,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -2139,7 +2139,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -2163,7 +2163,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try
             {
@@ -2216,7 +2216,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try {
             using (var command = connection.CreateCommand())
@@ -2241,7 +2241,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             using (var command = connection.CreateCommand())
             {
@@ -2322,7 +2322,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
             Logger.Info("Buff triggers loaded");
 
             try {
@@ -2346,7 +2346,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                     }
                 }
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
             Logger.Info("Skill Reagents loaded");
 
             try {
@@ -2371,7 +2371,7 @@ LEFT JOIN formula_funcs ff ON dum.func_type = 'FormulaFunc' AND ff.id = dum.func
                 }
                 Logger.Info("Skill Products loaded");
             }
-            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Table missing, skipping query."); }
+            } catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1) { Logger.Warn("Skipping query, the client database has no such table: {0}", ex.Message); }
 
             try
             {

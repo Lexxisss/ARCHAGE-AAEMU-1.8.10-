@@ -48,9 +48,12 @@ public class VendorGameData : Singleton<VendorGameData>, IGameDataLoader
         if (_goodsLookup.TryGetValue((npcId, itemId, gradeId), out good))
             return true;
 
-        // Some requests use grade 0 while the authoritative catalogue fixes a grade.
-        // Only accept this fallback when the item is unambiguous for the NPC.
-        if (gradeId == 0 && _goodsByNpc.TryGetValue(npcId, out var goods))
+        // The grade the client asks with is the item's own, and the catalogue's is the merchant's:
+        // this client buys a grade 3 item from a shelf that records grade 0, and requiring the two
+        // to agree refused a sale of something plainly on sale. Match on the item alone, and only
+        // where the NPC sells it once - two entries for one item are a real choice and guessing
+        // between them would sell the wrong one.
+        if (_goodsByNpc.TryGetValue(npcId, out var goods))
         {
             var candidates = goods.Where(x => x.ItemId == itemId).Take(2).ToArray();
             if (candidates.Length == 1)
