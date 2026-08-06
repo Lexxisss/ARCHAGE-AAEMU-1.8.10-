@@ -141,7 +141,10 @@ public class Line : Patrol
         moveType.DeltaMovement[2] = 0;
         moveType.Stance = 0;    // 0 Stand. The enum is posture: 1 is Crouch, not idle.
         moveType.Alertness = 0; // IDLE = 0x0, ALERT = 0x1, COMBAT = 0x2
-        moveType.Time += 50;    // has to change all the time for normal motion.
+        // The same clock every other movement body is stamped with. This used to add fifty to a
+        // field that had just been created at zero, so a unit on a line route announced itself at
+        // time 50 for ever while everything around it counted milliseconds since midnight.
+        moveType.Time = (uint)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
 
         if (move)
         {

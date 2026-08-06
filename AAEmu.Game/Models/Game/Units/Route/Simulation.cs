@@ -397,10 +397,18 @@ public class Simulation : Patrol
             // TODO: Implement proper use for Transform.World.AddDistanceToFront)
             var (newX, newY, newZ) = PositionAndRotation.AddDistanceToFront(travelDist, targetDist, npc.Transform.Local.Position, target);
 
-            newZ = WorldManager.Instance.GetHeight(npc.Transform.ZoneId, npc.Transform.World.Position.X, npc.Transform.World.Position.Z);
-            if (newZ == 0)
+            // The height belongs to the point the step ends at, and the sample takes an x and a y.
+            // This asked for the height at the position before the step, and handed Z over as the
+            // northing - so every patrol step took its height from somewhere else entirely and the
+            // unit bobbed its way along the route. A zone with no height data leaves the height the
+            // path itself worked out, and anything that flies keeps the height its route gives it.
+            if (!npc.CanFly)
             {
-                newZ = npc.Transform.World.Position.Z;
+                var groundZ = WorldManager.Instance.GetHeight(npc.Transform.ZoneId, newX, newY);
+                if (groundZ != 0)
+                {
+                    newZ = groundZ;
+                }
             }
 
             npc.Transform.Local.SetPosition(newX, newY, newZ);
