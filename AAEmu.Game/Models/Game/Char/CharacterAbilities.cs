@@ -16,7 +16,12 @@ public class CharacterAbilities
     {
         Owner = owner;
         Abilities = new Dictionary<AbilityType, Ability>();
-        for (var i = 1; i < 13; i++) //1.2 = 10 ability, 3.0.3.0 = 12 ability
+
+        // This client has ability slots 1..29 and uses 30 for an empty selection, which is why
+        // AbilityType.None is 30. Stopping at 12 was right for 3.0.3.0 and wrong here: a character
+        // who had picked slot 14 crashed the moment anything granted them experience, and because
+        // that happens while a quest hands out its rewards, the whole completion was lost with it.
+        for (var i = 1; i < (int)AbilityType.None; i++)
         {
             var id = (AbilityType)i;
             Abilities[id] = new Ability(id);
