@@ -136,6 +136,7 @@ public static class SCOffsets
     public const ushort SCUnitEquipmentIdsPacket = 0x094;
     public const ushort SCSplitCofferItemResultPacket = 0x0B3;
     public const ushort SCSyncItemLifespanPacket = 0x22B;
+    public const ushort SCSpecialtyGoodsPacket = 0x018; // target x2game.dll ctor 0x39345320, reader 0x399D0950
     public const ushort SCSpecialtyRecordsPacket = 0x034;
     public const ushort off_3A10851C = 0x1AB;
     public const ushort SCSocketingResultPacket = 0x0D3;
@@ -976,7 +977,7 @@ public static class SCOffsets
     public const ushort SCResponseCommonFarmListPacket = 0x106;
     public const ushort SCRefreshInCharacterListPacket = 0xfff;
     public const ushort SCScheduleItemUpdatePacket = 0xfff;
-    public const ushort SCSchoolOfFishDoodadsPacket = 0xfff;
+    public const ushort SCSchoolOfFishDoodadsPacket = 0x12C; // x2game.dll factory 0x39358390, body serializer 0x399ED380
     public const ushort SCSearchListPacket = 0xfff;
     public const ushort SCSpamReportedPacket = 0xfff;
     public const ushort SCSpecialtyRatioPacket = 0xfff;

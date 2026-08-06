@@ -1,4 +1,5 @@
-﻿using AAEmu.Game.Models.Game.Char;
+﻿using AAEmu.Game.Core.Managers.UnitManagers;
+using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj.Templates;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
@@ -8,30 +9,40 @@ namespace AAEmu.Game.Models.Game.DoodadObj.Funcs;
 
 public class DoodadFuncBuyFish : DoodadFuncTemplate
 {
-    // doodad_funcs
     public uint ItemId { get; set; }
 
     public override void Use(BaseUnit caster, Doodad owner, uint skillId, int nextPhase = 0)
     {
         Logger.Trace("DoodadFuncBuyFish");
 
-        if (caster is Character character)
+        if (caster is not Character character)
+            return;
+
+        var backpack = character.Inventory.GetEquippedBySlot(EquipmentItemSlot.Backpack);
+        if (backpack == null)
         {
-            var backpack = character.Inventory.GetEquippedBySlot(EquipmentItemSlot.Backpack);
-            if (backpack == null)
-            {
-                character.SendErrorMessage(ErrorMessageType.StoreBackpackNogoods);
-                return;
-            }
-
-            owner.ItemTemplateId = backpack.TemplateId; // to display the phase animation correctly for doodad
-
-            // TODO receiving money and removing the back pack
-            var total = backpack.Template.Refund;
-            character.Money += total;
-
-            character.Equipment.RemoveItem(ItemTaskType.SkillEffectConsumption, backpack, true);
-            character.AddMoney(SlotType.Inventory, total);
+            character.SendErrorMessage(ErrorMessageType.StoreBackpackNogoods);
+            return;
         }
+
+        if (!DoodadManager.Instance.CanBuyFish(Id, backpack.TemplateId))
+        {
+            character.SendErrorMessage(ErrorMessageType.Invalid);
+            return;
+        }
+
+        owner.ItemTemplateId = backpack.TemplateId;
+
+        var payout = backpack.Template?.Refund ?? 0;
+        if (payout <= 0)
+        {
+            character.SendErrorMessage(ErrorMessageType.Invalid);
+            return;
+        }
+
+        if (character.Equipment.ConsumeItem(ItemTaskType.SellBackpack, backpack.TemplateId, 1, backpack) != 1)
+            return;
+
+        character.AddMoney(SlotType.Inventory, payout, ItemTaskType.SellBackpack);
     }
 }

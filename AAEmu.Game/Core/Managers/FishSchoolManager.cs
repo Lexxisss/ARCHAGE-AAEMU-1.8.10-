@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using AAEmu.Commons.Utils;
+using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Models.Game.DoodadObj;
-using AAEmu.Game.Models.StaticValues;
+using AAEmu.Game.Models.Game.DoodadObj.Funcs;
 
 using NLog;
 
@@ -12,52 +14,36 @@ namespace AAEmu.Game.Core.Managers;
 public class FishSchoolManager : Singleton<FishSchoolManager>
 {
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
-    private Dictionary<uint, List<Doodad>> FishSchools { get; set; } = new();
 
     public void Initialize()
     {
-        FishSchools = new Dictionary<uint, List<Doodad>>();
         Logger.Info("Initialising FishSchool Manager...");
+    }
+
+    // Fish schools are data-driven. The target database attaches DoodadFuncFishSchool to every
+    // valid school phase and points that function at an npc_spawner_id. Template IDs are not fixed.
+    public static bool IsFishSchool(Doodad doodad)
+    {
+        if (doodad?.Template == null)
+            return false;
+
+        return DoodadManager.Instance.GetDoodadPhaseFuncs(doodad.FuncGroupId)
+            .Any(func => func.FuncType == nameof(DoodadFuncFishSchool));
     }
 
     public void Load(uint worldId)
     {
-        var fishSchool = new List<Doodad>();
-        Logger.Info("Loading FishSchool...");
-        var doodads = WorldManager.Instance.GetAllDoodads();
-        if (doodads != null)
-        {
-            foreach (var d in doodads)
-            {
-                // ID=6447, "Freshwater Fish School", ID=6448, "Saltwater Fish School"
-                if ((d.TemplateId == DoodadConstants.FreshwaterFishSchool) || (d.TemplateId == DoodadConstants.SaltwaterFishSchool))
-                    fishSchool.Add(d);
-            }
-
-            lock (FishSchools)
-            {
-                if (fishSchool.Count > 0)
-                {
-                    if (!FishSchools.TryGetValue(worldId, out var worldFishList))
-                    {
-                        worldFishList = new List<Doodad>();
-                        FishSchools.Add(worldId, worldFishList);
-                    }
-
-                    worldFishList.AddRange(fishSchool);
-                }
-            }
-        }
-        Logger.Info($"Loaded {fishSchool.Count} FishSchool for worldId={worldId}...");
+        var count = WorldManager.Instance.GetAllDoodads()?
+            .Count(doodad => doodad.Transform.WorldId == worldId && IsFishSchool(doodad)) ?? 0;
+        Logger.Info("Loaded {0} fish-school doodads for worldId={1}", count, worldId);
     }
 
     public List<Doodad> GetAllFishSchools()
     {
-        var res = new List<Doodad>();
-        foreach (var (world, doodads) in FishSchools)
-        {
-            res.AddRange(doodads);
-        }
-        return res;
+        // Query the live world rather than caching object references: school doodads change phase,
+        // despawn and respawn while the server is running.
+        return WorldManager.Instance.GetAllDoodads()?
+            .Where(IsFishSchool)
+            .ToList() ?? new List<Doodad>();
     }
 }

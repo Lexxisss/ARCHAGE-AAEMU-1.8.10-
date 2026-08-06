@@ -29,22 +29,37 @@ public class FishingLoot : SpecialEffectAction
 
         Logger.Debug("Special effects: FishingLoot value1 {0}, value2 {1}, value3 {2}, value4 {3}", value1, value2, value3, value4);
 
-        var zoneGroupId = ZoneManager.Instance.GetZoneByKey(target.Transform.ZoneId).GroupId;
-        var zoneGroup = ZoneManager.Instance.GetZoneGroupById(zoneGroupId);
+        var zone = ZoneManager.Instance.GetZoneByKey(character.Transform.ZoneId);
+        var zoneGroup = zone == null ? null : ZoneManager.Instance.GetZoneGroupById(zone.GroupId);
         if (zoneGroup == null)
         {
-            Logger.Warn($"{character.Name} seems to be trying to fish out of bounds.");
+            Logger.Warn("{0} tried to fish outside a configured zone.", character.Name);
             return;
         }
 
-        var lootTableId = (target.Transform.World.Position.Z > 101) ? zoneGroup.FishingLandLootPackId : zoneGroup.FishingSeaLootPackId;
+        var targetHeight = target?.Transform.World.Position.Z ?? character.Transform.World.Position.Z;
+        switch (targetObj)
+        {
+            case SkillCastPositionTarget position:
+                targetHeight = position.PosZ;
+                break;
+            case SkillCastPosition2Target position:
+                targetHeight = position.PosZ;
+                break;
+            case SkillCastPosition3Target position:
+                targetHeight = position.PosZ;
+                break;
+        }
 
+        var lootTableId = targetHeight > 101f
+            ? zoneGroup.FishingLandLootPackId
+            : zoneGroup.FishingSeaLootPackId;
         var pack = LootGameData.Instance.GetPack(lootTableId);
-
-        if ((pack == null) || (pack.Loots.Count <= 0))
+        if (pack?.Loots == null || pack.Loots.Count == 0)
             return;
 
         var generatedList = pack.GeneratePackNew(character, ActabilityType.Fishing);
-        pack.GiveLootPack(character, ItemTaskType.SkillEffectGainItem, generatedList);
+        if (!pack.GiveLootPack(character, ItemTaskType.SkillEffectGainItem, generatedList))
+            character.SendErrorMessage(ErrorMessageType.BagFull);
     }
 }

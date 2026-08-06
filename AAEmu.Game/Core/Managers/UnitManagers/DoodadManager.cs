@@ -43,6 +43,8 @@ public class DoodadManager : Singleton<DoodadManager>
     private bool _loaded;
     private Dictionary<uint, List<DoodadPhaseFunc>> _phaseFuncs;
     private Dictionary<string, Dictionary<uint, DoodadPhaseFuncTemplate>> _phaseFuncTemplates;
+    private Dictionary<uint, HashSet<uint>> _buyFishItems;
+    private Dictionary<(uint FuncId, uint ItemId), uint> _convertFishItems;
 
     private Dictionary<uint, DoodadTemplate> _templates;
 
@@ -73,6 +75,8 @@ public class DoodadManager : Singleton<DoodadManager>
         _phaseFuncs = new Dictionary<uint, List<DoodadPhaseFunc>>();
         _funcTemplates = new Dictionary<string, Dictionary<uint, DoodadFuncTemplate>>();
         _phaseFuncTemplates = new Dictionary<string, Dictionary<uint, DoodadPhaseFuncTemplate>>();
+        _buyFishItems = new Dictionary<uint, HashSet<uint>>();
+        _convertFishItems = new Dictionary<(uint FuncId, uint ItemId), uint>();
         foreach (var type in Helpers.GetTypesInNamespace(Assembly.GetAssembly(GetType()),
                      "AAEmu.Game.Models.Game.DoodadObj.Funcs"))
         {
@@ -329,6 +333,12 @@ public class DoodadManager : Singleton<DoodadManager>
                             ItemId = reader.GetUInt32("item_id")
                         };
                         _phaseFuncTemplates["DoodadFuncBuyFishItem"].Add(func.Id, func);
+                        if (!_buyFishItems.TryGetValue(func.DoodadFuncBuyFishId, out var acceptedItems))
+                        {
+                            acceptedItems = new HashSet<uint>();
+                            _buyFishItems.Add(func.DoodadFuncBuyFishId, acceptedItems);
+                        }
+                        acceptedItems.Add(func.ItemId);
                     }
                 }
             }
@@ -703,6 +713,8 @@ public class DoodadManager : Singleton<DoodadManager>
                             LootPackId = 0
                         };
                         _phaseFuncTemplates["DoodadFuncConvertFishItem"].Add(func.Id, func);
+                        if (func.ConvertItemId != 0)
+                            _convertFishItems[(func.DoodadFuncConvertFishId, func.ItemId)] = func.ConvertItemId;
                     }
                 }
             }
@@ -3120,6 +3132,20 @@ public class DoodadManager : Singleton<DoodadManager>
         }
 
         return result.ToArray();
+    }
+
+    public bool CanBuyFish(uint doodadFuncBuyFishId, uint itemId)
+    {
+        return _buyFishItems != null && _buyFishItems.TryGetValue(doodadFuncBuyFishId, out var items) && items.Contains(itemId);
+    }
+
+    public bool TryGetConvertedFishItem(uint doodadFuncConvertFishId, uint itemId, out uint convertItemId)
+    {
+        if (_convertFishItems != null)
+            return _convertFishItems.TryGetValue((doodadFuncConvertFishId, itemId), out convertItemId);
+
+        convertItemId = 0;
+        return false;
     }
 
     public List<DoodadPhaseFunc> GetPhaseFunc(uint funcGroupId)

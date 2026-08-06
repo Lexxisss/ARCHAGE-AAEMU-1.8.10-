@@ -1,6 +1,7 @@
 ﻿using System;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.DoodadObj;
 
 namespace AAEmu.Game.Models.Game;
 
@@ -32,6 +33,8 @@ public class TelescopeRegistrationEntry
                 return;
             _showFishSchoolRange = value;
             Player?.SendPacket(new SCSchoolOfFishFinderToggledPacket(_showFishSchoolRange > 0, _showFishSchoolRange));
+            if (_showFishSchoolRange <= 0)
+                Player?.SendPacket(new SCSchoolOfFishDoodadsPacket(true, Array.Empty<Doodad>()));
         }
     }
 

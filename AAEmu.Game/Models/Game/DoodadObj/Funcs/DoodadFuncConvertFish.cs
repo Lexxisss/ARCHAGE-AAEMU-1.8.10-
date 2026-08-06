@@ -1,5 +1,4 @@
-﻿using AAEmu.Game.Core.Managers;
-using AAEmu.Game.GameData;
+﻿using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj.Templates;
 using AAEmu.Game.Models.Game.Items;
@@ -10,31 +9,38 @@ namespace AAEmu.Game.Models.Game.DoodadObj.Funcs;
 
 public class DoodadFuncConvertFish : DoodadFuncTemplate
 {
-    // doodad_funcs
     public override void Use(BaseUnit caster, Doodad owner, uint skillId, int nextPhase = 0)
     {
         Logger.Trace("DoodadFuncConvertFish");
-        if (caster is Character character)
+
+        if (caster is not Character character)
+            return;
+
+        var backpack = character.Inventory.GetEquippedBySlot(EquipmentItemSlot.Backpack);
+        if (backpack == null)
         {
-            var backpack = character.Inventory.GetEquippedBySlot(EquipmentItemSlot.Backpack);
-            if (backpack == null)
-            {
-                character.SendErrorMessage(ErrorMessageType.StoreBackpackNogoods);
-                return;
-            }
-
-            // TODO receiving trophy and removing the back pack
-            character.Equipment.RemoveItem(ItemTaskType.Fishing, backpack, true);
-
-            var trophys = ItemManager.Instance.GetLootConvertFish(backpack.TemplateId);
-            if (trophys == null) { return; }
-            foreach (var trophy in trophys)
-            {
-                var fish = FishDetailsGameData.Instance.Create(trophy);
-                character.Inventory.Bag.AddOrMoveExistingItem(ItemTaskType.Fishing, fish);
-
-                break; // TODO use only the first item
-            }
+            character.SendErrorMessage(ErrorMessageType.StoreBackpackNogoods);
+            return;
         }
+
+        if (!DoodadManager.Instance.TryGetConvertedFishItem(Id, backpack.TemplateId, out var convertItemId) ||
+            convertItemId == 0)
+        {
+            character.SendErrorMessage(ErrorMessageType.Invalid);
+            return;
+        }
+
+        if (character.Inventory.Bag.SpaceLeftForItem(convertItemId) < 1)
+        {
+            character.SendErrorMessage(ErrorMessageType.BagFull);
+            return;
+        }
+
+        if (character.Equipment.ConsumeItem(ItemTaskType.Fishing, backpack.TemplateId, 1, backpack) != 1)
+            return;
+
+        if (!character.Inventory.TryAddNewItem(ItemTaskType.Fishing, convertItemId, 1))
+            Logger.Error("DoodadFuncConvertFish: failed to add conversion item {0} after consuming fish {1} for {2}",
+                convertItemId, backpack.TemplateId, character.Name);
     }
 }

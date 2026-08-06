@@ -59,7 +59,6 @@ public class ItemManager : Singleton<ItemManager>
 
     // Loot related
     private Dictionary<uint, List<LootPackDroppingNpc>> _lootPackDroppingNpc;
-    private Dictionary<uint, List<LootPackConvertFish>> _lootPackConvertFish;
     private Dictionary<int, GradeDistributions> _itemGradeDistributions;
     private Dictionary<uint, List<Item>> _lootDropItems;
 
@@ -140,16 +139,6 @@ public class ItemManager : Singleton<ItemManager>
     public List<LootPackDroppingNpc> GetLootPackIdByNpcId(uint npcId)
     {
         return _lootPackDroppingNpc.TryGetValue(npcId, out var value) ? value : new List<LootPackDroppingNpc>();
-    }
-
-    /// <summary>
-    /// GetLootPackIdByItemId - designed to transform fish into trophies
-    /// </summary>
-    /// <param name="ItemId"></param>
-    /// <returns></returns>
-    public List<LootPackConvertFish> GetLootPackIdByItemId(uint ItemId)
-    {
-        return _lootPackConvertFish.TryGetValue(ItemId, out var value) ? value : new List<LootPackConvertFish>();
     }
 
     public List<Item> GetLootDropItems(uint npcId)
@@ -254,51 +243,6 @@ public class ItemManager : Singleton<ItemManager>
 
         if (!_lootDropItems.TryGetValue(npcId, out items))
             items = new List<Item>();
-        return items;
-    }
-
-    public List<Item> GetLootConvertFish(uint templateId)
-    {
-        var items = new List<Item>();
-        var lootPackConvertFishes = GetLootPackIdByItemId(templateId);
-
-        if (lootPackConvertFishes.Count <= 0)
-        {
-            return items;
-        }
-
-        foreach (var lootPackConvertFish in lootPackConvertFishes)
-        {
-            var lootPacks = LootGameData.Instance.GetPack(lootPackConvertFish.LootPackId);
-            var dropRateMax = (uint)0;
-            for (var ui = 0; ui < lootPacks.Loots?.Count; ui++)
-            {
-                dropRateMax += lootPacks.Loots[ui].DropRate;
-            }
-            var dropRateItem = Rand.Next(0, dropRateMax);
-            var dropRateItemId = 0u;
-            for (var uii = 0; uii < (lootPacks.Loots?.Count ?? 0); uii++)
-            {
-                if (lootPacks.Loots?[uii].DropRate + dropRateItemId >= dropRateItem)
-                {
-                    var item = new Item();
-                    item.TemplateId = lootPacks.Loots[uii].ItemId;
-                    item.CreateTime = DateTime.UtcNow;
-                    item.Id = Instance.GetNewId();
-                    item.MadeUnitId = templateId;
-                    item.Count = Rand.Next(lootPacks.Loots[uii].MinAmount, lootPacks.Loots[uii].MaxAmount);
-                    items.Add(item);
-                    break;
-                }
-
-                if (lootPacks.Loots != null)
-                {
-                    dropRateItemId += lootPacks.Loots[uii].DropRate;
-                }
-            }
-            break; // TODO use only the first item
-        }
-
         return items;
     }
 
@@ -592,7 +536,9 @@ public class ItemManager : Singleton<ItemManager>
         Item item;
         try
         {
-            item = (Item)Activator.CreateInstance(template.ClassType, id, template, count);
+            item = FishDetailsGameData.Instance.IsFish(templateId)
+                ? new BigFish(id, template, count)
+                : (Item)Activator.CreateInstance(template.ClassType, id, template, count);
         }
         catch (Exception ex)
         {
@@ -612,6 +558,9 @@ public class ItemManager : Singleton<ItemManager>
         if (item.Template.FixedGrade >= 0)
             item.Grade = (byte)item.Template.FixedGrade;
         item.CreateTime = DateTime.UtcNow;
+        if (item is BigFish bigFish)
+            FishDetailsGameData.Instance.Initialize(bigFish);
+
         if (generateId)
         {
             if (!_allItems.TryAdd(item.Id, item))
@@ -661,7 +610,6 @@ public class ItemManager : Singleton<ItemManager>
         _holdableItemLookConverts = new Dictionary<uint, uint>();
         _wearableItemLookConverts = new Dictionary<uint, uint>();
         _lootPackDroppingNpc = new Dictionary<uint, List<LootPackDroppingNpc>>();
-        _lootPackConvertFish = new Dictionary<uint, List<LootPackConvertFish>>();
         _itemGradeDistributions = new Dictionary<int, GradeDistributions>();
         /*
         _lootPacks = new Dictionary<uint, List<Loot>>();
@@ -1531,33 +1479,6 @@ public class ItemManager : Singleton<ItemManager>
 
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = "SELECT * FROM doodad_func_convert_fish_items";
-                command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
-                {
-                    while (reader.Read())
-                    {
-                        var template = new LootPackConvertFish();
-                        template.Id = reader.GetUInt32("id");
-                        template.ItemId = reader.GetUInt32("item_id");
-                        template.LootPackId = reader.GetUInt32("loot_pack_id");
-                        template.DoodadFuncConvertFishId = reader.GetUInt32("doodad_func_convert_fish_id");
-                        List<LootPackConvertFish> lootPackConvertFish;
-                        if (_lootPackConvertFish.TryGetValue(template.ItemId, out var value))
-                            lootPackConvertFish = value;
-                        else
-                        {
-                            lootPackConvertFish = new List<LootPackConvertFish>();
-                            _lootPackConvertFish.Add(template.ItemId, lootPackConvertFish);
-                        }
-
-                        lootPackConvertFish.Add(template);
-                    }
-                }
-            }
-
-            using (var command = connection.CreateCommand())
-            {
                 command.CommandText = "SELECT * FROM item_spawn_doodads";
                 command.Prepare();
                 using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
@@ -2030,6 +1951,14 @@ public class ItemManager : Singleton<ItemManager>
                         nClass = itemTemplate.ClassType;
                     }
 
+                    if (FishDetailsGameData.Instance.IsFish(itemTemplateId) && nClass != typeof(BigFish))
+                    {
+                        Logger.Info(
+                            $"Restoring fish item {itemId} template {itemTemplateId} as {typeof(BigFish)} " +
+                            $"instead of persisted type {itemType}");
+                        nClass = typeof(BigFish);
+                    }
+
                     Item item;
                     try
                     {
@@ -2082,7 +2011,13 @@ public class ItemManager : Singleton<ItemManager>
                     item.ItemFlags = (ItemFlag)reader.GetByte("flags");
                     item.UccId = reader.GetUInt32("ucc"); // Make sure this UCC is set BEFORE reading details as UccItem needs to be able to override it
                     var details = (Commons.Network.PacketStream)(byte[])reader.GetValue("details");
+                    var hasBigFishDetail = details.LeftBytes >= 16;
                     item.ReadDetails(details);
+                    if (item is BigFish bigFish && !hasBigFishDetail)
+                    {
+                        FishDetailsGameData.Instance.Initialize(bigFish);
+                        bigFish.DetailWasMigrated = true;
+                    }
 
                     // Overwrite Fixed-grade items, just to make sure. Retail does not do this, but it just feels better if we do
                     if (item.Template != null)
@@ -2110,13 +2045,16 @@ public class ItemManager : Singleton<ItemManager>
                         // Move item to it's container (if defined)
                         if (container.AddOrMoveExistingItem(ItemTaskType.Invalid, item, item.Slot))
                         {
-                            // Keep migrated ship-equipment details dirty so the healthy 12-byte
-                            // state replaces the old empty/zero blob in MySQL.
-                            item.IsDirty = item is SlaveEquipmentItem { DetailWasMigrated: true };
-                            if (item.IsDirty)
+                            // Keep migrated typed details dirty so the healthy payload replaces the
+                            // old empty/generic blob in MySQL.
+                            item.IsDirty = item.IsDirty ||
+                                           item is SlaveEquipmentItem { DetailWasMigrated: true } ||
+                                           item is BigFish { DetailWasMigrated: true };
+                            if (item is SlaveEquipmentItem { DetailWasMigrated: true } ||
+                                item is BigFish { DetailWasMigrated: true })
                             {
                                 Logger.Info(
-                                    "Migrated slave equipment detail: owner={0}, item={1}, template={2}, container={3}, slot={4}, detail={5}",
+                                    "Migrated typed item detail: owner={0}, item={1}, template={2}, container={3}, slot={4}, detail={5}",
                                     item.OwnerId,
                                     item.Id,
                                     item.TemplateId,

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.GameData;
 using AAEmu.Game.Models.Game.DoodadObj.Templates;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.DoodadObj.Funcs;
 
@@ -15,6 +17,17 @@ public class DoodadFuncFishSchool : DoodadPhaseFuncTemplate
     public override bool Use(BaseUnit caster, Doodad owner)
     {
         Logger.Debug($"DoodadFuncFishSchool NpcSpawnerId={NpcSpawnerId}");
+
+        var existingNpc = WorldManager.Instance.GetAllNpcs()
+            .FirstOrDefault(npc => npc.Spawner?.Id == NpcSpawnerId &&
+                                   npc.Transform.WorldId == owner.Transform.WorldId &&
+                                   npc.Transform.InstanceId == owner.Transform.InstanceId &&
+                                   MathUtil.CalculateDistance(npc.Transform.World.Position, owner.Transform.World.Position, true) <= 20f);
+        if (existingNpc != null)
+        {
+            Logger.Debug("DoodadFuncFishSchool: spawner {0} already has live npc objId={1}", NpcSpawnerId, existingNpc.ObjId);
+            return false;
+        }
 
         var npcSpawnerNpc = NpcGameData.Instance.GetNpcSpawnerNpc(NpcSpawnerId);
         if (npcSpawnerNpc == null)
@@ -53,7 +66,8 @@ public class DoodadFuncFishSchool : DoodadPhaseFuncTemplate
         //spawnPos.World.SetHeight(WorldManager.Instance.GetHeight(spawnPos));
         spawner[0].Position = spawnPos.CloneAsSpawnPosition();
         var npc = spawner[0].Spawn(0);
-        npc.Spawner.RespawnTime = 0; // запретим респавн
+        if (npc != null)
+            npc.Spawner.RespawnTime = 0; // no automatic respawn for the hooked fish
 
         return false;
     }

@@ -120,10 +120,11 @@ public class RadarManager : Singleton<RadarManager>
 
             foreach (var (_, entry) in Registrations)
             {
+                if (entry?.Player == null)
+                    continue;
+
                 // TODO: Make a proper GM flag
                 var gmRangeCheck = entry.Player.AccessLevel >= 100 ? 100000f : 0f;
-                if ((entry == null) || (entry.Player == null))
-                    continue;
 
                 // Check public Transportation
                 if (entry.ShowPublicTransportRange > 0)
@@ -171,8 +172,13 @@ public class RadarManager : Singleton<RadarManager>
                         }
                     }
 
-                    // Send Data
-                    if (inRangeFish.Count > 0)
+                    // The client replaces its fish-school marker set when it receives a packet with last=true.
+                    // An empty terminal packet is therefore required to clear stale markers after leaving the range.
+                    if (inRangeFish.Count == 0)
+                    {
+                        entry.Player.SendPacket(new SCSchoolOfFishDoodadsPacket(true, Array.Empty<Doodad>()));
+                    }
+                    else
                     {
                         for (var i = 0; i < inRangeFish.Count; i += FishPerPacket)
                         {

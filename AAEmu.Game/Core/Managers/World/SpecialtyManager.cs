@@ -24,6 +24,7 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
     private Dictionary<uint, Specialty> _specialties;
     private Dictionary<uint, SpecialtyBundleItem> _specialtyBundleItems;
     private Dictionary<uint, SpecialtyNpc> _specialtyNpc;
+    private HashSet<(uint FromZoneGroupId, uint ToZoneGroupId)> _specialtyRoutes;
 
     //                 itemId           bundleId
     private Dictionary<uint, Dictionary<uint, SpecialtyBundleItem>> _specialtyBundleItemsMapped;
@@ -37,6 +38,7 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
         _specialties = new Dictionary<uint, Specialty>();
         _specialtyBundleItems = new Dictionary<uint, SpecialtyBundleItem>();
         _specialtyNpc = new Dictionary<uint, SpecialtyNpc>();
+        _specialtyRoutes = new HashSet<(uint FromZoneGroupId, uint ToZoneGroupId)>();
         _soldPackAmountInTick = new Dictionary<uint, Dictionary<uint, int>>();
 
         _specialtyBundleItemsMapped = new Dictionary<uint, Dictionary<uint, SpecialtyBundleItem>>();
@@ -61,6 +63,8 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
                         template.RowZoneGroupId = reader.GetUInt32("row_zone_group_id");
                         template.ColZoneGroupId = reader.GetUInt32("col_zone_group_id");
                         _specialties.Add(template.Id, template);
+                        // In the client matrix col is the source axis and row is the destination axis.
+                        _specialtyRoutes.Add((template.ColZoneGroupId, template.RowZoneGroupId));
                     }
                 }
             }
@@ -78,7 +82,7 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
                         template.ItemId = reader.GetUInt32("item_id");
                         template.SpecialtyBundleId = reader.GetUInt32("specialty_bundle_id");
                         template.Profit = reader.GetUInt32("profit");
-                        template.Ratio = reader.GetUInt32("ratio");
+                        template.Ratio = reader.GetInt32("ratio");
                         _specialtyBundleItems.Add(template.Id, template);
 
                         if (!_specialtyBundleItemsMapped.ContainsKey(template.ItemId))
@@ -102,11 +106,9 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
                         //template.Name = reader.GetString("name"); // there is no such field in the database for version 3.0.3.0
                         template.NpcId = reader.GetUInt32("npc_id");
                         template.SpecialtyBundleId = reader.GetUInt32("specialty_bundle_id");
+                        template.ZoneGroupId = reader.GetUInt32("zone_group_id", 0);
 
-                        // TODO есть повторы
-                        // NpcId    SpecialtyBundleId
-                        // 15086	25
-                        // 15086	8000009
+                        // The target data currently has one row per NPC, but keep TryAdd to reject malformed duplicates.
                         _specialtyNpc.TryAdd(template.NpcId, template);
                     }
                 }
@@ -134,21 +136,22 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
     }
 
     /// <summary>
-    /// Returns the Ration rounded down
+    /// Returns the current demand ratio for the equipped specialty pack at the destination.
     /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    public int GetRatioForSpecialty(Character player)
+    public int GetRatioForSpecialty(Character player, uint destinationZoneGroupId)
     {
         var backpack = player.Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlot.Backpack);
-        if (backpack == null)
+        if (backpack == null || destinationZoneGroupId == 0)
             return 0;
 
-        var zoneGroupId = ZoneManager.Instance.GetZoneByKey(player.Transform.ZoneId)?.GroupId ?? 0;
+        InitRatioInZoneForPack(backpack.TemplateId, destinationZoneGroupId);
+        return (int)Math.Floor(_priceRatios[backpack.TemplateId][destinationZoneGroupId]);
+    }
 
-        InitRatioInZoneForPack(backpack.TemplateId, zoneGroupId);
-
-        return (int)Math.Floor(_priceRatios[backpack.TemplateId][zoneGroupId]);
+    public int GetRatioForSpecialty(Character player)
+    {
+        var destinationZoneGroupId = ZoneManager.Instance.GetZoneByKey(player.Transform.ZoneId)?.GroupId ?? 0;
+        return GetRatioForSpecialty(player, destinationZoneGroupId);
     }
 
     /// <summary>
@@ -160,16 +163,102 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
     public List<(uint, uint)> GetRatiosForTargetRoute(uint fromZoneGroupId, uint toZoneGroupId)
     {
         var res = new List<(uint, uint)>();
+        if (!_specialtyRoutes.Contains((fromZoneGroupId, toZoneGroupId)))
+            return res;
 
         // Get list of possible source packs
         var sourcePacks = ItemManager.Instance.GetAllItems().Where(x => x.SpecialtyZoneId == fromZoneGroupId);
-        foreach (var item in sourcePacks)
+        foreach (var item in sourcePacks.Take(128))
         {
             InitRatioInZoneForPack(item.Id, toZoneGroupId);
             res.Add((item.Id, (uint)Math.Floor(_priceRatios[item.Id][toZoneGroupId])));
         }
 
         return res;
+    }
+
+    /// <summary>
+    /// Builds the sale list shown by one specialty buyer.
+    /// SC 0x0018 is limited by the target client to 20 goods per packet; chunking is done by the packet handler.
+    /// </summary>
+    public List<SpecialtyGoods> GetGoodsForNpc(Character player, uint npcObjId)
+    {
+        var result = new List<SpecialtyGoods>();
+        var npc = WorldManager.Instance.GetNpc(npcObjId);
+        if (npc == null || !_specialtyNpc.TryGetValue(npc.TemplateId, out var specialtyNpc))
+            return result;
+
+        if (MathUtil.CalculateDistance(player.Transform.World.Position, npc.Transform.World.Position) > 2.5)
+            return result;
+
+        var destinationZoneGroupId = specialtyNpc.ZoneGroupId != 0
+            ? specialtyNpc.ZoneGroupId
+            : ZoneManager.Instance.GetZoneByKey(npc.Transform.ZoneId)?.GroupId ?? 0;
+        if (destinationZoneGroupId == 0)
+            return result;
+
+        var paysItemPoints = npc.Template.SpecialtyCoinId != 0;
+        foreach (var bundleItem in _specialtyBundleItems.Values
+                     .Where(x => x.SpecialtyBundleId == specialtyNpc.SpecialtyBundleId)
+                     .OrderBy(x => x.ItemId))
+        {
+            var item = bundleItem.Item;
+            var sourceZoneGroupId = item?.SpecialtyZoneId ?? 0;
+            // specialty_bundle_items + specialty_npcs is the authoritative acceptance mapping.
+            // The specialties row/column matrix only covers the current-price grid and is not a
+            // complete list of every bundle item accepted by every buyer.
+            if (item == null || sourceZoneGroupId == 0)
+                continue;
+
+            var baseCopper = CalculateBaseAmount(bundleItem);
+            if (baseCopper <= 0)
+                continue;
+
+            InitRatioInZoneForPack(bundleItem.ItemId, destinationZoneGroupId);
+            var demandRatio = (uint)Math.Clamp(
+                (int)Math.Floor(_priceRatios[bundleItem.ItemId][destinationZoneGroupId]), 0, int.MaxValue);
+            var currentCopper = (long)Math.Floor(baseCopper * (demandRatio / 100d));
+
+            var baseAmount = paysItemPoints ? (long)Math.Round(baseCopper / 10000d) : baseCopper;
+            var currentAmount = paysItemPoints ? (long)Math.Round(currentCopper / 10000d) : currentCopper;
+            var stock = GetSoldPackCount(bundleItem.ItemId, destinationZoneGroupId);
+
+            result.Add(new SpecialtyGoods
+            {
+                ItemId = bundleItem.ItemId,
+                CurrentAmount = currentAmount,
+                BaseAmount = baseAmount,
+                Ratio = demandRatio,
+                Stock = stock,
+                CanProduce = true,
+                // Dev client EnumCurrency registration: GOLD=0, ITEM_POINT=6
+                // (x2game-dev.dll 0x399F06B4-0x399F089A).
+                Currency = paysItemPoints ? (sbyte)6 : (sbyte)0,
+                // The byte is present in the target wire record at +0x28; its semantic name is unresolved.
+                // Zero is the constructor/default value used by the client for the normal sale list.
+                Type = 0
+            });
+        }
+
+        return result;
+    }
+
+    private static long CalculateBaseAmount(SpecialtyBundleItem bundleItem)
+    {
+        if (bundleItem?.Item == null)
+            return 0;
+
+        // Client data contribution: specialty_bundle_items.profit/ratio plus item_prices.refund.
+        return (long)Math.Floor(bundleItem.Profit * (bundleItem.Ratio / 1000d)) + bundleItem.Item.Refund;
+    }
+
+    private uint GetSoldPackCount(uint itemId, uint destinationZoneGroupId)
+    {
+        if (!_soldPackAmountInTick.TryGetValue(itemId, out var zones) ||
+            !zones.TryGetValue(destinationZoneGroupId, out var count) || count <= 0)
+            return 0;
+
+        return (uint)count;
     }
 
     public int GetBasePriceForSpecialty(Character player, uint npcId)
@@ -198,7 +287,18 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
         if (!_specialtyNpc.TryGetValue(npc.TemplateId, out var specialtyNpc))
         {
             player.SendErrorMessage(ErrorMessageType.StoreCantSellSameZone);
-            return 1;
+            return 0;
+        }
+
+        var destinationZoneGroupId = specialtyNpc.ZoneGroupId != 0
+            ? specialtyNpc.ZoneGroupId
+            : ZoneManager.Instance.GetZoneByKey(npc.Transform.ZoneId)?.GroupId ?? 0;
+        var sourceZoneGroupId = backpack.Template?.SpecialtyZoneId ?? 0;
+        if (sourceZoneGroupId == 0 || destinationZoneGroupId == 0 ||
+            sourceZoneGroupId == destinationZoneGroupId)
+        {
+            player.SendErrorMessage(ErrorMessageType.StoreCantSellSameZone);
+            return 0;
         }
 
         var bundleIdAtNPC = specialtyNpc.SpecialtyBundleId;
@@ -222,7 +322,10 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
             return 0;
         }
 
-        return (int)(Math.Floor(bundleItem.Profit * (bundleItem.Ratio / 1000f)) + bundleItem.Item.Refund);
+        if (bundleItem.Item == null)
+            return 0;
+
+        return checked((int)CalculateBaseAmount(bundleItem));
     }
 
     public int SellSpecialty(Character player, uint npcObjId)
@@ -238,18 +341,23 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
         if (basePrice == 0) // We had an error, no need to keep going
             return basePrice;
 
-        var priceRatio = GetRatioForSpecialty(player);
-
         var backpack = player.Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlot.Backpack);
         if (backpack == null)
         {
             player.SendErrorMessage(ErrorMessageType.StoreBackpackNogoods);
-            return basePrice;
+            return 0;
         }
 
         var npc = WorldManager.Instance.GetNpc(npcObjId);
-        if (npc == null)
-            return basePrice;
+        if (npc == null || !_specialtyNpc.TryGetValue(npc.TemplateId, out var specialtyNpc))
+            return 0;
+
+        var destinationZoneGroupId = specialtyNpc.ZoneGroupId != 0
+            ? specialtyNpc.ZoneGroupId
+            : ZoneManager.Instance.GetZoneByKey(npc.Transform.ZoneId)?.GroupId ?? 0;
+        var priceRatio = GetRatioForSpecialty(player, destinationZoneGroupId);
+        if (priceRatio <= 0)
+            return 0;
 
         // Our backpack isn't null, we have the NPC, time to calculate the profits
 
@@ -257,12 +365,11 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
         uint crafterId = backpack.MadeUnitId != player.Id ? backpack.MadeUnitId : 0;
         var sellerShare = 0.80f; // 80% default, set this to 1f for packs that don't share profit
 
-        var interestRate = 5;
-
-        var finalPriceNoInterest = (basePrice * (priceRatio / 100f));
-        var interest = (finalPriceNoInterest * (interestRate / 100f));
-        var amountBonus = 0; // TODO: negotiation bonus
-        var finalPrice = finalPriceNoInterest + interest + amountBonus;
+        // The target client displays server-provided current/base amounts; it does not derive an extra
+        // interest percentage. Keep unconfirmed event/negotiation additions at zero.
+        var interestRate = 0;
+        var amountBonus = 0;
+        var finalPrice = basePrice * (priceRatio / 100f);
 
         var itemTypeToDeliver = npc.Template.SpecialtyCoinId;
         var amountOfItemsTotalPayout = (int)Math.Round(finalPrice);
@@ -323,7 +430,7 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
         player.ChangeLabor(-60, (int)ActabilityType.Commerce);
 
         // Add one pack sold in this zone during this tick
-        var zoneGroupId = ZoneManager.Instance.GetZoneByKey(player.Transform.ZoneId)?.GroupId ?? 0;
+        var zoneGroupId = destinationZoneGroupId;
         if (!_soldPackAmountInTick.ContainsKey(backpack.TemplateId))
             _soldPackAmountInTick.Add(backpack.TemplateId, new Dictionary<uint, int>());
 
@@ -333,6 +440,30 @@ public class SpecialtyManager : Singleton<SpecialtyManager>
         _soldPackAmountInTick[backpack.TemplateId][zoneGroupId] += 1;
 
         return basePrice;
+    }
+
+    public uint ResolveSpecialtyNpcObjId(uint firstObjId, uint secondObjId)
+    {
+        var firstNpc = WorldManager.Instance.GetNpc(firstObjId);
+        if (firstNpc != null && _specialtyNpc.ContainsKey(firstNpc.TemplateId))
+            return firstObjId;
+
+        var secondNpc = WorldManager.Instance.GetNpc(secondObjId);
+        if (secondNpc != null && _specialtyNpc.ContainsKey(secondNpc.TemplateId))
+            return secondObjId;
+
+        return 0;
+    }
+
+    public uint GetDestinationZoneGroup(uint npcObjId)
+    {
+        var npc = WorldManager.Instance.GetNpc(npcObjId);
+        if (npc == null || !_specialtyNpc.TryGetValue(npc.TemplateId, out var specialtyNpc))
+            return 0;
+
+        return specialtyNpc.ZoneGroupId != 0
+            ? specialtyNpc.ZoneGroupId
+            : ZoneManager.Instance.GetZoneByKey(npc.Transform.ZoneId)?.GroupId ?? 0;
     }
 
     public void ConsumeRatio()

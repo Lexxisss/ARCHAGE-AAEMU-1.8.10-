@@ -12,10 +12,18 @@ public class CSSellBackpackGoodsPacket : GamePacket
 
     public override void Read(PacketStream stream)
     {
-        var objId = stream.ReadBc();
+        // target x2game.dll 0x399D12B0: two BC object references
+        var firstObjId = stream.ReadBc();
+        var secondObjId = stream.ReadBc();
+        var npcObjId = SpecialtyManager.Instance.ResolveSpecialtyNpcObjId(firstObjId, secondObjId);
+        if (npcObjId == 0)
+        {
+            Connection.ActiveChar.SendErrorMessage(ErrorMessageType.InvalidTarget);
+            return;
+        }
 
-        var basePrice = SpecialtyManager.Instance.SellSpecialty(Connection.ActiveChar, objId);
-
-        Logger.Warn($"CSSellBackpackGoods, ObjId: {objId}. BasePrice: {basePrice}");
+        var basePrice = SpecialtyManager.Instance.SellSpecialty(Connection.ActiveChar, npcObjId);
+        Logger.Debug("CSSellBackpackGoods: first={0}, second={1}, npc={2}, basePrice={3}",
+            firstObjId, secondObjId, npcObjId, basePrice);
     }
 }

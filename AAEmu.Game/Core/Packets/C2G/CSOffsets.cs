@@ -533,7 +533,7 @@ public static class CSOffsets
     public const ushort CSPerpayHouseTaxPacket = 0x1F0; // prepay; same slot as off_3A12FAAC
     public const ushort CSRankCharacterPacket = 0xfff;
     public const ushort CSRequestHouseTaxPacket = 0x20F;
-    public const ushort CSRequestSpecialtyCurrentPacket = 0xfff;
+    public const ushort CSRequestSpecialtyCurrentPacket = 0x175; // target x2game.dll 0x399E0BE0: u16 from + u16 to
     public const ushort CSResetSkillsPacket = 0x05D; // target x2game.dll constructor
     public const ushort CSResurrectCharacterPacket = 0x00F;
     public const ushort CSRollDicePacket = 0xfff;
@@ -566,7 +566,7 @@ public static class CSOffsets
     public const ushort CSDiscardSlavePacket = 0xfff;
     public const ushort CSDetachFromDoodadPacket = 0x14F; // no separate class exists; this is CSUnbondDoodad
     public const ushort CSLeaveInstantGamePacket = 0xfff;
-    public const ushort CSListSpecialtyGoodsPacket = 0xfff;
+    public const ushort CSListSpecialtyGoodsPacket = 0x1ED; // target x2game.dll 0x3983A0F0
     public const ushort CSAuctionPostPacket = 0xfff;
     public const ushort CSAuctionLowestPricePacket = 0xfff;
     public const ushort CSDepositMoneyPacket = 0xfff;
