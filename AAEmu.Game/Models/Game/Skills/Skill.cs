@@ -1038,23 +1038,29 @@ public class Skill
                     continue;
                 }
 
-                if (effect.SourceBuffTagId > 0 && effect.CheckSourceTagSrc && !caster.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceBuffTagId)))
-                {
-                    // TODO Commented out the code for the Id=2255 quest to work. Restore after finding a solution to the lack of a debuff.
-                    continue;
-                }
-
-                if (effect.SourceNoBuffTagId > 0 && effect.CheckNoSourceTagSrc && caster.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceNoBuffTagId)))
-                {
-                    continue;
-                }
-
-                if (effect.TargetBuffTagId > 0 && effect.CheckTargetTagSrc && !target.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetBuffTagId)))
+                // A tag named here is the condition itself, not a suggestion. The check_*_tag_src
+                // flags beside it are off in every row of the target data - all 3123 that demand a
+                // tag and all 497 that forbid one - so requiring them as well silenced every one
+                // of these conditions. A skill written as two branches, one for "I already have
+                // this" and one for "I do not", then ran both: Resurgence handed out two identical
+                // heals over time at once. Whatever those flags narrow, it is not whether the
+                // condition applies.
+                if (effect.SourceBuffTagId > 0 && !caster.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceBuffTagId)))
                 {
                     continue;
                 }
 
-                if (effect.TargetNoBuffTagId > 0 && effect.CheckNoTargetTagSrc && target.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetNoBuffTagId)))
+                if (effect.SourceNoBuffTagId > 0 && caster.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceNoBuffTagId)))
+                {
+                    continue;
+                }
+
+                if (effect.TargetBuffTagId > 0 && !target.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetBuffTagId)))
+                {
+                    continue;
+                }
+
+                if (effect.TargetNoBuffTagId > 0 && target.Buffs.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetNoBuffTagId)))
                 {
                     continue;
                 }
