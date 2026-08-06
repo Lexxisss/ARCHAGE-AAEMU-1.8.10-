@@ -4,6 +4,7 @@ using System.Numerics;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Skills.Templates;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.Units.Movements;
@@ -13,6 +14,12 @@ namespace AAEmu.Game.Models.Game.Skills.SkillControllers;
 
 public class LeapSkillController : SkillController
 {
+    // Target x2game.dll: X2::SkillControllerLeap::GetType returns 2. The value is
+    // written by the client into CSCreateSkillController after its local controller
+    // has already been created from the plot event.
+    private const byte ClientControllerType = 2;
+    private const int ClientCompletionGraceMs = 250;
+
     public int Angle { get; set; }
     public int Speed { get; set; }
     public int Duration { get; set; }
@@ -20,6 +27,12 @@ public class LeapSkillController : SkillController
 
     private float _calculatedSpeed;
     private Vector3 _endPosition;
+    private bool _clientDriven;
+    private DateTime _clientEndAt;
+
+    public bool ClientControllerConfirmed { get; private set; }
+    public bool FallDamageImmune { get; private set; }
+    public override bool UsesClientMovement => _clientDriven;
     public enum LeapDirection
     {
         Both = 0,
@@ -59,6 +72,18 @@ public class LeapSkillController : SkillController
             End();
             return;
         };
+
+        // A player executes positional Leap controllers locally after SCPlotEvent.
+        // Its ordinary 0x0104 movement is the authoritative result. Moving the same
+        // character here creates a second simulation which is overwritten by the next
+        // client step and, more importantly, fights the local animation/controller.
+        if (_clientDriven)
+        {
+            if (DateTime.UtcNow >= _clientEndAt)
+                End();
+            return;
+        }
+
         var elapsedSeconds = (float)(delta.TotalMilliseconds / 1000f);
         MoveTowards(_calculatedSpeed * elapsedSeconds, elapsedSeconds);
     }
@@ -72,7 +97,21 @@ public class LeapSkillController : SkillController
         }
 
         base.Execute();
+        _clientDriven = Owner is Character && Target.ObjId == uint.MaxValue;
+        if (_clientDriven)
+            _clientEndAt = DateTime.UtcNow.AddMilliseconds(Duration + ClientCompletionGraceMs);
         TickManager.Instance.OnTick.Subscribe(Tick, TimeSpan.FromMilliseconds(50));
+    }
+
+    public override bool ConfirmClientController(byte scType, bool fallDamageImmune)
+    {
+        if (!_clientDriven || scType != ClientControllerType || State != SCState.Running)
+            return false;
+
+        ClientControllerConfirmed = true;
+        FallDamageImmune = fallDamageImmune;
+        _clientEndAt = DateTime.UtcNow.AddMilliseconds(Duration + ClientCompletionGraceMs);
+        return true;
     }
 
     public override void End()

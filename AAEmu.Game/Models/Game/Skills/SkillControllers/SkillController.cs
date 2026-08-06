@@ -22,6 +22,11 @@ public class SkillController
 
     public SCState State { get; protected set; }
 
+    /// <summary>
+    /// True when the owner's normal movement packets are the authoritative controller output.
+    /// </summary>
+    public virtual bool UsesClientMovement => false;
+
     protected SkillController()
     {
 
@@ -45,6 +50,16 @@ public class SkillController
             Owner?.Name ?? "<null>",
             Owner?.ObjId ?? 0,
             State);
+    }
+
+    /// <summary>
+    /// Confirms that the owning client created the controller announced by the plot.
+    /// The client-side controller type is a protocol value and must not be assumed to
+    /// equal every server-side <see cref="SkillControllerKind"/> value.
+    /// </summary>
+    public virtual bool ConfirmClientController(byte scType, bool fallDamageImmune)
+    {
+        return false;
     }
 
     public static SkillController CreateSkillController(SkillControllerTemplate template, BaseUnit owner, BaseUnit target)

@@ -315,6 +315,18 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
         character.Transform.ResetFinalizeTransform();
         character.Quests?.OnPositionChanged();
 
+        // A positional player controller (notably glider Leap) is simulated by the
+        // owning client. Forward that exact controller-driven step to observers instead
+        // of running a second server-side Leap simulation. The sender already rendered
+        // the step locally, so it must not receive an echo.
+        if (character.ActiveSkillController?.UsesClientMovement == true &&
+            _movement is UnitMoveType controllerMovement)
+        {
+            character.BroadcastPacket(
+                new SCOneUnitMovementPacket(character.ObjId, controllerMovement),
+                false);
+        }
+
         var regionChanged = oldRegion != character.Region;
         var zoneChanged = oldZone != character.Transform.ZoneId;
         var publishedNpcs = WorldManager.Instance.RefreshProtocol1810NearbyNpcs(

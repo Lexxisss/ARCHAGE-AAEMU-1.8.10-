@@ -24,9 +24,12 @@ public class SCSkillControllerStatePacket : GamePacket
     {
         stream.WriteBc(_objId);
         stream.Write(_scType);
-        stream.Write(_len);
-        stream.Write(_teared);
-        stream.Write(_cutouted);
+        if (_scType == 0)
+        {
+            stream.Write(_len);
+            stream.Write(_teared);
+            stream.Write(_cutouted);
+        }
         return stream;
     }
 }
