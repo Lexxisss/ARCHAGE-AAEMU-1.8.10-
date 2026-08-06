@@ -1,0 +1,642 @@
+{
+  "comment": [
+    "Объёмы сфер, раздающих баффы (spheres.sphere_detail_type = 'SphereBuff').",
+    "Координаты зоно-локальные, как в level design; сервер переводит их в мировые",
+    "через ZoneManager.ConvertToWorldCoordinates по zoneKey.",
+    "Источник: game/worlds/<world>/level_design/zone/<zoneKey>/world_server/quest_area_sphere.g",
+    "из распакованной раздачи клиента. В запакованном game_pak этой части level design нет,",
+    "поэтому геометрия хранится здесь. Клиентские данные, если они доступны, имеют приоритет."
+  ],
+  "areas": [
+    {
+      "world": "instance_dewplane_boss",
+      "zoneKey": 376,
+      "sphereId": 2545,
+      "x": 891.562,
+      "y": 1080.82,
+      "z": 909.0,
+      "radius": 65.0
+    },
+    {
+      "world": "instance_dewplane_boss",
+      "zoneKey": 376,
+      "sphereId": 2887,
+      "x": 890.16,
+      "y": 1078.08,
+      "z": 178.604,
+      "radius": 40.0
+    },
+    {
+      "world": "instance_feast_garden",
+      "zoneKey": 321,
+      "sphereId": 2487,
+      "x": 1029.83,
+      "y": 1006.63,
+      "z": 386.085,
+      "radius": 10.0
+    },
+    {
+      "world": "instance_feast_garden",
+      "zoneKey": 321,
+      "sphereId": 2488,
+      "x": 196.302,
+      "y": 1865.21,
+      "z": 363.698,
+      "radius": 10.0
+    },
+    {
+      "world": "instance_hanging_gardens_of_ipna",
+      "zoneKey": 346,
+      "sphereId": 3071,
+      "x": 485.765,
+      "y": 500.338,
+      "z": 306.063,
+      "radius": 5.0
+    },
+    {
+      "world": "instance_hanging_gardens_of_ipna",
+      "zoneKey": 346,
+      "sphereId": 3072,
+      "x": 747.42,
+      "y": 511.17,
+      "z": 326.001,
+      "radius": 8.0
+    },
+    {
+      "world": "instance_prologue_izuna",
+      "zoneKey": 327,
+      "sphereId": 2675,
+      "x": 1257.43,
+      "y": 1759.77,
+      "z": 139.314,
+      "radius": 8.0
+    },
+    {
+      "world": "instance_prologue_izuna",
+      "zoneKey": 327,
+      "sphereId": 2676,
+      "x": 1064.65,
+      "y": 1234.2,
+      "z": 161.4,
+      "radius": 10.0
+    },
+    {
+      "world": "instance_prologue_izuna",
+      "zoneKey": 327,
+      "sphereId": 2678,
+      "x": 1257.59,
+      "y": 1759.82,
+      "z": 139.267,
+      "radius": 8.0
+    },
+    {
+      "world": "instance_prologue_izuna",
+      "zoneKey": 327,
+      "sphereId": 2679,
+      "x": 1064.48,
+      "y": 1234.13,
+      "z": 161.368,
+      "radius": 10.0
+    },
+    {
+      "world": "instance_sea_of_chaos",
+      "zoneKey": 338,
+      "sphereId": 2769,
+      "x": 1445.1,
+      "y": 1212.43,
+      "z": 100.0,
+      "radius": 45.0
+    },
+    {
+      "world": "instance_sea_of_chaos",
+      "zoneKey": 338,
+      "sphereId": 2770,
+      "x": 970.601,
+      "y": 838.612,
+      "z": 100.0,
+      "radius": 45.0
+    },
+    {
+      "world": "instance_sea_of_chaos",
+      "zoneKey": 338,
+      "sphereId": 2771,
+      "x": 1055.37,
+      "y": 1695.23,
+      "z": 100.0,
+      "radius": 45.0
+    },
+    {
+      "world": "instance_sea_of_chaos",
+      "zoneKey": 338,
+      "sphereId": 2772,
+      "x": 581.19,
+      "y": 1318.22,
+      "z": 100.0,
+      "radius": 45.0
+    },
+    {
+      "world": "instance_sea_of_chaos",
+      "zoneKey": 338,
+      "sphereId": 2774,
+      "x": 962.657,
+      "y": 881.02,
+      "z": 100.0,
+      "radius": 7.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 141,
+      "sphereId": 2245,
+      "x": 2679.69,
+      "y": 3384.23,
+      "z": 132.562,
+      "radius": 15.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 183,
+      "sphereId": 2244,
+      "x": 669.073,
+      "y": 710.002,
+      "z": 129.802,
+      "radius": 3.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 183,
+      "sphereId": 2847,
+      "x": 599.0,
+      "y": 711.0,
+      "z": 121.0,
+      "radius": 3.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 186,
+      "sphereId": 2308,
+      "x": 841.265,
+      "y": 890.585,
+      "z": 103.491,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 186,
+      "sphereId": 2313,
+      "x": 841.806,
+      "y": 890.911,
+      "z": 103.78,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 186,
+      "sphereId": 2776,
+      "x": 841.806,
+      "y": 890.911,
+      "z": 103.78,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 191,
+      "sphereId": 2307,
+      "x": 1313.48,
+      "y": 1111.46,
+      "z": 100.0,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 191,
+      "sphereId": 2312,
+      "x": 1313.48,
+      "y": 1111.46,
+      "z": 100.0,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 191,
+      "sphereId": 2777,
+      "x": 1313.48,
+      "y": 1111.46,
+      "z": 100.0,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 213,
+      "sphereId": 2325,
+      "x": 2691.0,
+      "y": 2588.02,
+      "z": 105.464,
+      "radius": 1000.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 282,
+      "sphereId": 2442,
+      "x": 1554.74,
+      "y": 1238.35,
+      "z": 105.785,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 282,
+      "sphereId": 2444,
+      "x": 1554.52,
+      "y": 1238.48,
+      "z": 105.788,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 282,
+      "sphereId": 2779,
+      "x": 1554.74,
+      "y": 1238.35,
+      "z": 105.785,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 284,
+      "sphereId": 2309,
+      "x": 1914.9,
+      "y": 1226.85,
+      "z": 115.859,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 284,
+      "sphereId": 2314,
+      "x": 1915.21,
+      "y": 1226.8,
+      "z": 115.859,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 284,
+      "sphereId": 2778,
+      "x": 1914.9,
+      "y": 1226.85,
+      "z": 115.859,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 301,
+      "sphereId": 2443,
+      "x": 1540.53,
+      "y": 1327.7,
+      "z": 105.79,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 301,
+      "sphereId": 2445,
+      "x": 1540.46,
+      "y": 1327.89,
+      "z": 105.791,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 301,
+      "sphereId": 2780,
+      "x": 1540.53,
+      "y": 1327.7,
+      "z": 105.79,
+      "radius": 500.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 307,
+      "sphereId": 2545,
+      "x": 891.562,
+      "y": 1080.82,
+      "z": 109.173,
+      "radius": 65.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 337,
+      "sphereId": 2680,
+      "x": 324.319,
+      "y": 1261.45,
+      "z": 456.272,
+      "radius": 7.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 350,
+      "sphereId": 2800,
+      "x": 2084.91,
+      "y": 2494.19,
+      "z": 492.629,
+      "radius": 35.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 354,
+      "sphereId": 3053,
+      "x": 1115.52,
+      "y": 3166.16,
+      "z": 603.176,
+      "radius": 15.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 378,
+      "sphereId": 3001,
+      "x": 2722.83,
+      "y": 2200.67,
+      "z": 181.191,
+      "radius": 10.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 378,
+      "sphereId": 3002,
+      "x": 2831.75,
+      "y": 2104.12,
+      "z": 181.711,
+      "radius": 10.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 378,
+      "sphereId": 3003,
+      "x": 2928.16,
+      "y": 2202.43,
+      "z": 180.639,
+      "radius": 10.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 378,
+      "sphereId": 3004,
+      "x": 2832.65,
+      "y": 2301.21,
+      "z": 180.386,
+      "radius": 10.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 378,
+      "sphereId": 3067,
+      "x": 2765.04,
+      "y": 2073.74,
+      "z": 186.572,
+      "radius": 15.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2950,
+      "x": 1561.03,
+      "y": 1858.61,
+      "z": 285.701,
+      "radius": 70.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2953,
+      "x": 1668.85,
+      "y": 1742.87,
+      "z": 289.635,
+      "radius": 70.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2954,
+      "x": 1520.74,
+      "y": 1697.49,
+      "z": 301.423,
+      "radius": 70.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2960,
+      "x": 1034.14,
+      "y": 1959.94,
+      "z": 217.637,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2961,
+      "x": 1033.94,
+      "y": 1965.14,
+      "z": 217.363,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2962,
+      "x": 1033.89,
+      "y": 1969.03,
+      "z": 217.506,
+      "radius": 1.6
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2963,
+      "x": 1029.59,
+      "y": 1968.86,
+      "z": 217.174,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2964,
+      "x": 1029.87,
+      "y": 1973.54,
+      "z": 217.497,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2965,
+      "x": 1025.88,
+      "y": 1973.19,
+      "z": 217.696,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2966,
+      "x": 1021.04,
+      "y": 1972.63,
+      "z": 217.58,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2967,
+      "x": 1015.75,
+      "y": 1979.89,
+      "z": 217.883,
+      "radius": 6.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2981,
+      "x": 1025.77,
+      "y": 1973.3,
+      "z": 217.776,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2982,
+      "x": 1033.89,
+      "y": 1969.05,
+      "z": 217.506,
+      "radius": 1.6
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2983,
+      "x": 1020.96,
+      "y": 1972.66,
+      "z": 217.724,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2984,
+      "x": 1025.77,
+      "y": 1973.29,
+      "z": 217.776,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2985,
+      "x": 1029.84,
+      "y": 1973.52,
+      "z": 217.499,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2986,
+      "x": 1029.6,
+      "y": 1968.81,
+      "z": 217.174,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2987,
+      "x": 1033.87,
+      "y": 1969.06,
+      "z": 217.505,
+      "radius": 1.6
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2988,
+      "x": 1033.92,
+      "y": 1965.14,
+      "z": 217.456,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2989,
+      "x": 1034.09,
+      "y": 1959.93,
+      "z": 217.808,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2990,
+      "x": 1042.26,
+      "y": 1958.17,
+      "z": 218.557,
+      "radius": 6.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2992,
+      "x": 1020.96,
+      "y": 1972.64,
+      "z": 217.724,
+      "radius": 1.7
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2993,
+      "x": 1017.87,
+      "y": 1974.78,
+      "z": 218.052,
+      "radius": 1.5
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2994,
+      "x": 1019.16,
+      "y": 1977.55,
+      "z": 217.95,
+      "radius": 1.5
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 2995,
+      "x": 1020.36,
+      "y": 1980.49,
+      "z": 217.663,
+      "radius": 1.5
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 3068,
+      "x": 2563.81,
+      "y": 1049.99,
+      "z": 283.435,
+      "radius": 15.0
+    },
+    {
+      "world": "main_world",
+      "zoneKey": 382,
+      "sphereId": 3069,
+      "x": 2760.08,
+      "y": 1718.77,
+      "z": 360.431,
+      "radius": 15.0
+    }
+  ]
+}

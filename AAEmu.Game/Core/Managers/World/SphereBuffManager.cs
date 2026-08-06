@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
+using AAEmu.Commons.IO;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.GameData;
 using AAEmu.Game.IO;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.World;
+
+using Newtonsoft.Json;
 
 using NLog;
 
@@ -31,6 +34,24 @@ public class SphereBuffManager : Singleton<SphereBuffManager>
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
     private const string SphereFileName = "quest_area_sphere.g";
+    private const string DataFileName = "sphere_buff_areas.json";
+
+    private sealed class SphereBuffAreaFile
+    {
+        [JsonProperty("areas")]
+        public List<SphereBuffAreaEntry> Areas { get; set; }
+    }
+
+    private sealed class SphereBuffAreaEntry
+    {
+        [JsonProperty("world")] public string World { get; set; }
+        [JsonProperty("zoneKey")] public uint ZoneKey { get; set; }
+        [JsonProperty("sphereId")] public uint SphereId { get; set; }
+        [JsonProperty("x")] public float X { get; set; }
+        [JsonProperty("y")] public float Y { get; set; }
+        [JsonProperty("z")] public float Z { get; set; }
+        [JsonProperty("radius")] public float Radius { get; set; }
+    }
 
     /// <summary>Areas by world id: only worlds that hold any are present.</summary>
     private Dictionary<uint, List<SphereBuffArea>> _areasByWorld = new();
@@ -86,6 +107,9 @@ public class SphereBuffManager : Singleton<SphereBuffManager>
             }
         }
 
+        var fromClientData = areas.Values.Sum(list => list.Count);
+        var fromDataFile = LoadFromDataFile(areas);
+
         lock (_lock)
         {
             _areasByWorld = areas;
@@ -95,10 +119,83 @@ public class SphereBuffManager : Singleton<SphereBuffManager>
                 _loadedBuffIds.Add(area.BuffId);
         }
 
-        var total = areas.Values.Sum(list => list.Count);
         Logger.Info(
-            "Loaded {0} buff spheres across {1} worlds ({2} volumes belong to spheres of another kind)",
-            total, areas.Count, withoutDefinition);
+            "Loaded {0} buff spheres across {1} worlds ({2} from client data, {3} from Data/{4}, " +
+            "{5} volumes belong to spheres of another kind)",
+            fromClientData + fromDataFile, areas.Count, fromClientData, fromDataFile, DataFileName,
+            withoutDefinition);
+    }
+
+    /// <summary>
+    /// Adds the volumes shipped in Data for spheres the client data did not describe.
+    /// </summary>
+    /// <remarks>
+    /// The volumes live in the server half of the client's level design
+    /// (<c>&lt;zone&gt;/world_server/quest_area_sphere.g</c>), and a packed game_pak does not carry
+    /// that half - only the client half beside it, which is why the quest spheres load and these
+    /// do not. The same volumes are therefore kept in Data, extracted from an unpacked
+    /// distribution. Client data still wins wherever it has something to say.
+    /// </remarks>
+    private static int LoadFromDataFile(Dictionary<uint, List<SphereBuffArea>> areas)
+    {
+        var filePath = Path.Combine(FileManager.AppPath, "Data", DataFileName);
+        var contents = FileManager.GetFileContents(filePath);
+        if (string.IsNullOrWhiteSpace(contents))
+        {
+            Logger.Info("No {0} in Data; buff spheres come from client data only", DataFileName);
+            return 0;
+        }
+
+        var alreadyLoaded = areas.Values
+            .SelectMany(list => list)
+            .Select(area => area.SphereId)
+            .ToHashSet();
+
+        var worldsByName = WorldManager.Instance.GetWorlds()
+            .GroupBy(world => world.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First().Id, StringComparer.OrdinalIgnoreCase);
+
+        var loaded = 0;
+        try
+        {
+            var document = JsonConvert.DeserializeObject<SphereBuffAreaFile>(contents);
+            foreach (var entry in document?.Areas ?? [])
+            {
+                if (alreadyLoaded.Contains(entry.SphereId) || entry.Radius <= 0f)
+                    continue;
+
+                if (!worldsByName.TryGetValue(entry.World ?? string.Empty, out var worldId))
+                {
+                    Logger.Warn("Sphere {0} names world {1}, which this server does not have",
+                        entry.SphereId, entry.World);
+                    continue;
+                }
+
+                var area = BuildArea(
+                    worldId,
+                    entry.ZoneKey,
+                    entry.SphereId,
+                    new Vector3(entry.X, entry.Y, entry.Z),
+                    entry.Radius);
+                if (area == null)
+                    continue;
+
+                if (!areas.TryGetValue(worldId, out var worldAreas))
+                {
+                    worldAreas = new List<SphereBuffArea>();
+                    areas.Add(worldId, worldAreas);
+                }
+
+                worldAreas.Add(area);
+                loaded++;
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.Error(exception, "Unable to read {0}", filePath);
+        }
+
+        return loaded;
     }
 
     public void Initialize()
