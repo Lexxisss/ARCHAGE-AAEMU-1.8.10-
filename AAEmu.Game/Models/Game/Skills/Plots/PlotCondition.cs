@@ -9,6 +9,7 @@ using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Faction;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Templates;
+using AAEmu.Game.Models.Game.Skills.Utils;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.StaticValues;
 using AAEmu.Game.Utils;
@@ -80,19 +81,17 @@ public class PlotCondition
     // 2
     private static bool ConditionRelation(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int relationType, int unused2, int unused3, int unused4)
     {
-        Logger.Debug($"ConditionRelation {relationType} {caster} -> {target}");
+        Logger.Trace($"ConditionRelation {relationType} {caster} -> {target}");
 
-        // Param1 is either 1, 4 or 5
-        switch (relationType)
-        {
-            case 1: // Friendly?
-                return caster.Faction.GetRelationState(target.Faction) == RelationState.Friendly;
-            case 4: // Hostile?
-                return caster.Faction.GetRelationState(target.Faction) == RelationState.Hostile;
-            case 5: //
-                break;
-        }
-        return true;
+        if (caster == null || target == null)
+            return false;
+
+        // The target data uses 1, 3, 4 and 5, and they are SkillTargetRelation: friendly, raid,
+        // hostile and others. Three and five used to fall through to true, so every "is this
+        // somebody else" and every raid check passed - which is how a skill that heals an ally
+        // also healed whatever it had just hit. The same numbering already decides targeting for
+        // the rest of the skill system; one answer for it is enough.
+        return SkillTargetingUtil.IsRelationValid((SkillTargetRelation)relationType, caster, target);
     }
 
     // 3

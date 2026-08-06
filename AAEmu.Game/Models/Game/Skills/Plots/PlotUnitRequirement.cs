@@ -1,9 +1,9 @@
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.Housing;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.NPChar;
-using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.Units;
 using MateUnit = AAEmu.Game.Models.Game.Units.Mate;
 
@@ -64,17 +64,21 @@ public sealed class PlotUnitRequirement
                 var hpPercent = (int)(hpUnit.Hp * 100L / hpUnit.MaxHp);
                 return hpPercent >= Value1 && hpPercent <= Value2;
 
-            // Unit class/type selector. value1=0 means any BaseUnit; the target DB uses
-            // 1..5 for concrete unit families.
+            // Unit family selector, numbered as BaseUnitType and not as anything of our own.
+            // The target data settles it: the events this gates are named for what they ask
+            // about - "pve check" and "enemy target check" ask for 1, "is it a slave" for 2,
+            // "is it housing" for 3, and the pet checks for 5. Reading 1 as a player was what
+            // made every "pve check" false against an NPC, and with it the whole damage branch
+            // of two dozen plots.
             case 38:
-                return Value1 switch
+                return (BaseUnitType)Value1 switch
                 {
-                    0 => unit != null,
-                    1 => unit is Character,
-                    2 => unit is Npc,
-                    3 => unit is MateUnit,
-                    4 => unit is Slave,
-                    5 => unit is Doodad,
+                    BaseUnitType.Character => unit is Character,
+                    BaseUnitType.Npc => unit is Npc,
+                    BaseUnitType.Slave => unit is Slave,
+                    BaseUnitType.Housing => unit is House,
+                    BaseUnitType.Transfer => unit is Transfer,
+                    BaseUnitType.Mate => unit is MateUnit,
                     _ => false
                 };
 
