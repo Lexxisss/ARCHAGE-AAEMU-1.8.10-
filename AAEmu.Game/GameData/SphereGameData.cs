@@ -7,6 +7,7 @@ using AAEmu.Game.GameData.Framework;
 using AAEmu.Game.Models.Game.Chat;
 using AAEmu.Game.Models.Game.Quests.Acts;
 using AAEmu.Game.Models.Game.Quests.Static;
+using AAEmu.Game.Models.Game.Skills.Plots;
 using AAEmu.Game.Models.Spheres;
 using AAEmu.Game.Utils.DB;
 
@@ -27,6 +28,7 @@ public class SphereGameData : Singleton<SphereGameData>, IGameDataLoader
     private Dictionary<uint, List<SphereBubbles>> _sphereBubbles;
     private Dictionary<uint, List<SphereAcceptQuests>> _sphereAcceptQuests;
     private Dictionary<uint, List<SphereAcceptQuestQuests>> _sphereAcceptQuestQuests;
+    private Dictionary<uint, List<PlotUnitRequirement>> _sphereUnitReqs;
 
     public void Load(SqliteConnection connection, SqliteConnection connection2)
     {
@@ -40,6 +42,7 @@ public class SphereGameData : Singleton<SphereGameData>, IGameDataLoader
         _sphereBubbles = new Dictionary<uint, List<SphereBubbles>>();
         _sphereAcceptQuests = new Dictionary<uint, List<SphereAcceptQuests>>();
         _sphereAcceptQuestQuests = new Dictionary<uint, List<SphereAcceptQuestQuests>>();
+        _sphereUnitReqs = new Dictionary<uint, List<PlotUnitRequirement>>();
 
         using (var command = connection.CreateCommand())
         {
@@ -239,14 +242,46 @@ public class SphereGameData : Singleton<SphereGameData>, IGameDataLoader
                     var template = new SphereBuffs()
                     {
                         Id = reader.GetUInt32("id"),
-                        BuffId = reader.GetUInt32("buff_id")
-
+                        BuffId = reader.GetUInt32("buff_id"),
+                        RemoveOnLeaveBuffId = reader.GetUInt32("remove_on_leave_buff_id", 0),
+                        AndPet = reader.GetBoolean("and_pet", false)
                     };
 
                     if (!_sphereBuffs.ContainsKey(template.Id))
                         _sphereBuffs.Add(template.Id, new List<SphereBuffs>());
 
                     _sphereBuffs[template.Id].Add(template);
+                }
+            }
+        }
+
+        // What a sphere demands of the unit standing in it. The harbour spheres name a faction
+        // each, which is what keeps a Nuian ship from mooring at a Haranyan pier.
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = @"SELECT owner_id, display_msg, kind_id, value1, value2, value3
+                                    FROM unit_reqs
+                                    WHERE owner_type = 'Sphere'";
+            command.Prepare();
+            using (var sqliteReader = command.ExecuteReader())
+            using (var reader = new SQLiteWrapperReader(sqliteReader))
+            {
+                while (reader.Read())
+                {
+                    var sphereId = reader.GetUInt32("owner_id");
+                    var requirement = new PlotUnitRequirement
+                    {
+                        DisplayMessage = reader.GetBoolean("display_msg", false),
+                        KindId = reader.GetInt32("kind_id", 0),
+                        Value1 = reader.GetInt32("value1", 0),
+                        Value2 = reader.GetInt32("value2", 0),
+                        Value3 = reader.GetInt32("value3", 0)
+                    };
+
+                    if (!_sphereUnitReqs.ContainsKey(sphereId))
+                        _sphereUnitReqs.Add(sphereId, new List<PlotUnitRequirement>());
+
+                    _sphereUnitReqs[sphereId].Add(requirement);
                 }
             }
         }
@@ -318,6 +353,32 @@ public class SphereGameData : Singleton<SphereGameData>, IGameDataLoader
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// The sphere row, or null when the client database does not describe it.
+    /// </summary>
+    public Spheres GetSphere(uint sphereId)
+    {
+        return _spheres.TryGetValue(sphereId, out var spheres) && spheres.Count > 0 ? spheres[0] : null;
+    }
+
+    /// <summary>
+    /// The buff a sphere hands out, looked up by the sphere's detail id.
+    /// </summary>
+    public SphereBuffs GetSphereBuff(uint sphereDetailId)
+    {
+        return _sphereBuffs.TryGetValue(sphereDetailId, out var buffs) && buffs.Count > 0 ? buffs[0] : null;
+    }
+
+    /// <summary>
+    /// What a unit has to be for a sphere to act on it. Empty when the sphere asks nothing.
+    /// </summary>
+    public List<PlotUnitRequirement> GetSphereUnitRequirements(uint sphereId)
+    {
+        return _sphereUnitReqs.TryGetValue(sphereId, out var requirements)
+            ? requirements
+            : new List<PlotUnitRequirement>();
     }
 
     public static List<string> GetQuestSphere(uint questId)

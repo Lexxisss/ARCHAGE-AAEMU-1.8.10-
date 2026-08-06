@@ -110,6 +110,11 @@ public sealed class GameService : IHostedService, IDisposable
         SphereQuestManager.Instance.Load();
         SphereQuestManager.Instance.Initialize();
 
+        // Both read their volumes from the client's level design, so they come after the worlds
+        // and the game data the spheres are described by.
+        SphereBuffManager.Instance.Load();
+        SphereBuffManager.Instance.Initialize();
+
         FormulaManager.Instance.Load();
         ExperienceManager.Instance.Load();
 
