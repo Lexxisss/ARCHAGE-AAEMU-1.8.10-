@@ -143,11 +143,12 @@ public class DamageEffect : EffectTemplate
                 hitType = SkillHitType.RangedHit;//No siege type?
                 break;
             // Damage dealt by healing power - the target database has 118 of these, Holy Bolt
-            // among them. It is a spell as far as landing goes; the client's hit types have no
-            // heal-flavoured member, and leaving it Invalid meant sending a damage packet the
-            // client had no reason to act on.
+            // among them. Everything about the number comes from the healing side, so the roll
+            // does too; HealEffect answers the same question with HealCritical. Only the hit type
+            // put on the wire is the spell one, because the client's list has no heal member and
+            // a heal's own critical is already reported to combat buffs as SpellCritical.
             case DamageType.Heal:
-                if (Rand.Next(0f, 100f) < ((Unit)caster).SpellCritical - flexibilityRateMod)
+                if (Rand.Next(0f, 100f) < ((Unit)caster).HealCritical - flexibilityRateMod)
                     hitType = SkillHitType.SpellCritical;
                 else
                     hitType = SkillHitType.SpellHit;
@@ -246,6 +247,9 @@ public class DamageEffect : EffectTemplate
             DamageType.Magic => ((Unit)caster).SpellDamageMul,
             DamageType.Ranged => ((Unit)caster).RangedDamageMul,
             DamageType.Siege => 1.0f, // TODO
+            // What raises a healer's output raises this too: it is the same healing power, put to
+            // a different use. HealEffect finishes with the same multiplier.
+            DamageType.Heal => ((Unit)caster).HealMul,
             _ => 1f
         };
 
@@ -322,7 +326,12 @@ public class DamageEffect : EffectTemplate
                 finalDamage *= 1 + (((Unit)caster).RangedCriticalBonus - trg.Flexibility / 100) / 100;
                 break;
             case SkillHitType.SpellCritical:
-                finalDamage *= 1 + (((Unit)caster).SpellCriticalBonus - trg.Flexibility / 100) / 100;
+                // Heal damage rides on the spell hit type but carries the healer's critical bonus,
+                // the one HealEffect uses; the spell bonus belongs to spells.
+                var spellCriticalBonus = DamageType == DamageType.Heal
+                    ? ((Unit)caster).HealCriticalBonus
+                    : ((Unit)caster).SpellCriticalBonus;
+                finalDamage *= 1 + (spellCriticalBonus - trg.Flexibility / 100) / 100;
                 break;
             default:
                 break;
