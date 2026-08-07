@@ -17,6 +17,9 @@ public class QuestActObjItemGroupUse : QuestActTemplate
 
     //public static int ItemGroupUseStatus { get; private set; } = 0;
     private int Objective { get; set; }
+    /// <summary>Percent this act adds for each thing done on a scored quest.</summary>
+    public override int ScorePerUnit => Count;
+
 
     public override bool Use(ICharacter character, Quest quest, int objective)
     {
@@ -24,8 +27,9 @@ public class QuestActObjItemGroupUse : QuestActTemplate
         if (quest.Template.Score > 0) // Check if the quest use Template.Score or Count
         {
             quest.ItemGroupUseStatus = objective * Count; // Count в данном случае % за единицу
-            quest.OverCompletionPercent = quest.ItemGroupUseStatus + quest.HuntStatus + quest.GroupHuntStatus + quest.InteractionStatus;
-
+            // The quest adds up every objective itself. Summing a few of these per-type fields
+            // here lost whatever a second component of the same type had written over.
+            quest.RecalculateOverCompletion();
             if (quest.Template.LetItDone)
             {
                 if (quest.OverCompletionPercent >= quest.Template.Score * 1 / 2)

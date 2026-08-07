@@ -89,6 +89,48 @@ public partial class Quest : PacketMarshaler
         ReadyToReportNpc = false;
     }
 
+    /// <summary>
+    /// Adds up how far a scored quest has got, over all of its objectives.
+    /// </summary>
+    /// <remarks>
+    /// Each act used to keep its own running total in one field on the quest - HuntStatus,
+    /// GatherStatus and so on - and add a handful of those together. A quest listing two kinds of
+    /// monster has two components of the same act, and the second wrote over what the first had
+    /// counted, so killing the one you had not touched yet reset the other to nothing. Sixty-five
+    /// of the hundred and twelve scored quests list some objective type more than once.
+    ///
+    /// The score belongs to the quest, not to a kind of act: it is what every objective has done
+    /// so far, each worth its own percentage per unit.
+    /// </remarks>
+    public void RecalculateOverCompletion()
+    {
+        var components = Template?.GetComponents(QuestComponentKind.Progress);
+        if (components == null || Objectives == null)
+        {
+            return;
+        }
+
+        var total = 0;
+        for (var i = 0; i < components.Length && i < Objectives.Length; i++)
+        {
+            if (Objectives[i] <= 0)
+            {
+                continue;
+            }
+
+            foreach (var act in _questManager.GetActs(components[i].Id))
+            {
+                var perUnit = act?.GetTemplate()?.ScorePerUnit ?? 0;
+                if (perUnit > 0)
+                {
+                    total += Objectives[i] * perUnit;
+                }
+            }
+        }
+
+        OverCompletionPercent = total;
+    }
+
     public Quest() : this(
         null,
         QuestManager.Instance,
