@@ -3264,6 +3264,39 @@ public class DoodadManager : Singleton<DoodadManager>
     }
 
     /// <summary>
+    /// Every doodad template that carries the given phase function in any of its phases.
+    /// </summary>
+    /// <remarks>
+    /// Asking each doodad about the phase it is standing in answers a different question - a fish
+    /// school spends most of its life in phases that hold only a timer, and reaches the one that
+    /// names DoodadFuncFishSchool for a while at a time. What a template is does not change, so it
+    /// is worth working out once.
+    /// </remarks>
+    public HashSet<uint> GetTemplateIdsWithPhaseFunc(string funcType)
+    {
+        var result = new HashSet<uint>();
+        if (string.IsNullOrEmpty(funcType))
+        {
+            return result;
+        }
+
+        foreach (var (templateId, template) in _templates)
+        {
+            foreach (var funcGroup in template.FuncGroups)
+            {
+                if (_phaseFuncs.TryGetValue(funcGroup.Id, out var funcs) &&
+                    funcs.Exists(func => func.FuncType == funcType))
+                {
+                    result.Add(templateId);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Whether any phase of this doodad template hands out the given skill.
     /// </summary>
     /// <remarks>

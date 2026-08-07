@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 using AAEmu.Commons.Utils;
@@ -15,21 +15,30 @@ public class FishSchoolManager : Singleton<FishSchoolManager>
 {
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// Templates that name DoodadFuncFishSchool in any of their phases.
+    /// </summary>
+    /// <remarks>
+    /// Worked out once from the doodad data rather than asking each doodad about the phase it
+    /// happens to be standing in. A school of the two common kinds spends most of its life in
+    /// phases holding nothing but a timer and only reaches a fishing phase for a while at a time,
+    /// so the per-phase test counted almost none of them at startup and left the fish finder
+    /// blind to the rest. It also spared the radar a walk over every doodad in the world - all
+    /// hundred and thirty-seven thousand of them - on each of its ticks.
+    /// </remarks>
+    private static HashSet<uint> _fishSchoolTemplateIds = new();
+
     public void Initialize()
     {
-        Logger.Info("Initialising FishSchool Manager...");
+        _fishSchoolTemplateIds =
+            DoodadManager.Instance.GetTemplateIdsWithPhaseFunc(nameof(DoodadFuncFishSchool));
+
+        Logger.Info("Initialising FishSchool Manager... {0} fish-school doodad templates",
+            _fishSchoolTemplateIds.Count);
     }
 
-    // Fish schools are data-driven. The target database attaches DoodadFuncFishSchool to every
-    // valid school phase and points that function at an npc_spawner_id. Template IDs are not fixed.
     public static bool IsFishSchool(Doodad doodad)
-    {
-        if (doodad?.Template == null)
-            return false;
-
-        return DoodadManager.Instance.GetDoodadPhaseFuncs(doodad.FuncGroupId)
-            .Any(func => func.FuncType == nameof(DoodadFuncFishSchool));
-    }
+        => doodad != null && _fishSchoolTemplateIds.Contains(doodad.TemplateId);
 
     public void Load(uint worldId)
     {

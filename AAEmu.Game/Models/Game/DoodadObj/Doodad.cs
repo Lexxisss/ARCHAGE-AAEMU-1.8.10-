@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Numerics;
 
 using AAEmu.Commons.Network;
@@ -171,7 +172,41 @@ public class Doodad : BaseUnit
     public uint QuestGlow { get; set; } //0 off // 1 on
     public int PuzzleGroup { get; set; } = -1; // -1 off
     public DoodadSpawner Spawner { get; set; }
-    public DoodadFuncTask FuncTask { get; set; }
+    private DoodadFuncTask _funcTask;
+
+    public DoodadFuncTask FuncTask
+    {
+        get => _funcTask;
+        set => _funcTask = value;
+    }
+
+    /// <summary>
+    /// Takes the pending phase task away from the doodad and cancels it, once.
+    /// </summary>
+    /// <remarks>
+    /// Testing the field and then dereferencing it are two steps, and a doodad's timers run on
+    /// the scheduler's threads while players interact with it on the network's. A phase change
+    /// landing between the two saw the field emptied underneath and threw. Taking the reference
+    /// atomically means exactly one caller gets it and the losers get nothing to do; cancelling
+    /// what has already fired is safe on the task manager's side.
+    /// </remarks>
+    public bool CancelFuncTask(BaseUnit caster)
+    {
+        var pending = Interlocked.Exchange(ref _funcTask, null);
+        if (pending == null)
+        {
+            return false;
+        }
+
+        pending.CancelAsync().GetAwaiter().GetResult();
+
+        if (caster is Character)
+            Logger.Debug("DoodadFuncTimer: The current timer has been canceled. TemplateId {0}, ObjId {1}", TemplateId, ObjId);
+        else
+            Logger.Trace("DoodadFuncTimer: The current timer has been canceled. TemplateId {0}, ObjId {1}", TemplateId, ObjId);
+
+        return true;
+    }
 
     public List<DoodadFunc> CurrentFuncs { get; set; }
     public List<DoodadPhaseFunc> CurrentPhaseFuncs { get; set; }
@@ -445,12 +480,7 @@ public class Doodad : BaseUnit
                 // проверка нужна для Windstone id=1473
                 if (!HasOnlyGroupKindStart())
                 {
-                    if (FuncTask != null)
-                    {
-                        FuncTask.CancelAsync().GetAwaiter().GetResult();
-                        FuncTask = null;
-                        Logger.Debug($"DoFunc::DoodadFuncTimer: The current timer has been canceled. TemplateId {TemplateId}, ObjId {ObjId}, nextPhase {func.NextPhase}");
-                    }
+                    CancelFuncTask(caster);
 
                     // Delete doodad
                     if (Spawner is not null)
@@ -535,19 +565,7 @@ public class Doodad : BaseUnit
             ListGroupId.Clear();
         }
 
-        if (FuncTask != null)
-        {
-            FuncTask.CancelAsync().GetAwaiter().GetResult();
-            FuncTask = null;
-            if (caster is Character)
-            {
-                Logger.Debug("DoPhaseFuncs:DoodadFuncTimer: The current timer has been canceled.");
-            }
-            else
-            {
-                Logger.Trace("DoPhaseFuncs:DoodadFuncTimer: The current timer has been canceled.");
-            }
-        }
+        CancelFuncTask(caster);
 
         if (caster is Character)
         {
