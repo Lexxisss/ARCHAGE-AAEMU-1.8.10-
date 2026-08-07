@@ -485,6 +485,53 @@ public class DoodadManager : Singleton<DoodadManager>
                 }
             }
 
+            // doodad_func_tod_reacts
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM doodad_func_tod_reacts";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var func = new DoodadFuncTodReact
+                        {
+                            Id = reader.GetUInt32("id"),
+                            Tod = reader.GetInt32("tod", 0),
+                            TodEnd = reader.GetInt32("tod_end", 0),
+                            NextPhase = reader.GetInt32("next_phase", 0),
+                            IsRealtime = reader.GetBoolean("is_realtime", true) // stored as 't'/'f'
+                        };
+                        _phaseFuncTemplates["DoodadFuncTodReact"].Add(func.Id, func);
+                    }
+                }
+            }
+
+            // doodad_func_change_other_doodad_phases
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM doodad_func_change_other_doodad_phases";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        // The column is declared varchar and stored as text, so it has to be read
+                        // as one - every value is a doodad template id all the same.
+                        _ = uint.TryParse(reader.GetString("target_doodad_id", "0"), out var targetDoodadId);
+
+                        var func = new DoodadFuncChangeOtherDoodadPhase
+                        {
+                            Id = reader.GetUInt32("id"),
+                            TargetDoodadId = targetDoodadId,
+                            TargetPhase = reader.GetInt32("target_phase", -1),
+                            NextPhase = reader.GetInt32("next_phase", -1)
+                        };
+                        _phaseFuncTemplates["DoodadFuncChangeOtherDoodadPhase"].Add(func.Id, func);
+                    }
+                }
+            }
+
             // doodad_func_climbs
             using (var command = connection.CreateCommand())
             {

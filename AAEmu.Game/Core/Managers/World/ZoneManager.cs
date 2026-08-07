@@ -249,8 +249,9 @@ public class ZoneManager : Singleton<ZoneManager>
     /// <returns>Returns true if the doodad can have a growth time bonus, false if out of climate, or no climate defined for the doodad</returns>
     public static bool DoodadHasMatchingClimate(Doodad doodad)
     {
-        // If no climate defined, then don't give a bonus
-        if (doodad.Template.ClimateId == Climate.Any || doodad.Template.ClimateId == Climate.Any)
+        // If no climate defined, then don't give a bonus. The second half of this test used to
+        // repeat the first, so "no climate at all" was never the case it meant to exclude.
+        if (doodad.Template.ClimateId == Climate.Any || doodad.Template.ClimateId == Climate.None)
             return false;
 
         // Get doodad's zone (if missing zoneId (key)
