@@ -395,7 +395,7 @@ public class DamageEffect : EffectTemplate
 
         if (Bonuses != null)
         {
-            ((Unit)caster).Bonuses[uint.MaxValue] = new List<Bonus>();
+            ((Unit)caster).ClearBonuses(uint.MaxValue);
         }
 
         if (caster.GetRelationStateTo(trg) == RelationState.Friendly)

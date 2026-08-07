@@ -95,7 +95,7 @@ public class Slave : Unit
     /// </summary>
     public int RebuildEquipmentBonuses()
     {
-        Bonuses[SlaveEquipmentBonusIndex] = new List<Bonus>();
+        ClearBonuses(SlaveEquipmentBonusIndex);
 
         if (Equipment == null)
             return 0;

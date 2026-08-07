@@ -666,26 +666,50 @@ public class Unit : BaseUnit, IUnit
         BroadcastPacket(new SCForceAttackSetPacket(ObjId, ForceAttack), true);
     }
 
+    /// <summary>
+    /// Guards the bonus lists. Buffs come and go from the network's threads while the scheduler's
+    /// threads read the same lists to work out a speed or a damage multiplier. Copying a list that
+    /// another thread is removing from hands back an entry that is not there, and the reader trips
+    /// over it - which is how a buff ending brought down a damage effect with a null reference.
+    /// </summary>
+    private readonly object _bonusesLock = new();
+
     public override void AddBonus(uint bonusIndex, Bonus bonus)
     {
-        var bonuses = Bonuses.TryGetValue(bonusIndex, out var bonuse) ? bonuse : new List<Bonus>();
-        bonuses.Add(bonus);
-        Bonuses[bonusIndex] = bonuses;
+        if (bonus == null)
+            return;
+
+        lock (_bonusesLock)
+        {
+            if (!Bonuses.TryGetValue(bonusIndex, out var bonuses))
+            {
+                bonuses = new List<Bonus>();
+                Bonuses[bonusIndex] = bonuses;
+            }
+
+            bonuses.Add(bonus);
+        }
     }
 
     public override void RemoveBonus(uint bonusIndex, UnitAttribute attribute)
     {
-        if (!Bonuses.ContainsKey(bonusIndex))
+        lock (_bonusesLock)
         {
-            return;
-        }
-        var bonuses = Bonuses[bonusIndex];
-        foreach (var bonus in new List<Bonus>(bonuses))
-        {
-            if (bonus.Template != null && bonus.Template.Attribute == attribute)
+            if (!Bonuses.TryGetValue(bonusIndex, out var bonuses))
             {
-                bonuses.Remove(bonus);
+                return;
             }
+
+            bonuses.RemoveAll(bonus => bonus?.Template != null && bonus.Template.Attribute == attribute);
+        }
+    }
+
+    /// <summary>Empties one group of bonuses, keeping other groups as they are.</summary>
+    public void ClearBonuses(uint bonusIndex)
+    {
+        lock (_bonusesLock)
+        {
+            Bonuses[bonusIndex] = new List<Bonus>();
         }
     }
 
@@ -696,16 +720,21 @@ public class Unit : BaseUnit, IUnit
         {
             return result;
         }
-        foreach (var bonuses in new List<List<Bonus>>(Bonuses.Values))
+
+        lock (_bonusesLock)
         {
-            foreach (var bonus in new List<Bonus>(bonuses))
+            foreach (var bonuses in Bonuses.Values)
             {
-                if (bonus.Template != null && bonus.Template.Attribute == attribute)
+                foreach (var bonus in bonuses)
                 {
-                    result.Add(bonus);
+                    if (bonus?.Template != null && bonus.Template.Attribute == attribute)
+                    {
+                        result.Add(bonus);
+                    }
                 }
             }
         }
+
         return result;
     }
 
