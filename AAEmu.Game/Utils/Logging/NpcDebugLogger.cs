@@ -89,7 +89,7 @@ public static class NpcDebugLogger
                 : $"viewerObj={viewer.ObjId}|viewerId={viewer.Id}|viewerName={Clean(viewer.Name)}";
 
             Logger.Info(
-                "stage={0}|{1}|npcId={2}|obj={3}|runtimeName={4}|templateName={5}|showNameTag={6}|model={7}|race={8}|gender={9}|customDirect={10}|customResolved={11}|customResolvedModel={12}|customDefault={13}|customResolution={14}|noApply={15}|appearanceType={16}|npcWireExt={37}|appearanceSlot0C={17}|modifierLength={18}|appearanceWireLength={19}|hairColor={20}|defaultHairColor={21}|twoToneHair={22}|modifierHash=0x{23:X8}|clothPack={24}|weaponPack={25}|visualMask=0x{26:X2}|headFlag={27}|cosplayFlag={28}|cosplayVisual={29}|cosplayVisualResolution={30}|cosplayPrimary={31}|cosplaySecondary={32}|equip=[{33}]|initialIds=[{34}]|body=[{35}]|pos={36}|wireBaseRace={38}|wireBaseGender={39}|wireVisualRace={40}|wireVisualGender={41}",
+                "stage={0}|{1}|npcId={2}|obj={3}|runtimeName={4}|templateName={5}|showNameTag={6}|model={7}|race={8}|gender={9}|customDirect={10}|customResolved={11}|customResolvedModel={12}|customDefault={13}|customResolution={14}|noApply={15}|appearanceType={16}|npcWireExt={37}|appearanceSlot0C={17}|modifierLength={18}|appearanceWireLength={19}|hairColor={20}|defaultHairColor={21}|twoToneHair={22}|modifierHash=0x{23:X8}|clothPack={24}|weaponPack={25}|visualMask=0x{26:X2}|headFlag={27}|cosplayFlag={28}|cosplayVisual={29}|cosplayVisualResolution={30}|cosplayPrimary={31}|cosplaySecondary={32}|equip=[{33}]|initialIds=[{34}]|body=[{35}]|pos={36}|wireBaseRace={38}|wireBaseGender={39}|wireVisualRace={40}|wireVisualGender={41}|spawnYaw={42}|placementYaw={43}|placementPoints={44}",
                 Clean(stage), viewerInfo, npc.TemplateId, npc.ObjId, Clean(npc.Name), Clean(template.Name),
                 template.ShowNameTag ? 1 : 0, npc.ModelId, template.Race, template.Gender,
                 template.TotalCustomId, template.ResolvedCustomId, template.ResolvedCustomModelId,
@@ -110,7 +110,12 @@ public static class NpcDebugLogger
                 wireModelParams.Face?.BaseRace ?? 0,
                 wireModelParams.Face?.BaseGender ?? 0,
                 wireModelParams.Face?.VisualRace ?? 0,
-                wireModelParams.Face?.VisualGender ?? 0);
+                wireModelParams.Face?.VisualGender ?? 0,
+                // Where the facing is meant to come from, so a wrongly turned npc says at a glance
+                // whether it was lost reading the placement or after the npc was put down.
+                (npc.Spawner?.Position?.Yaw ?? 0f).RadToDeg(),
+                (npc.Spawner?.Placement?.Points?.FirstOrDefault()?.ZRotation ?? 0f).RadToDeg(),
+                npc.Spawner?.Placement?.Points?.Count ?? 0);
         }
         catch (Exception exception)
         {
