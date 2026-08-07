@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -240,10 +241,33 @@ public class Simulation : Patrol
         return result;
     }
 
+    /// <summary>
+    /// The file holding this route, looked for under the world and zone it belongs to before the
+    /// flat directory.
+    /// </summary>
+    /// <remarks>
+    /// Route names are not unique: of the 4073 the client's level design holds, 434 occur in more
+    /// than one place - the three difficulties of Nachashgar are one level built three times, and
+    /// 93 more repeat between zones of a single world. So the routes are laid out the way the
+    /// client keeps them, Data/Path/&lt;world&gt;/&lt;zone&gt;/, and the flat directory is still
+    /// searched afterwards for the handful of hand-written ones.
+    /// </remarks>
     private string GetMoveFileName()
     {
-        var result = System.IO.Path.Combine(MoveFilesPath, MoveFileName + MoveFileExt);
-        return result;
+        var spawnerPosition = Npc?.Spawner?.Position;
+        if (spawnerPosition != null)
+        {
+            var worldName = WorldManager.Instance.GetWorld(spawnerPosition.WorldId)?.Name;
+            if (!string.IsNullOrEmpty(worldName))
+            {
+                var scoped = System.IO.Path.Combine(MoveFilesPath, worldName,
+                    spawnerPosition.ZoneId.ToString(CultureInfo.InvariantCulture), MoveFileName + MoveFileExt);
+                if (File.Exists(scoped))
+                    return scoped;
+            }
+        }
+
+        return System.IO.Path.Combine(MoveFilesPath, MoveFileName + MoveFileExt);
     }
 
     //***************************************************************
