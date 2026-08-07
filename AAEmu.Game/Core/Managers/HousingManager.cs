@@ -1714,32 +1714,28 @@ WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'doodads';";
         return 1f + surcharge;
     }
 
-    /// <summary>How many tax certificates an amount of tax money costs, for this design's own rate.</summary>
+    /// <summary>One certificate covers this much tax money.</summary>
     /// <remarks>
-    /// The design names both what one period costs in money and what it costs in certificates, and
-    /// the two are authored independently: a hundred thousand buys one certificate on one design,
-    /// a hundred and fifty thousand buys two on another, three million buys one. No single divisor
-    /// fits, which is why the three that were invented for this - ten thousand, five thousand and
-    /// a million - could not all have been right, and were not.
+    /// Read off the client: putting up design 312 quotes 450 000 in tax - one week at 150 000 plus
+    /// a deposit of twice that - and the client asks the player for forty-five certificates.
+    /// </remarks>
+    private const int TaxMoneyPerCertificate = 10000;
+
+    /// <summary>How many tax certificates an amount of tax money costs.</summary>
+    /// <remarks>
+    /// A flat rate, not a per-design one. Counting in periods instead - what the money comes to
+    /// over what one period costs, times the design's seal_count - charged six where the client
+    /// asked for forty-five, because it read seal_count as a price when it is not one.
     ///
-    /// So the certificates are counted in periods: what the money comes to, over what one period
-    /// costs, times what one period costs in certificates.
-    ///
-    /// This is our reading of the data and not something anyone has found in the client. What is
-    /// established is only that buildings are paid for in certificates rather than coin, and that
-    /// two other kinds of building divide the count again by numbers we do not have. Until those
-    /// turn up this is what we charge, and it is at least built from the design's own figures
-    /// rather than a constant somebody liked.
+    /// The rate holds as the bill grows: the surcharge for owning several heavily taxed buildings
+    /// raises the money, and the certificates follow it.
     /// </remarks>
     private static int CertificatesFor(HousingTemplate template, int taxAmount)
     {
-        var tax = template.Taxation?.Tax ?? 0;
-        var seals = template.Taxation?.SealCount ?? 0;
-        if (tax == 0 || seals == 0 || taxAmount <= 0)
+        if (template?.Taxation == null || taxAmount <= 0)
             return 0;
 
-        var periods = (double)taxAmount / tax;
-        return (int)Math.Ceiling(periods * seals);
+        return (int)Math.Ceiling((double)taxAmount / TaxMoneyPerCertificate);
     }
 
     public bool CalculateBuildingTaxInfo(ulong accountId, HousingTemplate newHouseTemplate, bool buildingNewHouse, out int totalTaxToPay, out int heavyHouseCount, out int normalHouseCount, out int hostileTaxRate, out int oneWeekTaxCount)
