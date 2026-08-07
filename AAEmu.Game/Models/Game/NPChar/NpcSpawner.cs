@@ -36,6 +36,14 @@ public class NpcSpawner : Spawner<Npc>
     private readonly Dictionary<uint, int> _memberSpawnCounts = new();
     private readonly Dictionary<uint, uint> _logicalMemberByNpcObjId = new();
 
+    // Which post each npc of this placement is standing at, so that two of them never take the
+    // same one. A post carries the way it is faced, so sharing one leaves other posts empty and
+    // both occupants facing a way that only makes sense where they are not standing.
+    private readonly Dictionary<uint, int> _pointByNpcObjId = new();
+    private readonly HashSet<int> _takenPoints = new();
+    private int _lastPointIndex = -1;
+    private WorldSpawnPosition _basePosition;
+
     [JsonProperty(DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
     [DefaultValue(1f)]
     public uint Count { get; set; }
@@ -349,6 +357,12 @@ public class NpcSpawner : Spawner<Npc>
             _logicalPopulation++;
             _memberSpawnCounts[member.Id] = _memberSpawnCounts.GetValueOrDefault(member.Id) + 1;
             _logicalMemberByNpcObjId[npcs[0].ObjId] = member.Id;
+            if (_lastPointIndex >= 0)
+            {
+                _takenPoints.Add(_lastPointIndex);
+                _pointByNpcObjId[npcs[0].ObjId] = _lastPointIndex;
+                _lastPointIndex = -1;
+            }
             if (_scheduledCount > 0)
                 _scheduledCount = Math.Max(0, _scheduledCount - npcs.Count);
             _lastSpawn = npcs[^1];
@@ -396,7 +410,12 @@ public class NpcSpawner : Spawner<Npc>
 
     private WorldSpawnPosition SelectSpawnPosition()
     {
-        var result = Position.Clone();
+        // Start from where the placement actually is, not from wherever the last npc of this
+        // spawner happened to be put: Position is overwritten on every spawn, so measuring the
+        // next one from it let the whole group wander and carry the previous one's facing.
+        _basePosition ??= Position.Clone();
+        _lastPointIndex = -1;
+        var result = _basePosition.Clone();
         if (Placement.SpawnAreaType == "area" && Placement.Triangles.Count > 0)
         {
             var totalAreaRate = Placement.Triangles.Sum(triangle => Math.Max(0f, triangle.AreaRate));
@@ -425,7 +444,9 @@ public class NpcSpawner : Spawner<Npc>
 
         if (Placement.Points.Count > 0)
         {
-            var point = Placement.Points[Rand.Next(Placement.Points.Count)];
+            var index = SelectFreePointIndex();
+            var point = Placement.Points[index];
+            _lastPointIndex = index;
             result.X = point.Position.X;
             result.Y = point.Position.Y;
             result.Z = point.Position.Z;
@@ -434,10 +455,32 @@ public class NpcSpawner : Spawner<Npc>
         return result;
     }
 
+    /// <summary>
+    /// A post of this placement that nobody is standing at, or any of them once they are all
+    /// taken. Drawing with replacement stacked npcs two to a post and left others empty, and
+    /// since the post is what says which way to face, the ones doubled up faced the wrong way
+    /// for where they stood.
+    /// </summary>
+    private int SelectFreePointIndex()
+    {
+        if (_takenPoints.Count >= Placement.Points.Count)
+            return Rand.Next(Placement.Points.Count);
+
+        var free = new List<int>(Placement.Points.Count - _takenPoints.Count);
+        for (var i = 0; i < Placement.Points.Count; i++)
+            if (!_takenPoints.Contains(i))
+                free.Add(i);
+
+        return free.Count > 0 ? free[Rand.Next(free.Count)] : Rand.Next(Placement.Points.Count);
+    }
+
     private void RemoveExactLogicalPopulation(Npc npc)
     {
         if (Placement == null || !_logicalMemberByNpcObjId.Remove(npc.ObjId, out var memberId))
             return;
+        // Give the post back, or the placement runs out of them and starts doubling up again.
+        if (_pointByNpcObjId.Remove(npc.ObjId, out var pointIndex))
+            _takenPoints.Remove(pointIndex);
         _logicalPopulation = Math.Max(0, _logicalPopulation - 1);
         if (_memberSpawnCounts.TryGetValue(memberId, out var count))
             _memberSpawnCounts[memberId] = Math.Max(0, count - 1);
@@ -758,6 +801,9 @@ public class NpcSpawner : Spawner<Npc>
         _logicalPopulation = 0;
         _memberSpawnCounts.Clear();
         _logicalMemberByNpcObjId.Clear();
+        _pointByNpcObjId.Clear();
+        _takenPoints.Clear();
+        _lastPointIndex = -1;
         _spawned = new List<Npc>();
         _lastSpawn = null;
     }
