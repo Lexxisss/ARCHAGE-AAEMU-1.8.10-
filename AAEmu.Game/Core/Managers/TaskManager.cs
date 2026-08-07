@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Linq;
 using System.Threading.Tasks;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers.Id;
@@ -61,6 +63,23 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
             Logger.Log(level,
                 "Scheduler load: executing {0}/{1}, jobs held {2}, new requests {3} since the last report",
                 executing, AppConfiguration.Instance.MaxConcurencyThreadPool, scheduled, since);
+
+            // Who asked for all of it. A rate on its own says the server is drowning without
+            // saying in what, and the answer has been guessed at three times already.
+            var byName = new List<KeyValuePair<string, int>>();
+            foreach (var name in _requestsByTaskName.Keys)
+            {
+                if (_requestsByTaskName.TryRemove(name, out var count) && count > 0)
+                    byName.Add(new KeyValuePair<string, int>(name, count));
+            }
+
+            if (byName.Count > 0)
+            {
+                byName.Sort((left, right) => right.Value.CompareTo(left.Value));
+                var top = string.Join(", ", byName.Take(8).Select(x => $"{x.Key} {x.Value}"));
+                Logger.Log(level, "Scheduler load by task: {0}{1}",
+                    top, byName.Count > 8 ? $", and {byName.Count - 8} more kinds" : string.Empty);
+            }
         }
         catch (Exception e)
         {
@@ -69,6 +88,9 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
     }
 
     private int _lastReportedRequestCount;
+
+    /// <summary>How many bookings each kind of task asked for since the last report.</summary>
+    private readonly ConcurrentDictionary<string, int> _requestsByTaskName = new();
 
     public async IAsyncEnumerable<Task> GetExecutingTasks()
     {
@@ -117,6 +139,8 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
         [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
     {
         this.ScheduleRequestCount++;
+        if (task != null)
+            _requestsByTaskName.AddOrUpdate(task.Name, 1, static (_, current) => current + 1);
 
         if (_generalScheduler.IsShutdown)
             return;
