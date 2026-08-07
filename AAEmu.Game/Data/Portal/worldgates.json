@@ -8637,5 +8637,2098 @@
         "Z": 129.88,
         "ZRot": 0.0,
         "SubZoneId": 1205
+    },
+
+    // ---- Instance worlds ----
+    // Same source and conversion, but these name their world: WorldId is only a
+    // position in the order the client's worlds are enumerated, so it is resolved
+    // by name when the list loads.
+    {
+        // event_Korea_a_1  (arche_mall, 개천절 이벤트 (천제단))
+        "Id": 719,
+        "Name": "event_Korea_a_1",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3744.57,
+        "Y": 4374.55,
+        "Z": 306.25,
+        "ZRot": 170.0,
+        "SubZoneId": 719
+    },
+    {
+        // arche_mall_event  (arche_mall, 할로윈 이벤트 귀환 지점)
+        "Id": 1007,
+        "Name": "arche_mall_event",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3716.15,
+        "Y": 4500.50,
+        "Z": 145.18,
+        "ZRot": 0.0,
+        "SubZoneId": 1007
+    },
+    {
+        // arche_mall_event_b  (arche_mall, 미로 이벤트 귀환)
+        "Id": 1043,
+        "Name": "arche_mall_event_b",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 4935.28,
+        "Y": 4311.85,
+        "Z": 128.63,
+        "ZRot": 0.0,
+        "SubZoneId": 1043
+    },
+    {
+        // arche_mall_event_a  (arche_mall, 미로 이벤트 위치)
+        "Id": 1044,
+        "Name": "arche_mall_event_a",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 4933.85,
+        "Y": 4279.16,
+        "Z": 128.78,
+        "ZRot": 0.0,
+        "SubZoneId": 1044
+    },
+    {
+        // arche_mall_event_c  (arche_mall, 미로공원 출구 입장)
+        "Id": 1045,
+        "Name": "arche_mall_event_c",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 4937.16,
+        "Y": 4300.41,
+        "Z": 128.66,
+        "ZRot": 5.0,
+        "SubZoneId": 1045
+    },
+    {
+        // arche_mall_event_d  (arche_mall, 신기루 대어 낚시 이벤트 위치)
+        "Id": 1046,
+        "Name": "arche_mall_event_d",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 4814.29,
+        "Y": 4331.14,
+        "Z": 104.94,
+        "ZRot": 110.0,
+        "SubZoneId": 1046
+    },
+    {
+        // arche_mall_jump_recall  (arche_mall, 레이싱 점프 이벤트 귀환)
+        "Id": 1062,
+        "Name": "arche_mall_jump_recall",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3797.95,
+        "Y": 4835.65,
+        "Z": 110.30,
+        "ZRot": 0.0,
+        "SubZoneId": 1062
+    },
+    {
+        // arche_mall_jump_entrance  (arche_mall, 레이싱 점프 시작 위치)
+        "Id": 1063,
+        "Name": "arche_mall_jump_entrance",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3787.96,
+        "Y": 4836.81,
+        "Z": 110.42,
+        "ZRot": 0.0,
+        "SubZoneId": 1063
+    },
+    {
+        // halloween_race_return01  (arche_mall, 처음 위치로 돌아가요)
+        "Id": 1097,
+        "Name": "halloween_race_return01",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3470.29,
+        "Y": 4547.51,
+        "Z": 165.13,
+        "ZRot": 0.0,
+        "SubZoneId": 1097
+    },
+    {
+        // event_whiteday_entrance  (arche_mall, 화이트데이 시작 지점 이동)
+        "Id": 1130,
+        "Name": "event_whiteday_entrance",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3802.90,
+        "Y": 4897.17,
+        "Z": 104.31,
+        "ZRot": 0.0,
+        "SubZoneId": 1130
+    },
+    {
+        // gate_budda_2021  (arche_mall, 수행의 길 입장 지역)
+        "Id": 1141,
+        "Name": "gate_budda_2021",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3531.57,
+        "Y": 4215.02,
+        "Z": 104.16,
+        "ZRot": 138.0,
+        "SubZoneId": 1141
+    },
+    {
+        // royalgraves  (arche_mall, 왕가의 무덤 이벤트 위치)
+        "Id": 1149,
+        "Name": "royalgraves",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 4416.72,
+        "Y": 4108.35,
+        "Z": 117.25,
+        "ZRot": 178.0,
+        "SubZoneId": 1149
+    },
+    {
+        // 9th_event_return  (arche_mall, 실패 후 귀환 포인트)
+        "Id": 1150,
+        "Name": "9th_event_return",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3793.39,
+        "Y": 4373.12,
+        "Z": 102.46,
+        "ZRot": 11.0,
+        "SubZoneId": 1150
+    },
+    {
+        // 9th_event_entrance  (arche_mall, 이벤트 지역으로 이동)
+        "Id": 1151,
+        "Name": "9th_event_entrance",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3777.84,
+        "Y": 4379.07,
+        "Z": 106.59,
+        "ZRot": -165.0,
+        "SubZoneId": 1151
+    },
+    {
+        // 9th_event_game_start2  (arche_mall, 2층 지역으로 두번째)
+        "Id": 1157,
+        "Name": "9th_event_game_start2",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3791.57,
+        "Y": 4368.78,
+        "Z": 143.63,
+        "ZRot": -116.0,
+        "SubZoneId": 1157
+    },
+    {
+        // 9th_event_game_start3  (arche_mall, 2층 지역으로 세번째)
+        "Id": 1158,
+        "Name": "9th_event_game_start3",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3787.71,
+        "Y": 4351.12,
+        "Z": 143.63,
+        "ZRot": 68.0,
+        "SubZoneId": 1158
+    },
+    {
+        // 9th_event_game_start4  (arche_mall, 2층 지역으로 네번째)
+        "Id": 1159,
+        "Name": "9th_event_game_start4",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3798.13,
+        "Y": 4358.40,
+        "Z": 143.63,
+        "ZRot": 147.0,
+        "SubZoneId": 1159
+    },
+    {
+        // event_Korea_a_2  (arche_mall, 만우절 귀환 지점으로 사용할 예정)
+        "Id": 1178,
+        "Name": "event_Korea_a_2",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3703.73,
+        "Y": 4538.76,
+        "Z": 145.15,
+        "ZRot": 0.0,
+        "SubZoneId": 1178
+    },
+    {
+        // 20220331_escape  (arche_mall, 만우절 탈출 지점)
+        "Id": 1179,
+        "Name": "20220331_escape",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3692.79,
+        "Y": 4552.95,
+        "Z": 152.02,
+        "ZRot": 0.0,
+        "SubZoneId": 1179
+    },
+    {
+        // 20220331_door  (arche_mall, 만우절 입장)
+        "Id": 1180,
+        "Name": "20220331_door",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3712.96,
+        "Y": 4524.08,
+        "Z": 146.15,
+        "ZRot": 0.0,
+        "SubZoneId": 1180
+    },
+    {
+        // archeage_x_nouhaus  (arche_mall, 누하스 힐링 이벤트)
+        "Id": 1201,
+        "Name": "archeage_x_nouhaus",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3623.25,
+        "Y": 4227.62,
+        "Z": 106.04,
+        "ZRot": 0.0,
+        "SubZoneId": 1201
+    },
+    {
+        // portal_blue12  (instance_battle_field_of_feast, 향연제일검 12시)
+        "Id": 783,
+        "Name": "portal_blue12",
+        "World": "instance_battle_field_of_feast",
+        "ZoneId": 326,
+        "X": 560.14,
+        "Y": 586.29,
+        "Z": 387.36,
+        "ZRot": 179.0,
+        "SubZoneId": 783
+    },
+    {
+        // portal_red3  (instance_battle_field_of_feast, 향연제일검 3시)
+        "Id": 784,
+        "Name": "portal_red3",
+        "World": "instance_battle_field_of_feast",
+        "ZoneId": 326,
+        "X": 598.26,
+        "Y": 520.20,
+        "Z": 387.35,
+        "ZRot": 58.0,
+        "SubZoneId": 784
+    },
+    {
+        // portal_green9  (instance_battle_field_of_feast, 향연제일검 9시)
+        "Id": 785,
+        "Name": "portal_green9",
+        "World": "instance_battle_field_of_feast",
+        "ZoneId": 326,
+        "X": 522.07,
+        "Y": 520.18,
+        "Z": 387.36,
+        "ZRot": -60.0,
+        "SubZoneId": 785
+    },
+    {
+        // blackspike_rebirthroom  (instance_black_spike, 포탈: 검은 가시 시작/부활방)
+        "Id": 1142,
+        "Name": "blackspike_rebirthroom",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 749.38,
+        "Y": 555.24,
+        "Z": 151.70,
+        "ZRot": 0.0,
+        "SubZoneId": 1142
+    },
+    {
+        // blackspike_nachashgar_room  (instance_black_spike, 포탈: 검은 가시 나차쉬가르 방)
+        "Id": 1143,
+        "Name": "blackspike_nachashgar_room",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 520.37,
+        "Y": 867.90,
+        "Z": 134.12,
+        "ZRot": 89.0,
+        "SubZoneId": 1143
+    },
+    {
+        // blackspike_feast_room  (instance_black_spike, 포탈: 검은 가시 향연의 뜰 방)
+        "Id": 1144,
+        "Name": "blackspike_feast_room",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 503.85,
+        "Y": 578.39,
+        "Z": 145.14,
+        "ZRot": 89.0,
+        "SubZoneId": 1144
+    },
+    {
+        // blackspike_ocean_room  (instance_black_spike, 포탈: 검은 가시 바다 방)
+        "Id": 1145,
+        "Name": "blackspike_ocean_room",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 527.30,
+        "Y": 305.05,
+        "Z": 117.88,
+        "ZRot": 89.0,
+        "SubZoneId": 1145
+    },
+    {
+        // blackspike_ammon_room  (instance_black_spike, 포탈: 검은 가시 아몬파키드 방)
+        "Id": 1146,
+        "Name": "blackspike_ammon_room",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 998.88,
+        "Y": 824.57,
+        "Z": 154.65,
+        "ZRot": 0.0,
+        "SubZoneId": 1146
+    },
+    {
+        // blackspike_kahlil_room  (instance_black_spike, 포탈: 검은 가시 칼릴탈몬 방)
+        "Id": 1147,
+        "Name": "blackspike_kahlil_room",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 996.28,
+        "Y": 546.21,
+        "Z": 146.62,
+        "ZRot": 0.0,
+        "SubZoneId": 1147
+    },
+    {
+        // blackspike_library_room  (instance_black_spike, 포탈: 검은 가시 에아나드 심장 방)
+        "Id": 1148,
+        "Name": "blackspike_library_room",
+        "World": "instance_black_spike",
+        "ZoneId": 396,
+        "X": 994.80,
+        "Y": 257.09,
+        "Z": 152.22,
+        "ZRot": 0.0,
+        "SubZoneId": 1148
+    },
+    {
+        // instance_reddragon_craft  (instance_carcass, 버려진 고대의 잔해)
+        "Id": 990,
+        "Name": "instance_reddragon_craft",
+        "World": "instance_carcass",
+        "ZoneId": 366,
+        "X": 3094.08,
+        "Y": 5260.12,
+        "Z": 105.55,
+        "ZRot": 0.0,
+        "SubZoneId": 990
+    },
+    {
+        // Portal_chellange_2  (instance_challenge_tower, 무한대전 왼편 지점)
+        "Id": 987,
+        "Name": "Portal_chellange_2",
+        "World": "instance_challenge_tower",
+        "ZoneId": 368,
+        "X": 432.78,
+        "Y": 466.33,
+        "Z": 149.06,
+        "ZRot": -58.0,
+        "SubZoneId": 987
+    },
+    {
+        // Portal_chellange_1  (instance_challenge_tower, 무한대전 오른편 지점)
+        "Id": 988,
+        "Name": "Portal_chellange_1",
+        "World": "instance_challenge_tower",
+        "ZoneId": 368,
+        "X": 409.46,
+        "Y": 451.17,
+        "Z": 149.06,
+        "ZRot": 121.0,
+        "SubZoneId": 988
+    },
+    {
+        // Portal_chellange_area  (instance_challenge_tower, 무한대전 소환 지점)
+        "Id": 989,
+        "Name": "Portal_chellange_area",
+        "World": "instance_challenge_tower",
+        "ZoneId": 368,
+        "X": 450.56,
+        "Y": 416.17,
+        "Z": 128.07,
+        "ZRot": 37.0,
+        "SubZoneId": 989
+    },
+    {
+        // sprigun_room  (instance_cradle_of_destruction, 미치광이의 침실로 통하는 공간 이동의 문)
+        "Id": 488,
+        "Name": "sprigun_room",
+        "World": "instance_cradle_of_destruction",
+        "ZoneId": 264,
+        "X": 180.72,
+        "Y": 716.22,
+        "Z": 182.99,
+        "ZRot": -179.0,
+        "SubZoneId": 488
+    },
+    {
+        // sprigun_room_hard  (instance_cradle_of_destruction_hard, [고대] 미치광이의 침실로 통하는 공간 이동의 문)
+        "Id": 735,
+        "Name": "sprigun_room_hard",
+        "World": "instance_cradle_of_destruction_hard",
+        "ZoneId": 320,
+        "X": 180.72,
+        "Y": 716.22,
+        "Z": 182.99,
+        "ZRot": -179.0,
+        "SubZoneId": 735
+    },
+    {
+        // instance_dew_plain_area_1  (instance_dew_plain, 이슬평원 전쟁_중앙 진입 존)
+        "Id": 995,
+        "Name": "instance_dew_plain_area_1",
+        "World": "instance_dew_plain",
+        "ZoneId": 374,
+        "X": 1932.98,
+        "Y": 2103.51,
+        "Z": 180.02,
+        "ZRot": -18.0,
+        "SubZoneId": 995
+    },
+    {
+        // portal_kadum  (instance_dewplane_boss, 피의 사자 카둠 지상 이동 포탈)
+        "Id": 1055,
+        "Name": "portal_kadum",
+        "World": "instance_dewplane_boss",
+        "ZoneId": 376,
+        "X": 829.83,
+        "Y": 1224.06,
+        "Z": 136.50,
+        "ZRot": 0.0,
+        "SubZoneId": 1055
+    },
+    {
+        // gv_dimensional_a  (instance_dimensional_defence, 차원경계방어전 부활지 A진영)
+        "Id": 1190,
+        "Name": "gv_dimensional_a",
+        "World": "instance_dimensional_defence",
+        "ZoneId": 402,
+        "X": 428.52,
+        "Y": 1777.22,
+        "Z": 112.02,
+        "ZRot": -165.0,
+        "SubZoneId": 1190
+    },
+    {
+        // gv_dimensional_b  (instance_dimensional_defence, 차원경계방어전 부활지 B진영)
+        "Id": 1195,
+        "Name": "gv_dimensional_b",
+        "World": "instance_dimensional_defence",
+        "ZoneId": 402,
+        "X": 2476.55,
+        "Y": 751.95,
+        "Z": 111.77,
+        "ZRot": -165.0,
+        "SubZoneId": 1195
+    },
+    {
+        // event_8th_east_gate  (instance_event_camp_1on1, 8주년 이벤트 동쪽 통로)
+        "Id": 1118,
+        "Name": "event_8th_east_gate",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1386.87,
+        "Y": 1531.14,
+        "Z": 256.46,
+        "ZRot": 81.0,
+        "SubZoneId": 1118
+    },
+    {
+        // event_8th_west_gate  (instance_event_camp_1on1, 8주년 이벤트 서쪽 통로)
+        "Id": 1119,
+        "Name": "event_8th_west_gate",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1428.24,
+        "Y": 1531.43,
+        "Z": 256.46,
+        "ZRot": -99.0,
+        "SubZoneId": 1119
+    },
+    {
+        // event_8th_north_gate  (instance_event_camp_1on1, 8주년 이벤트 북쪽 통로)
+        "Id": 1120,
+        "Name": "event_8th_north_gate",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1407.03,
+        "Y": 1502.93,
+        "Z": 257.36,
+        "ZRot": 180.0,
+        "SubZoneId": 1120
+    },
+    {
+        // event_8th_south_gate  (instance_event_camp_1on1, 8주년 이벤트 남쪽 통로)
+        "Id": 1121,
+        "Name": "event_8th_south_gate",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1406.96,
+        "Y": 1552.78,
+        "Z": 256.46,
+        "ZRot": 0.0,
+        "SubZoneId": 1121
+    },
+    {
+        // event_8th_vote_gate  (instance_event_camp_1on1, 8주년 이벤트 투표 장소 집합)
+        "Id": 1122,
+        "Name": "event_8th_vote_gate",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1406.66,
+        "Y": 1523.55,
+        "Z": 274.37,
+        "ZRot": 0.0,
+        "SubZoneId": 1122
+    },
+    {
+        // event_8th_vote_end  (instance_event_camp_1on1, 8주년 이벤트 투표 끝나고 여신상 귀환)
+        "Id": 1123,
+        "Name": "event_8th_vote_end",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1408.58,
+        "Y": 1525.52,
+        "Z": 256.87,
+        "ZRot": 0.0,
+        "SubZoneId": 1123
+    },
+    {
+        // event_8th_east_gate_in  (instance_event_camp_1on1, 8주년 이벤트 동쪽 통로 안으로)
+        "Id": 1125,
+        "Name": "event_8th_east_gate_in",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1399.10,
+        "Y": 1531.45,
+        "Z": 257.36,
+        "ZRot": -89.0,
+        "SubZoneId": 1125
+    },
+    {
+        // event_8th_west_gate_in  (instance_event_camp_1on1, 8주년 이벤트 서쪽 통로 안으로)
+        "Id": 1126,
+        "Name": "event_8th_west_gate_in",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1413.94,
+        "Y": 1526.72,
+        "Z": 256.81,
+        "ZRot": 90.0,
+        "SubZoneId": 1126
+    },
+    {
+        // event_8th_south_gate_in  (instance_event_camp_1on1, 8주년 이벤트 남쪽 통로 안으로)
+        "Id": 1127,
+        "Name": "event_8th_south_gate_in",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1404.08,
+        "Y": 1538.48,
+        "Z": 256.87,
+        "ZRot": -167.0,
+        "SubZoneId": 1127
+    },
+    {
+        // event_8th_north_gate_in  (instance_event_camp_1on1, 8주년 이벤트 북쪽 통로 안으로)
+        "Id": 1128,
+        "Name": "event_8th_north_gate_in",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1409.79,
+        "Y": 1521.14,
+        "Z": 257.36,
+        "ZRot": 14.0,
+        "SubZoneId": 1128
+    },
+    {
+        // cuttlefish_return  (instance_event_camp_1on1, 탈락자 이동 위치)
+        "Id": 1160,
+        "Name": "cuttlefish_return",
+        "World": "instance_event_camp_1on1",
+        "ZoneId": 393,
+        "X": 1647.17,
+        "Y": 1224.64,
+        "Z": 257.76,
+        "ZRot": -88.0,
+        "SubZoneId": 1160
+    },
+    {
+        // 10th_event_start  (instance_event_hanuimaru, 하늬마루 운동회 처음 위치 귀환)
+        "Id": 1199,
+        "Name": "10th_event_start",
+        "World": "instance_event_hanuimaru",
+        "ZoneId": 403,
+        "X": 1634.13,
+        "Y": 2219.20,
+        "Z": 406.32,
+        "ZRot": -157.0,
+        "SubZoneId": 1199
+    },
+    {
+        // portal_docheol_room  (instance_feast_garden, 도철의 방 안쪽)
+        "Id": 736,
+        "Name": "portal_docheol_room",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1718.46,
+        "Y": 1786.07,
+        "Z": 355.47,
+        "ZRot": -135.0,
+        "SubZoneId": 736
+    },
+    {
+        // portal_docheol_outroom  (instance_feast_garden, 도철의 방 밖)
+        "Id": 739,
+        "Name": "portal_docheol_outroom",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1030.28,
+        "Y": 1343.05,
+        "Z": 354.50,
+        "ZRot": -175.0,
+        "SubZoneId": 739
+    },
+    {
+        // portal_aria_outroom  (instance_feast_garden, 아리아의 방 밖)
+        "Id": 741,
+        "Name": "portal_aria_outroom",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1314.52,
+        "Y": 841.81,
+        "Z": 365.33,
+        "ZRot": 59.0,
+        "SubZoneId": 741
+    },
+    {
+        // portal_aria_room  (instance_feast_garden, 아리아의 방 안쪽)
+        "Id": 742,
+        "Name": "portal_aria_room",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 212.10,
+        "Y": 1812.26,
+        "Z": 366.43,
+        "ZRot": -40.0,
+        "SubZoneId": 742
+    },
+    {
+        // portal_baeksojeong_outroom  (instance_feast_garden, 백소정의 방 밖)
+        "Id": 743,
+        "Name": "portal_baeksojeong_outroom",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 728.59,
+        "Y": 831.98,
+        "Z": 357.05,
+        "ZRot": -60.0,
+        "SubZoneId": 743
+    },
+    {
+        // portal_baeksojeong_room  (instance_feast_garden, 백소정의 방 안쪽)
+        "Id": 744,
+        "Name": "portal_baeksojeong_room",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 269.75,
+        "Y": 270.05,
+        "Z": 359.26,
+        "ZRot": 135.0,
+        "SubZoneId": 744
+    },
+    {
+        // portal_baeksojeong_roomstart  (instance_feast_garden, 백소정의 방 입구)
+        "Id": 745,
+        "Name": "portal_baeksojeong_roomstart",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 728.17,
+        "Y": 831.84,
+        "Z": 357.05,
+        "ZRot": 123.0,
+        "SubZoneId": 745
+    },
+    {
+        // portal_docheol_roomstart  (instance_feast_garden, 도철의 방 입구)
+        "Id": 746,
+        "Name": "portal_docheol_roomstart",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1029.94,
+        "Y": 1343.76,
+        "Z": 354.72,
+        "ZRot": -5.0,
+        "SubZoneId": 746
+    },
+    {
+        // portal_aria_roomstart  (instance_feast_garden, 아리아의 방 입구)
+        "Id": 747,
+        "Name": "portal_aria_roomstart",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1315.63,
+        "Y": 841.48,
+        "Z": 365.33,
+        "ZRot": -121.0,
+        "SubZoneId": 747
+    },
+    {
+        // portal_fest_garden_center  (instance_feast_garden, 향연의 뜰 입구)
+        "Id": 749,
+        "Name": "portal_fest_garden_center",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1029.83,
+        "Y": 1006.59,
+        "Z": 391.41,
+        "ZRot": -118.0,
+        "SubZoneId": 749
+    },
+    {
+        // portal_docheol_sideway  (instance_feast_garden, 도철 방향 우회로 순간 이동 장치)
+        "Id": 755,
+        "Name": "portal_docheol_sideway",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1214.09,
+        "Y": 1145.75,
+        "Z": 352.27,
+        "ZRot": -78.0,
+        "SubZoneId": 755
+    },
+    {
+        // portal_baeksojeong_sideway  (instance_feast_garden, 백소정 방향 우회로 순간 이동 장치)
+        "Id": 756,
+        "Name": "portal_baeksojeong_sideway",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 791.91,
+        "Y": 1127.34,
+        "Z": 361.08,
+        "ZRot": 171.0,
+        "SubZoneId": 756
+    },
+    {
+        // portal_aria_sideway  (instance_feast_garden, 아리아 방향 우회로 순간 이동 장치)
+        "Id": 757,
+        "Name": "portal_aria_sideway",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1028.00,
+        "Y": 754.42,
+        "Z": 348.54,
+        "ZRot": 163.0,
+        "SubZoneId": 757
+    },
+    {
+        // portal_dboss_room  (instance_feast_garden, 대연회장)
+        "Id": 759,
+        "Name": "portal_dboss_room",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 959.82,
+        "Y": 2752.60,
+        "Z": 346.33,
+        "ZRot": -29.0,
+        "SubZoneId": 759
+    },
+    {
+        // quest_secret  (instance_feast_garden, 향연의 뜰 퀘스트 이동지점)
+        "Id": 768,
+        "Name": "quest_secret",
+        "World": "instance_feast_garden",
+        "ZoneId": 321,
+        "X": 1227.00,
+        "Y": 1112.00,
+        "Z": 393.69,
+        "ZRot": 0.0,
+        "SubZoneId": 768
+    },
+    {
+        // garuda1  (instance_garuda_nest, 가루다서식지 전장 누이아 부활)
+        "Id": 1137,
+        "Name": "garuda1",
+        "World": "instance_garuda_nest",
+        "ZoneId": 389,
+        "X": 2679.46,
+        "Y": 422.70,
+        "Z": 564.00,
+        "ZRot": 0.0,
+        "SubZoneId": 1137
+    },
+    {
+        // garuda2  (instance_garuda_nest, 가루다서식지 전장 하리 부활)
+        "Id": 1138,
+        "Name": "garuda2",
+        "World": "instance_garuda_nest",
+        "ZoneId": 389,
+        "X": 3237.86,
+        "Y": 805.68,
+        "Z": 568.77,
+        "ZRot": 0.0,
+        "SubZoneId": 1138
+    },
+    {
+        // garuda3  (instance_garuda_nest, 가루다서식지 전장 무법자 부활)
+        "Id": 1139,
+        "Name": "garuda3",
+        "World": "instance_garuda_nest",
+        "ZoneId": 389,
+        "X": 2874.85,
+        "Y": 694.55,
+        "Z": 558.13,
+        "ZRot": 0.0,
+        "SubZoneId": 1139
+    },
+    {
+        // ipna_in_front_of_K&T  (instance_hanging_gardens_of_ipna, 칼릴과 탈몬 입구)
+        "Id": 925,
+        "Name": "ipna_in_front_of_K&T",
+        "World": "instance_hanging_gardens_of_ipna",
+        "ZoneId": 346,
+        "X": 501.62,
+        "Y": 500.04,
+        "Z": 306.00,
+        "ZRot": -91.0,
+        "SubZoneId": 925
+    },
+    {
+        // ipna_in_front_of_heimdallr  (instance_hanging_gardens_of_ipna, 아몬파키드 입구)
+        "Id": 926,
+        "Name": "ipna_in_front_of_heimdallr",
+        "World": "instance_hanging_gardens_of_ipna",
+        "ZoneId": 346,
+        "X": 776.32,
+        "Y": 499.92,
+        "Z": 326.21,
+        "ZRot": -92.0,
+        "SubZoneId": 926
+    },
+    {
+        // heimdallr_1  (instance_hanging_gardens_of_ipna, 열망의 안식처 입구)
+        "Id": 1041,
+        "Name": "heimdallr_1",
+        "World": "instance_hanging_gardens_of_ipna",
+        "ZoneId": 346,
+        "X": 746.12,
+        "Y": 527.42,
+        "Z": 323.42,
+        "ZRot": -172.0,
+        "SubZoneId": 1041
+    },
+    {
+        // portal_instance_howling_abyss  (instance_howling_abyss, 울부짖는 구렁텅이 2보스 귀환 장소)
+        "Id": 484,
+        "Name": "portal_instance_howling_abyss",
+        "World": "instance_howling_abyss",
+        "ZoneId": 265,
+        "X": 530.68,
+        "Y": 477.99,
+        "Z": 187.68,
+        "ZRot": 0.0,
+        "SubZoneId": 484
+    },
+    {
+        // portal_howling_abyss_2  (instance_howling_abyss_2, 영던_울구 2보스 귀환 장소)
+        "Id": 525,
+        "Name": "portal_howling_abyss_2",
+        "World": "instance_howling_abyss_2",
+        "ZoneId": 280,
+        "X": 530.68,
+        "Y": 477.99,
+        "Z": 187.68,
+        "ZRot": 0.0,
+        "SubZoneId": 525
+    },
+    {
+        // portal_immortal_room_1  (instance_immortal_isle, 다후타의 방)
+        "Id": 555,
+        "Name": "portal_immortal_room_1",
+        "World": "instance_immortal_isle",
+        "ZoneId": 285,
+        "X": 1707.86,
+        "Y": 1300.30,
+        "Z": 33.30,
+        "ZRot": 45.0,
+        "SubZoneId": 555
+    },
+    {
+        // portal_immortal_easy_room_1  (instance_immortal_isle_easy, 다후타의 방)
+        "Id": 567,
+        "Name": "portal_immortal_easy_room_1",
+        "World": "instance_immortal_isle_easy",
+        "ZoneId": 290,
+        "X": 1707.86,
+        "Y": 1300.30,
+        "Z": 33.30,
+        "ZRot": 45.0,
+        "SubZoneId": 567
+    },
+    {
+        // instance_library_1_up_1  (instance_library_1, 무한한 지식의 열람실 위 1)
+        "Id": 630,
+        "Name": "instance_library_1_up_1",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 993.90,
+        "Y": 384.06,
+        "Z": 173.41,
+        "ZRot": 89.0,
+        "SubZoneId": 630
+    },
+    {
+        // instance_library_1_dn_1  (instance_library_1, 무한한 지식의 열람실 아래 1)
+        "Id": 631,
+        "Name": "instance_library_1_dn_1",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 998.48,
+        "Y": 373.08,
+        "Z": 133.30,
+        "ZRot": 0.0,
+        "SubZoneId": 631
+    },
+    {
+        // instance_library_1_dn_2  (instance_library_1, 무한한 지식의 열람실 아래 2)
+        "Id": 633,
+        "Name": "instance_library_1_dn_2",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 152.91,
+        "Y": 394.91,
+        "Z": 133.30,
+        "ZRot": 180.0,
+        "SubZoneId": 633
+    },
+    {
+        // instance_library_1_up_3  (instance_library_1, 무한한 지식의 열람실 위 3)
+        "Id": 634,
+        "Name": "instance_library_1_up_3",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 767.87,
+        "Y": 607.66,
+        "Z": 173.41,
+        "ZRot": 90.0,
+        "SubZoneId": 634
+    },
+    {
+        // instance_library_1_dn_3  (instance_library_1, 무한한 지식의 열람실 아래 3)
+        "Id": 635,
+        "Name": "instance_library_1_dn_3",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 779.32,
+        "Y": 614.74,
+        "Z": 133.30,
+        "ZRot": 89.0,
+        "SubZoneId": 635
+    },
+    {
+        // instance_library_2_up_1  (instance_library_2, 책 읽는 정원 위 1)
+        "Id": 636,
+        "Name": "instance_library_2_up_1",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 159.65,
+        "Y": 2304.01,
+        "Z": 169.41,
+        "ZRot": 0.0,
+        "SubZoneId": 636
+    },
+    {
+        // instance_library_2_dn_1  (instance_library_2, 책 읽는 정원 아래 1)
+        "Id": 637,
+        "Name": "instance_library_2_dn_1",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 106.29,
+        "Y": 2304.46,
+        "Z": 129.39,
+        "ZRot": 0.0,
+        "SubZoneId": 637
+    },
+    {
+        // instance_library_2_up_2  (instance_library_2, 책 읽는 정원 위 2)
+        "Id": 638,
+        "Name": "instance_library_2_up_2",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 865.51,
+        "Y": 2176.07,
+        "Z": 169.44,
+        "ZRot": 0.0,
+        "SubZoneId": 638
+    },
+    {
+        // instance_library_2_dn_2  (instance_library_2, 책 읽는 정원 아래 2)
+        "Id": 639,
+        "Name": "instance_library_2_dn_2",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 917.56,
+        "Y": 2176.40,
+        "Z": 129.11,
+        "ZRot": 0.0,
+        "SubZoneId": 639
+    },
+    {
+        // instance_library_2_up_3  (instance_library_2, 책 읽는 정원 위 3)
+        "Id": 640,
+        "Name": "instance_library_2_up_3",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 767.98,
+        "Y": 3040.23,
+        "Z": 168.89,
+        "ZRot": 0.0,
+        "SubZoneId": 640
+    },
+    {
+        // instance_library_2_dn_3  (instance_library_2, 책 읽는 정원 아래 3)
+        "Id": 641,
+        "Name": "instance_library_2_dn_3",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 768.21,
+        "Y": 3093.97,
+        "Z": 128.74,
+        "ZRot": 0.0,
+        "SubZoneId": 641
+    },
+    {
+        // instance_library_3_up_1  (instance_library_3, 비명 서고 위 1)
+        "Id": 642,
+        "Name": "instance_library_3_up_1",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 398.18,
+        "Y": 4447.59,
+        "Z": 296.68,
+        "ZRot": 180.0,
+        "SubZoneId": 642
+    },
+    {
+        // instance_library_3_dn_1  (instance_library_3, 비명 서고 아래 1)
+        "Id": 643,
+        "Name": "instance_library_3_dn_1",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 382.70,
+        "Y": 4476.82,
+        "Z": 256.58,
+        "ZRot": -25.0,
+        "SubZoneId": 643
+    },
+    {
+        // instance_library_3_up_2  (instance_library_3, 비명 서고 위 2)
+        "Id": 644,
+        "Name": "instance_library_3_up_2",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 625.68,
+        "Y": 5024.47,
+        "Z": 296.68,
+        "ZRot": -0.0,
+        "SubZoneId": 644
+    },
+    {
+        // instance_library_3_dn_2  (instance_library_3, 비명 서고 아래 2)
+        "Id": 645,
+        "Name": "instance_library_3_dn_2",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 642.92,
+        "Y": 4993.16,
+        "Z": 256.58,
+        "ZRot": 110.0,
+        "SubZoneId": 645
+    },
+    {
+        // instance_library_3_up_3  (instance_library_3, 비명 서고 위 3)
+        "Id": 646,
+        "Name": "instance_library_3_up_3",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 928.47,
+        "Y": 4462.66,
+        "Z": 296.68,
+        "ZRot": -90.0,
+        "SubZoneId": 646
+    },
+    {
+        // instance_library_3_dn_3  (instance_library_3, 비명 서고 아래 3)
+        "Id": 647,
+        "Name": "instance_library_3_dn_3",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 897.96,
+        "Y": 4478.04,
+        "Z": 256.58,
+        "ZRot": 40.0,
+        "SubZoneId": 647
+    },
+    {
+        // instance_library_1_Yn_in  (instance_library_1, 윈의 비밀서재 출구)
+        "Id": 654,
+        "Name": "instance_library_1_Yn_in",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 743.26,
+        "Y": 634.06,
+        "Z": 350.44,
+        "ZRot": 0.0,
+        "SubZoneId": 654
+    },
+    {
+        // instance_library_1_Yn_out  (instance_library_1, 윈의 비밀서재 입구)
+        "Id": 655,
+        "Name": "instance_library_1_Yn_out",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 736.73,
+        "Y": 639.84,
+        "Z": 173.45,
+        "ZRot": 0.0,
+        "SubZoneId": 655
+    },
+    {
+        // instance_library_1_Setno_in  (instance_library_1, 스테노의 비밀서재 출구)
+        "Id": 656,
+        "Name": "instance_library_1_Setno_in",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 1017.60,
+        "Y": 407.69,
+        "Z": 357.28,
+        "ZRot": 0.0,
+        "SubZoneId": 656
+    },
+    {
+        // instance_library_1_Setno_out  (instance_library_1, 스테노의 비밀서재 입구)
+        "Id": 657,
+        "Name": "instance_library_1_Setno_out",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 1023.87,
+        "Y": 415.09,
+        "Z": 173.43,
+        "ZRot": 0.0,
+        "SubZoneId": 657
+    },
+    {
+        // instance_library_1_Sealed_in  (instance_library_1, 봉인의 비밀서재 출구)
+        "Id": 658,
+        "Name": "instance_library_1_Sealed_in",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 128.79,
+        "Y": 367.92,
+        "Z": 345.81,
+        "ZRot": 90.0,
+        "SubZoneId": 658
+    },
+    {
+        // instance_library_1_Sealed_out  (instance_library_1, 봉인의 비밀서재 입구)
+        "Id": 659,
+        "Name": "instance_library_1_Sealed_out",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 127.97,
+        "Y": 352.61,
+        "Z": 173.43,
+        "ZRot": 0.0,
+        "SubZoneId": 659
+    },
+    {
+        // instance_library_2_garden_in  (instance_library_2, 비밀 정원 출구)
+        "Id": 660,
+        "Name": "instance_library_2_garden_in",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 128.24,
+        "Y": 2277.36,
+        "Z": 288.50,
+        "ZRot": 0.0,
+        "SubZoneId": 660
+    },
+    {
+        // instance_library_2_garden_out  (instance_library_2, 비밀 정원 입구)
+        "Id": 661,
+        "Name": "instance_library_2_garden_out",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 122.33,
+        "Y": 2271.92,
+        "Z": 168.94,
+        "ZRot": 0.0,
+        "SubZoneId": 661
+    },
+    {
+        // instance_library_2_rest_in  (instance_library_2, 안식의 방 출구)
+        "Id": 662,
+        "Name": "instance_library_2_rest_in",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 878.42,
+        "Y": 2176.16,
+        "Z": 288.55,
+        "ZRot": 0.0,
+        "SubZoneId": 662
+    },
+    {
+        // instance_library_2_rest_out  (instance_library_2, 안식의 방 입구)
+        "Id": 663,
+        "Name": "instance_library_2_rest_out",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 889.80,
+        "Y": 2143.87,
+        "Z": 168.87,
+        "ZRot": 0.0,
+        "SubZoneId": 663
+    },
+    {
+        // instance_library_2_Cloyne_in  (instance_library_2, 클로인의 비밀서재 출구)
+        "Id": 664,
+        "Name": "instance_library_2_Cloyne_in",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 768.80,
+        "Y": 3045.96,
+        "Z": 288.42,
+        "ZRot": 0.0,
+        "SubZoneId": 664
+    },
+    {
+        // instance_library_2_Cloyne_out  (instance_library_2, 클로인의 비밀서재 입구)
+        "Id": 665,
+        "Name": "instance_library_2_Cloyne_out",
+        "World": "instance_library",
+        "ZoneId": 297,
+        "X": 735.64,
+        "Y": 3077.62,
+        "Z": 168.88,
+        "ZRot": 0.0,
+        "SubZoneId": 665
+    },
+    {
+        // instance_library_3_Tirenep_in  (instance_library_3, 티레네프의 비밀서재 출구)
+        "Id": 666,
+        "Name": "instance_library_3_Tirenep_in",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 356.58,
+        "Y": 4479.73,
+        "Z": 514.05,
+        "ZRot": -90.0,
+        "SubZoneId": 666
+    },
+    {
+        // instance_library_3_Tirenep_out  (instance_library_3, 티레네프의 비밀서재 입구)
+        "Id": 667,
+        "Name": "instance_library_3_Tirenep_out",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 351.17,
+        "Y": 4495.59,
+        "Z": 296.68,
+        "ZRot": -90.0,
+        "SubZoneId": 667
+    },
+    {
+        // instance_library_3_Scream_in  (instance_library_3, 비명서고의 비밀서재 출구)
+        "Id": 668,
+        "Name": "instance_library_3_Scream_in",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 896.16,
+        "Y": 4454.84,
+        "Z": 512.88,
+        "ZRot": -0.0,
+        "SubZoneId": 668
+    },
+    {
+        // instance_library_3_Scream_out  (instance_library_3, 비명서고의 비밀서재 입구)
+        "Id": 669,
+        "Name": "instance_library_3_Scream_out",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 880.62,
+        "Y": 4447.72,
+        "Z": 297.65,
+        "ZRot": -0.0,
+        "SubZoneId": 669
+    },
+    {
+        // instance_library_3_deny_in  (instance_library_3, 데니스트리오스의 비밀 서재 출구)
+        "Id": 670,
+        "Name": "instance_library_3_deny_in",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 662.38,
+        "Y": 4902.88,
+        "Z": 512.02,
+        "ZRot": -1.0,
+        "SubZoneId": 670
+    },
+    {
+        // instance_library_3_deny_out  (instance_library_3, 데니스트리오스의 비밀 서재 입구)
+        "Id": 671,
+        "Name": "instance_library_3_deny_out",
+        "World": "instance_library",
+        "ZoneId": 298,
+        "X": 672.35,
+        "Y": 4976.65,
+        "Z": 296.68,
+        "ZRot": 90.0,
+        "SubZoneId": 671
+    },
+    {
+        // instance_library_1_Sealed_in2  (instance_library_1, 봉인의 비밀서재 출구)
+        "Id": 679,
+        "Name": "instance_library_1_Sealed_in2",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 129.58,
+        "Y": 477.60,
+        "Z": 345.81,
+        "ZRot": 90.0,
+        "SubZoneId": 679
+    },
+    {
+        // portal_heart_of_eanad  (instance_library_heart, 에아나드의 심장 안쪽)
+        "Id": 734,
+        "Name": "portal_heart_of_eanad",
+        "World": "instance_library",
+        "ZoneId": 315,
+        "X": 4629.70,
+        "Y": 587.18,
+        "Z": 389.74,
+        "ZRot": 180.0,
+        "SubZoneId": 734
+    },
+    {
+        // portal_infinite_readingroom  (instance_library_1, 무한한지식의열람실귀환포인트)
+        "Id": 949,
+        "Name": "portal_infinite_readingroom",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 629.40,
+        "Y": 641.96,
+        "Z": 133.45,
+        "ZRot": -90.0,
+        "SubZoneId": 949
+    },
+    {
+        // portal_1f_boss  (instance_library_boss_total, (통합) 입관심사실 안쪽)
+        "Id": 962,
+        "Name": "portal_1f_boss",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2240.00,
+        "Y": 208.00,
+        "Z": 150.00,
+        "ZRot": -180.0,
+        "SubZoneId": 962
+    },
+    {
+        // Portal_1F_Exit  (instance_library_boss_total, (통합)입관심사대기실귀환지점)
+        "Id": 963,
+        "Name": "Portal_1F_Exit",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2498.00,
+        "Y": 208.00,
+        "Z": 131.00,
+        "ZRot": -180.0,
+        "SubZoneId": 963
+    },
+    {
+        // Portal_1F_lounge  (instance_library_boss_total, (통합)입관심사대기실진입지점)
+        "Id": 964,
+        "Name": "Portal_1F_lounge",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2498.00,
+        "Y": 188.00,
+        "Z": 131.00,
+        "ZRot": 0.0,
+        "SubZoneId": 964
+    },
+    {
+        // Portal_2F_lounge  (instance_library_boss_total, (통합)얼어붙은서재진입지점)
+        "Id": 965,
+        "Name": "Portal_2F_lounge",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2861.00,
+        "Y": 1646.00,
+        "Z": 137.00,
+        "ZRot": 90.0,
+        "SubZoneId": 965
+    },
+    {
+        // Portal_2F_boss  (instance_library_boss_total, (통합)얼어붙은서재안쪽도착)
+        "Id": 966,
+        "Name": "Portal_2F_boss",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2850.00,
+        "Y": 1761.00,
+        "Z": 128.00,
+        "ZRot": 0.0,
+        "SubZoneId": 966
+    },
+    {
+        // portal_3f_lounge  (instance_library_boss_total, (통합)혼돈의서고 대기실 도착지점)
+        "Id": 967,
+        "Name": "portal_3f_lounge",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2624.00,
+        "Y": 2419.00,
+        "Z": 129.00,
+        "ZRot": 0.0,
+        "SubZoneId": 967
+    },
+    {
+        // Portal_3f_boss  (instance_library_boss_total, (통합)혼돈의 서고 보스방 도착지점)
+        "Id": 968,
+        "Name": "Portal_3f_boss",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2625.00,
+        "Y": 2542.00,
+        "Z": 127.00,
+        "ZRot": 0.0,
+        "SubZoneId": 968
+    },
+    {
+        // Portal_2f_exit  (instance_library_boss_total, (통합)얼어붙은서재 대기실로 돌아오는 지점)
+        "Id": 969,
+        "Name": "Portal_2f_exit",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2839.00,
+        "Y": 1646.00,
+        "Z": 137.00,
+        "ZRot": -90.0,
+        "SubZoneId": 969
+    },
+    {
+        // portal_3f_exit  (instance_library_boss_total, (통합)혼돈의 서고 대기실로 퇴장장소)
+        "Id": 970,
+        "Name": "portal_3f_exit",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2624.00,
+        "Y": 2442.00,
+        "Z": 129.00,
+        "ZRot": 180.0,
+        "SubZoneId": 970
+    },
+    {
+        // portal_4f_lounge  (instance_library_boss_total, (통합)에아나드의 심장 대기실 도착)
+        "Id": 971,
+        "Name": "portal_4f_lounge",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 4203.78,
+        "Y": 287.72,
+        "Z": 230.77,
+        "ZRot": 175.0,
+        "SubZoneId": 971
+    },
+    {
+        // portal_4f_boss  (instance_library_boss_total, (통합)에아나드의 심장 보스방 도착)
+        "Id": 972,
+        "Name": "portal_4f_boss",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 4631.00,
+        "Y": 578.00,
+        "Z": 391.00,
+        "ZRot": -180.0,
+        "SubZoneId": 972
+    },
+    {
+        // Portal_1f_return  (instance_library_boss_total, 입관심사실안쪽귀환지점)
+        "Id": 973,
+        "Name": "Portal_1f_return",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2240.00,
+        "Y": 177.00,
+        "Z": 150.00,
+        "ZRot": 0.0,
+        "SubZoneId": 973
+    },
+    {
+        // Portal_2f_return  (instance_library_boss_total, 얼어붙은 서재 안쪽 귀환지점)
+        "Id": 974,
+        "Name": "Portal_2f_return",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2850.00,
+        "Y": 1808.00,
+        "Z": 129.11,
+        "ZRot": -180.0,
+        "SubZoneId": 974
+    },
+    {
+        // Portal_3f_return  (instance_library_boss_total, 혼돈의 서고 안쪽 귀환지점)
+        "Id": 975,
+        "Name": "Portal_3f_return",
+        "World": "instance_library_new_boss",
+        "ZoneId": 365,
+        "X": 2625.00,
+        "Y": 2578.00,
+        "Z": 127.00,
+        "ZRot": 175.0,
+        "SubZoneId": 975
+    },
+    {
+        // rp_life_dungeon_pepi  (instance_life_dungeon_daru, 생활인던_페피포탈)
+        "Id": 1206,
+        "Name": "rp_life_dungeon_pepi",
+        "World": "instance_life_dungeon_daru",
+        "ZoneId": 410,
+        "X": 1699.36,
+        "Y": 1553.02,
+        "Z": 102.37,
+        "ZRot": 0.0,
+        "SubZoneId": 1206
+    },
+    {
+        // portal_nachashgar_02  (instance_nachashgar, 나차쉬가르 포탈 2)
+        "Id": 524,
+        "Name": "portal_nachashgar_02",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 486.47,
+        "Y": 381.58,
+        "Z": 150.62,
+        "ZRot": -90.0,
+        "SubZoneId": 524
+    },
+    {
+        // portal_nachashgar_03  (instance_nachashgar, 나차쉬가르 포탈 3)
+        "Id": 526,
+        "Name": "portal_nachashgar_03",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 660.35,
+        "Y": 402.47,
+        "Z": 154.16,
+        "ZRot": -90.0,
+        "SubZoneId": 526
+    },
+    {
+        // portal_nachashgar_04  (instance_nachashgar, 나차쉬가르 포탈 4)
+        "Id": 527,
+        "Name": "portal_nachashgar_04",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 865.22,
+        "Y": 390.76,
+        "Z": 146.22,
+        "ZRot": -90.0,
+        "SubZoneId": 527
+    },
+    {
+        // portal_nachashgar_05  (instance_nachashgar, 나차쉬가르 포탈 5)
+        "Id": 528,
+        "Name": "portal_nachashgar_05",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 1098.40,
+        "Y": 389.84,
+        "Z": 151.29,
+        "ZRot": -90.0,
+        "SubZoneId": 528
+    },
+    {
+        // portal_nachashgar_06  (instance_nachashgar, 나차쉬가르 포탈 6)
+        "Id": 529,
+        "Name": "portal_nachashgar_06",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 347.96,
+        "Y": 581.65,
+        "Z": 145.27,
+        "ZRot": -90.0,
+        "SubZoneId": 529
+    },
+    {
+        // portal_nachashgar_07  (instance_nachashgar, 나차쉬가르 포탈 7)
+        "Id": 530,
+        "Name": "portal_nachashgar_07",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 517.73,
+        "Y": 577.28,
+        "Z": 144.74,
+        "ZRot": -90.0,
+        "SubZoneId": 530
+    },
+    {
+        // portal_nachashgar_08  (instance_nachashgar, 나차쉬가르 포탈 8)
+        "Id": 531,
+        "Name": "portal_nachashgar_08",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 708.31,
+        "Y": 598.89,
+        "Z": 118.78,
+        "ZRot": -90.0,
+        "SubZoneId": 531
+    },
+    {
+        // portal_nachashgar_09  (instance_nachashgar, 나차쉬가르 포탈 09)
+        "Id": 532,
+        "Name": "portal_nachashgar_09",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 884.28,
+        "Y": 609.75,
+        "Z": 132.26,
+        "ZRot": -90.0,
+        "SubZoneId": 532
+    },
+    {
+        // portal_nachashgar_back_01  (instance_nachashgar, 나차쉬가르 포탈 back_01)
+        "Id": 546,
+        "Name": "portal_nachashgar_back_01",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 339.13,
+        "Y": 380.26,
+        "Z": 151.70,
+        "ZRot": 90.0,
+        "SubZoneId": 546
+    },
+    {
+        // portal_nachashgar_back_02  (instance_nachashgar, 나차쉬가르 포탈 back_02)
+        "Id": 547,
+        "Name": "portal_nachashgar_back_02",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 541.97,
+        "Y": 383.85,
+        "Z": 150.62,
+        "ZRot": 90.0,
+        "SubZoneId": 547
+    },
+    {
+        // portal_nachashgar_back_03  (instance_nachashgar, 나차쉬가르 포탈 back_03)
+        "Id": 548,
+        "Name": "portal_nachashgar_back_03",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 718.02,
+        "Y": 399.48,
+        "Z": 154.16,
+        "ZRot": 90.0,
+        "SubZoneId": 548
+    },
+    {
+        // portal_nachashgar_back_04  (instance_nachashgar, 나차쉬가르 포탈 back_04)
+        "Id": 549,
+        "Name": "portal_nachashgar_back_04",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 924.53,
+        "Y": 389.85,
+        "Z": 146.22,
+        "ZRot": 90.0,
+        "SubZoneId": 549
+    },
+    {
+        // portal_nachashgar_back_06  (instance_nachashgar, 나차쉬가르 포탈 back_06)
+        "Id": 551,
+        "Name": "portal_nachashgar_back_06",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 404.00,
+        "Y": 579.88,
+        "Z": 149.24,
+        "ZRot": 90.0,
+        "SubZoneId": 551
+    },
+    {
+        // portal_nachashgar_back_07  (instance_nachashgar, 나차쉬가르 포탈 back_07)
+        "Id": 552,
+        "Name": "portal_nachashgar_back_07",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 574.23,
+        "Y": 577.35,
+        "Z": 144.74,
+        "ZRot": 90.0,
+        "SubZoneId": 552
+    },
+    {
+        // portal_nachashgar_back_08  (instance_nachashgar, 나차쉬가르 포탈 back_08)
+        "Id": 553,
+        "Name": "portal_nachashgar_back_08",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 762.77,
+        "Y": 598.88,
+        "Z": 117.89,
+        "ZRot": 90.0,
+        "SubZoneId": 553
+    },
+    {
+        // portal_nachashgar_010  (instance_nachashgar, 나차쉬가르 포탈 010)
+        "Id": 561,
+        "Name": "portal_nachashgar_010",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 1106.91,
+        "Y": 624.63,
+        "Z": 114.99,
+        "ZRot": -90.0,
+        "SubZoneId": 561
+    },
+    {
+        // portal_nachashgar_09_c  (instance_nachashgar, 나차쉬가르 09_카르밀라)
+        "Id": 625,
+        "Name": "portal_nachashgar_09_c",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 876.36,
+        "Y": 858.30,
+        "Z": 132.26,
+        "ZRot": -90.0,
+        "SubZoneId": 625
+    },
+    {
+        // portal_nachashgar_09_a  (instance_nachashgar, 나차쉬가르_09_아너린)
+        "Id": 626,
+        "Name": "portal_nachashgar_09_a",
+        "World": "instance_nachashgar",
+        "ZoneId": 278,
+        "X": 647.81,
+        "Y": 858.30,
+        "Z": 132.26,
+        "ZRot": -90.0,
+        "SubZoneId": 626
+    },
+    {
+        // portal_nachashgar_ancient_05  (instance_nachashgar_ancient, 고대 나차쉬가르 두억시니)
+        "Id": 1161,
+        "Name": "portal_nachashgar_ancient_05",
+        "World": "instance_nachashgar_ancient",
+        "ZoneId": 398,
+        "X": 1097.63,
+        "Y": 389.23,
+        "Z": 152.00,
+        "ZRot": -90.0,
+        "SubZoneId": 1161
+    },
+    {
+        // portal_nachashgar_ancient_01  (instance_nachashgar_ancient, 고대 나차쉬가르 수호자방 이동)
+        "Id": 1162,
+        "Name": "portal_nachashgar_ancient_01",
+        "World": "instance_nachashgar_ancient",
+        "ZoneId": 398,
+        "X": 342.38,
+        "Y": 380.23,
+        "Z": 151.75,
+        "ZRot": -90.0,
+        "SubZoneId": 1162
+    },
+    {
+        // portal_nachashgar_ancient_lar  (instance_nachashgar_ancient, 고대 나차쉬가르 레르만)
+        "Id": 1163,
+        "Name": "portal_nachashgar_ancient_lar",
+        "World": "instance_nachashgar_ancient",
+        "ZoneId": 398,
+        "X": 884.25,
+        "Y": 609.25,
+        "Z": 133.25,
+        "ZRot": -90.0,
+        "SubZoneId": 1163
+    },
+    {
+        // portal_nachashgar_ancient_ca  (instance_nachashgar_ancient, 고대 나차쉬가르 카르밀라)
+        "Id": 1164,
+        "Name": "portal_nachashgar_ancient_ca",
+        "World": "instance_nachashgar_ancient",
+        "ZoneId": 398,
+        "X": 876.50,
+        "Y": 857.75,
+        "Z": 133.25,
+        "ZRot": -90.0,
+        "SubZoneId": 1164
+    },
+    {
+        // portal_nachashgar_ancient_an  (instance_nachashgar_ancient, 고대 나차쉬가르 아너린)
+        "Id": 1165,
+        "Name": "portal_nachashgar_ancient_an",
+        "World": "instance_nachashgar_ancient",
+        "ZoneId": 398,
+        "X": 648.25,
+        "Y": 857.88,
+        "Z": 133.25,
+        "ZRot": -90.0,
+        "SubZoneId": 1165
+    },
+    {
+        // portal_nachashgar_ancient_boss  (instance_nachashgar_ancient, 고대 나차쉬가르 바르키)
+        "Id": 1166,
+        "Name": "portal_nachashgar_ancient_boss",
+        "World": "instance_nachashgar_ancient",
+        "ZoneId": 398,
+        "X": 1107.50,
+        "Y": 624.50,
+        "Z": 115.88,
+        "ZRot": -90.0,
+        "SubZoneId": 1166
+    },
+    {
+        // portal_nacha_easy_02  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 2)
+        "Id": 572,
+        "Name": "portal_nacha_easy_02",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 486.47,
+        "Y": 381.58,
+        "Z": 150.62,
+        "ZRot": -90.0,
+        "SubZoneId": 572
+    },
+    {
+        // portal_nacha_easy_03  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 3)
+        "Id": 573,
+        "Name": "portal_nacha_easy_03",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 660.35,
+        "Y": 402.47,
+        "Z": 154.16,
+        "ZRot": -90.0,
+        "SubZoneId": 573
+    },
+    {
+        // portal_nacha_easy_04  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 4)
+        "Id": 574,
+        "Name": "portal_nacha_easy_04",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 865.22,
+        "Y": 390.76,
+        "Z": 146.22,
+        "ZRot": -90.0,
+        "SubZoneId": 574
+    },
+    {
+        // portal_nacha_easy_05  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 5)
+        "Id": 575,
+        "Name": "portal_nacha_easy_05",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 1098.40,
+        "Y": 389.84,
+        "Z": 151.29,
+        "ZRot": -90.0,
+        "SubZoneId": 575
+    },
+    {
+        // portal_nacha_easy_06  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 6)
+        "Id": 576,
+        "Name": "portal_nacha_easy_06",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 347.96,
+        "Y": 581.65,
+        "Z": 145.27,
+        "ZRot": -90.0,
+        "SubZoneId": 576
+    },
+    {
+        // portal_nacha_easy_07  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 7)
+        "Id": 577,
+        "Name": "portal_nacha_easy_07",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 517.73,
+        "Y": 577.28,
+        "Z": 144.74,
+        "ZRot": -90.0,
+        "SubZoneId": 577
+    },
+    {
+        // portal_nacha_easy_08  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 8)
+        "Id": 578,
+        "Name": "portal_nacha_easy_08",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 708.31,
+        "Y": 598.89,
+        "Z": 118.78,
+        "ZRot": -90.0,
+        "SubZoneId": 578
+    },
+    {
+        // portal_nacha_easy_09  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 9)
+        "Id": 579,
+        "Name": "portal_nacha_easy_09",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 884.28,
+        "Y": 609.75,
+        "Z": 132.26,
+        "ZRot": -90.0,
+        "SubZoneId": 579
+    },
+    {
+        // portal_nacha_easy_010  (instance_nachashgar_easy, 불안정한 나차쉬가르 포탈 10)
+        "Id": 580,
+        "Name": "portal_nacha_easy_010",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 1106.91,
+        "Y": 624.63,
+        "Z": 114.99,
+        "ZRot": -90.0,
+        "SubZoneId": 580
+    },
+    {
+        // portal_nacha_easy_back_01  (instance_nachashgar_easy, 불안정한 나차쉬가르 back_01)
+        "Id": 581,
+        "Name": "portal_nacha_easy_back_01",
+        "World": "instance_nachashgar_easy",
+        "ZoneId": 292,
+        "X": 340.32,
+        "Y": 380.13,
+        "Z": 151.70,
+        "ZRot": 0.0,
+        "SubZoneId": 581
+    },
+    {
+        // garden_shadow_hawk_base_out  (instance_phantom_of_delphinad, 델피나드의 환영 : 그림자 매 기지 밖)
+        "Id": 1021,
+        "Name": "garden_shadow_hawk_base_out",
+        "World": "instance_phantom_of_delphinad",
+        "ZoneId": 384,
+        "X": 1794.07,
+        "Y": 2043.99,
+        "Z": 290.13,
+        "ZRot": 90.0,
+        "SubZoneId": 1021
+    },
+    {
+        // delphinad_room_potal  (instance_phantom_of_delphinad, 이공간 진입포탈)
+        "Id": 1023,
+        "Name": "delphinad_room_potal",
+        "World": "instance_phantom_of_delphinad",
+        "ZoneId": 384,
+        "X": 1761.50,
+        "Y": 2113.59,
+        "Z": 273.00,
+        "ZRot": -150.0,
+        "SubZoneId": 1023
+    },
+    {
+        // portal_prologue_01  (instance_prologue, 세계관 인던 시작지점)
+        "Id": 608,
+        "Name": "portal_prologue_01",
+        "World": "instance_prologue",
+        "ZoneId": 300,
+        "X": 419.16,
+        "Y": 639.77,
+        "Z": 115.36,
+        "ZRot": 174.0,
+        "SubZoneId": 608
+    },
+    {
+        // portal_prologue_02  (instance_prologue, 세계관 인던 부두 앞)
+        "Id": 609,
+        "Name": "portal_prologue_02",
+        "World": "instance_prologue",
+        "ZoneId": 300,
+        "X": 102.39,
+        "Y": 507.77,
+        "Z": 101.46,
+        "ZRot": -154.0,
+        "SubZoneId": 609
+    },
+    {
+        // portal_prologue_03  (instance_prologue, 세계관 인던 원해 선상)
+        "Id": 610,
+        "Name": "portal_prologue_03",
+        "World": "instance_prologue",
+        "ZoneId": 300,
+        "X": 1693.76,
+        "Y": 287.03,
+        "Z": 104.62,
+        "ZRot": -94.0,
+        "SubZoneId": 610
+    },
+    {
+        // portal_prologue_04  (instance_prologue, 세계관 인던 원대륙 언덕 위)
+        "Id": 611,
+        "Name": "portal_prologue_04",
+        "World": "instance_prologue",
+        "ZoneId": 300,
+        "X": 1080.35,
+        "Y": 1422.97,
+        "Z": 170.69,
+        "ZRot": 8.0,
+        "SubZoneId": 611
+    },
+    {
+        // portal_prologue_05  (instance_prologue, 세계관 인던 원대륙 공성전차 앞)
+        "Id": 612,
+        "Name": "portal_prologue_05",
+        "World": "instance_prologue",
+        "ZoneId": 300,
+        "X": 958.75,
+        "Y": 1433.94,
+        "Z": 128.43,
+        "ZRot": 19.0,
+        "SubZoneId": 612
+    },
+    {
+        // portal_prologue_06  (instance_prologue, 세계관 인던 성채 내부)
+        "Id": 613,
+        "Name": "portal_prologue_06",
+        "World": "instance_prologue",
+        "ZoneId": 300,
+        "X": 969.80,
+        "Y": 1659.92,
+        "Z": 169.62,
+        "ZRot": 179.0,
+        "SubZoneId": 613
+    },
+    {
+        // portal_lastdayofhiramakand_in  (instance_the_last_day_of_hiramakand, 히라마칸드 최후의 날 시간의 차단막 안쪽)
+        "Id": 991,
+        "Name": "portal_lastdayofhiramakand_in",
+        "World": "instance_the_last_day_of_hiramakand",
+        "ZoneId": 367,
+        "X": 2777.61,
+        "Y": 2325.64,
+        "Z": 424.77,
+        "ZRot": 180.0,
+        "SubZoneId": 991
     }
 ]

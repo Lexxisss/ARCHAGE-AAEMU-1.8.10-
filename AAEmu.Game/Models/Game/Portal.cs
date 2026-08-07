@@ -18,6 +18,14 @@ public class Portal : PacketMarshaler
     public uint Owner { get; set; }
     public uint WorldId { get; set; }
 
+    /// <summary>
+    /// Name of the world this destination belongs to, for anything outside the main world.
+    /// Resolved to <see cref="WorldId"/> when the list is loaded: world ids are positions in the
+    /// order the client's worlds are enumerated, so writing a number here would quietly move every
+    /// instance destination the day a world is added or removed.
+    /// </summary>
+    public string World { get; set; }
+
     public override PacketStream Write(PacketStream stream)
     {
         stream.Write(Id);

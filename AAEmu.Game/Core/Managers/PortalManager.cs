@@ -259,6 +259,25 @@ public class PortalManager : Singleton<PortalManager>
         if (JsonHelper.TryDeserializeObject(contents, out List<Portal> worldgates, out _))
             foreach (var worldgate in worldgates)
             {
+                // A destination outside the main world names its world instead of numbering it,
+                // because the number is only a position in the order the client's worlds are
+                // enumerated. A name that resolves to nothing is dropped: a portal pointing at
+                // the wrong world would land the player in open ground somewhere else entirely.
+                if (!string.IsNullOrEmpty(worldgate.World) && worldgate.WorldId == 0)
+                {
+                    var namedWorld = WorldManager.Instance.GetWorlds()
+                        .FirstOrDefault(w => string.Equals(w.Name, worldgate.World, StringComparison.OrdinalIgnoreCase));
+                    if (namedWorld == null)
+                    {
+                        Logger.Warn(
+                            "Worldgate {0} ({1}) names world '{2}', which this client does not have; skipped",
+                            worldgate.Id, worldgate.Name, worldgate.World);
+                        continue;
+                    }
+
+                    worldgate.WorldId = namedWorld.Id;
+                }
+
                 _worldgates.Add(worldgate.SubZoneId, worldgate);
                 _worldgatesKey.Add(worldgate.Id, worldgate.SubZoneId);
             }
