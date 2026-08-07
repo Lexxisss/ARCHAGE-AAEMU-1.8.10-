@@ -172,16 +172,36 @@ public class GameScheduleManager : Singleton<GameScheduleManager>
         return cronExpression;
     }
 
+    /// <summary>
+    /// Time left for a doodad, read from the doodad schedule rather than the spawner one.
+    /// </summary>
+    /// <remarks>
+    /// Doodads are asked about through <see cref="CheckDoodadInScheduleSpawners"/> and
+    /// <see cref="CheckDoodadInGameSchedules"/>, both of which read the doodad list. Asking
+    /// <see cref="GetRemainingTime"/> for the same id looked in the spawner list, found nothing
+    /// and answered zero, and the caller took that for "now" - which is how a scheduled doodad
+    /// came to reschedule its own spawn forever.
+    /// </remarks>
+    public TimeSpan GetRemainingTimeDoodad(int doodadId, bool start = true)
+    {
+        return RemainingTimeFrom(_gameScheduleDoodadIds, doodadId, start);
+    }
+
     public TimeSpan GetRemainingTime(int spawnerId, bool start = true)
     {
-        if (!_gameScheduleSpawnerIds.ContainsKey(spawnerId))
+        return RemainingTimeFrom(_gameScheduleSpawnerIds, spawnerId, start);
+    }
+
+    private TimeSpan RemainingTimeFrom(Dictionary<int, List<int>> scheduleIds, int id, bool start)
+    {
+        if (scheduleIds == null || !scheduleIds.ContainsKey(id))
         {
             return TimeSpan.Zero;
         }
 
         var remainingTime = TimeSpan.MaxValue;
 
-        foreach (var gameScheduleId in _gameScheduleSpawnerIds[spawnerId])
+        foreach (var gameScheduleId in scheduleIds[id])
         {
             if (!_gameSchedules.ContainsKey(gameScheduleId)) { continue; }
 

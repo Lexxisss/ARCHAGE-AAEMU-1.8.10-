@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AAEmu.Game.Core.Managers;
@@ -175,7 +175,7 @@ public class DoodadSpawner : Spawner<Doodad>
             // if there is, we'll check the time for the spawning
             if (GameScheduleManager.Instance.CheckDoodadInGameSchedules(doodad.TemplateId))
             {
-                var delay = GameScheduleManager.Instance.GetRemainingTime((int)doodad.TemplateId, false);
+                var delay = GameScheduleManager.Instance.GetRemainingTimeDoodad((int)doodad.TemplateId, false);
 
                 // Same trap as on the spawn side: a zero here rescheduled this despawn for now,
                 // and it spun. Without an end time there is nothing to wait for, so leave the
@@ -214,7 +214,7 @@ public class DoodadSpawner : Spawner<Doodad>
             // if there is, we'll check the time for the spawning
             if (GameScheduleManager.Instance.CheckDoodadInGameSchedules(UnitId))
             {
-                var delay = GameScheduleManager.Instance.GetRemainingTime((int)UnitId, true);
+                var delay = GameScheduleManager.Instance.GetRemainingTimeDoodad((int)UnitId, true);
 
                 // A doodad can be listed in the doodad schedule and absent from the spawner one,
                 // and then the remaining time comes back as zero - which used to reschedule this
