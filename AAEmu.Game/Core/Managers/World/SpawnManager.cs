@@ -1028,6 +1028,35 @@ public class SpawnManager : Singleton<SpawnManager>
         }
     }
 
+    /// <summary>
+    /// Where the priestesses of Nui stand. respawns.json does not say which of its points are
+    /// graveyards and which are staging spots or harbours, so this is how that gets worked out:
+    /// a graveyard is a point with a priestess standing on it.
+    /// </summary>
+    public List<WorldSpawnPosition> GetPriestSpawnPositions()
+    {
+        var positions = new List<WorldSpawnPosition>();
+        if (_npcSpawners == null)
+            return positions;
+
+        lock (_lockSpawner)
+        {
+            foreach (var worldSpawners in _npcSpawners.Values)
+                foreach (var spawners in worldSpawners.Values)
+                    foreach (var spawner in spawners)
+                    {
+                        if (spawner?.Position == null)
+                            continue;
+                        if (NpcManager.Instance.GetTemplate(spawner.UnitId) is not { Priest: true })
+                            continue;
+
+                        positions.Add(spawner.Position);
+                    }
+        }
+
+        return positions;
+    }
+
     public List<NpcSpawner> GetNpcSpawner(uint spawnerId, byte worldId)
     {
         var ret = new List<NpcSpawner>();

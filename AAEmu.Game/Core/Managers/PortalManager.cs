@@ -43,6 +43,9 @@ public class PortalManager : Singleton<PortalManager>
     private Dictionary<uint, Portal> _respawnsBySubZone;
     private Dictionary<uint, Portal> _worldgates;
 
+    private readonly object _graveyardLock = new();
+    private volatile HashSet<uint> _graveyards;
+
     private Dictionary<uint, OpenPortalReagents> _openPortalInlandReagents;
     private Dictionary<uint, OpenPortalReagents> _openPortalOutlandReagents;
     private Dictionary<uint, DistrictReturnPoints> _districtReturnPoints;
@@ -481,25 +484,85 @@ public class PortalManager : Singleton<PortalManager>
         if (character == null || _respawns == null || _respawns.Count == 0)
             return null;
 
-        // The sub-zone mapping is authoritative when present. Falling back to a raw nearest-point
-        // search across every world can select a Nui from another continent/instance whose local
-        // coordinates merely happen to be closer.
-        // Ask the subzone index, not the one keyed by return point id. Asking the id-keyed
-        // dictionary for a subzone answered with whichever point happens to carry that number
-        // as its own id, and fifteen of them do - which is how dying in Arcum Iris put the
-        // character down in Cinderstone Moor.
-        if (_respawnsBySubZone.TryGetValue(character.SubZoneId, out var localRespawn) &&
-            (localRespawn.WorldId == 0 || localRespawn.WorldId == character.Transform.WorldId))
-            return localRespawn;
+        // Distance decides, as respawns.json says in as many words: "for a respawn the coordinates
+        // matter, nothing else does; after death the nearest point is found and a teleport made to
+        // it". The nearest *graveyard*, though. Choosing by sub-zone instead sent a character who
+        // died at the Granite Quarry a hundred and eighty metres away to the Harani starting zone,
+        // which has no Nui at it; and the plain nearest point, twenty-six metres off, is a piece of
+        // level furniture with no Nui either. The nearest priestess is at a hundred and thirty.
+        var graveyards = GetGraveyards();
+        var world = character.Transform.WorldId;
 
+        // Keep to the character's own world first, so a point on another continent cannot win on
+        // local coordinates alone; then the untagged points, which is the whole main-world set.
+        // A world holding no priestess at all still has to put its dead down somewhere, so as a
+        // last resort any respawn point will do.
+        return FindClosestRespawn(character, w => w == world, graveyards)
+               ?? FindClosestRespawn(character, w => w == 0, graveyards)
+               ?? FindClosestRespawn(character, w => w == world, null)
+               ?? FindClosestRespawn(character, w => w == 0, null);
+    }
+
+    /// <summary>
+    /// Which respawn points are graveyards. Only about half of the six hundred are; the rest are
+    /// harbours, staging spots and starting areas that nobody should wake up at, and the file
+    /// gives no way to tell them apart. What tells them apart is that a priestess of Nui stands
+    /// at a graveyard, so ask the spawners once and remember the answer. It has to be once and
+    /// late: the NPC spawners are not loaded yet at the time the portals are.
+    /// </summary>
+    private HashSet<uint> GetGraveyards()
+    {
+        if (_graveyards != null)
+            return _graveyards;
+
+        lock (_graveyardLock)
+        {
+            if (_graveyards != null)
+                return _graveyards;
+
+            const float standingAtIt = 20f;
+            var found = new HashSet<uint>();
+            var priests = SpawnManager.Instance.GetPriestSpawnPositions();
+
+            foreach (var respawn in _respawns.Values)
+            {
+                if (respawn == null)
+                    continue;
+
+                foreach (var priest in priests)
+                {
+                    if (priest.WorldId != respawn.WorldId)
+                        continue;
+
+                    var dx = priest.X - respawn.X;
+                    var dy = priest.Y - respawn.Y;
+                    if (dx * dx + dy * dy > standingAtIt * standingAtIt)
+                        continue;
+
+                    found.Add(respawn.Id);
+                    break;
+                }
+            }
+
+            Logger.Info("Found {0} graveyards among {1} respawn points, by the {2} priestesses of Nui standing at them",
+                found.Count, _respawns.Count, priests.Count);
+
+            _graveyards = found;
+            return _graveyards;
+        }
+    }
+
+    private Portal FindClosestRespawn(Character character, Func<uint, bool> worldAccepted, HashSet<uint> onlyThese)
+    {
         var characterPosition = character.Transform.World.Position;
         var bestDistance = float.MaxValue;
         Portal closest = null;
 
         foreach (var value in _respawns.Values)
         {
-            if (value == null ||
-                (value.WorldId != 0 && value.WorldId != character.Transform.WorldId))
+            if (value == null || !worldAccepted(value.WorldId))
+                continue;
+            if (onlyThese != null && !onlyThese.Contains(value.Id))
                 continue;
 
             var portalPosition = new Vector3(value.X, value.Y, value.Z);
