@@ -723,10 +723,31 @@ public partial class Quest
         {
             var previousStatus = Status;
             var previousComponentId = CurrentComponentId;
-            if (Status != QuestStatus.Progress || CurrentComponentId == 0 ||
-                !Template.Components.TryGetValue(CurrentComponentId, out var component) ||
-                component.KindId != QuestComponentKind.Progress)
+
+            // A quest that lets itself be handed in early is also the kind you can carry past its
+            // hundred - the reward is scaled by how far you got, up to half again. That was
+            // unreachable: the moment the score touched a hundred the quest turned ready, and a
+            // ready quest took no more events, so the upper half of its own reward scale could
+            // never happen. While it is ready it still listens, until there is no more to gain.
+            var overCompleting = false;
+            QuestComponent component;
+
+            if (Status == QuestStatus.Progress && CurrentComponentId != 0 &&
+                Template.Components.TryGetValue(CurrentComponentId, out component) &&
+                component.KindId == QuestComponentKind.Progress)
+            {
+                // Ordinary progress on the component the quest is standing on.
+            }
+            else if (IsOverCompletionOpen() &&
+                     Template.Components.TryGetValue(_objectiveComponentId, out component) &&
+                     component.KindId == QuestComponentKind.Progress)
+            {
+                overCompleting = true;
+            }
+            else
+            {
                 return false;
+            }
 
             // On a scored quest every objective feeds the same total, so an event has to be
             // offered to all of them. Looking only at the component the quest currently sits on
@@ -757,12 +778,15 @@ public partial class Quest
                 return false;
 
             RebuildClientObjectives();
-            var complete = IsProgressComponentComplete(component, Template.LetItDone && EarlyCompletion);
-            if (complete && (!Template.LetItDone || GetCompletionPercent() >= 100))
+            if (!overCompleting)
             {
-                _runtimeCompletedComponents.Add(component.Id);
-                AdvanceFrom(component);
-                RebuildClientObjectives();
+                var complete = IsProgressComponentComplete(component, Template.LetItDone && EarlyCompletion);
+                if (complete && (!Template.LetItDone || GetCompletionPercent() >= 100))
+                {
+                    _runtimeCompletedComponents.Add(component.Id);
+                    AdvanceFrom(component);
+                    RebuildClientObjectives();
+                }
             }
 
             if (sendUpdate)
@@ -770,6 +794,21 @@ public partial class Quest
             return true;
         }
     }
+
+    /// <summary>How far past its score a quest may be carried; the reward scale stops here too.</summary>
+    private const int MaxOverCompletionPercent = 150;
+
+    /// <summary>
+    /// Whether a quest that can already be handed in may still be pushed further for a bigger
+    /// reward. Only scored quests that allow being finished early work this way, and only until
+    /// there is nothing more to gain by it.
+    /// </summary>
+    private bool IsOverCompletionOpen()
+        => Status == QuestStatus.Ready
+           && Template.Score > 0
+           && Template.LetItDone
+           && _objectiveComponentId != 0
+           && GetCompletionPercent() < MaxOverCompletionPercent;
 
     public bool TryEnableLetItDone()
     {
