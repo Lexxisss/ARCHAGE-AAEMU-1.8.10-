@@ -1342,12 +1342,35 @@ public partial class Quest
             Owner.SendPacket(new SCQuestNotifierInitPacket(true));
     }
 
+    /// <summary>
+    /// The objectives the client is shown, in the order it shows them.
+    /// </summary>
+    /// <remarks>
+    /// A scored quest spreads its objectives over several components and counts them all towards
+    /// one total, so all of them belong on the client's list. Taking only the component the quest
+    /// happens to be standing on left the others invisible: gathering counted on the server and
+    /// the bar never moved, because the gathering lived in a component the list never looked at.
+    /// </remarks>
+    private QuestAct[] GetClientObjectiveActs()
+    {
+        if (Template.Score > 0)
+        {
+            return ScoredObjectiveComponents()
+                .OrderBy(x => x.Id)
+                .SelectMany(x => x.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(a => a.Id))
+                .ToArray();
+        }
+
+        if (_objectiveComponentId == 0 || !Template.Components.TryGetValue(_objectiveComponentId, out var component))
+            return Array.Empty<QuestAct>();
+
+        return component.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(x => x.Id).ToArray();
+    }
+
     public int[] GetClientObjectiveTargets()
     {
         var result = new int[ClientObjectiveCount];
-        if (_objectiveComponentId == 0 || !Template.Components.TryGetValue(_objectiveComponentId, out var component))
-            return result;
-        var acts = component.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(x => x.Id).ToArray();
+        var acts = GetClientObjectiveActs();
         for (var i = 0; i < acts.Length; i++)
         {
             var slot = Math.Min(i, ClientObjectiveCount - 1);
@@ -1361,9 +1384,7 @@ public partial class Quest
         if (Objectives == null || Objectives.Length != ClientObjectiveCount)
             Objectives = new int[ClientObjectiveCount];
         Array.Clear(Objectives, 0, Objectives.Length);
-        if (_objectiveComponentId == 0 || !Template.Components.TryGetValue(_objectiveComponentId, out var component))
-            return;
-        var acts = component.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(x => x.Id).ToArray();
+        var acts = GetClientObjectiveActs();
         for (var i = 0; i < acts.Length; i++)
         {
             var slot = Math.Min(i, ClientObjectiveCount - 1);
