@@ -673,7 +673,15 @@ EndLoop:
                 complete = Template.Score > 0 ? completes.Any(b => b) : completes.All(b => b);
                 Status = complete ? QuestStatus.Ready : QuestStatus.Progress;
 
-                if (questActObjTalk || questActObjInteraction) // TODO: added for quest Id=2037, Id=3353
+                // Every component must have been touched - written for quest 2037 (three people to
+                // talk to) and 3353 (three bells to ring), where nothing counts until all of them
+                // are done. Both of those carry no score.
+                //
+                // A quest with a score says something different: fill the hundred points however
+                // you like, out of whichever objectives are listed. Applying the rule above to one
+                // of those held it at in-progress on a full bar, because a mob type the player
+                // never happened to kill still stood at zero. Sixteen quests are shaped that way.
+                if ((questActObjTalk || questActObjInteraction) && Template.Score <= 0)
                 {
                     for (var i = 0; i < components.Length; i++)
                     {
