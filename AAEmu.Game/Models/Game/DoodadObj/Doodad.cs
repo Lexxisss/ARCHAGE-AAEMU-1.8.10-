@@ -198,7 +198,10 @@ public class Doodad : BaseUnit
             return false;
         }
 
-        pending.CancelAsync().GetAwaiter().GetResult();
+        // Not a blocking wait: this runs on the scheduler's own threads, and waiting there for the
+        // scheduler to delete the very job we are running starves the pool that everything else
+        // is booked on.
+        TaskManager.Instance.CancelWithoutWaiting(pending);
 
         if (caster is Character)
             Logger.Debug("DoodadFuncTimer: The current timer has been canceled. TemplateId {0}, ObjId {1}", TemplateId, ObjId);

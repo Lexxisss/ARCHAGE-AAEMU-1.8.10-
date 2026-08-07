@@ -51,7 +51,7 @@ public class TickDoodad : ICommand
                 var funcTask = doodad.FuncTask;
                 if (funcTask != null)
                 {
-                    funcTask.CancelAsync().GetAwaiter().GetResult();
+                    TaskManager.Instance.CancelWithoutWaiting(funcTask);
                     funcTask.Execute();
                     tickedCount++;
                 }

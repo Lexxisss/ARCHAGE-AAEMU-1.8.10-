@@ -101,12 +101,22 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
     {
         // A delay is a delay, not a date. Anything that would run past the end of DateTime is a
         // caller's arithmetic gone wrong rather than a request worth honouring.
-        if (startTime is { } requestedStart &&
-            (requestedStart < TimeSpan.Zero || requestedStart > MaxScheduleDelay))
+        if (startTime is { } requestedStart)
         {
-            Logger.Warn("Task {0} from {1}:{2} asked to start in {3}; ignoring the request",
-                task.Name, Path.GetFileName(callerFile), callerLine, requestedStart);
-            return;
+            if (requestedStart > MaxScheduleDelay)
+            {
+                Logger.Warn("Task {0} from {1}:{2} asked to start in {3}; ignoring the request",
+                    task.Name, Path.GetFileName(callerFile), callerLine, requestedStart);
+                return;
+            }
+
+            // A delay in the past means now, and callers rely on it: a buff with no duration asks
+            // to be dispelled in -1 ms, which is how it comes to an end at all. Refusing those
+            // outright left such buffs on their owner for good.
+            if (requestedStart < TimeSpan.Zero)
+            {
+                startTime = TimeSpan.Zero;
+            }
         }
 
         var jobKey = new JobKey(string.Empty);
@@ -299,6 +309,46 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
 
         task.Cancelled = true;
         TaskIdManager.Instance.ReleaseId(task.Id);
+    }
+
+    /// <summary>
+    /// Stops a task at once and clears its job afterwards, without blocking the caller.
+    /// </summary>
+    /// <remarks>
+    /// Every game task runs on the scheduler's own pool, and that pool has eight threads. A task
+    /// that waits for the scheduler to delete a job - very often the job it is itself running -
+    /// holds one of those eight for as long as the scheduler takes to agree, and doodads do this
+    /// on every phase change. With enough of them in flight the pool has nothing left to run
+    /// anything with, and everything booked shows up seconds late: an attack, an interaction, a
+    /// buff coming to an end.
+    ///
+    /// Nothing needs the answer. What actually stops the task running again is the flag, and that
+    /// is set here and now; removing the job is tidying up and can happen on its own time.
+    /// </remarks>
+    public void CancelWithoutWaiting(Task task)
+    {
+        if (task?.JobDetail == null)
+            return;
+
+        Release(task);
+        _ = DeleteJobQuietly(task.JobDetail.Key);
+    }
+
+    private async ThreadTask DeleteJobQuietly(JobKey jobKey)
+    {
+        try
+        {
+            await _generalScheduler.DeleteJob(jobKey);
+        }
+        catch (SchedulerException)
+        {
+            // Already gone, or on its way out. Either is the outcome we wanted.
+            Logger.Trace("Task {0} was already gone when it was cancelled", jobKey);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Could not delete job {0}", jobKey);
+        }
     }
 
     public async Task<bool> Cancel(Task task)
