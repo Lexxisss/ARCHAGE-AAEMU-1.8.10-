@@ -1116,10 +1116,10 @@ public class Inventory
         //if ((item?.Template.LootQuestId > 0) && (count != 0))
         if (count > 0 && item != null)
         {
-            //Owner?.Quests?.OnItemGather(item, count);
             // инициируем событие
-            //Task.Run(() => QuestManager.Instance.DoAcquiredEvents((Character)Owner, item.TemplateId, item.Count));
-            QuestManager.Instance.DoAcquiredEvents((ICharacter)Owner, item.TemplateId, item.Count);
+            // What just arrived, not what the stack now holds. A quest counts each event as more
+            // progress, so reporting the whole stack credited the third item picked up as three.
+            QuestManager.Instance.DoAcquiredEvents((ICharacter)Owner, item.TemplateId, count);
         }
     }
 

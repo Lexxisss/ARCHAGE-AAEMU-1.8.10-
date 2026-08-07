@@ -310,7 +310,7 @@ public class Doodad : BaseUnit
 
     public void Use(BaseUnit caster, uint skillId = 0, int funcGroupId = 0)
     {
-        if (caster == null)
+        if (caster == null || _deleted)
         {
             return;
         }
@@ -667,6 +667,14 @@ public class Doodad : BaseUnit
     /// <returns>if TRUE, it did not pass the check for the quest (it must be aborted)</returns>
     public bool DoChangePhase(BaseUnit caster, int nextPhase)
     {
+        // A task that was already in the scheduler when this doodad left the world must not start
+        // its phase chain up again - that chain books the next timer, and the object it belongs to
+        // is gone, so nothing would ever stop it.
+        if (_deleted)
+        {
+            return true;
+        }
+
         // здесь не надо удалять doodad
         //if (nextPhase == -1)
         //{
@@ -1023,8 +1031,19 @@ public class Doodad : BaseUnit
 
     public override void Delete()
     {
-        base.Delete();
+        // Say so before anything else, so a phase task already on its way in gives up rather than
+        // starting the chain again on an object that is leaving the world.
         _deleted = true;
+
+        // And take its pending task away. Nothing did this, so a doodad that despawned - a
+        // gathering node finishing its cycle, say - left its timer running in the scheduler. The
+        // timer fired on the dead object, changed its phase, and that phase booked the next timer
+        // a second later, for good. Every such doodad a player used added one more tick a second
+        // to a pool of eight threads, which is why the server grew slower with use and only a
+        // restart cleared it.
+        CancelFuncTask(null);
+
+        base.Delete();
         foreach (var areaTrigger in AttachAreaTriggers)
         {
             AreaTriggerManager.Instance.RemoveAreaTrigger(areaTrigger);

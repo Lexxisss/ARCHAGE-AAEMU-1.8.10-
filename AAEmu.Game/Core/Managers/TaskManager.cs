@@ -119,6 +119,11 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
             }
         }
 
+        // Booking a task means it is meant to run. The same object is often booked again after it
+        // was cancelled - a doodad's respawn timer is the very task its despawn cancelled - and a
+        // task left marked as cancelled is skipped by the job for good.
+        task.Cancelled = false;
+
         var jobKey = new JobKey(string.Empty);
         do
         {
