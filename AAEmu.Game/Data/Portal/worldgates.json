@@ -245,5 +245,22 @@
         "Z": 121.90,
         "ZRot": 63,
         "SubZoneId": 542
+    },
+    {
+        // return_points.id 941 = hirama_the_west_guide,
+        // "히라마 산맥 서부 진입로 부근" - the western approach to the Hirama mountains.
+        // Taken from the unpacked client: worlds/main_world/level_design/zone/288/world_server/
+        // return_point.g holds ReturnPoint_hirama_the_west_guide at zone-local
+        // ( 2728.62, 1732.37, 345.783 ), zRot 0.488692. Folder 288 is o_the_great_reeds,
+        // originX 17 originY 27, so world = origin * 1024 + local, the same conversion
+        // ZoneManager.ConvertToWorldCoordinates uses for spawns.
+        "Id": 941,
+        "Name": "Hirama Mountains, western approach",
+        "ZoneId": 288,
+        "X": 20136.62,
+        "Y": 29380.37,
+        "Z": 345.78,
+        "ZRot": 28,
+        "SubZoneId": 941
     }
 ]
