@@ -42,7 +42,6 @@ public class PortalManager : Singleton<PortalManager>
     private Dictionary<uint, Portal> _respawns;
     private Dictionary<uint, uint> _respawnsKey;
     private Dictionary<uint, Portal> _worldgates;
-    private Dictionary<uint, uint> _worldgatesKey;
 
     private Dictionary<uint, OpenPortalReagents> _openPortalInlandReagents;
     private Dictionary<uint, OpenPortalReagents> _openPortalOutlandReagents;
@@ -97,17 +96,13 @@ public class PortalManager : Singleton<PortalManager>
 
     public Portal GetWorldgatesBySubZoneId(uint subZoneId)
     {
-        return _worldgates != null && _worldgates.TryGetValue(subZoneId, out var worldgate)
-            ? worldgate
-            : null;
+        return _worldgates?.Values.FirstOrDefault(x => x.SubZoneId == subZoneId);
     }
 
     public Portal GetWorldgatesById(uint id)
     {
-        return _worldgatesKey != null && _worldgatesKey.ContainsKey(id)
-            ? _worldgates.ContainsKey(_worldgatesKey[id])
-                ? _worldgates[_worldgatesKey[id]]
-                : null
+        return _worldgates != null && _worldgates.TryGetValue(id, out var worldgate)
+            ? worldgate
             : null;
     }
 
@@ -152,7 +147,6 @@ public class PortalManager : Singleton<PortalManager>
         _worldgates = new Dictionary<uint, Portal>();
         _recallsKey = new Dictionary<uint, uint>();
         _respawnsKey = new Dictionary<uint, uint>();
-        _worldgatesKey = new Dictionary<uint, uint>();
 
         Logger.Info("Loading Portals ...");
 
@@ -278,8 +272,13 @@ public class PortalManager : Singleton<PortalManager>
                     worldgate.WorldId = namedWorld.Id;
                 }
 
-                _worldgates.Add(worldgate.SubZoneId, worldgate);
-                _worldgatesKey.Add(worldgate.Id, worldgate.SubZoneId);
+                // Keyed by the return point id, which is what every lookup asks for. Keying by
+                // SubZoneId used to lock out any destination whose id happened to equal a
+                // SubZoneId already spoken for, and nine real places were lost that way.
+                if (!_worldgates.TryAdd(worldgate.Id, worldgate))
+                    Logger.Warn(
+                        "Worldgate {0} ({1}) is listed twice; keeping the first",
+                        worldgate.Id, worldgate.Name);
             }
         else
             throw new GameException($"PortalManager: Parse {filePath} file");

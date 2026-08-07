@@ -10730,5 +10730,108 @@
         "Z": 424.77,
         "ZRot": 180.0,
         "SubZoneId": 991
+    },
+
+    // ---- Ids that used to collide with a SubZoneId ----
+    {
+        // gv_sing_tear  (e_singing_land_3, 눈물 젖은 언덕 무덤)
+        "Id": 196,
+        "Name": "gv_sing_tear",
+        "ZoneId": 256,
+        "X": 22509.80,
+        "Y": 10730.01,
+        "Z": 307.40,
+        "ZRot": 0.0,
+        "SubZoneId": 196
+    },
+    {
+        // instance_library_1_up_2  (instance_library_1, 무한한 지식의 열람실 위 2)
+        "Id": 632,
+        "Name": "instance_library_1_up_2",
+        "World": "instance_library",
+        "ZoneId": 296,
+        "X": 159.81,
+        "Y": 384.59,
+        "Z": 173.41,
+        "ZRot": 179.0,
+        "SubZoneId": 632
+    },
+    {
+        // ostguardian_gv_all  (o_shining_shore_1, 오스트 가신단 주둔지)
+        "Id": 730,
+        "Name": "ostguardian_gv_all",
+        "ZoneId": 282,
+        "X": 18688.48,
+        "Y": 27086.65,
+        "Z": 213.03,
+        "ZRot": -120.0,
+        "SubZoneId": 730
+    },
+    {
+        // gv_whale_song_e  (o_whale_song_bay, 무덤: 동대륙 고래 노래만)
+        "Id": 852,
+        "Name": "gv_whale_song_e",
+        "ZoneId": 310,
+        "X": 17190.71,
+        "Y": 29158.99,
+        "Z": 156.17,
+        "ZRot": -50.0,
+        "SubZoneId": 852
+    },
+    {
+        // o_nuimari_thermal_springs  (o_nuimari, 누이마리 온천 워프지역)
+        "Id": 1030,
+        "Name": "o_nuimari_thermal_springs",
+        "ZoneId": 205,
+        "X": 21450.00,
+        "Y": 24230.00,
+        "Z": 158.00,
+        "ZRot": 0.0,
+        "SubZoneId": 1030
+    },
+    {
+        // halloween_race_start01  (arche_mall, 2020 유령과의 비행 공간의 틈)
+        "Id": 1098,
+        "Name": "halloween_race_start01",
+        "World": "arche_mall_world",
+        "ZoneId": 260,
+        "X": 3464.97,
+        "Y": 4543.03,
+        "Z": 165.56,
+        "ZRot": -116.0,
+        "SubZoneId": 1098
+    },
+    {
+        // gv_mount_ipnir_e1  (o_mount_ipnir_1, 무덤: 이프니르 산 하리하라1)
+        "Id": 1101,
+        "Name": "gv_mount_ipnir_e1",
+        "ZoneId": 388,
+        "X": 15516.76,
+        "Y": 30122.71,
+        "Z": 229.98,
+        "ZRot": 0.0,
+        "SubZoneId": 1101
+    },
+    {
+        // gv_mount_ipnir_p1  (o_mount_ipnir_1, 무덤: 이프니르 산 해적1)
+        "Id": 1102,
+        "Name": "gv_mount_ipnir_p1",
+        "ZoneId": 388,
+        "X": 15792.68,
+        "Y": 30635.12,
+        "Z": 208.18,
+        "ZRot": 0.0,
+        "SubZoneId": 1102
+    },
+    {
+        // gv_mount_ipnir_w2  (o_mount_ipnir_2, 무덤: 이프니르 산 누이아2)
+        "Id": 1103,
+        "Name": "gv_mount_ipnir_w2",
+        "ZoneId": 391,
+        "X": 14176.24,
+        "Y": 30611.17,
+        "Z": 291.99,
+        "ZRot": 0.0,
+        "SubZoneId": 1103
     }
 ]
