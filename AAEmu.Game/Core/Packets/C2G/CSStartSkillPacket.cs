@@ -4,6 +4,7 @@ using System.Linq;
 using AAEmu.Commons.Exceptions;
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Char;
@@ -118,7 +119,16 @@ public class CSStartSkillPacket : GamePacket
         var isBuffGrantedSkill = SkillManager.Instance.IsSkillGrantedByActiveBuff(
             skillId, Connection.ActiveChar.Buffs);
 
-        if (!isServerProvidedSkill && !isLearnedSkill && !isLearnedVariant && !isBuffGrantedSkill)
+        // A gathering node, a quest device or any other doodad offers its own skill for the phase
+        // it is standing in - "break the unknown ore vein" is not something a character learns.
+        // The doodad decides: if its current phase has no function for this skill, the answer is
+        // still no.
+        var isDoodadOfferedSkill = skillCastTarget?.ObjId > 0 &&
+            WorldManager.Instance.GetDoodad(skillCastTarget.ObjId) is { } targetDoodad &&
+            DoodadManager.Instance.GetFunc(targetDoodad.FuncGroupId, skillId) != null;
+
+        if (!isServerProvidedSkill && !isLearnedSkill && !isLearnedVariant && !isBuffGrantedSkill &&
+            !isDoodadOfferedSkill)
         {
             Logger.Warn(
                 "StartSkill: character {0} ({1}) attempted to use unauthorized skill {2}",
