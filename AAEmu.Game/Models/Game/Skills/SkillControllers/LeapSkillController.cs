@@ -178,8 +178,17 @@ public class LeapSkillController : SkillController
             }
         }
 
-        var angle = MathUtil.CalculateAngleFrom(oldPosition, _endPosition);
-        Owner.Transform.Local.SetRotationDegree(0f, 0f, (float)angle - 90);
+        // Only turn the unit when there is somewhere to turn towards. A leap with no target lands
+        // where it started - Card Leap and the glider skills carry no target and no distance in
+        // their controller - and atan2 of nothing at all answers zero, which taken as a heading and
+        // dropped by ninety degrees spun the character a quarter turn to the right and sent the
+        // glide off sideways.
+        if (MathUtil.CalculateDistance(oldPosition, _endPosition, true) > 0.05f)
+        {
+            var angle = MathUtil.CalculateAngleFrom(oldPosition, _endPosition);
+            Owner.Transform.Local.SetRotationDegree(0f, 0f, (float)angle - 90);
+        }
+
         var (rx, ry, rz) = Owner.Transform.Local.ToRollPitchYawSBytesMovement();
         var displacement = Owner.Transform.Local.Position - oldPosition;
 
