@@ -40,7 +40,6 @@ public class PortalManager : Singleton<PortalManager>
     private Dictionary<uint, List<Portal>> _recalls;
     private Dictionary<uint, uint> _recallsKey;
     private Dictionary<uint, Portal> _respawns;
-    private Dictionary<uint, uint> _respawnsKey;
     private Dictionary<uint, Portal> _worldgates;
 
     private Dictionary<uint, OpenPortalReagents> _openPortalInlandReagents;
@@ -80,17 +79,13 @@ public class PortalManager : Singleton<PortalManager>
 
     public Portal GetRespawnBySubZoneId(uint subZoneId)
     {
-        return _respawns != null && _respawns.TryGetValue(subZoneId, out var respawn)
-            ? respawn
-            : null;
+        return _respawns?.Values.FirstOrDefault(x => x.SubZoneId == subZoneId);
     }
 
     public Portal GetRespawnById(uint id)
     {
-        return _respawnsKey != null && _respawnsKey.ContainsKey(id)
-            ? _respawns.ContainsKey(_respawnsKey[id])
-                ? _respawns[_respawnsKey[id]]
-                : null
+        return _respawns != null && _respawns.TryGetValue(id, out var respawn)
+            ? respawn
             : null;
     }
 
@@ -146,7 +141,6 @@ public class PortalManager : Singleton<PortalManager>
         _respawns = new Dictionary<uint, Portal>();
         _worldgates = new Dictionary<uint, Portal>();
         _recallsKey = new Dictionary<uint, uint>();
-        _respawnsKey = new Dictionary<uint, uint>();
 
         Logger.Info("Loading Portals ...");
 
@@ -229,12 +223,13 @@ public class PortalManager : Singleton<PortalManager>
         if (JsonHelper.TryDeserializeObject(contents, out List<Portal> respawns, out _))
             foreach (var respawn in respawns)
             {
-                if (_respawns.ContainsKey(respawn.SubZoneId))
-                {
-                    //
-                }
-                _respawns.Add(respawn.SubZoneId, respawn);
-                _respawnsKey.Add(respawn.Id, respawn.SubZoneId);
+                // Keyed by the return point id for the same reason worldgates are: the lookup
+                // asks by id, and keying by SubZoneId meant two points sharing a subzone gave
+                // each other's destination - the caller got a grave in the wrong province.
+                if (!_respawns.TryAdd(respawn.Id, respawn))
+                    Logger.Warn(
+                        "Respawn point {0} ({1}) is listed twice; keeping the first",
+                        respawn.Id, respawn.Name);
             }
         else
             throw new GameException($"PortalManager: Parse {filePath} file");

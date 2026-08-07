@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "Name": "arche_mall_world",
         "SpawnPosition": {
@@ -242,5 +242,102 @@
             "Z": 154.036,
             "Yaw": -90.0
         }
+    },
+
+    // ---- Entrances derived from each world's own return points ----
+    {
+        // entrance taken from ReturnPoint_portal_blue12
+        "Name": "instance_battle_field_of_feast",
+        "SpawnPosition": { "ZoneId": 326, "X": 560.137, "Y": 586.288, "Z": 387.357, "Yaw": 179.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_blackspike_ammon_room
+        "Name": "instance_black_spike",
+        "SpawnPosition": { "ZoneId": 396, "X": 998.877, "Y": 824.573, "Z": 154.650, "Yaw": 0.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_instance_reddragon_craft
+        "Name": "instance_carcass",
+        "SpawnPosition": { "ZoneId": 366, "X": 3094.080, "Y": 5260.120, "Z": 105.550, "Yaw": 0.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_Portal_chellange_1
+        "Name": "instance_challenge_tower",
+        "SpawnPosition": { "ZoneId": 368, "X": 409.464, "Y": 451.166, "Z": 149.061, "Yaw": 121.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_sprigun_room_hard
+        "Name": "instance_cradle_of_destruction_hard",
+        "SpawnPosition": { "ZoneId": 320, "X": 180.719, "Y": 716.223, "Z": 182.988, "Yaw": -179.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_instance_dew_plain_area_1
+        "Name": "instance_dew_plain",
+        "SpawnPosition": { "ZoneId": 374, "X": 1932.980, "Y": 2103.510, "Z": 180.021, "Yaw": -18.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_portal_kadum
+        "Name": "instance_dewplane_boss",
+        "SpawnPosition": { "ZoneId": 376, "X": 829.826, "Y": 1224.060, "Z": 136.499, "Yaw": 0.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_gv_dimensional_a
+        "Name": "instance_dimensional_defence",
+        "SpawnPosition": { "ZoneId": 402, "X": 428.520, "Y": 1777.220, "Z": 112.018, "Yaw": -165.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_event_8th_east_gate_in
+        "Name": "instance_event_camp_1on1",
+        "SpawnPosition": { "ZoneId": 393, "X": 1399.095, "Y": 1531.452, "Z": 257.364, "Yaw": -89.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_10th_event_start
+        "Name": "instance_event_hanuimaru",
+        "SpawnPosition": { "ZoneId": 403, "X": 1634.130, "Y": 2219.200, "Z": 406.317, "Yaw": -157.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_portal_aria_roomstart
+        "Name": "instance_feast_garden",
+        "SpawnPosition": { "ZoneId": 321, "X": 1315.630, "Y": 841.477, "Z": 365.331, "Yaw": -121.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_garuda1
+        "Name": "instance_garuda_nest",
+        "SpawnPosition": { "ZoneId": 389, "X": 2679.463, "Y": 422.701, "Z": 564.005, "Yaw": 0.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_heimdallr_1
+        "Name": "instance_hanging_gardens_of_ipna",
+        "SpawnPosition": { "ZoneId": 346, "X": 746.121, "Y": 527.419, "Z": 323.419, "Yaw": -172.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_Portal_1F_Exit
+        "Name": "instance_library_new_boss",
+        "SpawnPosition": { "ZoneId": 365, "X": 2498.000, "Y": 208.000, "Z": 131.000, "Yaw": -180.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_rp_life_dungeon_pepi
+        "Name": "instance_life_dungeon_daru",
+        "SpawnPosition": { "ZoneId": 410, "X": 1699.360, "Y": 1553.020, "Z": 102.373, "Yaw": 0.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_portal_nachashgar_ancient_01
+        "Name": "instance_nachashgar_ancient",
+        "SpawnPosition": { "ZoneId": 398, "X": 342.375, "Y": 380.226, "Z": 151.750, "Yaw": -90.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_delphinad_room_potal
+        "Name": "instance_phantom_of_delphinad",
+        "SpawnPosition": { "ZoneId": 384, "X": 1761.503, "Y": 2113.590, "Z": 273.000, "Yaw": -150.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_portal_lastdayofhiramakand_in
+        "Name": "instance_the_last_day_of_hiramakand",
+        "SpawnPosition": { "ZoneId": 367, "X": 2777.610, "Y": 2325.640, "Z": 424.766, "Yaw": 180.0 }
+    },
+    {
+        // entrance taken from ReturnPoint_Gwe_start
+        "Name": "main_world",
+        "SpawnPosition": { "ZoneId": 129, "X": 10390.810, "Y": 15981.200, "Z": 367.356, "Yaw": 0.0 }
     }
 ]

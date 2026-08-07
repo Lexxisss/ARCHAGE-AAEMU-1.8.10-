@@ -2533,5 +2533,3714 @@
         "Z": 102.40,
         "ZRot": 27,
         "SubZoneId": 10680
+    },
+
+    // ---- Points districts refer to, from the client's level design. SubZoneId is left at zero: the client's own subzone for each is not in the data. ----
+    {
+        // Gweonid_HarpaCamp  (w_gweonid_forest_1, 하르파 수련장)
+        "Id": 1,
+        "Name": "Gweonid_HarpaCamp",
+        "ZoneId": 129,
+        "X": 10346.34,
+        "Y": 16054.74,
+        "Z": 358.62,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // Gweonid_SiteOfMemory  (w_gweonid_forest_2, 기억의 터)
+        "Id": 2,
+        "Name": "Gweonid_SiteOfMemory",
+        "ZoneId": 181,
+        "X": 10427.88,
+        "Y": 14831.78,
+        "Z": 288.19,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gweonid_laketown  (w_gweonid_forest_3, 호숫가 마을)
+        "Id": 3,
+        "Name": "gweonid_laketown",
+        "ZoneId": 182,
+        "X": 10823.16,
+        "Y": 15304.51,
+        "Z": 225.06,
+        "ZRot": 25.0,
+        "SubZoneId": 0
+    },
+    {
+        // mari_goldvill  (w_marianople_1, [주민] 황금 실타래 마을)
+        "Id": 5,
+        "Name": "mari_goldvill",
+        "ZoneId": 133,
+        "X": 10670.74,
+        "Y": 11886.38,
+        "Z": 129.48,
+        "ZRot": 120.0,
+        "SubZoneId": 0
+    },
+    {
+        // mari_square  (w_marianople_2, 마리아노플)
+        "Id": 6,
+        "Name": "mari_square",
+        "ZoneId": 183,
+        "X": 11135.17,
+        "Y": 12124.72,
+        "Z": 143.01,
+        "ZRot": 20.0,
+        "SubZoneId": 0
+    },
+    {
+        // gp_bd_roystercamp  (w_garangdol_plains_1, 로이스터 야영지)
+        "Id": 7,
+        "Name": "gp_bd_roystercamp",
+        "ZoneId": 140,
+        "X": 12865.47,
+        "Y": 14419.61,
+        "Z": 141.75,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gp_bd_sandywindvillage  (w_garangdol_plains_2, [주민] 모래 먼지 마을)
+        "Id": 8,
+        "Name": "gp_bd_sandywindvillage",
+        "ZoneId": 185,
+        "X": 12235.01,
+        "Y": 13289.31,
+        "Z": 160.11,
+        "ZRot": -30.0,
+        "SubZoneId": 0
+    },
+    {
+        // gp_bd_roadsend  (w_garangdol_plains_2, 로즈엔드 초소)
+        "Id": 9,
+        "Name": "gp_bd_roadsend",
+        "ZoneId": 185,
+        "X": 11737.15,
+        "Y": 12929.83,
+        "Z": 139.12,
+        "ZRot": -39.0,
+        "SubZoneId": 0
+    },
+    {
+        // BirchVillage  (w_white_forest_1, [주민] 자작나무 마을)
+        "Id": 13,
+        "Name": "BirchVillage",
+        "ZoneId": 143,
+        "X": 9692.43,
+        "Y": 12754.21,
+        "Z": 159.40,
+        "ZRot": 177.0,
+        "SubZoneId": 0
+    },
+    {
+        // WhiteGuardian  (w_white_forest_2, 수호자의 부락)
+        "Id": 14,
+        "Name": "WhiteGuardian",
+        "ZoneId": 244,
+        "X": 10623.74,
+        "Y": 13207.87,
+        "Z": 233.79,
+        "ZRot": -84.0,
+        "SubZoneId": 0
+    },
+    {
+        // Baragi  (w_solzreed_3, 바라기 마을)
+        "Id": 15,
+        "Name": "Baragi",
+        "ZoneId": 179,
+        "X": 15657.68,
+        "Y": 15150.99,
+        "Z": 122.96,
+        "ZRot": 125.0,
+        "SubZoneId": 0
+    },
+    {
+        // watcher  (w_solzreed_3, 파수 마을)
+        "Id": 16,
+        "Name": "watcher",
+        "ZoneId": 179,
+        "X": 14830.19,
+        "Y": 14295.67,
+        "Z": 119.94,
+        "ZRot": -35.0,
+        "SubZoneId": 0
+    },
+    {
+        // Crescent_Throne  (w_solzreed_2, 초승달 왕좌)
+        "Id": 17,
+        "Name": "Crescent_Throne",
+        "ZoneId": 178,
+        "X": 15323.59,
+        "Y": 13877.66,
+        "Z": 154.29,
+        "ZRot": 59.0,
+        "SubZoneId": 0
+    },
+    {
+        // milkyriver  (w_solzreed_1, 우윳빛 강 마을)
+        "Id": 18,
+        "Name": "milkyriver",
+        "ZoneId": 142,
+        "X": 13607.92,
+        "Y": 14543.92,
+        "Z": 108.18,
+        "ZRot": 38.0,
+        "SubZoneId": 0
+    },
+    {
+        // shooting_star_vil  (w_bronze_rock_3, 별똥비 마을)
+        "Id": 21,
+        "Name": "shooting_star_vil",
+        "ZoneId": 193,
+        "X": 7351.98,
+        "Y": 13786.48,
+        "Z": 1173.78,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // andelph  (w_bronze_rock_2, 안델프)
+        "Id": 22,
+        "Name": "andelph",
+        "ZoneId": 192,
+        "X": 6337.78,
+        "Y": 13757.59,
+        "Z": 1108.63,
+        "ZRot": -177.0,
+        "SubZoneId": 0
+    },
+    {
+        // ice_glass_vill  (w_bronze_rock_3, [주민] 얼음잔 마을)
+        "Id": 23,
+        "Name": "ice_glass_vill",
+        "ZoneId": 193,
+        "X": 6534.74,
+        "Y": 13407.17,
+        "Z": 968.86,
+        "ZRot": 8.0,
+        "SubZoneId": 0
+    },
+    {
+        // CaerNord  (e_ynystere_1, 카어 노르드)
+        "Id": 26,
+        "Name": "CaerNord",
+        "ZoneId": 139,
+        "X": 20927.22,
+        "Y": 13137.15,
+        "Z": 114.73,
+        "ZRot": 3.0,
+        "SubZoneId": 0
+    },
+    {
+        // Rubyminevill  (e_ynystere_2, [주민] 루비 광산촌)
+        "Id": 27,
+        "Name": "Rubyminevill",
+        "ZoneId": 259,
+        "X": 21597.22,
+        "Y": 12438.55,
+        "Z": 250.18,
+        "ZRot": 150.0,
+        "SubZoneId": 0
+    },
+    {
+        // sing_soldier  (e_singing_land_3, 징병소)
+        "Id": 28,
+        "Name": "sing_soldier",
+        "ZoneId": 256,
+        "X": 22109.82,
+        "Y": 11280.60,
+        "Z": 216.38,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // sing_alcohol  (e_singing_land_3, [주민] 술향기 마을)
+        "Id": 29,
+        "Name": "sing_alcohol",
+        "ZoneId": 256,
+        "X": 21802.54,
+        "Y": 10254.72,
+        "Z": 152.82,
+        "ZRot": -124.0,
+        "SubZoneId": 0
+    },
+    {
+        // Protectorguardcamp  (w_cross_plains_1, 불탄 성 감시 야영지)
+        "Id": 33,
+        "Name": "Protectorguardcamp",
+        "ZoneId": 148,
+        "X": 14313.21,
+        "Y": 11321.06,
+        "Z": 180.20,
+        "ZRot": -169.0,
+        "SubZoneId": 0
+    },
+    {
+        // seachildharbor  (w_cross_plains_2, [주민] 시차일드 부두)
+        "Id": 34,
+        "Name": "seachildharbor",
+        "ZoneId": 257,
+        "X": 15380.31,
+        "Y": 11539.87,
+        "Z": 108.43,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // maha_watchhouse  (e_mahadevi_3, 밀렵 감시 초소)
+        "Id": 36,
+        "Name": "maha_watchhouse",
+        "ZoneId": 197,
+        "X": 20076.05,
+        "Y": 8468.42,
+        "Z": 209.74,
+        "ZRot": 143.0,
+        "SubZoneId": 0
+    },
+    {
+        // maha_CityOfTower  (e_mahadevi_2, 탑의 도시)
+        "Id": 37,
+        "Name": "maha_CityOfTower",
+        "ZoneId": 196,
+        "X": 19336.50,
+        "Y": 8481.62,
+        "Z": 222.56,
+        "ZRot": 21.0,
+        "SubZoneId": 0
+    },
+    {
+        // maha_explorer  (e_mahadevi_1, [주민] 여행자의 쉼터)
+        "Id": 38,
+        "Name": "maha_explorer",
+        "ZoneId": 153,
+        "X": 18691.46,
+        "Y": 9309.79,
+        "Z": 177.21,
+        "ZRot": 109.0,
+        "SubZoneId": 0
+    },
+    {
+        // sunrise_tour  (e_sunrise_peninsula_1, [주민] 여행자의 샘)
+        "Id": 43,
+        "Name": "sunrise_tour",
+        "ZoneId": 141,
+        "X": 16933.89,
+        "Y": 8071.55,
+        "Z": 151.41,
+        "ZRot": -49.0,
+        "SubZoneId": 0
+    },
+    {
+        // sunrise_ostera  (e_sunrise_peninsula_2, 오스테라)
+        "Id": 44,
+        "Name": "sunrise_ostera",
+        "ZoneId": 191,
+        "X": 16809.85,
+        "Y": 9154.23,
+        "Z": 127.87,
+        "ZRot": -25.0,
+        "SubZoneId": 0
+    },
+    {
+        // sunrise_sun  (e_sunrise_peninsula_1, 햇무리 마을)
+        "Id": 45,
+        "Name": "sunrise_sun",
+        "ZoneId": 141,
+        "X": 15679.58,
+        "Y": 7642.11,
+        "Z": 154.44,
+        "ZRot": -125.0,
+        "SubZoneId": 0
+    },
+    {
+        // tc_bd_ezna  (w_two_crowns_2, 이즈나)
+        "Id": 50,
+        "Name": "tc_bd_ezna",
+        "ZoneId": 186,
+        "X": 13474.50,
+        "Y": 10745.15,
+        "Z": 183.06,
+        "ZRot": 135.0,
+        "SubZoneId": 0
+    },
+    {
+        // tc_bd_moonvillage  (w_two_crowns_1, [주민] 그믐녘 마을)
+        "Id": 51,
+        "Name": "tc_bd_moonvillage",
+        "ZoneId": 149,
+        "X": 12441.82,
+        "Y": 11139.48,
+        "Z": 149.81,
+        "ZRot": 1.0,
+        "SubZoneId": 0
+    },
+    {
+        // tc_bd_arena  (w_two_crowns_2, 검투 경기장)
+        "Id": 52,
+        "Name": "tc_bd_arena",
+        "ZoneId": 186,
+        "X": 13140.39,
+        "Y": 11229.78,
+        "Z": 129.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // tiger_iron  (e_tiger_spine_mountains_2, [주민] 쇠모루 마을)
+        "Id": 65,
+        "Name": "tiger_iron",
+        "ZoneId": 258,
+        "X": 21777.31,
+        "Y": 8099.53,
+        "Z": 404.12,
+        "ZRot": -106.0,
+        "SubZoneId": 0
+    },
+    {
+        // tiger_eye  (e_tiger_spine_mountains_1, 호랑이 눈)
+        "Id": 66,
+        "Name": "tiger_eye",
+        "ZoneId": 158,
+        "X": 21763.62,
+        "Y": 8617.48,
+        "Z": 517.88,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_br_e  (w_bronze_rock_3, 무덤: 청동 바위산 하리하란 세력)
+        "Id": 69,
+        "Name": "grave_br_e",
+        "ZoneId": 193,
+        "X": 6584.32,
+        "Y": 13644.06,
+        "Z": 1008.65,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // lilyuthill_windvillage  (w_lilyut_meadow_2, [주민] 바람그늘 마을)
+        "Id": 70,
+        "Name": "lilyuthill_windvillage",
+        "ZoneId": 195,
+        "X": 12622.28,
+        "Y": 15470.71,
+        "Z": 160.58,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // Lilyuthill_Lonbancastle  (w_lilyut_meadow_2, 바위언덕 마을)
+        "Id": 71,
+        "Name": "Lilyuthill_Lonbancastle",
+        "ZoneId": 195,
+        "X": 12775.77,
+        "Y": 16165.15,
+        "Z": 352.30,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // Gweonid_SilenceCamp  (w_gweonid_forest_3, 파수꾼 야영지)
+        "Id": 72,
+        "Name": "Gweonid_SilenceCamp",
+        "ZoneId": 182,
+        "X": 11409.15,
+        "Y": 15275.04,
+        "Z": 195.57,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // windchaser  (e_falcony_plateau_2, 바람자취 부락)
+        "Id": 74,
+        "Name": "windchaser",
+        "ZoneId": 184,
+        "X": 24130.32,
+        "Y": 10017.50,
+        "Z": 593.57,
+        "ZRot": 95.0,
+        "SubZoneId": 0
+    },
+    {
+        // ashenmist  (e_falcony_plateau_2, 잿빛안개 부락)
+        "Id": 75,
+        "Name": "ashenmist",
+        "ZoneId": 184,
+        "X": 24029.78,
+        "Y": 8635.99,
+        "Z": 567.31,
+        "ZRot": -10.0,
+        "SubZoneId": 0
+    },
+    {
+        // gaondal  (e_falcony_plateau_1, [주민] 가온달 부락)
+        "Id": 76,
+        "Name": "gaondal",
+        "ZoneId": 156,
+        "X": 23672.51,
+        "Y": 9806.35,
+        "Z": 584.01,
+        "ZRot": -70.0,
+        "SubZoneId": 0
+    },
+    {
+        // whitecloud  (e_falcony_plateau_1, 흰구름결 부락)
+        "Id": 77,
+        "Name": "whitecloud",
+        "ZoneId": 156,
+        "X": 23257.59,
+        "Y": 9025.96,
+        "Z": 659.90,
+        "ZRot": 176.0,
+        "SubZoneId": 0
+    },
+    {
+        // oxyon  (e_falcony_plateau_1, 옥시언 상단)
+        "Id": 78,
+        "Name": "oxyon",
+        "ZoneId": 156,
+        "X": 23764.46,
+        "Y": 9182.67,
+        "Z": 581.36,
+        "ZRot": 132.0,
+        "SubZoneId": 0
+    },
+    {
+        // lilyuthill_brook  (w_lilyut_meadow_1, 가리여울 마을)
+        "Id": 79,
+        "Name": "lilyuthill_brook",
+        "ZoneId": 144,
+        "X": 13568.14,
+        "Y": 15877.91,
+        "Z": 176.97,
+        "ZRot": -49.0,
+        "SubZoneId": 0
+    },
+    {
+        // mahadevi_deportation  (e_sunrise_peninsula_1, 마하데비 검문소)
+        "Id": 115,
+        "Name": "mahadevi_deportation",
+        "ZoneId": 141,
+        "X": 17781.69,
+        "Y": 8339.39,
+        "Z": 261.86,
+        "ZRot": 60.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_br_p  (w_bronze_rock_3, 무덤: 청동 바위산 해적)
+        "Id": 145,
+        "Name": "grave_br_p",
+        "ZoneId": 193,
+        "X": 6422.34,
+        "Y": 13131.64,
+        "Z": 955.98,
+        "ZRot": -171.0,
+        "SubZoneId": 0
+    },
+    {
+        // ice_cap_vil  (w_bronze_rock_1, 만년설 마을)
+        "Id": 157,
+        "Name": "ice_cap_vil",
+        "ZoneId": 154,
+        "X": 6237.52,
+        "Y": 13081.87,
+        "Z": 1135.59,
+        "ZRot": -74.0,
+        "SubZoneId": 0
+    },
+    {
+        // nacha_gate  (o_abyss_gate, [던전] 나차쉬가르)
+        "Id": 158,
+        "Name": "nacha_gate",
+        "ZoneId": 276,
+        "X": 23026.95,
+        "Y": 25851.68,
+        "Z": 137.56,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_br_showerystar  (w_bronze_rock_3, 무덤: 별똥비 마을)
+        "Id": 159,
+        "Name": "grave_br_showerystar",
+        "ZoneId": 193,
+        "X": 7335.34,
+        "Y": 13661.27,
+        "Z": 1157.37,
+        "ZRot": -27.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_br_andelph  (w_bronze_rock_2, 무덤: 안델프)
+        "Id": 160,
+        "Name": "grave_br_andelph",
+        "ZoneId": 192,
+        "X": 6122.49,
+        "Y": 13292.26,
+        "Z": 1030.36,
+        "ZRot": 17.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_br_bronze_hill  (w_bronze_rock_1, 무덤: 청동 봉우리)
+        "Id": 161,
+        "Name": "grave_br_bronze_hill",
+        "ZoneId": 154,
+        "X": 6427.22,
+        "Y": 12933.54,
+        "Z": 1036.39,
+        "ZRot": -84.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_br_BareFeet  (w_bronze_rock_3, 무덤: 맨발고개)
+        "Id": 162,
+        "Name": "grave_br_BareFeet",
+        "ZoneId": 193,
+        "X": 6868.74,
+        "Y": 13402.48,
+        "Z": 1012.04,
+        "ZRot": -18.0,
+        "SubZoneId": 0
+    },
+    {
+        // sing_lute  (e_singing_land_1, 비파 항구)
+        "Id": 164,
+        "Name": "sing_lute",
+        "ZoneId": 160,
+        "X": 21162.13,
+        "Y": 10517.10,
+        "Z": 115.58,
+        "ZRot": -68.0,
+        "SubZoneId": 0
+    },
+    {
+        // Forest_Defender_Vill  (e_ancient_forest, 숲의 수호자 부락)
+        "Id": 165,
+        "Name": "Forest_Defender_Vill",
+        "ZoneId": 159,
+        "X": 22302.06,
+        "Y": 12106.03,
+        "Z": 259.62,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // Forest_Hunter  (e_ancient_forest, [주민] 사냥꾼 마을)
+        "Id": 166,
+        "Name": "Forest_Hunter",
+        "ZoneId": 159,
+        "X": 22757.35,
+        "Y": 11997.39,
+        "Z": 256.25,
+        "ZRot": -137.0,
+        "SubZoneId": 0
+    },
+    {
+        // Forest_Defender_Camp  (e_ancient_forest, 수호자 야영지)
+        "Id": 167,
+        "Name": "Forest_Defender_Camp",
+        "ZoneId": 159,
+        "X": 23789.12,
+        "Y": 11276.87,
+        "Z": 362.75,
+        "ZRot": -87.0,
+        "SubZoneId": 0
+    },
+    {
+        // sunrise_town  (w_golden_plains_3, 해오름 마을)
+        "Id": 175,
+        "Name": "sunrise_town",
+        "ZoneId": 207,
+        "X": 11285.29,
+        "Y": 10736.92,
+        "Z": 129.69,
+        "ZRot": -90.0,
+        "SubZoneId": 0
+    },
+    {
+        // sunset_town  (w_golden_plains_2, [주민] 해질녘 마을)
+        "Id": 176,
+        "Name": "sunset_town",
+        "ZoneId": 206,
+        "X": 9330.30,
+        "Y": 10296.23,
+        "Z": 185.58,
+        "ZRot": -2.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_forest_rest  (e_ancient_forest, 안식의 숲 끝자락 무덤)
+        "Id": 202,
+        "Name": "grave_forest_rest",
+        "ZoneId": 159,
+        "X": 23048.12,
+        "Y": 11547.73,
+        "Z": 252.44,
+        "ZRot": -164.0,
+        "SubZoneId": 0
+    },
+    {
+        // Forest_Returned_Camp  (e_ancient_forest, 리턴드 결사단 야영지)
+        "Id": 205,
+        "Name": "Forest_Returned_Camp",
+        "ZoneId": 159,
+        "X": 24355.12,
+        "Y": 11413.03,
+        "Z": 422.06,
+        "ZRot": -123.0,
+        "SubZoneId": 0
+    },
+    {
+        // Forest_Noble_Rest  (e_ancient_forest, 세바스티안 백작의 휴양지)
+        "Id": 206,
+        "Name": "Forest_Noble_Rest",
+        "ZoneId": 159,
+        "X": 23565.73,
+        "Y": 12142.39,
+        "Z": 253.00,
+        "ZRot": 68.0,
+        "SubZoneId": 0
+    },
+    {
+        // rain_hatora  (e_rainbow_field_2, 하토라)
+        "Id": 207,
+        "Name": "rain_hatora",
+        "ZoneId": 187,
+        "X": 20029.62,
+        "Y": 7596.29,
+        "Z": 179.25,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rain_rest  (e_rainbow_field_3, 마른 볕 쉼터)
+        "Id": 208,
+        "Name": "rain_rest",
+        "ZoneId": 188,
+        "X": 20503.27,
+        "Y": 7130.44,
+        "Z": 193.29,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rain_puddle  (e_rainbow_field_3, 정화의 웅덩이)
+        "Id": 209,
+        "Name": "rain_puddle",
+        "ZoneId": 188,
+        "X": 21418.19,
+        "Y": 7392.21,
+        "Z": 235.70,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rain_sleeve  (e_rainbow_field_4, 너른 소매 마을)
+        "Id": 210,
+        "Name": "rain_sleeve",
+        "ZoneId": 189,
+        "X": 22283.18,
+        "Y": 7010.51,
+        "Z": 278.95,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rain_fortune  (e_rainbow_field_2, 핫산의 야영지)
+        "Id": 211,
+        "Name": "rain_fortune",
+        "ZoneId": 187,
+        "X": 19434.66,
+        "Y": 7522.47,
+        "Z": 196.13,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_rain_first  (e_rainbow_field_2, 첫번째 무덤)
+        "Id": 212,
+        "Name": "gv_rain_first",
+        "ZoneId": 187,
+        "X": 19333.06,
+        "Y": 7591.30,
+        "Z": 207.44,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // dwarf_start  (w_cradle_of_genesis_2, 드워프 출발지)
+        "Id": 239,
+        "Name": "dwarf_start",
+        "ZoneId": 328,
+        "X": 8539.96,
+        "Y": 13095.02,
+        "Z": 678.41,
+        "ZRot": 64.0,
+        "SubZoneId": 0
+    },
+    {
+        // Gwe_bigtree  (w_gweonid_forest_1, 숲의 인도자)
+        "Id": 244,
+        "Name": "Gwe_bigtree",
+        "ZoneId": 129,
+        "X": 9964.00,
+        "Y": 15330.92,
+        "Z": 229.90,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // Gwe_start  (w_gweonid_forest_1, 엘프 출발지)
+        "Id": 245,
+        "Name": "Gwe_start",
+        "ZoneId": 129,
+        "X": 10390.81,
+        "Y": 15981.20,
+        "Z": 367.36,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // maha_queen_farm  (e_mahadevi_3, 약초 농장 마을)
+        "Id": 254,
+        "Name": "maha_queen_farm",
+        "ZoneId": 197,
+        "X": 20325.58,
+        "Y": 9322.87,
+        "Z": 281.74,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // maha_secret_port  (e_mahadevi_1, 마하데비 항구)
+        "Id": 255,
+        "Name": "maha_secret_port",
+        "ZoneId": 153,
+        "X": 19222.36,
+        "Y": 7817.10,
+        "Z": 152.79,
+        "ZRot": 60.0,
+        "SubZoneId": 0
+    },
+    {
+        // tc_bd_willius  (w_two_crowns_1, 보름 거주지)
+        "Id": 260,
+        "Name": "tc_bd_willius",
+        "ZoneId": 149,
+        "X": 13260.80,
+        "Y": 11778.24,
+        "Z": 135.95,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // howling_island  (s_pirate_island, 으르렁거리는 섬)
+        "Id": 277,
+        "Name": "howling_island",
+        "ZoneId": 284,
+        "X": 15190.79,
+        "Y": 23037.21,
+        "Z": 108.79,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // Disciplinantvill  (e_ynystere_1, 수행자의 마을)
+        "Id": 305,
+        "Name": "Disciplinantvill",
+        "ZoneId": 139,
+        "X": 20286.72,
+        "Y": 12031.29,
+        "Z": 123.71,
+        "ZRot": -151.0,
+        "SubZoneId": 0
+    },
+    {
+        // ls_greenwolf  (w_long_sand_1, 녹색 늑대 마을)
+        "Id": 324,
+        "Name": "ls_greenwolf",
+        "ZoneId": 162,
+        "X": 8851.13,
+        "Y": 8232.34,
+        "Z": 154.48,
+        "ZRot": -86.0,
+        "SubZoneId": 0
+    },
+    {
+        // ls_drycamp  (w_long_sand_2, 푸른 모래톱 휴양지)
+        "Id": 325,
+        "Name": "ls_drycamp",
+        "ZoneId": 245,
+        "X": 9455.90,
+        "Y": 9150.60,
+        "Z": 114.50,
+        "ZRot": -10.0,
+        "SubZoneId": 0
+    },
+    {
+        // ls_goldentongue  (w_long_sand_2, [주민] 황금 혀 항구)
+        "Id": 326,
+        "Name": "ls_goldentongue",
+        "ZoneId": 245,
+        "X": 10735.58,
+        "Y": 9604.60,
+        "Z": 104.60,
+        "ZRot": -92.0,
+        "SubZoneId": 0
+    },
+    {
+        // hell_lawless  (w_hell_swamp_2, [주민] 무법 마을)
+        "Id": 328,
+        "Name": "hell_lawless",
+        "ZoneId": 248,
+        "X": 7483.44,
+        "Y": 9831.15,
+        "Z": 188.71,
+        "ZRot": 163.0,
+        "SubZoneId": 0
+    },
+    {
+        // hell_elf  (w_hell_swamp_2, 수호의 야영지)
+        "Id": 329,
+        "Name": "hell_elf",
+        "ZoneId": 248,
+        "X": 7944.40,
+        "Y": 9080.30,
+        "Z": 193.19,
+        "ZRot": 72.0,
+        "SubZoneId": 0
+    },
+    {
+        // hell_triste  (w_hell_swamp_1, 트리스테 극단 야영지)
+        "Id": 330,
+        "Name": "hell_triste",
+        "ZoneId": 161,
+        "X": 7813.01,
+        "Y": 7763.93,
+        "Z": 200.92,
+        "ZRot": -32.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_sb_snowlioncamp  (e_steppe_belt_1, 눈사자 바위 야영지)
+        "Id": 348,
+        "Name": "rp_sb_snowlioncamp",
+        "ZoneId": 136,
+        "X": 24747.87,
+        "Y": 7677.86,
+        "Z": 343.19,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // sb_rp_redclaw  (e_steppe_belt_1, 붉은발톱 부락)
+        "Id": 349,
+        "Name": "sb_rp_redclaw",
+        "ZoneId": 136,
+        "X": 23827.71,
+        "Y": 7363.64,
+        "Z": 306.25,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // sb_rp_firebreath  (e_steppe_belt_1, 불숨결 부락)
+        "Id": 351,
+        "Name": "sb_rp_firebreath",
+        "ZoneId": 136,
+        "X": 24671.09,
+        "Y": 6884.69,
+        "Z": 315.65,
+        "ZRot": -1.0,
+        "SubZoneId": 0
+    },
+    {
+        // sb_rp_bluefang  (e_steppe_belt_2, [주민] 푸른송곳니 부락)
+        "Id": 352,
+        "Name": "sb_rp_bluefang",
+        "ZoneId": 247,
+        "X": 25917.67,
+        "Y": 6812.55,
+        "Z": 362.27,
+        "ZRot": 53.0,
+        "SubZoneId": 0
+    },
+    {
+        // has_hageydan  (e_hasla_1, 하늘정원 마을)
+        "Id": 356,
+        "Name": "has_hageydan",
+        "ZoneId": 155,
+        "X": 28984.81,
+        "Y": 7622.56,
+        "Z": 631.28,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // has_temeburoke  (e_hasla_1, 테미캣 부락)
+        "Id": 359,
+        "Name": "has_temeburoke",
+        "ZoneId": 155,
+        "X": 29996.14,
+        "Y": 7857.93,
+        "Z": 402.35,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // loka_rt_twilight  (e_lokas_checkers_2, 황혼 노을 부락)
+        "Id": 377,
+        "Name": "loka_rt_twilight",
+        "ZoneId": 246,
+        "X": 24921.67,
+        "Y": 10604.15,
+        "Z": 687.71,
+        "ZRot": 69.0,
+        "SubZoneId": 0
+    },
+    {
+        // loka_rt_hermit  (e_lokas_checkers_2, 은거자의 마을)
+        "Id": 378,
+        "Name": "loka_rt_hermit",
+        "ZoneId": 246,
+        "X": 25756.53,
+        "Y": 10915.44,
+        "Z": 784.52,
+        "ZRot": -143.0,
+        "SubZoneId": 0
+    },
+    {
+        // loka_rt_water  (e_lokas_checkers_1, [주민] 물안개 마을)
+        "Id": 379,
+        "Name": "loka_rt_water",
+        "ZoneId": 138,
+        "X": 25416.81,
+        "Y": 9774.32,
+        "Z": 713.05,
+        "ZRot": 52.0,
+        "SubZoneId": 0
+    },
+    {
+        // loka_rt_ferre  (e_lokas_checkers_1, 페레 정찰대 야영지)
+        "Id": 380,
+        "Name": "loka_rt_ferre",
+        "ZoneId": 138,
+        "X": 25949.23,
+        "Y": 9154.21,
+        "Z": 682.13,
+        "ZRot": -175.0,
+        "SubZoneId": 0
+    },
+    {
+        // loka_rt_solong  (e_lokas_checkers_1, 솔롱고스 야영지)
+        "Id": 381,
+        "Name": "loka_rt_solong",
+        "ZoneId": 138,
+        "X": 25948.21,
+        "Y": 8826.20,
+        "Z": 645.74,
+        "ZRot": -142.0,
+        "SubZoneId": 0
+    },
+    {
+        // ruins_hari_stonemason  (e_ruins_of_hariharalaya_1, [주민] 석공 마을)
+        "Id": 387,
+        "Name": "ruins_hari_stonemason",
+        "ZoneId": 137,
+        "X": 27773.07,
+        "Y": 6759.99,
+        "Z": 575.57,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // ruins_hari_drakforestvillage  (e_ruins_of_hariharalaya_2, 고고학자 마을)
+        "Id": 390,
+        "Name": "ruins_hari_drakforestvillage",
+        "ZoneId": 242,
+        "X": 28538.33,
+        "Y": 6148.06,
+        "Z": 558.87,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // ruins_hari_herbalistcamp  (e_ruins_of_hariharalaya_3, 약초꾼의 야영지)
+        "Id": 391,
+        "Name": "ruins_hari_herbalistcamp",
+        "ZoneId": 243,
+        "X": 26985.74,
+        "Y": 7057.98,
+        "Z": 437.18,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // anci_gv_endroad  (e_ancient_forest, 고대의 숲 이니스테르 가는길)
+        "Id": 407,
+        "Name": "anci_gv_endroad",
+        "ZoneId": 159,
+        "X": 23657.91,
+        "Y": 12144.47,
+        "Z": 267.01,
+        "ZRot": -16.0,
+        "SubZoneId": 0
+    },
+    {
+        // golden_west_1  (w_golden_plains_2, 농가)
+        "Id": 417,
+        "Name": "golden_west_1",
+        "ZoneId": 206,
+        "X": 10088.77,
+        "Y": 10539.92,
+        "Z": 182.50,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // golden_puoing  (w_golden_plains_3, 양조장)
+        "Id": 418,
+        "Name": "golden_puoing",
+        "ZoneId": 207,
+        "X": 10629.78,
+        "Y": 10748.56,
+        "Z": 170.85,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_dried_camp  (w_the_carcass_1, 말라붙은 저수지 야영지)
+        "Id": 503,
+        "Name": "carcass_rt_dried_camp",
+        "ZoneId": 145,
+        "X": 9156.71,
+        "Y": 16265.37,
+        "Z": 120.64,
+        "ZRot": -131.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_barren_island  (w_the_carcass_1, 메마른 섬)
+        "Id": 504,
+        "Name": "carcass_rt_barren_island",
+        "ZoneId": 145,
+        "X": 9257.56,
+        "Y": 16675.55,
+        "Z": 141.30,
+        "ZRot": -131.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_iona_village  (w_the_carcass_1, 아이오나 마을)
+        "Id": 505,
+        "Name": "carcass_rt_iona_village",
+        "ZoneId": 145,
+        "X": 9720.39,
+        "Y": 17043.20,
+        "Z": 128.12,
+        "ZRot": -0.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_bluespartoi_camp  (w_the_carcass_1, 갈색비늘 에키혼)
+        "Id": 506,
+        "Name": "carcass_rt_bluespartoi_camp",
+        "ZoneId": 145,
+        "X": 9565.55,
+        "Y": 17846.96,
+        "Z": 145.67,
+        "ZRot": -131.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_lavis_vill  (w_the_carcass_1, [주민] 라비스 마을)
+        "Id": 507,
+        "Name": "carcass_rt_lavis_vill",
+        "ZoneId": 145,
+        "X": 10477.25,
+        "Y": 17350.85,
+        "Z": 184.95,
+        "ZRot": -131.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_bonefence  (w_the_carcass_1, 뼈 울타리 야영지)
+        "Id": 508,
+        "Name": "carcass_rt_bonefence",
+        "ZoneId": 145,
+        "X": 10673.18,
+        "Y": 16930.92,
+        "Z": 168.90,
+        "ZRot": -131.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_red_camp  (w_the_carcass_2, 붉은 흙 야영지)
+        "Id": 509,
+        "Name": "carcass_rt_red_camp",
+        "ZoneId": 273,
+        "X": 11730.91,
+        "Y": 17854.57,
+        "Z": 231.87,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // carcass_rt_bonepuddle  (w_the_carcass_2, 뼈 웅덩이 야영지)
+        "Id": 510,
+        "Name": "carcass_rt_bonepuddle",
+        "ZoneId": 273,
+        "X": 11148.75,
+        "Y": 17555.30,
+        "Z": 119.94,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // has_beechy  (e_hasla_2, 비취 마을)
+        "Id": 511,
+        "Name": "has_beechy",
+        "ZoneId": 272,
+        "X": 28623.63,
+        "Y": 8515.70,
+        "Z": 528.12,
+        "ZRot": 157.0,
+        "SubZoneId": 0
+    },
+    {
+        // has_beloo  (e_hasla_2, 베로에)
+        "Id": 512,
+        "Name": "has_beloo",
+        "ZoneId": 272,
+        "X": 30002.33,
+        "Y": 8750.47,
+        "Z": 446.38,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_bd_restland  (o_rest_land, 안식의 땅)
+        "Id": 518,
+        "Name": "o_bd_restland",
+        "ZoneId": 234,
+        "X": 21137.97,
+        "Y": 24735.57,
+        "Z": 253.95,
+        "ZRot": 136.0,
+        "SubZoneId": 0
+    },
+    {
+        // has_training  (e_hasla_3, 버려진 훈련소)
+        "Id": 554,
+        "Name": "has_training",
+        "ZoneId": 274,
+        "X": 29845.68,
+        "Y": 7013.80,
+        "Z": 413.09,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_salpi  (o_salpimari, 살피마리)
+        "Id": 556,
+        "Name": "o_salpi",
+        "ZoneId": 204,
+        "X": 20107.61,
+        "Y": 24570.06,
+        "Z": 155.11,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_abyss  (o_abyss_gate, 심연의 입구)
+        "Id": 557,
+        "Name": "o_abyss",
+        "ZoneId": 276,
+        "X": 22349.85,
+        "Y": 24938.36,
+        "Z": 189.22,
+        "ZRot": -24.0,
+        "SubZoneId": 0
+    },
+    {
+        // nuimari_return  (o_nuimari, 누이마리)
+        "Id": 558,
+        "Name": "nuimari_return",
+        "ZoneId": 205,
+        "X": 21727.66,
+        "Y": 23758.35,
+        "Z": 144.99,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // seonyukmari_return  (o_seonyeokmari, 서녘마리)
+        "Id": 559,
+        "Name": "seonyukmari_return",
+        "ZoneId": 233,
+        "X": 20140.40,
+        "Y": 24764.16,
+        "Z": 188.25,
+        "ZRot": 110.0,
+        "SubZoneId": 0
+    },
+    {
+        // landofsunlight_return  (o_land_of_sunlights, 태양의 들녘)
+        "Id": 560,
+        "Name": "landofsunlight_return",
+        "ZoneId": 275,
+        "X": 22113.63,
+        "Y": 26416.83,
+        "Z": 163.19,
+        "ZRot": -141.0,
+        "SubZoneId": 0
+    },
+    {
+        // solz_novicefarm  (w_solzreed_3, [주민] 파수 마을 부근)
+        "Id": 563,
+        "Name": "solz_novicefarm",
+        "ZoneId": 179,
+        "X": 14953.19,
+        "Y": 14260.53,
+        "Z": 121.63,
+        "ZRot": -140.0,
+        "SubZoneId": 0
+    },
+    {
+        // gwe_novicefarm  (w_gweonid_forest_3, [주민] 영매의 거처 부근)
+        "Id": 564,
+        "Name": "gwe_novicefarm",
+        "ZoneId": 182,
+        "X": 10853.46,
+        "Y": 15531.94,
+        "Z": 245.10,
+        "ZRot": -153.0,
+        "SubZoneId": 0
+    },
+    {
+        // rain_novicefarm  (e_rainbow_field_3, [주민] 마른 볕 쉼터 부근)
+        "Id": 566,
+        "Name": "rain_novicefarm",
+        "ZoneId": 188,
+        "X": 20360.28,
+        "Y": 7162.16,
+        "Z": 185.56,
+        "ZRot": 40.0,
+        "SubZoneId": 0
+    },
+    {
+        // gara_inst_cutting  (w_garangdol_plains_2, [던전] 칼바람 폐광)
+        "Id": 602,
+        "Name": "gara_inst_cutting",
+        "ZoneId": 185,
+        "X": 11358.91,
+        "Y": 13130.52,
+        "Z": 144.84,
+        "ZRot": 135.0,
+        "SubZoneId": 0
+    },
+    {
+        // maha_inst_sal  (e_mahadevi_2, [던전] 서방 이슈바라 왕궁 지하)
+        "Id": 603,
+        "Name": "maha_inst_sal",
+        "ZoneId": 196,
+        "X": 19329.17,
+        "Y": 8516.41,
+        "Z": 198.94,
+        "ZRot": 110.0,
+        "SubZoneId": 0
+    },
+    {
+        // cros_inst_burnt  (w_cross_plains_2, [던전] 불탄 성 무기고)
+        "Id": 604,
+        "Name": "cros_inst_burnt",
+        "ZoneId": 257,
+        "X": 15676.00,
+        "Y": 12586.00,
+        "Z": 167.00,
+        "ZRot": -130.0,
+        "SubZoneId": 0
+    },
+    {
+        // ynys_inst_hadir  (e_ynystere_1, [던전] 하디르의 농장)
+        "Id": 605,
+        "Name": "ynys_inst_hadir",
+        "ZoneId": 139,
+        "X": 20015.72,
+        "Y": 12781.77,
+        "Z": 136.11,
+        "ZRot": -125.0,
+        "SubZoneId": 0
+    },
+    {
+        // hell_inst_howling  (w_hell_swamp_2, [던전] 울부짖는 구렁텅이)
+        "Id": 606,
+        "Name": "hell_inst_howling",
+        "ZoneId": 248,
+        "X": 7802.07,
+        "Y": 10321.83,
+        "Z": 249.54,
+        "ZRot": 90.0,
+        "SubZoneId": 0
+    },
+    {
+        // loka_inst_cradle  (e_lokas_checkers_1, [던전] 파괴의 요람)
+        "Id": 607,
+        "Name": "loka_inst_cradle",
+        "ZoneId": 138,
+        "X": 26857.46,
+        "Y": 9043.36,
+        "Z": 773.38,
+        "ZRot": -90.0,
+        "SubZoneId": 0
+    },
+    {
+        // tiger_blue  (e_tiger_spine_mountains_1, 푸른 전나무회)
+        "Id": 651,
+        "Name": "tiger_blue",
+        "ZoneId": 158,
+        "X": 21035.58,
+        "Y": 8310.06,
+        "Z": 372.13,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // ss_rp_w  (o_shining_shore_2, 누이아 집결지)
+        "Id": 652,
+        "Name": "ss_rp_w",
+        "ZoneId": 301,
+        "X": 19315.78,
+        "Y": 27168.65,
+        "Z": 131.97,
+        "ZRot": -130.0,
+        "SubZoneId": 0
+    },
+    {
+        // ss_rp_e  (o_shining_shore_1, 하리하라 집결지)
+        "Id": 672,
+        "Name": "ss_rp_e",
+        "ZoneId": 282,
+        "X": 19609.65,
+        "Y": 26967.28,
+        "Z": 131.69,
+        "ZRot": 50.0,
+        "SubZoneId": 0
+    },
+    {
+        // ss_rp_p  (o_shining_shore_1, 제3세력 집결지 )
+        "Id": 673,
+        "Name": "ss_rp_p",
+        "ZoneId": 282,
+        "X": 19325.57,
+        "Y": 26885.45,
+        "Z": 130.33,
+        "ZRot": -40.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_rain_rion_n  (e_rainbow_field_4, 마른 길목 북쪽 무덤)
+        "Id": 678,
+        "Name": "gv_rain_rion_n",
+        "ZoneId": 189,
+        "X": 22191.16,
+        "Y": 7186.51,
+        "Z": 262.83,
+        "ZRot": 171.0,
+        "SubZoneId": 0
+    },
+    {
+        // dew_plains_altar  (o_dew_plains, 붉은 이슬 제단)
+        "Id": 681,
+        "Name": "dew_plains_altar",
+        "ZoneId": 307,
+        "X": 23412.67,
+        "Y": 27683.37,
+        "Z": 178.16,
+        "ZRot": -23.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_silence_sea_w  (s_silent_sea_4, 해상전 서대륙 부활지점)
+        "Id": 690,
+        "Name": "gv_silence_sea_w",
+        "ZoneId": 213,
+        "X": 20688.49,
+        "Y": 22321.19,
+        "Z": 101.58,
+        "ZRot": -46.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_silence_sea_e  (s_silent_sea_4, 해상전 동대륙 부활지점)
+        "Id": 691,
+        "Name": "gv_silence_sea_e",
+        "ZoneId": 213,
+        "X": 18695.61,
+        "Y": 20872.02,
+        "Z": 102.24,
+        "ZRot": -103.0,
+        "SubZoneId": 0
+    },
+    {
+        // mirror_hunter  (w_mirror_kingdom_1, 사냥꾼의 처소)
+        "Id": 696,
+        "Name": "mirror_hunter",
+        "ZoneId": 266,
+        "X": 7455.96,
+        "Y": 19082.54,
+        "Z": 101.21,
+        "ZRot": -148.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mirror_ice_cliff  (w_mirror_kingdom_1, 무덤: 얼음 절벽 거울 해적)
+        "Id": 697,
+        "Name": "gv_mirror_ice_cliff",
+        "ZoneId": 266,
+        "X": 7489.55,
+        "Y": 19063.60,
+        "Z": 100.83,
+        "ZRot": -131.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mirror_ice_cliff_w  (w_mirror_kingdom_1, 무덤: 얼음 절벽 거울 서대)
+        "Id": 699,
+        "Name": "gv_mirror_ice_cliff_w",
+        "ZoneId": 266,
+        "X": 7507.24,
+        "Y": 19083.49,
+        "Z": 100.85,
+        "ZRot": 53.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mirror_ice_cliff_e  (w_mirror_kingdom_1, 무덤: 얼음 절벽 거울 동대)
+        "Id": 700,
+        "Name": "gv_mirror_ice_cliff_e",
+        "ZoneId": 266,
+        "X": 7471.87,
+        "Y": 19071.77,
+        "Z": 100.85,
+        "ZRot": 53.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_rog_gv_nuia  (o_ruins_of_gold, 황금의 폐허 누이아 부활지)
+        "Id": 705,
+        "Name": "o_rog_gv_nuia",
+        "ZoneId": 281,
+        "X": 17068.04,
+        "Y": 27384.44,
+        "Z": 115.77,
+        "ZRot": 99.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_rog_gv_harihara  (o_ruins_of_gold, 황금의 폐허 하리하라 부활지)
+        "Id": 706,
+        "Name": "o_rog_gv_harihara",
+        "ZoneId": 281,
+        "X": 18116.31,
+        "Y": 27309.23,
+        "Z": 126.52,
+        "ZRot": 76.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_rog_gv_pirate  (o_ruins_of_gold, 황금의 폐허 제3세력 부활지)
+        "Id": 707,
+        "Name": "o_rog_gv_pirate",
+        "ZoneId": 281,
+        "X": 17663.32,
+        "Y": 27720.19,
+        "Z": 132.76,
+        "ZRot": -23.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_rog_pt  (o_ruins_of_gold, [전진 기지] 황금의 폐허)
+        "Id": 708,
+        "Name": "o_rog_pt",
+        "ZoneId": 281,
+        "X": 17241.12,
+        "Y": 27511.32,
+        "Z": 141.00,
+        "ZRot": 41.0,
+        "SubZoneId": 0
+    },
+    {
+        // gahee_shining_1  (o_shining_shore_2, [교역소] 파비트라 기지)
+        "Id": 710,
+        "Name": "gahee_shining_1",
+        "ZoneId": 301,
+        "X": 19945.35,
+        "Y": 26944.76,
+        "Z": 105.88,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gahee_sunrise_1  (e_sunrise_peninsula_2, 이지의 등불)
+        "Id": 711,
+        "Name": "gahee_sunrise_1",
+        "ZoneId": 191,
+        "X": 16694.75,
+        "Y": 9265.31,
+        "Z": 107.18,
+        "ZRot": 30.0,
+        "SubZoneId": 0
+    },
+    {
+        // gahee_two_1  (w_two_crowns_2, 이지의 등불)
+        "Id": 712,
+        "Name": "gahee_two_1",
+        "ZoneId": 186,
+        "X": 13172.35,
+        "Y": 10124.27,
+        "Z": 105.67,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gahee_pirate_1  (s_pirate_island, 이지의 등불)
+        "Id": 713,
+        "Name": "gahee_pirate_1",
+        "ZoneId": 284,
+        "X": 15208.82,
+        "Y": 22763.68,
+        "Z": 115.67,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // freeisland_gv_nuia  (s_freedom_island, 자유도 근해 누이아 부활지)
+        "Id": 714,
+        "Name": "freeisland_gv_nuia",
+        "ZoneId": 283,
+        "X": 20063.88,
+        "Y": 18280.17,
+        "Z": 104.10,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // freeisland_gv_pirate  (s_freedom_island, 자유도 근해 해적 부활지)
+        "Id": 715,
+        "Name": "freeisland_gv_pirate",
+        "ZoneId": 283,
+        "X": 20945.08,
+        "Y": 19871.56,
+        "Z": 104.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // ostguardian_gv_all  (o_shining_shore_1, 오스트 가신단 주둔지)
+        "Id": 730,
+        "Name": "ostguardian_gv_all",
+        "ZoneId": 282,
+        "X": 18688.48,
+        "Y": 27086.65,
+        "Z": 213.03,
+        "ZRot": -120.0,
+        "SubZoneId": 0
+    },
+    {
+        // ss_gotohousing  (o_shining_shore_1, 빛나는 해안 서부 주거 지역 )
+        "Id": 731,
+        "Name": "ss_gotohousing",
+        "ZoneId": 282,
+        "X": 18848.27,
+        "Y": 27215.76,
+        "Z": 160.87,
+        "ZRot": -101.0,
+        "SubZoneId": 0
+    },
+    {
+        // ss_gotohousing_east  (o_shining_shore_2, 빛나는 해안 동부 주거 지역)
+        "Id": 737,
+        "Name": "ss_gotohousing_east",
+        "ZoneId": 301,
+        "X": 19977.65,
+        "Y": 27386.48,
+        "Z": 158.38,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // eazy_nuian  (o_shining_shore_1, [교역소] 일리온 기지)
+        "Id": 738,
+        "Name": "eazy_nuian",
+        "ZoneId": 282,
+        "X": 18998.32,
+        "Y": 26827.45,
+        "Z": 103.06,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // potal_boru  (e_ynystere_1, 보루)
+        "Id": 767,
+        "Name": "potal_boru",
+        "ZoneId": 139,
+        "X": 21185.39,
+        "Y": 12649.34,
+        "Z": 194.72,
+        "ZRot": -143.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hanuimaru_1  (w_hanuimaru_1, 무덤: 올챙이 꼬리 들판)
+        "Id": 786,
+        "Name": "gv_hanuimaru_1",
+        "ZoneId": 269,
+        "X": 5466.78,
+        "Y": 8564.96,
+        "Z": 418.55,
+        "ZRot": 160.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hanuimaru_2  (w_hanuimaru_1, 무덤: 올챙이 머리 들판)
+        "Id": 787,
+        "Name": "gv_hanuimaru_2",
+        "ZoneId": 269,
+        "X": 5318.04,
+        "Y": 9586.16,
+        "Z": 469.30,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hanuimaru_3  (w_hanuimaru_1, 무덤: 올챙이 머리 들판 해적)
+        "Id": 788,
+        "Name": "gv_hanuimaru_3",
+        "ZoneId": 269,
+        "X": 6468.98,
+        "Y": 8322.99,
+        "Z": 457.50,
+        "ZRot": -175.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_wilderness_flower  (e_sunny_wilderness_2, 꽃농장 마을)
+        "Id": 789,
+        "Name": "rp_wilderness_flower",
+        "ZoneId": 190,
+        "X": 20426.73,
+        "Y": 6203.13,
+        "Z": 230.51,
+        "ZRot": 124.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_warborn_start  (o_room_of_queen_1, 불탄 성지하 워본 시작 무덤)
+        "Id": 790,
+        "Name": "gv_warborn_start",
+        "ZoneId": 337,
+        "X": 2373.75,
+        "Y": 32008.65,
+        "Z": 458.39,
+        "ZRot": -178.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_summerleaf  (w_cradle_of_genesis_2, 무덤: 여름잎 강가)
+        "Id": 793,
+        "Name": "gv_summerleaf",
+        "ZoneId": 328,
+        "X": 8300.91,
+        "Y": 13310.95,
+        "Z": 680.28,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_ironwindhill  (w_cradle_of_genesis_2, 무덤: 쇠바람 고개)
+        "Id": 794,
+        "Name": "gv_ironwindhill",
+        "ZoneId": 328,
+        "X": 7780.32,
+        "Y": 13111.20,
+        "Z": 827.11,
+        "ZRot": -135.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_ironroad  (w_cradle_of_genesis_1, 무덤: 쇠의길)
+        "Id": 795,
+        "Name": "gv_ironroad",
+        "ZoneId": 150,
+        "X": 7714.19,
+        "Y": 12439.04,
+        "Z": 680.08,
+        "ZRot": 135.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_giantcanyon  (w_cradle_of_genesis_1, 무덤: 거인 협곡)
+        "Id": 796,
+        "Name": "gv_giantcanyon",
+        "ZoneId": 150,
+        "X": 7515.77,
+        "Y": 12016.55,
+        "Z": 558.09,
+        "ZRot": -125.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_giantmountain  (w_cradle_of_genesis_1, 무덤: 거인의 산)
+        "Id": 797,
+        "Name": "gv_giantmountain",
+        "ZoneId": 150,
+        "X": 6854.55,
+        "Y": 12243.00,
+        "Z": 684.25,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_machinefactory  (w_cradle_of_genesis_2, 기계태엽 공장)
+        "Id": 798,
+        "Name": "rp_machinefactory",
+        "ZoneId": 328,
+        "X": 8043.43,
+        "Y": 13531.04,
+        "Z": 821.70,
+        "ZRot": 44.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_irontown  (w_cradle_of_genesis_1, [주민] 무쇠 마을)
+        "Id": 799,
+        "Name": "rp_irontown",
+        "ZoneId": 150,
+        "X": 7565.05,
+        "Y": 12569.34,
+        "Z": 686.67,
+        "ZRot": 9.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_cradleofgenesis  (w_cradle_of_genesis_2, 태초의 요람 동대륙 )
+        "Id": 800,
+        "Name": "gv_e_cradleofgenesis",
+        "ZoneId": 328,
+        "X": 8084.33,
+        "Y": 13357.71,
+        "Z": 751.20,
+        "ZRot": 86.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_p_cradleofgenesis  (w_cradle_of_genesis_1, 태초의 요람 해적)
+        "Id": 801,
+        "Name": "gv_p_cradleofgenesis",
+        "ZoneId": 150,
+        "X": 7291.48,
+        "Y": 12332.52,
+        "Z": 693.12,
+        "ZRot": -175.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_warborn_sunny_start  (e_sunny_wilderness_1, 불볕황야 시작 지점)
+        "Id": 804,
+        "Name": "rp_warborn_sunny_start",
+        "ZoneId": 157,
+        "X": 19215.60,
+        "Y": 6786.97,
+        "Z": 285.40,
+        "ZRot": -177.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_hanuimaru_1  (w_hanuimaru_3, [주민] 올챙이 꼬리 들판)
+        "Id": 806,
+        "Name": "rp_hanuimaru_1",
+        "ZoneId": 334,
+        "X": 6290.48,
+        "Y": 9465.58,
+        "Z": 457.52,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_hanuimaru_2  (w_hanuimaru_1, 올챙이 머리 들판)
+        "Id": 807,
+        "Name": "rp_hanuimaru_2",
+        "ZoneId": 269,
+        "X": 5992.81,
+        "Y": 8697.88,
+        "Z": 408.34,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_wilderness_ruin  (e_sunny_wilderness_1, 잡동사니 폐허)
+        "Id": 808,
+        "Name": "rp_wilderness_ruin",
+        "ZoneId": 157,
+        "X": 19473.58,
+        "Y": 5969.27,
+        "Z": 185.21,
+        "ZRot": -76.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_ruin  (e_sunny_wilderness_1, 무덤: 잡동사니 폐허)
+        "Id": 809,
+        "Name": "gv_wilderness_ruin",
+        "ZoneId": 157,
+        "X": 19357.23,
+        "Y": 5911.77,
+        "Z": 186.66,
+        "ZRot": -76.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_wilderness_work  (e_sunny_wilderness_1, 하리하란 주거지 공사장)
+        "Id": 810,
+        "Name": "rp_wilderness_work",
+        "ZoneId": 157,
+        "X": 19258.85,
+        "Y": 6652.15,
+        "Z": 273.51,
+        "ZRot": 135.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_flower  (e_sunny_wilderness_2, 무덤: 꽃농장)
+        "Id": 811,
+        "Name": "gv_wilderness_flower",
+        "ZoneId": 190,
+        "X": 20254.34,
+        "Y": 5932.33,
+        "Z": 211.18,
+        "ZRot": 22.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_wilderness_government  (e_sunny_wilderness_2, [주민] 하리하란 총독부)
+        "Id": 812,
+        "Name": "rp_wilderness_government",
+        "ZoneId": 190,
+        "X": 21125.12,
+        "Y": 5939.78,
+        "Z": 246.38,
+        "ZRot": -87.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_government  (e_sunny_wilderness_2, 무덤: 하리하란 총독부)
+        "Id": 813,
+        "Name": "gv_wilderness_government",
+        "ZoneId": 190,
+        "X": 21172.51,
+        "Y": 5792.62,
+        "Z": 246.38,
+        "ZRot": -90.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_farm  (e_sunny_wilderness_2, 무덤: 워본자치구 공동농장)
+        "Id": 814,
+        "Name": "gv_wilderness_farm",
+        "ZoneId": 190,
+        "X": 21252.71,
+        "Y": 5577.61,
+        "Z": 211.55,
+        "ZRot": 167.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_city  (e_sunny_wilderness_3, 무덤: 워본자치구 속죄의 도시)
+        "Id": 815,
+        "Name": "gv_wilderness_city",
+        "ZoneId": 286,
+        "X": 21657.79,
+        "Y": 5736.24,
+        "Z": 146.03,
+        "ZRot": -26.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_wilderness_city  (e_sunny_wilderness_3, 워본 자치구: 속죄의 도시)
+        "Id": 816,
+        "Name": "rp_wilderness_city",
+        "ZoneId": 286,
+        "X": 21991.72,
+        "Y": 5634.41,
+        "Z": 122.61,
+        "ZRot": -87.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_repentance  (e_sunny_wilderness_4, 무덤: 워본자치구 참회의 묘소)
+        "Id": 817,
+        "Name": "gv_wilderness_repentance",
+        "ZoneId": 287,
+        "X": 22424.01,
+        "Y": 5574.85,
+        "Z": 133.56,
+        "ZRot": 71.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_wilderness_animal_farm  (e_sunny_wilderness_4, 워본 자치구: 공동 목장)
+        "Id": 818,
+        "Name": "rp_wilderness_animal_farm",
+        "ZoneId": 287,
+        "X": 22776.42,
+        "Y": 6217.81,
+        "Z": 173.51,
+        "ZRot": 116.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_animal_farm  (e_sunny_wilderness_4, 무덤: 워본자치구 공동목장)
+        "Id": 819,
+        "Name": "gv_wilderness_animal_farm",
+        "ZoneId": 287,
+        "X": 22687.87,
+        "Y": 6143.90,
+        "Z": 178.63,
+        "ZRot": 157.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_rock  (e_sunny_wilderness_4, 무덤: 바위둥지)
+        "Id": 820,
+        "Name": "gv_wilderness_rock",
+        "ZoneId": 287,
+        "X": 22993.55,
+        "Y": 5574.77,
+        "Z": 185.90,
+        "ZRot": -95.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_rest  (e_sunny_wilderness_4, 무덤: 워본자치구 여행자의 쉼터)
+        "Id": 821,
+        "Name": "gv_wilderness_rest",
+        "ZoneId": 287,
+        "X": 22037.39,
+        "Y": 6143.51,
+        "Z": 169.01,
+        "ZRot": -173.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_homearea_1  (e_sunny_wilderness_2, 무덤: 주거 지역 1)
+        "Id": 822,
+        "Name": "gv_wilderness_homearea_1",
+        "ZoneId": 190,
+        "X": 20639.30,
+        "Y": 5516.57,
+        "Z": 191.12,
+        "ZRot": 157.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_homearea_2  (e_sunny_wilderness_2, 무덤: 주거 지역 2)
+        "Id": 823,
+        "Name": "gv_wilderness_homearea_2",
+        "ZoneId": 190,
+        "X": 21271.10,
+        "Y": 5056.97,
+        "Z": 140.17,
+        "ZRot": -13.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_homearea_3  (e_sunny_wilderness_3, 무덤: 주거 지역 3)
+        "Id": 824,
+        "Name": "gv_wilderness_homearea_3",
+        "ZoneId": 286,
+        "X": 21885.57,
+        "Y": 4773.15,
+        "Z": 148.17,
+        "ZRot": -26.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_homearea_4  (e_sunny_wilderness_4, 무덤: 주거 지역 4)
+        "Id": 825,
+        "Name": "gv_wilderness_homearea_4",
+        "ZoneId": 287,
+        "X": 22538.40,
+        "Y": 4776.18,
+        "Z": 149.81,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_work  (e_sunny_wilderness_1, 무덤: 하리하란 주거지 공사장)
+        "Id": 826,
+        "Name": "gv_wilderness_work",
+        "ZoneId": 157,
+        "X": 19362.09,
+        "Y": 6608.13,
+        "Z": 264.37,
+        "ZRot": -61.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_other  (e_sunny_wilderness_2, 무덤: 무법자 / 해적 / 국가)
+        "Id": 827,
+        "Name": "gv_wilderness_other",
+        "ZoneId": 190,
+        "X": 21219.44,
+        "Y": 6009.56,
+        "Z": 187.42,
+        "ZRot": 157.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_wilderness_west  (e_sunny_wilderness_2, 무덤: 불볕황야 서대륙 무덤)
+        "Id": 828,
+        "Name": "gv_wilderness_west",
+        "ZoneId": 190,
+        "X": 21516.05,
+        "Y": 6201.52,
+        "Z": 202.21,
+        "ZRot": -10.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_queen_of_room_2  (o_room_of_queen_2, 무덤: 불탄 성 지하 다미안)
+        "Id": 830,
+        "Name": "gv_queen_of_room_2",
+        "ZoneId": 341,
+        "X": 3397.68,
+        "Y": 32002.88,
+        "Z": 457.62,
+        "ZRot": -180.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_lokaloka_w  (e_lokaloka_mountains_2, 무덤: 로칼로카 산맥 누이아 무덤)
+        "Id": 832,
+        "Name": "gv_e_lokaloka_w",
+        "ZoneId": 340,
+        "X": 28299.80,
+        "Y": 10374.05,
+        "Z": 727.63,
+        "ZRot": 133.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_lokaloka_e  (e_lokaloka_mountains_1, 무덤: 로칼로카 산맥 하리하라 무덤)
+        "Id": 833,
+        "Name": "gv_e_lokaloka_e",
+        "ZoneId": 270,
+        "X": 27094.16,
+        "Y": 11232.05,
+        "Z": 910.70,
+        "ZRot": 93.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_lokaloka_p  (e_lokaloka_mountains_1, 무덤: 로칼로카 산맥 해적 무덤)
+        "Id": 834,
+        "Name": "gv_e_lokaloka_p",
+        "ZoneId": 270,
+        "X": 28452.97,
+        "Y": 11446.42,
+        "Z": 931.62,
+        "ZRot": -5.7,
+        "SubZoneId": 0
+    },
+    {
+        // e_lokaloka_mountains_2  (e_lokaloka_mountains_1, 로카의 인중)
+        "Id": 836,
+        "Name": "e_lokaloka_mountains_2",
+        "ZoneId": 270,
+        "X": 27305.39,
+        "Y": 11228.66,
+        "Z": 868.53,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // resident_townhall  (e_hasla_2, [주민] 베로에 주민 회관)
+        "Id": 841,
+        "Name": "resident_townhall",
+        "ZoneId": 272,
+        "X": 29841.89,
+        "Y": 8856.98,
+        "Z": 479.23,
+        "ZRot": 93.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_the_great_reeds_1  (o_the_great_reeds, 무덤: 갈대무리 땅 서)
+        "Id": 842,
+        "Name": "gv_the_great_reeds_1",
+        "ZoneId": 288,
+        "X": 19271.70,
+        "Y": 28053.51,
+        "Z": 257.32,
+        "ZRot": 155.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_the_great_reeds_2  (o_the_great_reeds, 무덤: 갈대무리 땅 동)
+        "Id": 843,
+        "Name": "gv_the_great_reeds_2",
+        "ZoneId": 288,
+        "X": 20298.40,
+        "Y": 28430.23,
+        "Z": 246.68,
+        "ZRot": -45.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_the_great_reeds_3  (o_the_great_reeds, 무덤: 갈대무리 땅 국)
+        "Id": 844,
+        "Name": "gv_the_great_reeds_3",
+        "ZoneId": 288,
+        "X": 19519.98,
+        "Y": 28946.76,
+        "Z": 275.06,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_the_great_reeds  (o_the_great_reeds, 신의 방패 갈대무리 주둔지 )
+        "Id": 845,
+        "Name": "rp_the_great_reeds",
+        "ZoneId": 288,
+        "X": 19613.67,
+        "Y": 28310.11,
+        "Z": 294.51,
+        "ZRot": 180.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_whale_song_w  (o_whale_song_bay, 무덤: 서대륙 고래 노래만)
+        "Id": 851,
+        "Name": "gv_whale_song_w",
+        "ZoneId": 310,
+        "X": 16642.30,
+        "Y": 28423.70,
+        "Z": 123.12,
+        "ZRot": -151.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_whale_song_e  (o_whale_song_bay, 무덤: 동대륙 고래 노래만)
+        "Id": 852,
+        "Name": "gv_whale_song_e",
+        "ZoneId": 310,
+        "X": 17190.71,
+        "Y": 29158.99,
+        "Z": 156.17,
+        "ZRot": -50.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_whale_song_p  (o_whale_song_bay, 무덤: 해적 고래 노래만)
+        "Id": 853,
+        "Name": "gv_whale_song_p",
+        "ZoneId": 310,
+        "X": 16690.14,
+        "Y": 29215.20,
+        "Z": 156.50,
+        "ZRot": -44.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_whale_song_c  (o_whale_song_bay, 무덤: 국가 고래 노래만)
+        "Id": 854,
+        "Name": "gv_whale_song_c",
+        "ZoneId": 310,
+        "X": 17155.33,
+        "Y": 28269.16,
+        "Z": 138.39,
+        "ZRot": 16.0,
+        "SubZoneId": 0
+    },
+    {
+        // whale_song_w  (o_whale_song_bay, 누이아 방어기지)
+        "Id": 855,
+        "Name": "whale_song_w",
+        "ZoneId": 310,
+        "X": 16477.17,
+        "Y": 28466.61,
+        "Z": 141.38,
+        "ZRot": -32.0,
+        "SubZoneId": 0
+    },
+    {
+        // whale_song_e  (o_whale_song_bay, 하리하라 방어기지)
+        "Id": 856,
+        "Name": "whale_song_e",
+        "ZoneId": 310,
+        "X": 17381.04,
+        "Y": 29292.45,
+        "Z": 178.43,
+        "ZRot": 110.0,
+        "SubZoneId": 0
+    },
+    {
+        // whale_song_p  (o_whale_song_bay, 무법자 방어기지)
+        "Id": 857,
+        "Name": "whale_song_p",
+        "ZoneId": 310,
+        "X": 16471.61,
+        "Y": 29182.40,
+        "Z": 178.81,
+        "ZRot": -18.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_1  (o_candlestick_of_sea, 무덤: 바다의 촛대 서대륙)
+        "Id": 859,
+        "Name": "gv_o_candlestick_of_sea_1",
+        "ZoneId": 344,
+        "X": 13808.62,
+        "Y": 26610.01,
+        "Z": 176.79,
+        "ZRot": 105.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_2  (o_candlestick_of_sea, 무덤: 바다의 촛대 동대륙)
+        "Id": 860,
+        "Name": "gv_o_candlestick_of_sea_2",
+        "ZoneId": 344,
+        "X": 14818.43,
+        "Y": 26835.31,
+        "Z": 164.48,
+        "ZRot": -35.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_3  (o_candlestick_of_sea, 무덤: 바다의 촛대 국가)
+        "Id": 861,
+        "Name": "gv_o_candlestick_of_sea_3",
+        "ZoneId": 344,
+        "X": 14480.28,
+        "Y": 27015.51,
+        "Z": 180.93,
+        "ZRot": -80.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_4  (o_candlestick_of_sea, 무덤: 바다의 촛대 무법)
+        "Id": 862,
+        "Name": "gv_o_candlestick_of_sea_4",
+        "ZoneId": 344,
+        "X": 14600.34,
+        "Y": 26165.93,
+        "Z": 158.95,
+        "ZRot": -105.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_o_candlestick_of_sea_1  (o_candlestick_of_sea, 신의 방패 야영지)
+        "Id": 863,
+        "Name": "rp_o_candlestick_of_sea_1",
+        "ZoneId": 344,
+        "X": 14435.17,
+        "Y": 26693.98,
+        "Z": 133.37,
+        "ZRot": 160.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_5  (o_candlestick_of_sea, 무덤: 바다의 촛대 중심 서대)
+        "Id": 864,
+        "Name": "gv_o_candlestick_of_sea_5",
+        "ZoneId": 344,
+        "X": 14346.04,
+        "Y": 26691.61,
+        "Z": 137.40,
+        "ZRot": 175.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_6  (o_candlestick_of_sea, 무덤: 바다의 촛대 중심 동대)
+        "Id": 865,
+        "Name": "gv_o_candlestick_of_sea_6",
+        "ZoneId": 344,
+        "X": 14345.82,
+        "Y": 26691.91,
+        "Z": 137.38,
+        "ZRot": 175.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_candlestick_of_sea_7  (o_candlestick_of_sea, 무덤: 바다의 촛대 중심 해적)
+        "Id": 866,
+        "Name": "gv_o_candlestick_of_sea_7",
+        "ZoneId": 344,
+        "X": 14345.77,
+        "Y": 26692.18,
+        "Z": 137.35,
+        "ZRot": 175.0,
+        "SubZoneId": 0
+    },
+    {
+        // whale_song_god_of_shield  (o_whale_song_bay, 신의 방패 보급기지)
+        "Id": 873,
+        "Name": "whale_song_god_of_shield",
+        "ZoneId": 310,
+        "X": 16897.09,
+        "Y": 27901.87,
+        "Z": 117.16,
+        "ZRot": -102.0,
+        "SubZoneId": 0
+    },
+    {
+        // tr_w_solzreed  (w_solzreed_1, [교역소] 백월만)
+        "Id": 874,
+        "Name": "tr_w_solzreed",
+        "ZoneId": 142,
+        "X": 14247.22,
+        "Y": 13970.23,
+        "Z": 104.23,
+        "ZRot": 85.0,
+        "SubZoneId": 0
+    },
+    {
+        // tr_w_cross_plains  (w_cross_plains_2, [교역소] 시차일드 부두)
+        "Id": 875,
+        "Name": "tr_w_cross_plains",
+        "ZoneId": 257,
+        "X": 15473.04,
+        "Y": 11411.44,
+        "Z": 109.00,
+        "ZRot": -85.0,
+        "SubZoneId": 0
+    },
+    {
+        // tr_w_two_crowns  (w_two_crowns_1, [교역소] 악마 전쟁의 흉터)
+        "Id": 876,
+        "Name": "tr_w_two_crowns",
+        "ZoneId": 149,
+        "X": 13106.99,
+        "Y": 10543.11,
+        "Z": 118.86,
+        "ZRot": -150.0,
+        "SubZoneId": 0
+    },
+    {
+        // tr_e_ynystere  (e_ynystere_1, [교역소] 진혼곶)
+        "Id": 877,
+        "Name": "tr_e_ynystere",
+        "ZoneId": 139,
+        "X": 20531.71,
+        "Y": 13194.47,
+        "Z": 110.38,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // tr_e_singing_land  (e_singing_land_1, [교역소] 비파 항구)
+        "Id": 878,
+        "Name": "tr_e_singing_land",
+        "ZoneId": 160,
+        "X": 21067.51,
+        "Y": 10695.91,
+        "Z": 104.39,
+        "ZRot": -25.0,
+        "SubZoneId": 0
+    },
+    {
+        // tr_e_sunrise_peninsula  (e_sunrise_peninsula_2, [교역소] 오스테라 항구)
+        "Id": 879,
+        "Name": "tr_e_sunrise_peninsula",
+        "ZoneId": 191,
+        "X": 16674.01,
+        "Y": 9062.80,
+        "Z": 104.25,
+        "ZRot": 35.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_o_candlestick_of_sea_a  (o_candlestick_of_sea, 동쪽의 이프니르 수호탑)
+        "Id": 881,
+        "Name": "rp_o_candlestick_of_sea_a",
+        "ZoneId": 344,
+        "X": 14700.86,
+        "Y": 26805.54,
+        "Z": 164.30,
+        "ZRot": 90.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_o_candlestick_of_sea_b  (o_candlestick_of_sea, 서쪽의 이프니르 수호탑)
+        "Id": 882,
+        "Name": "rp_o_candlestick_of_sea_b",
+        "ZoneId": 344,
+        "X": 13806.24,
+        "Y": 26569.54,
+        "Z": 182.90,
+        "ZRot": 135.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_o_candlestick_of_sea_c  (o_candlestick_of_sea, 남쪽의 이프니르 수호탑)
+        "Id": 883,
+        "Name": "rp_o_candlestick_of_sea_c",
+        "ZoneId": 344,
+        "X": 14625.12,
+        "Y": 26237.12,
+        "Z": 163.43,
+        "ZRot": -65.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_o_candlestick_of_sea_d  (o_candlestick_of_sea, 북쪽의 이프니르 수호탑)
+        "Id": 884,
+        "Name": "rp_o_candlestick_of_sea_d",
+        "ZoneId": 344,
+        "X": 14474.75,
+        "Y": 26987.89,
+        "Z": 177.94,
+        "ZRot": -55.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_nuimari_outlaw  (o_nuimari, 무덤: 누이마리 무법자 분리)
+        "Id": 885,
+        "Name": "gv_o_nuimari_outlaw",
+        "ZoneId": 205,
+        "X": 21467.00,
+        "Y": 23645.00,
+        "Z": 172.00,
+        "ZRot": -90.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_salpimari_outlaw  (o_salpimari, 무덤: 살피마리 무법자 분리)
+        "Id": 886,
+        "Name": "gv_o_salpimari_outlaw",
+        "ZoneId": 204,
+        "X": 20461.57,
+        "Y": 24403.99,
+        "Z": 158.69,
+        "ZRot": 113.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_seo_outlaw  (o_seonyeokmari, 무덤: 서녘마리 무법자 분리)
+        "Id": 887,
+        "Name": "gv_o_seo_outlaw",
+        "ZoneId": 233,
+        "X": 19983.26,
+        "Y": 24916.44,
+        "Z": 172.72,
+        "ZRot": 49.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_rest_outlaw  (o_rest_land, 안식의 땅 동부 무덤)
+        "Id": 888,
+        "Name": "gv_o_rest_outlaw",
+        "ZoneId": 234,
+        "X": 21632.15,
+        "Y": 25186.40,
+        "Z": 229.90,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_abyss_outlaw  (o_abyss_gate, 무덤: 심연의 입구 무법자 분리)
+        "Id": 889,
+        "Name": "gv_o_abyss_outlaw",
+        "ZoneId": 276,
+        "X": 23908.55,
+        "Y": 25506.08,
+        "Z": 146.33,
+        "ZRot": -144.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_shining_outlaw  (o_shining_shore_2, 무덤: 빛나는 해안 무법자 분리)
+        "Id": 891,
+        "Name": "gv_o_shining_outlaw",
+        "ZoneId": 301,
+        "X": 19620.15,
+        "Y": 27178.04,
+        "Z": 129.99,
+        "ZRot": -70.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_rog_outlaw  (o_ruins_of_gold, 무덤: 황금의 폐허 무법자 분리)
+        "Id": 892,
+        "Name": "gv_o_rog_outlaw",
+        "ZoneId": 281,
+        "X": 17338.88,
+        "Y": 26996.86,
+        "Z": 157.31,
+        "ZRot": -168.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_great_reeds_outlaw  (o_the_great_reeds, 무덤: 갈대무리 땅 무법자 분리)
+        "Id": 893,
+        "Name": "gv_o_great_reeds_outlaw",
+        "ZoneId": 288,
+        "X": 20194.54,
+        "Y": 29255.66,
+        "Z": 273.58,
+        "ZRot": 145.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_solz_outlaw  (w_solzreed_3, 무덤: 솔즈리드 반도 무법자 분리)
+        "Id": 894,
+        "Name": "gv_w_solz_outlaw",
+        "ZoneId": 179,
+        "X": 14920.08,
+        "Y": 15052.73,
+        "Z": 135.78,
+        "ZRot": -118.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_lilyuthill_outlaw  (w_lilyut_meadow_2, 무덤: 릴리엇 구릉지 무법자 분리)
+        "Id": 895,
+        "Name": "gv_w_lilyuthill_outlaw",
+        "ZoneId": 195,
+        "X": 13015.78,
+        "Y": 15026.50,
+        "Z": 238.31,
+        "ZRot": -85.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_gweonid_outlaw  (w_gweonid_forest_3, 무덤: 그위오니드 숲 무법자 분리)
+        "Id": 896,
+        "Name": "gv_w_gweonid_outlaw",
+        "ZoneId": 182,
+        "X": 11049.79,
+        "Y": 14643.15,
+        "Z": 238.80,
+        "ZRot": 75.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_wf_outlaw  (w_white_forest_1, 무덤: 하얀 숲 무법자 분리)
+        "Id": 897,
+        "Name": "gv_w_wf_outlaw",
+        "ZoneId": 143,
+        "X": 9003.25,
+        "Y": 12585.03,
+        "Z": 231.14,
+        "ZRot": 55.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_garandol_outlaw  (w_garangdol_plains_2, 무덤: 가랑돌 평원 무법자 분리)
+        "Id": 898,
+        "Name": "gv_w_garandol_outlaw",
+        "ZoneId": 185,
+        "X": 12444.01,
+        "Y": 13019.45,
+        "Z": 152.86,
+        "ZRot": 156.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_grave_outlaw  (w_bronze_rock_3, 무덤: 청동 바위산 무법자 분리)
+        "Id": 899,
+        "Name": "gv_w_grave_outlaw",
+        "ZoneId": 193,
+        "X": 7198.30,
+        "Y": 13590.95,
+        "Z": 1138.02,
+        "ZRot": -164.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_cradleofgenesis_outlaw  (w_cradle_of_genesis_1, 무덤: 태초의 요람 무법자 분리)
+        "Id": 900,
+        "Name": "gv_w_cradleofgenesis_outlaw",
+        "ZoneId": 150,
+        "X": 6935.15,
+        "Y": 12072.22,
+        "Z": 609.15,
+        "ZRot": 50.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_marianople_outlaw  (w_marianople_1, 무덤: 마리아노플 무법자 분리)
+        "Id": 901,
+        "Name": "gv_w_marianople_outlaw",
+        "ZoneId": 133,
+        "X": 10610.37,
+        "Y": 12390.78,
+        "Z": 155.15,
+        "ZRot": -79.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_two_crowns_outlaw  (w_two_crowns_1, 무덤: 두 왕관 무법자 분리)
+        "Id": 902,
+        "Name": "gv_w_two_crowns_outlaw",
+        "ZoneId": 149,
+        "X": 12721.76,
+        "Y": 10407.76,
+        "Z": 140.27,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_cross_outlaw  (w_cross_plains_1, 무덤: 십자별 평원 무법자 분리)
+        "Id": 903,
+        "Name": "gv_w_cross_outlaw",
+        "ZoneId": 148,
+        "X": 14384.63,
+        "Y": 12334.74,
+        "Z": 136.95,
+        "ZRot": 171.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_golden_outlaw  (w_golden_plains_2, 무덤: 황금 평원 무법자 분리)
+        "Id": 904,
+        "Name": "gv_w_golden_outlaw",
+        "ZoneId": 206,
+        "X": 9624.25,
+        "Y": 10097.21,
+        "Z": 272.27,
+        "ZRot": 179.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_ls_outlaw  (w_long_sand_2, 무덤: 긴 모래톱 무법자 분리)
+        "Id": 905,
+        "Name": "gv_w_ls_outlaw",
+        "ZoneId": 245,
+        "X": 10135.76,
+        "Y": 8668.11,
+        "Z": 104.36,
+        "ZRot": 96.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_hell_outlaw  (w_hell_swamp_1, 무덤: 지옥 늪지대 무법자 분리)
+        "Id": 906,
+        "Name": "gv_w_hell_outlaw",
+        "ZoneId": 161,
+        "X": 8809.90,
+        "Y": 7900.02,
+        "Z": 222.09,
+        "ZRot": -103.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_hanuimaru_outlaw  (w_hanuimaru_1, 무덤: 하늬 마루 무법자 분리)
+        "Id": 907,
+        "Name": "gv_w_hanuimaru_outlaw",
+        "ZoneId": 269,
+        "X": 4980.48,
+        "Y": 8502.00,
+        "Z": 455.31,
+        "ZRot": 145.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_w_bone_outlaw  (w_the_carcass_1, 무덤: 뼈의 땅 무법자 분리)
+        "Id": 908,
+        "Name": "gv_w_bone_outlaw",
+        "ZoneId": 145,
+        "X": 9835.81,
+        "Y": 17064.80,
+        "Z": 131.87,
+        "ZRot": -103.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_freeisland_outlaw  (s_freedom_island, 무덤: 자유도 무법자 분리)
+        "Id": 909,
+        "Name": "gv_freeisland_outlaw",
+        "ZoneId": 283,
+        "X": 21047.38,
+        "Y": 18669.33,
+        "Z": 109.77,
+        "ZRot": 15.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_rainbow_nas  (e_rainbow_field_3, 무지개 벌판 국가 부활지)
+        "Id": 911,
+        "Name": "gv_e_rainbow_nas",
+        "ZoneId": 188,
+        "X": 22163.25,
+        "Y": 6591.19,
+        "Z": 257.00,
+        "ZRot": 130.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_tiger_spaine_nas  (e_tiger_spine_mountains_2, 호랑이 등뼈 산맥 국가 부활지)
+        "Id": 912,
+        "Name": "gv_e_tiger_spaine_nas",
+        "ZoneId": 258,
+        "X": 22540.00,
+        "Y": 8245.00,
+        "Z": 551.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_mahadevi_nas  (e_mahadevi_1, 마하데비 국가 부활지)
+        "Id": 913,
+        "Name": "gv_e_mahadevi_nas",
+        "ZoneId": 153,
+        "X": 18332.00,
+        "Y": 9155.00,
+        "Z": 186.00,
+        "ZRot": -125.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_sunrise_peninsula_nas  (e_sunrise_peninsula_1, 동틀녘 반도 국가 부활지)
+        "Id": 914,
+        "Name": "gv_e_sunrise_peninsula_nas",
+        "ZoneId": 141,
+        "X": 16448.00,
+        "Y": 7707.00,
+        "Z": 208.00,
+        "ZRot": 90.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_singing_land_nas  (e_singing_land_3, 노래의 땅 국가 부활지)
+        "Id": 915,
+        "Name": "gv_e_singing_land_nas",
+        "ZoneId": 256,
+        "X": 21148.00,
+        "Y": 10182.00,
+        "Z": 142.00,
+        "ZRot": 65.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_falcony_plateau_nas  (e_falcony_plateau_1, 매사냥 고원 국가 부활지)
+        "Id": 916,
+        "Name": "gv_e_falcony_plateau_nas",
+        "ZoneId": 156,
+        "X": 24097.00,
+        "Y": 8315.00,
+        "Z": 599.00,
+        "ZRot": 45.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_steppe_belt_nas  (e_steppe_belt_2, 초원의 띠 국가 부활지)
+        "Id": 917,
+        "Name": "gv_e_steppe_belt_nas",
+        "ZoneId": 247,
+        "X": 25127.52,
+        "Y": 7158.25,
+        "Z": 308.97,
+        "ZRot": 55.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_ynystere_nas  (e_ynystere_1, 이니스테르 국가 부활지)
+        "Id": 918,
+        "Name": "gv_e_ynystere_nas",
+        "ZoneId": 139,
+        "X": 20615.00,
+        "Y": 11988.00,
+        "Z": 138.00,
+        "ZRot": -45.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_ancient_forest_nas  (e_ancient_forest, 고대의 숲 국가 부활지)
+        "Id": 919,
+        "Name": "gv_e_ancient_forest_nas",
+        "ZoneId": 159,
+        "X": 23863.81,
+        "Y": 11170.77,
+        "Z": 428.65,
+        "ZRot": 91.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_lokas_checkers_nas  (e_lokas_checkers_1, 로카의 장기말들 국가 부활지)
+        "Id": 920,
+        "Name": "gv_e_lokas_checkers_nas",
+        "ZoneId": 138,
+        "X": 25559.00,
+        "Y": 9436.00,
+        "Z": 682.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_ruins_of_hariharalaya_nas  (e_ruins_of_hariharalaya_2, 하리하랄라야의 폐허 국가 부활지)
+        "Id": 921,
+        "Name": "gv_e_ruins_of_hariharalaya_nas",
+        "ZoneId": 242,
+        "X": 28899.00,
+        "Y": 6591.00,
+        "Z": 567.00,
+        "ZRot": -130.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_hasla_nas  (e_hasla_1, 하슬라 국가 부활지)
+        "Id": 922,
+        "Name": "gv_e_hasla_nas",
+        "ZoneId": 155,
+        "X": 29715.93,
+        "Y": 8005.81,
+        "Z": 422.55,
+        "ZRot": -58.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_e_lokaloka_mountains_nas  (e_lokaloka_mountains_1, 로칼로카 산맥 국가 부활지)
+        "Id": 923,
+        "Name": "gv_e_lokaloka_mountains_nas",
+        "ZoneId": 270,
+        "X": 27403.00,
+        "Y": 10573.00,
+        "Z": 801.00,
+        "ZRot": -75.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_shining_shore_garden  (o_shining_shore_2, [던전] 향연의 뜰)
+        "Id": 932,
+        "Name": "o_shining_shore_garden",
+        "ZoneId": 301,
+        "X": 19480.74,
+        "Y": 27261.01,
+        "Z": 132.27,
+        "ZRot": -1.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_hirama_cave  (o_hirama_the_west_2, 히라마 동굴)
+        "Id": 933,
+        "Name": "rp_hirama_cave",
+        "ZoneId": 351,
+        "X": 20075.62,
+        "Y": 29717.00,
+        "Z": 368.72,
+        "ZRot": -22.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_raven_cave  (o_hirama_the_west_2, 환영 동굴)
+        "Id": 934,
+        "Name": "rp_raven_cave",
+        "ZoneId": 351,
+        "X": 18757.32,
+        "Y": 30187.07,
+        "Z": 368.62,
+        "ZRot": 67.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_hirama_campsite  (o_hirama_the_west_1, 히라마 야영지)
+        "Id": 935,
+        "Name": "rp_hirama_campsite",
+        "ZoneId": 350,
+        "X": 19484.66,
+        "Y": 31175.25,
+        "Z": 497.81,
+        "ZRot": 167.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_the_west_w  (o_hirama_the_west_1, 무덤: 히라마 서부 누이아)
+        "Id": 936,
+        "Name": "gv_hirama_the_west_w",
+        "ZoneId": 350,
+        "X": 19260.89,
+        "Y": 31049.01,
+        "Z": 457.64,
+        "ZRot": -102.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_the_west_c  (o_hirama_the_west_1, 무덤: 히라마 서부 국가)
+        "Id": 937,
+        "Name": "gv_hirama_the_west_c",
+        "ZoneId": 350,
+        "X": 19742.18,
+        "Y": 30835.67,
+        "Z": 517.61,
+        "ZRot": -144.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_the_west_e  (o_hirama_the_west_2, 무덤: 히라마 서부 하리하라)
+        "Id": 938,
+        "Name": "gv_hirama_the_west_e",
+        "ZoneId": 351,
+        "X": 19712.74,
+        "Y": 29682.33,
+        "Z": 422.04,
+        "ZRot": 3.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_the_west_p  (o_hirama_the_west_2, 무덤: 히라마 서부 해적)
+        "Id": 939,
+        "Name": "gv_hirama_the_west_p",
+        "ZoneId": 351,
+        "X": 18664.83,
+        "Y": 29834.40,
+        "Z": 446.22,
+        "ZRot": -26.0,
+        "SubZoneId": 0
+    },
+    {
+        // hirama_east_warrior_hall  (o_hirama_the_east_1, 용사의 전당)
+        "Id": 979,
+        "Name": "hirama_east_warrior_hall",
+        "ZoneId": 354,
+        "X": 21040.39,
+        "Y": 31022.27,
+        "Z": 876.17,
+        "ZRot": -111.0,
+        "SubZoneId": 0
+    },
+    {
+        // hirama_east_waterfall_camp  (o_hirama_the_east_1, 계단 폭포 야영지)
+        "Id": 980,
+        "Name": "hirama_east_waterfall_camp",
+        "ZoneId": 354,
+        "X": 21075.00,
+        "Y": 30460.87,
+        "Z": 787.15,
+        "ZRot": 107.0,
+        "SubZoneId": 0
+    },
+    {
+        // hirama_east_forest_camp  (o_hirama_the_east_2, 검은 숲 야영지)
+        "Id": 981,
+        "Name": "hirama_east_forest_camp",
+        "ZoneId": 355,
+        "X": 21819.44,
+        "Y": 30965.82,
+        "Z": 745.19,
+        "ZRot": 43.0,
+        "SubZoneId": 0
+    },
+    {
+        // hirama_east_meadow_camp  (o_hirama_the_east_2, 안개 초원 야영지)
+        "Id": 982,
+        "Name": "hirama_east_meadow_camp",
+        "ZoneId": 355,
+        "X": 21839.41,
+        "Y": 30095.53,
+        "Z": 590.03,
+        "ZRot": -150.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_east_west  (o_hirama_the_east_1, 히라마 산맥 동부 부활지(서대륙))
+        "Id": 983,
+        "Name": "gv_hirama_east_west",
+        "ZoneId": 354,
+        "X": 21503.91,
+        "Y": 30464.31,
+        "Z": 764.48,
+        "ZRot": 74.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_east_east  (o_hirama_the_east_2, 히라마 산맥 동부 부활지(동대륙))
+        "Id": 984,
+        "Name": "gv_hirama_east_east",
+        "ZoneId": 355,
+        "X": 21716.77,
+        "Y": 29905.14,
+        "Z": 577.91,
+        "ZRot": 162.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_east_pirate  (o_hirama_the_east_1, 히라마 산맥 동부 부활지(무법자))
+        "Id": 985,
+        "Name": "gv_hirama_east_pirate",
+        "ZoneId": 354,
+        "X": 21495.80,
+        "Y": 31420.18,
+        "Z": 866.13,
+        "ZRot": 1.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_hirama_east_nation  (o_hirama_the_east_2, 히라마 산맥 동부 부활지(국가))
+        "Id": 986,
+        "Name": "gv_hirama_east_nation",
+        "ZoneId": 355,
+        "X": 21863.58,
+        "Y": 31347.12,
+        "Z": 715.99,
+        "ZRot": 69.0,
+        "SubZoneId": 0
+    },
+    {
+        // gatekeeper_hall  (gatekeeper_hall, 문지기의 방)
+        "Id": 1005,
+        "Name": "gatekeeper_hall",
+        "ZoneId": 379,
+        "X": 499.45,
+        "Y": 38375.49,
+        "Z": 131.17,
+        "ZRot": 180.0,
+        "SubZoneId": 0
+    },
+    {
+        // navel_of_the_world  (o_hirama_the_east_1, 세계의 배꼽)
+        "Id": 1011,
+        "Name": "navel_of_the_world",
+        "ZoneId": 354,
+        "X": 20572.15,
+        "Y": 31833.00,
+        "Z": 603.58,
+        "ZRot": -2.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_garden_season_winter_1  (the_garden_2, 무덤: 첫 번째 겨울 정원)
+        "Id": 1014,
+        "Name": "grave_garden_season_winter_1",
+        "ZoneId": 382,
+        "X": 32569.03,
+        "Y": 35704.95,
+        "Z": 183.16,
+        "ZRot": -89.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_garden_season_winter_2  (the_garden_2, 무덤: 두 번째 겨울 정원)
+        "Id": 1015,
+        "Name": "grave_garden_season_winter_2",
+        "ZoneId": 382,
+        "X": 32842.39,
+        "Y": 35457.70,
+        "Z": 362.22,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_garden_season_fall_1  (the_garden_1, 무덤: 첫 번째 가을 정원)
+        "Id": 1016,
+        "Name": "grave_garden_season_fall_1",
+        "ZoneId": 378,
+        "X": 32409.94,
+        "Y": 36626.69,
+        "Z": 191.08,
+        "ZRot": -41.0,
+        "SubZoneId": 0
+    },
+    {
+        // grave_garden_season_fall_2  (the_garden_1, 무덤: 두 번째 가을 정원)
+        "Id": 1017,
+        "Name": "grave_garden_season_fall_2",
+        "ZoneId": 378,
+        "X": 33382.58,
+        "Y": 36701.26,
+        "Z": 339.86,
+        "ZRot": 22.0,
+        "SubZoneId": 0
+    },
+    {
+        // temporary_post  (o_shining_shore_1, 신의 방패 임시 초소)
+        "Id": 1038,
+        "Name": "temporary_post",
+        "ZoneId": 282,
+        "X": 18763.29,
+        "Y": 27272.79,
+        "Z": 199.86,
+        "ZRot": -80.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_land_of_magic  (o_land_of_magic, 신의 방패 탐사기지)
+        "Id": 1047,
+        "Name": "rp_land_of_magic",
+        "ZoneId": 387,
+        "X": 17977.98,
+        "Y": 30584.37,
+        "Z": 191.81,
+        "ZRot": -93.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_land_of_magic_w  (o_land_of_magic, 무덤: 마법의 땅 서대륙)
+        "Id": 1048,
+        "Name": "gv_land_of_magic_w",
+        "ZoneId": 387,
+        "X": 17163.03,
+        "Y": 30003.78,
+        "Z": 253.81,
+        "ZRot": -83.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_land_of_magic_e  (o_land_of_magic, 무덤: 마법의 땅 동대륙)
+        "Id": 1049,
+        "Name": "gv_land_of_magic_e",
+        "ZoneId": 387,
+        "X": 17842.93,
+        "Y": 30800.77,
+        "Z": 205.58,
+        "ZRot": 40.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_land_of_magic_p  (o_land_of_magic, 무덤: 마법의 땅 무법자)
+        "Id": 1050,
+        "Name": "gv_land_of_magic_p",
+        "ZoneId": 387,
+        "X": 16596.16,
+        "Y": 30220.32,
+        "Z": 255.34,
+        "ZRot": 145.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_land_of_magic_w_sp  (o_land_of_magic, 무덤: 마법의 땅 서대륙_추격전)
+        "Id": 1051,
+        "Name": "gv_land_of_magic_w_sp",
+        "ZoneId": 387,
+        "X": 17584.57,
+        "Y": 30315.73,
+        "Z": 186.53,
+        "ZRot": 10.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_land_of_magic_e_sp  (o_land_of_magic, 무덤: 마법의 땅 동대륙_추격전)
+        "Id": 1052,
+        "Name": "gv_land_of_magic_e_sp",
+        "ZoneId": 387,
+        "X": 17526.98,
+        "Y": 31059.89,
+        "Z": 186.47,
+        "ZRot": 110.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_land_of_magic_p_sp  (o_land_of_magic, 무덤: 마법의 땅 무법자_추격전)
+        "Id": 1053,
+        "Name": "gv_land_of_magic_p_sp",
+        "ZoneId": 387,
+        "X": 16893.93,
+        "Y": 30637.57,
+        "Z": 186.71,
+        "ZRot": -78.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_land_of_sunlights_camp_1  (o_land_of_sunlights, [전진 기지] 태양의 들녘)
+        "Id": 1066,
+        "Name": "o_land_of_sunlights_camp_1",
+        "ZoneId": 275,
+        "X": 21824.22,
+        "Y": 26866.84,
+        "Z": 136.84,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_land_of_sunlights_camp_2  (o_land_of_sunlights, [해안 기지] 태양의 들녘)
+        "Id": 1067,
+        "Name": "o_land_of_sunlights_camp_2",
+        "ZoneId": 275,
+        "X": 21451.16,
+        "Y": 26937.46,
+        "Z": 104.74,
+        "ZRot": 45.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_abyss_gate_camp_1  (o_abyss_gate, [해안 기지] 심연의 입구)
+        "Id": 1068,
+        "Name": "o_abyss_gate_camp_1",
+        "ZoneId": 276,
+        "X": 23557.52,
+        "Y": 24691.40,
+        "Z": 105.73,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_abyss_gate_camp_2  (o_abyss_gate, [전진 기지] 심연의 입구)
+        "Id": 1069,
+        "Name": "o_abyss_gate_camp_2",
+        "ZoneId": 276,
+        "X": 23372.38,
+        "Y": 24915.34,
+        "Z": 145.07,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_candlestick_of_sea_01  (o_candlestick_of_sea, [해안 기지] 바다의 촛대)
+        "Id": 1071,
+        "Name": "o_candlestick_of_sea_01",
+        "ZoneId": 344,
+        "X": 14658.48,
+        "Y": 26973.72,
+        "Z": 104.24,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_candlestick_of_sea_02  (o_candlestick_of_sea, [전진 기지] 바다의 촛대)
+        "Id": 1072,
+        "Name": "o_candlestick_of_sea_02",
+        "ZoneId": 344,
+        "X": 14468.77,
+        "Y": 26792.72,
+        "Z": 128.18,
+        "ZRot": -145.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_whale_song_bay_03  (o_whale_song_bay, [해안 기지] 고래 노래만)
+        "Id": 1073,
+        "Name": "o_whale_song_bay_03",
+        "ZoneId": 310,
+        "X": 16504.78,
+        "Y": 27899.76,
+        "Z": 100.94,
+        "ZRot": 65.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_whale_song_bay_02  (o_whale_song_bay, [전진 기지] 고래 노래만)
+        "Id": 1074,
+        "Name": "o_whale_song_bay_02",
+        "ZoneId": 310,
+        "X": 17278.71,
+        "Y": 28538.79,
+        "Z": 154.67,
+        "ZRot": -90.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_ruins_of_gold_01  (o_ruins_of_gold, [해안 기지] 황금의 폐허)
+        "Id": 1075,
+        "Name": "o_ruins_of_gold_01",
+        "ZoneId": 281,
+        "X": 17176.58,
+        "Y": 27135.65,
+        "Z": 106.94,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_salpimari_01  (o_salpimari, [교역소] 살피마리)
+        "Id": 1077,
+        "Name": "o_salpimari_01",
+        "ZoneId": 204,
+        "X": 19646.84,
+        "Y": 24010.55,
+        "Z": 101.30,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_nui_outlaw_02  (o_nuimari, 무덤: 누이마리 무법자_02)
+        "Id": 1079,
+        "Name": "gv_nui_outlaw_02",
+        "ZoneId": 205,
+        "X": 21184.00,
+        "Y": 23988.00,
+        "Z": 173.00,
+        "ZRot": -120.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_nui_west_02  (o_nuimari, 무덤: 누이마리 서대_02)
+        "Id": 1080,
+        "Name": "gv_nui_west_02",
+        "ZoneId": 205,
+        "X": 21749.00,
+        "Y": 24038.00,
+        "Z": 159.00,
+        "ZRot": -130.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_nui_east_02  (o_nuimari, 무덤: 누이마리 동대_02)
+        "Id": 1081,
+        "Name": "gv_nui_east_02",
+        "ZoneId": 205,
+        "X": 21359.00,
+        "Y": 23887.00,
+        "Z": 167.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_seo_outlaw_02  (o_seonyeokmari, 무덤: 서녘마리 무법자_02)
+        "Id": 1082,
+        "Name": "gv_o_seo_outlaw_02",
+        "ZoneId": 233,
+        "X": 19985.70,
+        "Y": 25217.93,
+        "Z": 144.34,
+        "ZRot": -98.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_seo_west_02  (o_seonyeokmari, 무덤: 서녘마리 서대_02)
+        "Id": 1083,
+        "Name": "gv_seo_west_02",
+        "ZoneId": 233,
+        "X": 19887.00,
+        "Y": 24844.00,
+        "Z": 184.00,
+        "ZRot": 100.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_seo_east_02  (o_seonyeokmari, 무덤: 서녘마리 동대_02)
+        "Id": 1084,
+        "Name": "gv_seo_east_02",
+        "ZoneId": 233,
+        "X": 20000.00,
+        "Y": 25030.00,
+        "Z": 178.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_sal_outlaw_02  (o_salpimari, 무덤: 살피마리 무법자_02)
+        "Id": 1085,
+        "Name": "gv_o_sal_outlaw_02",
+        "ZoneId": 204,
+        "X": 19528.00,
+        "Y": 24305.00,
+        "Z": 186.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_sal_west_02  (o_salpimari, 무덤: 살피마리 서대_02)
+        "Id": 1086,
+        "Name": "gv_sal_west_02",
+        "ZoneId": 204,
+        "X": 20249.00,
+        "Y": 24500.00,
+        "Z": 138.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_sal_east_02  (o_salpimari, 무덤: 살피마리 동대_02)
+        "Id": 1087,
+        "Name": "gv_sal_east_02",
+        "ZoneId": 204,
+        "X": 19933.00,
+        "Y": 23912.00,
+        "Z": 148.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_rest_outlaw_02  (o_rest_land, 무덤: 안식의땅 무법자_02)
+        "Id": 1088,
+        "Name": "gv_o_rest_outlaw_02",
+        "ZoneId": 234,
+        "X": 22189.00,
+        "Y": 25241.00,
+        "Z": 308.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_rest_west_02  (o_rest_land, 무덤: 안식의땅 서대_02)
+        "Id": 1089,
+        "Name": "gv_rest_west_02",
+        "ZoneId": 234,
+        "X": 21640.00,
+        "Y": 24798.00,
+        "Z": 211.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_rest_east_02  (o_rest_land, 무덤: 안식의땅 동대_02)
+        "Id": 1090,
+        "Name": "gv_rest_east_02",
+        "ZoneId": 234,
+        "X": 21590.00,
+        "Y": 24933.00,
+        "Z": 234.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_abyss_outlaw_02  (o_abyss_gate, 무덤: 심연의입구 무법자_02)
+        "Id": 1091,
+        "Name": "gv_o_abyss_outlaw_02",
+        "ZoneId": 276,
+        "X": 22520.00,
+        "Y": 24562.00,
+        "Z": 125.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_gv_abyss_n_02  (o_abyss_gate, 무덤: 심연의입구 서대_02)
+        "Id": 1092,
+        "Name": "o_gv_abyss_n_02",
+        "ZoneId": 276,
+        "X": 22801.23,
+        "Y": 24207.67,
+        "Z": 161.95,
+        "ZRot": -43.0,
+        "SubZoneId": 0
+    },
+    {
+        // o_gv_abyss_h_02  (o_abyss_gate, 무덤: 심연의입구 동대_02)
+        "Id": 1093,
+        "Name": "o_gv_abyss_h_02",
+        "ZoneId": 276,
+        "X": 23119.74,
+        "Y": 24512.93,
+        "Z": 118.78,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_sunlight_pirate_02  (o_land_of_sunlights, 무덤: 태양의들녘 무법자_02)
+        "Id": 1094,
+        "Name": "gv_o_sunlight_pirate_02",
+        "ZoneId": 275,
+        "X": 21223.00,
+        "Y": 26163.00,
+        "Z": 103.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_sunlight_west_02  (o_land_of_sunlights, 무덤: 태양의들녘 서대_02)
+        "Id": 1095,
+        "Name": "gv_o_sunlight_west_02",
+        "ZoneId": 275,
+        "X": 21619.53,
+        "Y": 25506.71,
+        "Z": 256.41,
+        "ZRot": 179.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_o_sunlight_east_02  (o_land_of_sunlights, 무덤: 태양의들녘 동대_02)
+        "Id": 1096,
+        "Name": "gv_o_sunlight_east_02",
+        "ZoneId": 275,
+        "X": 21255.00,
+        "Y": 25882.00,
+        "Z": 102.00,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mount_ipnir_w1  (o_mount_ipnir_1, 무덤: 이프니르 산 누이아1)
+        "Id": 1100,
+        "Name": "gv_mount_ipnir_w1",
+        "ZoneId": 388,
+        "X": 15615.06,
+        "Y": 31726.86,
+        "Z": 188.26,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mount_ipnir_e1  (o_mount_ipnir_1, 무덤: 이프니르 산 하리하라1)
+        "Id": 1101,
+        "Name": "gv_mount_ipnir_e1",
+        "ZoneId": 388,
+        "X": 15516.76,
+        "Y": 30122.71,
+        "Z": 229.98,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mount_ipnir_p1  (o_mount_ipnir_1, 무덤: 이프니르 산 해적1)
+        "Id": 1102,
+        "Name": "gv_mount_ipnir_p1",
+        "ZoneId": 388,
+        "X": 15792.68,
+        "Y": 30635.12,
+        "Z": 208.18,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mount_ipnir_w2  (o_mount_ipnir_2, 무덤: 이프니르 산 누이아2)
+        "Id": 1103,
+        "Name": "gv_mount_ipnir_w2",
+        "ZoneId": 391,
+        "X": 14176.24,
+        "Y": 30611.17,
+        "Z": 291.99,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mount_ipnir_e2  (o_mount_ipnir_2, 무덤: 이프니르 산 하리하라2)
+        "Id": 1104,
+        "Name": "gv_mount_ipnir_e2",
+        "ZoneId": 391,
+        "X": 14036.32,
+        "Y": 30311.58,
+        "Z": 363.93,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_mount_ipnir_p2  (o_mount_ipnir_2, 무덤: 이프니르 산 해적2)
+        "Id": 1105,
+        "Name": "gv_mount_ipnir_p2",
+        "ZoneId": 391,
+        "X": 13352.97,
+        "Y": 29766.46,
+        "Z": 396.54,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_amor_base  (o_mount_ipnir_2, 기갑병단 지부)
+        "Id": 1106,
+        "Name": "rp_amor_base",
+        "ZoneId": 391,
+        "X": 14707.27,
+        "Y": 29667.94,
+        "Z": 235.88,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_ipna_monument  (o_mount_ipnir_1, 이프나 추모비)
+        "Id": 1107,
+        "Name": "rp_ipna_monument",
+        "ZoneId": 388,
+        "X": 15948.12,
+        "Y": 32230.43,
+        "Z": 185.09,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_ipna_wing  (o_mount_ipnir_2, 이프나의 날개)
+        "Id": 1108,
+        "Name": "rp_ipna_wing",
+        "ZoneId": 391,
+        "X": 13418.20,
+        "Y": 31014.31,
+        "Z": 107.68,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_ipnir_island  (o_mount_ipnir_2, 이프니르 공중섬)
+        "Id": 1114,
+        "Name": "rp_ipnir_island",
+        "ZoneId": 391,
+        "X": 14538.90,
+        "Y": 30507.66,
+        "Z": 658.11,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_western_prairie_n1  (o_western_prairie_1, 무덤: 서부 대초원 누이아1)
+        "Id": 1167,
+        "Name": "gv_western_prairie_n1",
+        "ZoneId": 397,
+        "X": 23401.08,
+        "Y": 28774.56,
+        "Z": 366.88,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_western_prairie_n2  (o_western_prairie_2, 무덤: 서부 대초원 누이아2)
+        "Id": 1168,
+        "Name": "gv_western_prairie_n2",
+        "ZoneId": 401,
+        "X": 24246.93,
+        "Y": 28797.05,
+        "Z": 369.61,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_western_prairie_h1  (o_western_prairie_1, 무덤: 서부 대초원 하리하라1)
+        "Id": 1169,
+        "Name": "gv_western_prairie_h1",
+        "ZoneId": 397,
+        "X": 23996.42,
+        "Y": 30068.97,
+        "Z": 379.58,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_western_prairie_h2  (o_western_prairie_2, 무덤: 서부 대초원 하리하라2)
+        "Id": 1170,
+        "Name": "gv_western_prairie_h2",
+        "ZoneId": 401,
+        "X": 24629.80,
+        "Y": 29513.65,
+        "Z": 399.05,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_western_prairie_p1  (o_western_prairie_1, 무덤: 서부 대초원 해적1)
+        "Id": 1171,
+        "Name": "gv_western_prairie_p1",
+        "ZoneId": 397,
+        "X": 23404.88,
+        "Y": 29842.37,
+        "Z": 405.59,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // gv_western_prairie_p2  (o_western_prairie_2, 무덤: 서부 대초원 해적2)
+        "Id": 1172,
+        "Name": "gv_western_prairie_p2",
+        "ZoneId": 401,
+        "X": 24833.77,
+        "Y": 29268.50,
+        "Z": 375.61,
+        "ZRot": 0.0,
+        "SubZoneId": 0
+    },
+    {
+        // rp_prairie's_eye  (o_western_prairie_2, 초원의 눈)
+        "Id": 1174,
+        "Name": "rp_prairie's_eye",
+        "ZoneId": 401,
+        "X": 24520.59,
+        "Y": 29839.65,
+        "Z": 516.67,
+        "ZRot": 0.0,
+        "SubZoneId": 0
     }
 ]
