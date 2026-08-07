@@ -728,8 +728,16 @@ public partial class Quest
                 component.KindId != QuestComponentKind.Progress)
                 return false;
 
+            // On a scored quest every objective feeds the same total, so an event has to be
+            // offered to all of them. Looking only at the component the quest currently sits on
+            // meant that once it moved past the monsters, killing more of them counted for
+            // nothing at all - the progress simply stopped arriving.
+            var candidateActs = Template.Score > 0
+                ? ScoredObjectiveComponents().SelectMany(x => x.Acts.OfType<QuestAct>()).OrderBy(x => x.Id)
+                : component.Acts.OfType<QuestAct>().OrderBy(x => x.Id);
+
             var changed = false;
-            foreach (var act in component.Acts.OfType<QuestAct>().OrderBy(x => x.Id))
+            foreach (var act in candidateActs)
             {
                 if (!IsObjectiveAct(act) || !MatchesRuntimeEvent(act, runtimeEvent))
                     continue;
@@ -834,7 +842,35 @@ public partial class Quest
         return objectives.All(x => GetActProgress(x) >= GetRequiredProgress(x));
     }
 
+    /// <summary>
+    /// Every objective a scored quest counts towards its total, wherever it is listed.
+    /// </summary>
+    /// <remarks>
+    /// The score belongs to the quest, not to one of its components: quest_contexts.score is a
+    /// single number for the whole thing. Quest 1135 asks for twenty points a kill or ten points
+    /// an item, so either objective alone reaches a hundred - they are two ways to do the same
+    /// job, not two stages of it. Counting one component at a time made the second an extra stage
+    /// and asked for two hundred points' worth of work.
+    /// </remarks>
+    private IEnumerable<QuestComponent> ScoredObjectiveComponents()
+        => Template.GetComponents(QuestComponentKind.Progress);
+
     private int CalculateScore(QuestComponent component)
+    {
+        if (Template.Score > 0)
+        {
+            long total = 0;
+            foreach (var scored in ScoredObjectiveComponents())
+            {
+                total += ScoreOf(scored);
+            }
+            return (int)Math.Min(int.MaxValue, total);
+        }
+
+        return ScoreOf(component);
+    }
+
+    private int ScoreOf(QuestComponent component)
     {
         long score = 0;
         foreach (var act in component.Acts.OfType<QuestAct>().Where(IsObjectiveAct))
