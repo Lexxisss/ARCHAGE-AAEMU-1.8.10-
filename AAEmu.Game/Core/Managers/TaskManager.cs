@@ -8,6 +8,7 @@ using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Models;
 using NLog;
 using Quartz;
+using Quartz.Impl.Matchers;
 using Quartz.Impl;
 using Quartz.Simpl;
 using Task = AAEmu.Game.Models.Tasks.Task;
@@ -29,6 +30,45 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
     public int ScheduleRequestCount { get; private set; }
     public async Task<int> GetExecutingJobsCount()
         => (await _generalScheduler.GetCurrentlyExecutingJobs()).Count;
+
+    /// <summary>How many jobs the scheduler is holding, whether running or waiting their turn.</summary>
+    public async Task<int> GetScheduledJobCount()
+        => (await _generalScheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup())).Count;
+
+    /// <summary>
+    /// Reports what the scheduler is carrying, so a delay can be told apart from a shortage.
+    /// </summary>
+    /// <remarks>
+    /// A booked task running seconds late has two possible causes that look identical from the
+    /// outside: every worker is stuck, or there is simply more work than eight threads can get
+    /// through. Executing against the pool size answers the first, the size of the job store
+    /// answers the second, and the requests since the last report say how fast work arrives.
+    /// </remarks>
+    public async ThreadTask ReportLoad()
+    {
+        try
+        {
+            var executing = await GetExecutingJobsCount();
+            var scheduled = await GetScheduledJobCount();
+            var requests = ScheduleRequestCount;
+            var since = requests - _lastReportedRequestCount;
+            _lastReportedRequestCount = requests;
+
+            var level = executing >= AppConfiguration.Instance.MaxConcurencyThreadPool || since > 5000
+                ? LogLevel.Warn
+                : LogLevel.Info;
+
+            Logger.Log(level,
+                "Scheduler load: executing {0}/{1}, jobs held {2}, new requests {3} since the last report",
+                executing, AppConfiguration.Instance.MaxConcurencyThreadPool, scheduled, since);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Could not read the scheduler load");
+        }
+    }
+
+    private int _lastReportedRequestCount;
 
     public async IAsyncEnumerable<Task> GetExecutingTasks()
     {
@@ -56,6 +96,16 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
     public void Start()
     {
         _generalScheduler.Start();
+
+        // Say what the scheduler is carrying, every ten seconds. Without it a task running late
+        // is only ever a report from the far end - "the server feels slow" - with no way to tell
+        // a jammed pool from an overloaded one.
+        TickManager.Instance.OnTick.Subscribe(OnLoadReportTick, TimeSpan.FromSeconds(10), true);
+    }
+
+    private void OnLoadReportTick(TimeSpan delta)
+    {
+        _ = ReportLoad();
     }
 
     public void Stop()
