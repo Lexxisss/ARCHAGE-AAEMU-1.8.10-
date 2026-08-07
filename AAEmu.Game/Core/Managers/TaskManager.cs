@@ -1,71 +1,475 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using AAEmu.Commons.Utils;
-using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Models;
 using NLog;
-using Quartz;
-using Quartz.Impl.Matchers;
-using Quartz.Impl;
-using Quartz.Simpl;
 using Task = AAEmu.Game.Models.Tasks.Task;
 using ThreadTask = System.Threading.Tasks.Task;
 
 namespace AAEmu.Game.Core.Managers;
 
+/// <summary>
+/// Runs the game's booked work: one thread watching the clock, a few running what is due.
+/// </summary>
+/// <remarks>
+/// This used to be Quartz. Quartz is built for jobs measured in minutes, and it charges for it -
+/// an existence check, a job and a trigger object, and an insert into a locking store, for every
+/// booking. The world books about two and a half thousand a second before a single player is
+/// online, nearly all of them doodads changing phase, and eight Quartz threads could push about
+/// nineteen hundred. The quarter it fell short by never came back: the queue grew without bound,
+/// everything booked arrived seconds late, and only a restart cleared it.
+///
+/// What replaces it is a heap keyed by due time and a channel of ready work. Booking is a heap
+/// insert, cancelling is a flag, and idling costs nothing at all - the watcher sleeps until the
+/// nearest due time rather than sweeping a list. There is no ceiling worth speaking of at the
+/// loads this server sees.
+/// </remarks>
 public class TaskManager : Singleton<TaskManager>, ITaskManager
 {
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
-    private bool _initialized = false;
 
     /// <summary>Longest delay worth booking; beyond this the caller has miscalculated.</summary>
     private static readonly TimeSpan MaxScheduleDelay = TimeSpan.FromDays(3650);
 
-    private DefaultThreadPool _generalPool;
-    private IScheduler _generalScheduler;
+    /// <summary>Never sleep longer than this, so a clock change cannot strand the queue.</summary>
+    private static readonly TimeSpan MaxWatcherSleep = TimeSpan.FromSeconds(1);
+
+    private readonly object _queueLock = new();
+    private readonly PriorityQueue<Booking, DateTime> _queue = new();
+    private readonly BlockingCollection<Task> _ready = new(new ConcurrentQueue<Task>());
+
+    private Thread _watcher;
+    private Thread[] _workers;
+    private CancellationTokenSource _shutdown;
+    private bool _initialized;
+    private int _started;
+    private long _generation;
+    private long _nextTaskId;
+
+    private int _lastReportedRequestCount;
+    private long _latenessTicks;
+    private int _latenessSamples;
+    private long _worstLatenessTicks;
+    private readonly ConcurrentDictionary<string, int> _requestsByTaskName = new();
 
     public int ScheduleRequestCount { get; private set; }
-    public async Task<int> GetExecutingJobsCount()
-        => (await _generalScheduler.GetCurrentlyExecutingJobs()).Count;
 
-    /// <summary>How many jobs the scheduler is holding, whether running or waiting their turn.</summary>
-    public async Task<int> GetScheduledJobCount()
-        => (await _generalScheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup())).Count;
+    /// <summary>One booking of a task. Stale ones are recognised by their generation.</summary>
+    private readonly record struct Booking(Task Task, long Generation);
+
+    public int WorkerCount => _workers?.Length ?? 0;
+
+    public System.Threading.Tasks.Task<int> GetExecutingJobsCount() => ThreadTask.FromResult(_ready.Count);
+
+    /// <summary>How many bookings are waiting their turn.</summary>
+    public System.Threading.Tasks.Task<int> GetScheduledJobCount()
+    {
+        lock (_queueLock)
+        {
+            return ThreadTask.FromResult(_queue.Count);
+        }
+    }
+
+    public async IAsyncEnumerable<Task> GetExecutingTasks()
+    {
+        foreach (var task in _ready.ToArray())
+            yield return task;
+
+        await ThreadTask.CompletedTask;
+    }
+
+    public void Initialize()
+    {
+        if (_initialized)
+            return;
+
+        _shutdown = new CancellationTokenSource();
+
+        // More hands than the machine has cores buys nothing; fewer than four leaves no room when
+        // one of them is held up by a slow packet or a database write.
+        var configured = AppConfiguration.Instance?.MaxConcurencyThreadPool ?? 0;
+        var workerCount = Math.Max(4, Math.Max(configured, Environment.ProcessorCount));
+
+        _workers = new Thread[workerCount];
+        for (var i = 0; i < workerCount; i++)
+        {
+            _workers[i] = new Thread(RunWorker)
+            {
+                Name = $"TaskWorker{i}",
+                IsBackground = true
+            };
+        }
+
+        _watcher = new Thread(RunWatcher)
+        {
+            Name = "TaskWatcher",
+            IsBackground = true
+        };
+
+        _initialized = true;
+        Logger.Info("Task manager ready with {0} worker threads", workerCount);
+    }
+
+    public void Start()
+    {
+        if (!_initialized)
+            Initialize();
+
+        // Starting a thread that is already running throws, so saying start twice would have
+        // brought the server down rather than doing nothing.
+        if (Interlocked.Exchange(ref _started, 1) == 1)
+            return;
+
+        _watcher.Start();
+        foreach (var worker in _workers)
+            worker.Start();
+
+        TickManager.Instance.OnTick.Subscribe(OnLoadReportTick, TimeSpan.FromSeconds(10), true);
+    }
+
+    public void Stop()
+    {
+        _shutdown?.Cancel();
+        lock (_queueLock)
+        {
+            _queue.Clear();
+            Monitor.PulseAll(_queueLock);
+        }
+
+        _ready.CompleteAdding();
+    }
+
+    public void Schedule(Task task, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1,
+        [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
+    {
+        ScheduleRequestCount++;
+        if (task != null)
+            _requestsByTaskName.AddOrUpdate(task.Name, 1, static (_, current) => current + 1);
+
+        if (_shutdown == null || _shutdown.IsCancellationRequested)
+            return;
+
+        if (task == null)
+        {
+            Logger.Warn(
+                "Task.Schedule called with no task from {0}:{1} (start {2}, repeat {3}, count {4})",
+                Path.GetFileName(callerFile), callerLine, startTime, repeatInterval, count);
+            return;
+        }
+
+        var delay = startTime ?? TimeSpan.Zero;
+        if (delay > MaxScheduleDelay)
+        {
+            Logger.Warn("Task {0} from {1}:{2} asked to start in {3}; ignoring the request",
+                task.Name, Path.GetFileName(callerFile), callerLine, delay);
+            return;
+        }
+
+        // A delay in the past means now, and callers rely on it: a buff with no duration asks to
+        // be dispelled in -1 ms, which is how it comes to an end at all.
+        if (delay < TimeSpan.Zero)
+            delay = TimeSpan.Zero;
+
+        task.CronSchedule = null;
+        task.RepeatInterval = repeatInterval ?? TimeSpan.Zero;
+        task.RepeatCount = task.RepeatInterval == TimeSpan.Zero ? 1 : count;
+        task.MaxCount = repeatInterval == null ? 0 : count;
+        task.ExecuteCount = 0;
+        task.ScheduleTime = Helpers.UnixTimeNowInMilli();
+
+        Enqueue(task, DateTime.UtcNow + delay);
+    }
+
+    public void CronSchedule(Task task, string cronExpression, TimeSpan? startTime = null,
+        TimeSpan? repeatInterval = null, int count = -1,
+        [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
+    {
+        ScheduleRequestCount++;
+        if (task != null)
+            _requestsByTaskName.AddOrUpdate(task.Name, 1, static (_, current) => current + 1);
+
+        if (_shutdown == null || _shutdown.IsCancellationRequested)
+            return;
+
+        if (task == null)
+        {
+            Logger.Warn(
+                "Task.CronSchedule called with no task from {0}:{1} (cron {2})",
+                Path.GetFileName(callerFile), callerLine, cronExpression);
+            return;
+        }
+
+        if (!Models.Tasks.TaskCronSchedule.TryParse(cronExpression, out var schedule))
+        {
+            Logger.Warn("Task {0} from {1}:{2} was given a schedule that cannot be read: \"{3}\"",
+                task.Name, Path.GetFileName(callerFile), callerLine, cronExpression);
+            return;
+        }
+
+        var from = DateTime.UtcNow + (startTime ?? TimeSpan.Zero);
+        var next = schedule.GetNextOccurrence(from);
+        if (next == null)
+        {
+            Logger.Warn("Task {0} from {1}:{2} has a schedule that never comes round: \"{3}\"",
+                task.Name, Path.GetFileName(callerFile), callerLine, cronExpression);
+            return;
+        }
+
+        task.CronSchedule = schedule;
+        task.RepeatInterval = TimeSpan.Zero;
+        task.RepeatCount = count;
+        task.MaxCount = count;
+        task.ExecuteCount = 0;
+        task.ScheduleTime = Helpers.UnixTimeNowInMilli();
+
+        Enqueue(task, next.Value);
+    }
+
+    private void Enqueue(Task task, DateTime dueTime)
+    {
+        lock (_queueLock)
+        {
+            // Booking means it is meant to run. The same object is often booked again after being
+            // cancelled - a doodad's respawn timer is the very task its despawn cancelled.
+            task.Cancelled = false;
+
+            // A plain counter. The id is only ever read back in diagnostics, so borrowing one from
+            // the shared id manager bought nothing and put a lock in the busiest path there is.
+            if (task.Id == 0)
+                task.Id = unchecked((uint)Interlocked.Increment(ref _nextTaskId));
+
+            task.DueTime = dueTime;
+            task.Generation = ++_generation;
+
+            _queue.Enqueue(new Booking(task, task.Generation), dueTime);
+
+            // Only stir the watcher when this lands before whatever it is already waiting for.
+            if (_queue.TryPeek(out _, out var head) && head >= dueTime)
+                Monitor.Pulse(_queueLock);
+        }
+    }
+
+    private void RunWatcher()
+    {
+        var token = _shutdown.Token;
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                Booking booking;
+                lock (_queueLock)
+                {
+                    while (!_queue.TryPeek(out _, out var due))
+                    {
+                        // Nothing booked at all: wait to be woken.
+                        Monitor.Wait(_queueLock, MaxWatcherSleep);
+                        if (token.IsCancellationRequested)
+                            return;
+                    }
+
+                    _queue.TryPeek(out _, out var head);
+                    var wait = head - DateTime.UtcNow;
+                    if (wait > TimeSpan.Zero)
+                    {
+                        Monitor.Wait(_queueLock, wait < MaxWatcherSleep ? wait : MaxWatcherSleep);
+                        continue;
+                    }
+
+                    booking = _queue.Dequeue();
+                }
+
+                var task = booking.Task;
+                if (task == null || task.Cancelled || task.Generation != booking.Generation)
+                    continue; // cancelled, or replaced by a newer booking
+
+                RecordLateness(DateTime.UtcNow - task.DueTime);
+                _ready.Add(task, token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                return; // the ready queue was closed; that is the shutdown
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, "The task watcher tripped over something");
+            }
+        }
+    }
+
+    private void RunWorker()
+    {
+        var token = _shutdown.Token;
+        try
+        {
+            foreach (var task in _ready.GetConsumingEnumerable(token))
+            {
+                if (task.Cancelled)
+                    continue;
+
+                try
+                {
+                    task.Execute();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Task {0} threw while running", task.Name);
+                }
+
+                task.ExecuteCount++;
+                Reschedule(task);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+            // The collection was completed while we were waiting on it; that is the shutdown.
+        }
+    }
+
+    /// <summary>Books the next run of a repeating task, if it has one left.</summary>
+    private void Reschedule(Task task)
+    {
+        if (task.Cancelled)
+            return;
+
+        if (task.RepeatCount >= 0 && task.ExecuteCount >= task.RepeatCount)
+        {
+            Release(task);
+            return;
+        }
+
+        DateTime next;
+        if (task.CronSchedule != null)
+        {
+            var occurrence = task.CronSchedule.GetNextOccurrence(DateTime.UtcNow);
+            if (occurrence == null)
+            {
+                Release(task);
+                return;
+            }
+
+            next = occurrence.Value;
+        }
+        else if (task.RepeatInterval > TimeSpan.Zero)
+        {
+            // Counted from when it was meant to run, not from now, so a repeating task does not
+            // drift later and later under load.
+            next = task.DueTime + task.RepeatInterval;
+            var now = DateTime.UtcNow;
+            if (next < now)
+                next = now;
+        }
+        else
+        {
+            Release(task);
+            return;
+        }
+
+        lock (_queueLock)
+        {
+            if (task.Cancelled)
+                return;
+
+            task.DueTime = next;
+            task.Generation = ++_generation;
+            _queue.Enqueue(new Booking(task, task.Generation), next);
+            if (_queue.TryPeek(out _, out var head) && head >= next)
+                Monitor.Pulse(_queueLock);
+        }
+    }
+
+    /// <summary>Marks a task cancelled once and hands its id back exactly once.</summary>
+    private static void Release(Task task)
+    {
+        if (task.Cancelled)
+            return;
+
+        task.Cancelled = true;
+        task.Id = 0;
+    }
 
     /// <summary>
-    /// Reports what the scheduler is carrying, so a delay can be told apart from a shortage.
+    /// Stops a task at once. Its booking stays in the queue until its turn comes and is dropped
+    /// then, which costs nothing and keeps cancelling free of the queue lock's contention.
+    /// </summary>
+    public bool CancelNow(Task task)
+    {
+        if (task == null)
+            return true;
+
+        Release(task);
+        return true;
+    }
+
+    public void CancelWithoutWaiting(Task task) => CancelNow(task);
+
+    public System.Threading.Tasks.Task<bool> Cancel(Task task) => ThreadTask.FromResult(CancelNow(task));
+
+    private void RecordLateness(TimeSpan lateness)
+    {
+        if (lateness < TimeSpan.Zero)
+            lateness = TimeSpan.Zero;
+
+        Interlocked.Add(ref _latenessTicks, lateness.Ticks);
+        Interlocked.Increment(ref _latenessSamples);
+
+        var ticks = lateness.Ticks;
+        var worst = Interlocked.Read(ref _worstLatenessTicks);
+        while (ticks > worst)
+        {
+            var seen = Interlocked.CompareExchange(ref _worstLatenessTicks, ticks, worst);
+            if (seen == worst)
+                break;
+            worst = seen;
+        }
+    }
+
+    private void OnLoadReportTick(TimeSpan delta) => ReportLoad();
+
+    /// <summary>
+    /// Reports what the scheduler is carrying and how late it is running.
     /// </summary>
     /// <remarks>
-    /// A booked task running seconds late has two possible causes that look identical from the
-    /// outside: every worker is stuck, or there is simply more work than eight threads can get
-    /// through. Executing against the pool size answers the first, the size of the job store
-    /// answers the second, and the requests since the last report say how fast work arrives.
+    /// Lateness is the number that matters: a queue of any size is fine as long as what comes out
+    /// of it comes out on time. The rest is there to say why, when it is not.
     /// </remarks>
-    public async ThreadTask ReportLoad()
+    public void ReportLoad()
     {
         try
         {
-            var executing = await GetExecutingJobsCount();
-            var scheduled = await GetScheduledJobCount();
+            int waiting;
+            lock (_queueLock)
+                waiting = _queue.Count;
+
             var requests = ScheduleRequestCount;
             var since = requests - _lastReportedRequestCount;
             _lastReportedRequestCount = requests;
 
-            var level = executing >= AppConfiguration.Instance.MaxConcurencyThreadPool || since > 5000
-                ? LogLevel.Warn
-                : LogLevel.Info;
+            var samples = Interlocked.Exchange(ref _latenessSamples, 0);
+            var totalTicks = Interlocked.Exchange(ref _latenessTicks, 0);
+            var worstTicks = Interlocked.Exchange(ref _worstLatenessTicks, 0);
+            var average = samples > 0 ? TimeSpan.FromTicks(totalTicks / samples) : TimeSpan.Zero;
+            var worst = TimeSpan.FromTicks(worstTicks);
+
+            var level = worst > TimeSpan.FromSeconds(1) ? LogLevel.Warn : LogLevel.Info;
 
             Logger.Log(level,
-                "Scheduler load: executing {0}/{1}, jobs held {2}, new requests {3} since the last report",
-                executing, AppConfiguration.Instance.MaxConcurencyThreadPool, scheduled, since);
+                "Scheduler load: waiting {0}, ready {1}, workers {2}, ran {3}, late by {4:F0} ms on average and {5:F0} ms at worst, new requests {6}",
+                waiting, _ready.Count, WorkerCount, samples,
+                average.TotalMilliseconds, worst.TotalMilliseconds, since);
 
-            // Who asked for all of it. A rate on its own says the server is drowning without
-            // saying in what, and the answer has been guessed at three times already.
             var byName = new List<KeyValuePair<string, int>>();
             foreach (var name in _requestsByTaskName.Keys)
             {
@@ -85,408 +489,5 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
         {
             Logger.Error(e, "Could not read the scheduler load");
         }
-    }
-
-    private int _lastReportedRequestCount;
-
-    /// <summary>How many bookings each kind of task asked for since the last report.</summary>
-    private readonly ConcurrentDictionary<string, int> _requestsByTaskName = new();
-
-    public async IAsyncEnumerable<Task> GetExecutingTasks()
-    {
-        var jobs = await _generalScheduler.GetCurrentlyExecutingJobs();
-        foreach (var job in jobs)
-            yield return (Task)job.JobDetail.JobDataMap.Get("Task");
-    }
-
-    public async void Initialize()
-    {
-        if (_initialized)
-            return;
-
-        _generalPool = new DefaultThreadPool();
-        _generalPool.MaxConcurrency = AppConfiguration.Instance.MaxConcurencyThreadPool;
-        _generalPool.Initialize();
-
-        DirectSchedulerFactory
-            .Instance
-            .CreateScheduler("General Scheduler", "GeneralScheduler", _generalPool, new RAMJobStore());
-        _generalScheduler = await DirectSchedulerFactory.Instance.GetScheduler("General Scheduler");
-        _initialized = true;
-    }
-
-    public void Start()
-    {
-        _generalScheduler.Start();
-
-        // Say what the scheduler is carrying, every ten seconds. Without it a task running late
-        // is only ever a report from the far end - "the server feels slow" - with no way to tell
-        // a jammed pool from an overloaded one.
-        TickManager.Instance.OnTick.Subscribe(OnLoadReportTick, TimeSpan.FromSeconds(10), true);
-    }
-
-    private void OnLoadReportTick(TimeSpan delta)
-    {
-        _ = ReportLoad();
-    }
-
-    public void Stop()
-    {
-        _generalScheduler?.Shutdown(true);
-    }
-
-    public async void Schedule(Task task, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1,
-        [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
-    {
-        this.ScheduleRequestCount++;
-        if (task != null)
-            _requestsByTaskName.AddOrUpdate(task.Name, 1, static (_, current) => current + 1);
-
-        if (_generalScheduler.IsShutdown)
-            return;
-
-        if (task == null)
-        {
-            // Nothing is scheduled and nothing breaks, but somebody upstream is holding a task
-            // that has already been let go. The old message named neither the caller nor the
-            // file, so the same line appeared hundreds of times with no way to find its source.
-            Logger.Warn(
-                "Task.Schedule called with no task from {0}:{1} (start {2}, repeat {3}, count {4})",
-                Path.GetFileName(callerFile), callerLine, startTime, repeatInterval, count);
-            return;
-        }
-
-        // This method is async void, so anything thrown past the first await lands on the thread
-        // pool as an unhandled exception and ends the process. A caller asking for something the
-        // scheduler cannot do must cost that caller its task, nothing more.
-        try
-        {
-            await ScheduleInternal(task, startTime, repeatInterval, count, callerFile, callerLine);
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e, "Could not schedule {0} requested from {1}:{2}",
-                task.Name, Path.GetFileName(callerFile), callerLine);
-        }
-    }
-
-    private async ThreadTask ScheduleInternal(Task task, TimeSpan? startTime, TimeSpan? repeatInterval, int count,
-        string callerFile, int callerLine)
-    {
-        // A delay is a delay, not a date. Anything that would run past the end of DateTime is a
-        // caller's arithmetic gone wrong rather than a request worth honouring.
-        if (startTime is { } requestedStart)
-        {
-            if (requestedStart > MaxScheduleDelay)
-            {
-                Logger.Warn("Task {0} from {1}:{2} asked to start in {3}; ignoring the request",
-                    task.Name, Path.GetFileName(callerFile), callerLine, requestedStart);
-                return;
-            }
-
-            // A delay in the past means now, and callers rely on it: a buff with no duration asks
-            // to be dispelled in -1 ms, which is how it comes to an end at all. Refusing those
-            // outright left such buffs on their owner for good.
-            if (requestedStart < TimeSpan.Zero)
-            {
-                startTime = TimeSpan.Zero;
-            }
-        }
-
-        // Booking a task means it is meant to run. The same object is often booked again after it
-        // was cancelled - a doodad's respawn timer is the very task its despawn cancelled - and a
-        // task left marked as cancelled is skipped by the job for good.
-        task.Cancelled = false;
-
-        var jobKey = new JobKey(string.Empty);
-        do
-        {
-            task.Id = TaskIdManager.Instance.GetNextId();
-            jobKey.Name = task.Name + task.Id;
-            jobKey.Group = task.Name;
-        }
-        while (await _generalScheduler.CheckExists(jobKey));
-
-        IJobDetail job;
-        var newJob = task.JobDetail == null;
-        if (newJob)
-        {
-            job = JobBuilder
-                .Create<TaskJob>()
-                .WithIdentity(task.Name + task.Id, task.Name)
-                .Build();
-            job.JobDataMap.Put("Logger", Logger);
-            job.JobDataMap.Put("Task", task);
-            task.JobDetail = job;
-        }
-
-        var triggerBuild = TriggerBuilder
-            .Create()
-            .WithIdentity(task.JobDetail.Key.Name, task.JobDetail.Key.Group);
-
-        if (startTime == null)
-            triggerBuild.StartNow();
-        else
-            triggerBuild.StartAt(DateTime.UtcNow.Add((TimeSpan)startTime));
-
-        if (task.Scheduler == null)
-        {
-            triggerBuild.WithSimpleSchedule(scheduler =>
-            {
-                if (repeatInterval == null)
-                    return;
-
-                scheduler.WithInterval((TimeSpan)repeatInterval);
-
-                if (count > 0)
-                    scheduler.WithRepeatCount(count);
-                else if (count == -1)
-                    scheduler.RepeatForever();
-            });
-        }
-        else
-            triggerBuild.WithSchedule(task.Scheduler);
-
-        triggerBuild.ForJob(task.JobDetail.Key);
-
-        task.Trigger = triggerBuild.Build();
-        task.ExecuteCount = 0;
-        task.MaxCount = repeatInterval == null ? 0 : count;
-        task.ScheduleTime = Helpers.UnixTimeNowInMilli();
-
-        try
-        {
-            if (newJob)
-            {
-                try
-                {
-                    await _generalScheduler.ScheduleJob(task.JobDetail, task.Trigger);
-                }
-                catch (Exception e)
-                {
-                    Logger.Trace(e, "Rescheduling task");
-                    try
-                    {
-                        await _generalScheduler.RescheduleJob(task.Trigger.Key, task.Trigger);
-                    }
-                    catch (Exception exception)
-                    {
-                        Logger.Error(exception, "Error scheduling task");
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    await _generalScheduler.RescheduleJob(task.Trigger.Key, task.Trigger);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error(e, "Error scheduling task");
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e, "Error scheduling task");
-        }
-    }
-
-    public async void CronSchedule(Task task, string cronExpression, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1,
-        [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
-    {
-        if (_generalScheduler.IsShutdown)
-            return;
-
-        if (task == null)
-        {
-            Logger.Warn(
-                "Task.CronSchedule called with no task from {0}:{1} (cron {2}, start {3}, repeat {4}, count {5})",
-                Path.GetFileName(callerFile), callerLine, cronExpression, startTime, repeatInterval, count);
-            return;
-        }
-
-        // async void again: an escaping exception would end the process rather than the request.
-        try
-        {
-            await CronScheduleInternal(task, cronExpression, startTime, repeatInterval, count);
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e, "Could not cron schedule {0} requested from {1}:{2}",
-                task.Name, Path.GetFileName(callerFile), callerLine);
-        }
-    }
-
-    private async ThreadTask CronScheduleInternal(Task task, string cronExpression, TimeSpan? startTime,
-        TimeSpan? repeatInterval, int count)
-    {
-        //var _cron = "0 0 22-7 * * *";
-        task.Id = TaskIdManager.Instance.GetNextId();
-        while (await _generalScheduler.CheckExists(new JobKey(task.Name + task.Id, task.Name)))
-            task.Id = TaskIdManager.Instance.GetNextId();
-
-        IJobDetail job;
-        var newJob = task.JobDetail == null;
-        if (newJob)
-        {
-            job = JobBuilder
-                .Create<TaskJob>()
-                .WithIdentity(task.Name + task.Id, task.Name)
-                .Build();
-            job.JobDataMap.Put("Logger", Logger);
-            job.JobDataMap.Put("Task", task);
-            task.JobDetail = job;
-        }
-
-        var triggerBuild = TriggerBuilder
-            .Create()
-            .WithIdentity(task.JobDetail.Key.Name, task.JobDetail.Key.Group);
-
-        if (startTime == null)
-            triggerBuild.StartNow();
-        else
-            triggerBuild.StartAt(DateTime.UtcNow.Add((TimeSpan)startTime));
-
-        if (task.Scheduler == null)
-        {
-            triggerBuild.WithCronSchedule(cronExpression);
-        }
-        else
-            triggerBuild.WithSchedule(CronScheduleBuilder.CronSchedule(cronExpression));
-
-        triggerBuild.ForJob(task.JobDetail.Key);
-        task.Trigger = triggerBuild.Build();
-
-        task.ExecuteCount = 0;
-        task.MaxCount = repeatInterval == null ? 0 : count;
-        task.ScheduleTime = Helpers.UnixTimeNowInMilli();
-
-        try
-        {
-            if (newJob)
-            {
-                await _generalScheduler.ScheduleJob(task.JobDetail, task.Trigger);
-            }
-            else
-            {
-                await _generalScheduler.RescheduleJob(task.Trigger.Key, task.Trigger);
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e, "Error cron scheduling task");
-        }
-    }
-
-    /// <summary>Marks a task cancelled once and hands its id back exactly once.</summary>
-    private static void Release(Task task)
-    {
-        if (task.Cancelled)
-            return;
-
-        task.Cancelled = true;
-        TaskIdManager.Instance.ReleaseId(task.Id);
-    }
-
-    /// <summary>
-    /// Stops a task at once and clears its job afterwards, without blocking the caller.
-    /// </summary>
-    /// <remarks>
-    /// Every game task runs on the scheduler's own pool, and that pool has eight threads. A task
-    /// that waits for the scheduler to delete a job - very often the job it is itself running -
-    /// holds one of those eight for as long as the scheduler takes to agree, and doodads do this
-    /// on every phase change. With enough of them in flight the pool has nothing left to run
-    /// anything with, and everything booked shows up seconds late: an attack, an interaction, a
-    /// buff coming to an end.
-    ///
-    /// Nothing needs the answer. What actually stops the task running again is the flag, and that
-    /// is set here and now; removing the job is tidying up and can happen on its own time.
-    /// </remarks>
-    public void CancelWithoutWaiting(Task task)
-    {
-        if (task?.JobDetail == null)
-            return;
-
-        Release(task);
-        _ = DeleteJobQuietly(task.JobDetail.Key);
-    }
-
-    private async ThreadTask DeleteJobQuietly(JobKey jobKey)
-    {
-        try
-        {
-            await _generalScheduler.DeleteJob(jobKey);
-        }
-        catch (SchedulerException)
-        {
-            // Already gone, or on its way out. Either is the outcome we wanted.
-            Logger.Trace("Task {0} was already gone when it was cancelled", jobKey);
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e, "Could not delete job {0}", jobKey);
-        }
-    }
-
-    public async Task<bool> Cancel(Task task)
-    {
-        if (task?.JobDetail == null)
-            return true;
-        try
-        {
-            var result = await _generalScheduler.DeleteJob(task.JobDetail.Key);
-
-            // A job that is no longer there is a job that needs no cancelling. Quartz answers
-            // false when it never found it and throws when it is already on its way out - a task
-            // that fired while this call was in flight. Both mean the same thing, and both used
-            // to leave the task id held forever: only the successful path ever gave it back, so
-            // every doodad timer that finished a moment too early leaked one.
-            Release(task);
-            return result;
-        }
-        catch (SchedulerException)
-        {
-            // A task that fired while its cancellation was in flight is an everyday race, not a
-            // fault, so it is logged at trace and without the exception: the stack trace said
-            // nothing but "Quartz threw", and it said it dozens of times a minute.
-            Logger.Trace("Task {0} was already gone when it was cancelled", task.JobDetail.Key);
-            Release(task);
-            return true;
-        }
-    }
-}
-
-[DisallowConcurrentExecution]
-[PersistJobDataAfterExecution]
-public sealed class TaskJob : IJob
-{
-    public ThreadTask Execute(IJobExecutionContext context)
-    {
-        var log = (Logger)context.MergedJobDataMap.Get("Logger");
-        try
-        {
-            var task = (Task)context.MergedJobDataMap.Get("Task");
-            if (task.Cancelled)
-                return ThreadTask.CompletedTask;
-
-            task.Execute();
-            task.ExecuteCount++;
-
-            if (task.MaxCount != -1 && task.ExecuteCount > task.MaxCount)
-                Clear(task.Id);
-        }
-        catch (Exception e)
-        {
-            log.Error(e);
-        }
-
-        return ThreadTask.CompletedTask;
-    }
-
-    private static void Clear(uint taskId)
-    {
-        ThreadTask.Run(() => TaskIdManager.Instance.ReleaseId(taskId));
     }
 }
