@@ -20,6 +20,9 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
     private bool _initialized = false;
 
+    /// <summary>Longest delay worth booking; beyond this the caller has miscalculated.</summary>
+    private static readonly TimeSpan MaxScheduleDelay = TimeSpan.FromDays(3650);
+
     private DefaultThreadPool _generalPool;
     private IScheduler _generalScheduler;
 
@@ -76,6 +79,33 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
             Logger.Warn(
                 "Task.Schedule called with no task from {0}:{1} (start {2}, repeat {3}, count {4})",
                 Path.GetFileName(callerFile), callerLine, startTime, repeatInterval, count);
+            return;
+        }
+
+        // This method is async void, so anything thrown past the first await lands on the thread
+        // pool as an unhandled exception and ends the process. A caller asking for something the
+        // scheduler cannot do must cost that caller its task, nothing more.
+        try
+        {
+            await ScheduleInternal(task, startTime, repeatInterval, count, callerFile, callerLine);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Could not schedule {0} requested from {1}:{2}",
+                task.Name, Path.GetFileName(callerFile), callerLine);
+        }
+    }
+
+    private async ThreadTask ScheduleInternal(Task task, TimeSpan? startTime, TimeSpan? repeatInterval, int count,
+        string callerFile, int callerLine)
+    {
+        // A delay is a delay, not a date. Anything that would run past the end of DateTime is a
+        // caller's arithmetic gone wrong rather than a request worth honouring.
+        if (startTime is { } requestedStart &&
+            (requestedStart < TimeSpan.Zero || requestedStart > MaxScheduleDelay))
+        {
+            Logger.Warn("Task {0} from {1}:{2} asked to start in {3}; ignoring the request",
+                task.Name, Path.GetFileName(callerFile), callerLine, requestedStart);
             return;
         }
 
@@ -188,6 +218,21 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
             return;
         }
 
+        // async void again: an escaping exception would end the process rather than the request.
+        try
+        {
+            await CronScheduleInternal(task, cronExpression, startTime, repeatInterval, count);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Could not cron schedule {0} requested from {1}:{2}",
+                task.Name, Path.GetFileName(callerFile), callerLine);
+        }
+    }
+
+    private async ThreadTask CronScheduleInternal(Task task, string cronExpression, TimeSpan? startTime,
+        TimeSpan? repeatInterval, int count)
+    {
         //var _cron = "0 0 22-7 * * *";
         task.Id = TaskIdManager.Instance.GetNextId();
         while (await _generalScheduler.CheckExists(new JobKey(task.Name + task.Id, task.Name)))

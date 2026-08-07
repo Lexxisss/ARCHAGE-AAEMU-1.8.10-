@@ -188,7 +188,7 @@ public class DoodadSpawner : Spawner<Doodad>
                     return;
                 }
 
-                Logger.Debug("DoDespawn: Doodad TemplateId {0} stays for another {1}", doodad.TemplateId, delay);
+                Logger.Trace("DoDespawn: Doodad TemplateId {0} stays for another {1}", doodad.TemplateId, delay);
                 TaskManager.Instance.Schedule(new DoodadSpawnerDoDespawnTask(doodad), delay);
                 return; // Reschedule when OK
             }
@@ -199,7 +199,7 @@ public class DoodadSpawner : Spawner<Doodad>
             var nextStart = GameScheduleManager.Instance.GetRemainingTimeDoodad((int)doodad.TemplateId, true);
             if (nextStart > TimeSpan.Zero)
             {
-                Logger.Debug("DoDespawn: Doodad TemplateId {0} removed, next window in {1}", doodad.TemplateId, nextStart);
+                Logger.Trace("DoDespawn: Doodad TemplateId {0} removed, next window in {1}", doodad.TemplateId, nextStart);
                 TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), nextStart);
             }
 
@@ -207,8 +207,11 @@ public class DoodadSpawner : Spawner<Doodad>
         }
         #endregion Schedule
 
+        // Read the doodad we were handed, not Last: Despawn has just set Last to null, so this
+        // line threw a NullReferenceException every time an unscheduled doodad went away.
+        Logger.Trace("DoDespawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} spawn [2] reschedule next time...",
+            UnitId, doodad.ObjId, doodad.FuncGroupId);
         Despawn(doodad);
-        Logger.Debug("DoDespawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} spawn [2] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
         TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), TimeSpan.FromSeconds(1));
     }
 
@@ -246,7 +249,9 @@ public class DoodadSpawner : Spawner<Doodad>
                 else
                 {
                     _permanent = false; // Doodad on the schedule.
-                    Logger.Debug("DoSpawn: Doodad TemplateId {0} waits {1} for its next window", UnitId, delay);
+                    // Trace, not debug: eleven and a half thousand doodads sit on a schedule, and
+                    // every one of them says this during the spawn pass.
+                    Logger.Trace("DoSpawn: Doodad TemplateId {0} waits {1} for its next window", UnitId, delay);
                     TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), delay);
                     return; // Reschedule when OK
                 }
@@ -272,7 +277,7 @@ public class DoodadSpawner : Spawner<Doodad>
         _spawned.Add(Last);
         if (!_permanent)
         {
-            Logger.Debug("DoSpawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [2] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
+            Logger.Trace("DoSpawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [2] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
             TaskManager.Instance.Schedule(new DoodadSpawnerDoDespawnTask(Last), TimeSpan.FromSeconds(1));
         }
 

@@ -199,7 +199,14 @@ public class GameScheduleManager : Singleton<GameScheduleManager>
             return TimeSpan.Zero;
         }
 
-        var remainingTime = TimeSpan.MaxValue;
+        // An id can be listed here while every schedule it names is missing from _gameSchedules,
+        // and then nothing below ever assigns. This used to hand back the TimeSpan.MaxValue it
+        // started from, which the callers took for a real delay and passed to the task manager,
+        // where adding it to the current time threw and - the scheduling method being async void -
+        // took the whole server down with it. Nothing found means nothing to wait for, which is
+        // what every caller already reads a zero as.
+        var remainingTime = TimeSpan.Zero;
+        var found = false;
 
         foreach (var gameScheduleId in scheduleIds[id])
         {
@@ -207,13 +214,14 @@ public class GameScheduleManager : Singleton<GameScheduleManager>
 
             var gameSchedules = _gameSchedules[gameScheduleId];
             var timeSpan = start ? GetRemainingTimeStart(gameSchedules) : GetRemainingTimeEnd(gameSchedules);
-            if (timeSpan <= remainingTime)
+            if (!found || timeSpan <= remainingTime)
             {
                 remainingTime = timeSpan;
+                found = true;
             }
         }
 
-        return remainingTime;
+        return found ? remainingTime : TimeSpan.Zero;
     }
 
     public bool HasGameScheduleSpawnersData(uint spawnerTemplateId)
