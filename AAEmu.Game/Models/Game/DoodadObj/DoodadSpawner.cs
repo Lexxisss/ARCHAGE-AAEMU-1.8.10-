@@ -176,6 +176,18 @@ public class DoodadSpawner : Spawner<Doodad>
             if (GameScheduleManager.Instance.CheckDoodadInGameSchedules(doodad.TemplateId))
             {
                 var delay = GameScheduleManager.Instance.GetRemainingTime((int)doodad.TemplateId, false);
+
+                // Same trap as on the spawn side: a zero here rescheduled this despawn for now,
+                // and it spun. Without an end time there is nothing to wait for, so leave the
+                // doodad standing rather than churn.
+                if (delay <= TimeSpan.Zero)
+                {
+                    Logger.Debug(
+                        "DoDespawn: Doodad TemplateId {0} is scheduled but has no end time; leaving it in place",
+                        doodad.TemplateId);
+                    return;
+                }
+
                 Logger.Debug("DoDespawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [1] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
                 Logger.Debug("DoDespawn: delay {0}", delay.ToString());
                 TaskManager.Instance.Schedule(new DoodadSpawnerDoDespawnTask(doodad), delay);
@@ -203,11 +215,26 @@ public class DoodadSpawner : Spawner<Doodad>
             if (GameScheduleManager.Instance.CheckDoodadInGameSchedules(UnitId))
             {
                 var delay = GameScheduleManager.Instance.GetRemainingTime((int)UnitId, true);
-                _permanent = false; // Doodad on the schedule.
-                Logger.Debug("DoSpawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [1] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
-                Logger.Debug("DoSpawn: delay {0}", delay.ToString());
-                TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), delay);
-                return; // Reschedule when OK
+
+                // A doodad can be listed in the doodad schedule and absent from the spawner one,
+                // and then the remaining time comes back as zero - which used to reschedule this
+                // very method for right now, over and over, as fast as the task manager would run
+                // it. Treat a delay that says nothing as no schedule at all and place the doodad,
+                // which is what happens for anything outside a schedule anyway.
+                if (delay <= TimeSpan.Zero)
+                {
+                    Logger.Debug(
+                        "DoSpawn: Doodad TemplateId {0} is scheduled but has no start time; spawning it",
+                        UnitId);
+                }
+                else
+                {
+                    _permanent = false; // Doodad on the schedule.
+                    Logger.Debug("DoSpawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [1] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
+                    Logger.Debug("DoSpawn: delay {0}", delay.ToString());
+                    TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), delay);
+                    return; // Reschedule when OK
+                }
             }
 
             // couldn't find it on the schedule, but it should have been!
