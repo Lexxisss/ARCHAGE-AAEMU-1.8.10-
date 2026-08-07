@@ -428,6 +428,8 @@ public class SpawnManager : Singleton<SpawnManager>
             _slaveSpawners[(byte)world.Id] = slaveSpawners;
         }
 
+        MarkFactionVariants();
+
         Logger.Info("Loading persistent doodads...");
 
         var doodadsSpawned = 0;
@@ -1026,6 +1028,79 @@ public class SpawnManager : Singleton<SpawnManager>
 
             Thread.Sleep(1000);
         }
+    }
+
+    /// <summary>
+    /// Finds the spots where several versions of the same character stand on top of one another,
+    /// one per mother faction, and records on each spawner who it is there for.
+    /// </summary>
+    /// <remarks>
+    /// The Blue Salt broker at the Crossroads Plains is three npcs on one point: 19809 for the
+    /// Nuia alliance, 19876 for Haranya, 19877 for the outlaws. Nothing about the npcs or their
+    /// spawners says so - the only thing that does is the mother_faction_only requirement on the
+    /// Start component of the quest each of them gives.
+    ///
+    /// Half a metre, not the three of npc_spawners.test_radius_npc: at three metres 15.6% of every
+    /// placement in the world has a neighbour, and almost all of those are ordinary crowds.
+    /// </remarks>
+    private void MarkFactionVariants()
+    {
+        const float sameSpot = 0.5f;
+        var marked = 0;
+
+        foreach (var worldSpawners in _npcSpawners.Values)
+        {
+            var candidates = new List<NpcSpawner>();
+            foreach (var spawners in worldSpawners.Values)
+                foreach (var spawner in spawners)
+                {
+                    if (spawner?.Position == null)
+                        continue;
+                    var factions = NpcGameData.Instance.GetQuestFactions(spawner.UnitId);
+                    if (factions is not { Count: > 0 })
+                        continue;
+
+                    spawner.VariantFactions = factions;
+                    candidates.Add(spawner);
+                }
+
+            var taken = new bool[candidates.Count];
+            for (var i = 0; i < candidates.Count; i++)
+            {
+                if (taken[i])
+                    continue;
+
+                var group = new List<NpcSpawner> { candidates[i] };
+                for (var j = i + 1; j < candidates.Count; j++)
+                {
+                    if (taken[j] || !OnTheSameSpot(candidates[i].Position, candidates[j].Position, sameSpot))
+                        continue;
+                    group.Add(candidates[j]);
+                    taken[j] = true;
+                }
+
+                // One of a kind serves everyone who walks up to it; there is no rival to defer to.
+                if (group.Count < 2)
+                    continue;
+
+                var sets = group.Select(spawner => spawner.VariantFactions).ToList();
+                foreach (var spawner in group)
+                    spawner.VariantGroup = sets;
+                marked += group.Count;
+            }
+        }
+
+        if (marked > 0)
+            Logger.Info("{0} npcs stand among rival versions of themselves, one per mother faction", marked);
+    }
+
+    private static bool OnTheSameSpot(WorldSpawnPosition left, WorldSpawnPosition right, float within)
+    {
+        if (left.WorldId != right.WorldId)
+            return false;
+        var dx = left.X - right.X;
+        var dy = left.Y - right.Y;
+        return dx * dx + dy * dy <= within * within;
     }
 
     /// <summary>

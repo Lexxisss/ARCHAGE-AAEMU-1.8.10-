@@ -50,6 +50,42 @@ public class NpcSpawner : Spawner<Npc>
     public List<uint> NpcSpawnerIds { get; set; }
     private bool _isScheduled { get; set; }
     public NpcSpawnerTemplate Template { get; set; } // npcSpawnerId(NpcSpawnerTemplateId), template
+
+    /// <summary>The mother factions this spawner's npc serves, when it stands among rival versions of itself.</summary>
+    public HashSet<uint> VariantFactions { get; set; }
+
+    /// <summary>What every version standing on this spot serves, this one included.</summary>
+    public IReadOnlyList<HashSet<uint>> VariantGroup { get; set; }
+
+    /// <summary>
+    /// Whether this npc should stay out of sight of a player of the given mother faction, because
+    /// another version of it standing on the same spot is the one meant for them.
+    /// </summary>
+    /// <remarks>
+    /// Never hides the last one: if nothing on the spot is aimed at that player, they see all of
+    /// it. Hiding the wrong one is worse than showing one too many - it can take away the npc a
+    /// quest is handed in to.
+    /// </remarks>
+    public bool IsHiddenFromFaction(uint motherFactionId)
+    {
+        var group = VariantGroup;
+        var own = VariantFactions;
+        if (group == null || own == null || motherFactionId == 0)
+            return false;
+
+        // How narrowly the best-aimed version on this spot is aimed. A version for one faction
+        // beats one that also serves others, which is what separates the Nuia-and-Haranya broker
+        // from the Haranya-only one standing in the same place.
+        var narrowest = int.MaxValue;
+        foreach (var factions in group)
+            if (factions.Contains(motherFactionId) && factions.Count < narrowest)
+                narrowest = factions.Count;
+
+        if (narrowest == int.MaxValue)
+            return false;
+
+        return !own.Contains(motherFactionId) || own.Count != narrowest;
+    }
     public NpcSpawnerPlacement Placement { get; set; }
 
     public NpcSpawner()

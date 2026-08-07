@@ -1081,8 +1081,16 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
 
         var radiusSquared = (double)radius * radius;
         var visibleNpcIds = character.Connection?.Protocol1810VisibleNpcObjIds;
+
+        // Where several versions of one character stand on the same spot, one per mother faction,
+        // show this player only the one that is theirs.
+        var motherFaction = character.Faction == null
+            ? 0u
+            : character.Faction.MotherId != 0 ? character.Faction.MotherId : character.Faction.Id;
+
         var candidates = nearestSameWorld
             .Where(entry => entry.DistanceSquared <= radiusSquared &&
+                            entry.Npc.Spawner?.IsHiddenFromFaction(motherFaction) != true &&
                             (visibleNpcIds == null || !visibleNpcIds.Contains(entry.Npc.ObjId)))
             .Take(Math.Max(0, maxCount))
             .ToList();

@@ -24,6 +24,26 @@ public class NpcGameData : Singleton<NpcGameData>, IGameDataLoader
     public Dictionary<uint, List<uint>> _npcMemberAndSpawnerTemplateIds; // memberId, List<npcSpawnerId>
     private Dictionary<uint, List<NpcGroupMember>> _npcGroupMembers;
 
+    /// <summary>
+    /// Which mother factions an npc's quests are open to, for the npcs whose quests are open to
+    /// some and not others.
+    /// </summary>
+    /// <remarks>
+    /// A quest can be restricted to one mother faction by a unit requirement of kind 56,
+    /// mother_faction_only, hung on its Start component; 2320 quests carry one. Where several
+    /// versions of the same character stand on the same spot - one for the Nuia alliance, one for
+    /// Haranya, one for the outlaws - this is the only thing in the data that tells them apart.
+    /// </remarks>
+    private Dictionary<uint, HashSet<uint>> _questFactionsForNpc;
+
+    /// <summary>The mother factions this npc's quests are for, or null if they are for anyone.</summary>
+    public HashSet<uint> GetQuestFactions(uint npcId)
+    {
+        return _questFactionsForNpc != null && _questFactionsForNpc.TryGetValue(npcId, out var factions)
+            ? factions
+            : null;
+    }
+
     public void Load(SqliteConnection connection, SqliteConnection connection2)
     {
         _skillsForNpc = new Dictionary<uint, List<NpcSkill>>();
@@ -32,6 +52,7 @@ public class NpcGameData : Singleton<NpcGameData>, IGameDataLoader
         _npcSpawnerTemplates = new Dictionary<uint, NpcSpawnerTemplate>();
         _npcMemberAndSpawnerTemplateIds = new Dictionary<uint, List<uint>>();
         _npcGroupMembers = new Dictionary<uint, List<NpcGroupMember>>();
+        _questFactionsForNpc = new Dictionary<uint, HashSet<uint>>();
 
         using (var command = connection2.CreateCommand())
         {
@@ -171,6 +192,35 @@ public class NpcGameData : Singleton<NpcGameData>, IGameDataLoader
                     _npcGroupMembers.Add(member.NpcGroupId, members);
                 }
                 members.Add(member);
+            }
+        }
+
+        using (var command = spawnConnection.CreateCommand())
+        {
+            // Every npc that takes part in a quest whose Start component is restricted to one
+            // mother faction, together with the faction it is restricted to.
+            command.CommandText =
+                "SELECT c.npc_id, r.value1 " +
+                "FROM quest_components c " +
+                "JOIN quest_components s ON s.quest_context_id = c.quest_context_id AND s.component_kind_id = 2 " +
+                "JOIN unit_reqs r ON r.owner_type = 'QuestComponent' AND r.owner_id = s.id AND r.kind_id = 56 " +
+                "WHERE c.npc_id IS NOT NULL AND c.npc_id <> 0";
+            command.Prepare();
+            using var sqliteReader = command.ExecuteReader();
+            using var reader = new SQLiteWrapperReader(sqliteReader);
+            while (reader.Read())
+            {
+                var npcId = reader.GetUInt32("npc_id");
+                var factionId = reader.GetUInt32("value1");
+                if (factionId == 0)
+                    continue;
+
+                if (!_questFactionsForNpc.TryGetValue(npcId, out var factions))
+                {
+                    factions = new HashSet<uint>();
+                    _questFactionsForNpc.Add(npcId, factions);
+                }
+                factions.Add(factionId);
             }
         }
     }
