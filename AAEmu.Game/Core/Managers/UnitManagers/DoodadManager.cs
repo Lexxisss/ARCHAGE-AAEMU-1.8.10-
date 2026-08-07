@@ -3191,6 +3191,35 @@ public class DoodadManager : Singleton<DoodadManager>
         return listDoodadFuncGroups;
     }
 
+    /// <summary>
+    /// Whether any phase of this doodad template hands out the given skill.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately not restricted to the phase the doodad happens to be standing in. An ore
+    /// vein starts in a quest-reaction phase and only names its gathering skill in a later one,
+    /// so a phase-strict test rejects the very interaction the client is offering. Being listed
+    /// by the template is authorisation to ask; whether the func actually runs is still the
+    /// current phase's decision.
+    /// </remarks>
+    public bool TemplateOffersSkill(uint doodadTemplateId, uint skillId)
+    {
+        if (skillId == 0 || !_templates.TryGetValue(doodadTemplateId, out var template))
+        {
+            return false;
+        }
+
+        foreach (var funcGroup in template.FuncGroups)
+        {
+            if (_funcsByGroups.TryGetValue(funcGroup.Id, out var funcs) &&
+                funcs.Exists(func => func.SkillId == skillId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public List<uint> GetDoodadFuncGroupsId(uint doodadTemplateId)
     {
         var listId = new List<uint>();

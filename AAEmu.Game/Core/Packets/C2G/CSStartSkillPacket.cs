@@ -119,13 +119,15 @@ public class CSStartSkillPacket : GamePacket
         var isBuffGrantedSkill = SkillManager.Instance.IsSkillGrantedByActiveBuff(
             skillId, Connection.ActiveChar.Buffs);
 
-        // A gathering node, a quest device or any other doodad offers its own skill for the phase
-        // it is standing in - "break the unknown ore vein" is not something a character learns.
-        // The doodad decides: if its current phase has no function for this skill, the answer is
-        // still no.
+        // A gathering node, a quest device or any other doodad offers its own skill - "break the
+        // unknown ore vein" is not something a character learns. Ask the doodad's template rather
+        // than the phase it is standing in: the unknown ore vein spawns in a quest-reaction phase
+        // and names the gathering skill only in a later one, so a phase-strict test turned the
+        // client's own offer into an unauthorized-skill warning.
         var isDoodadOfferedSkill = skillCastTarget?.ObjId > 0 &&
             WorldManager.Instance.GetDoodad(skillCastTarget.ObjId) is { } targetDoodad &&
-            DoodadManager.Instance.GetFunc(targetDoodad.FuncGroupId, skillId) != null;
+            (DoodadManager.Instance.GetFunc(targetDoodad.FuncGroupId, skillId) != null ||
+             DoodadManager.Instance.TemplateOffersSkill(targetDoodad.TemplateId, skillId));
 
         if (!isServerProvidedSkill && !isLearnedSkill && !isLearnedVariant && !isBuffGrantedSkill &&
             !isDoodadOfferedSkill)
