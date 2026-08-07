@@ -39,11 +39,12 @@ public class SaveManager : Singleton<SaveManager>
     public async void Stop()
     {
         _enabled = false;
-        if (saveTask == null)
+        var pendingSaveTask = saveTask;
+        if (pendingSaveTask == null)
         {
             return;
         }
-        var result = await saveTask.CancelAsync();
+        var result = await pendingSaveTask.CancelAsync();
         if (result)
         {
             saveTask = null;

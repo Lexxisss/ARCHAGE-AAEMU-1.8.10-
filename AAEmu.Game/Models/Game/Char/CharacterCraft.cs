@@ -347,8 +347,11 @@ public class CharacterCraft
         if (Owner == null)
             return;
 
-        if (Owner.SkillTask != null)
-            Owner.SkillTask.Skill.Cancelled = true;
+        // Read it once - a skill finishing on another thread clears this between the test and
+        // the assignment that used to follow it.
+        var skillTask = Owner.SkillTask;
+        if (skillTask != null)
+            skillTask.Skill.Cancelled = true;
         Owner.InterruptSkills();
     }
 }

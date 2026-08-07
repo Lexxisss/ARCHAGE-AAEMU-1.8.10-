@@ -200,16 +200,22 @@ public class DuelManager : Singleton<DuelManager>
             duel.Challenger.IsInDuel = false;
             duel.Challenged.IsInDuel = false;
 
-            if (duel.DuelStartTask != null)
+            // Take the reference before cancelling, and clear the field before letting go of it:
+            // these run on the scheduler's threads as well as the network's, and testing a field
+            // and then dereferencing it a line later is two steps a duel ending elsewhere can
+            // land between.
+            var startTask = duel.DuelStartTask;
+            if (startTask != null)
             {
-                _ = duel.DuelStartTask.CancelAsync();
                 duel.DuelStartTask = null;
+                _ = startTask.CancelAsync();
             }
 
-            if (duel.DuelEndTimerTask != null)
+            var endTimerTask = duel.DuelEndTimerTask;
+            if (endTimerTask != null)
             {
-                _ = duel.DuelEndTimerTask.CancelAsync();
                 duel.DuelEndTimerTask = null;
+                _ = endTimerTask.CancelAsync();
             }
 
             DuelRemove(duel);
@@ -283,8 +289,15 @@ public class DuelManager : Singleton<DuelManager>
             var duel = _duels[id];
             if (duel.Challenger.Hp <= 1 || duel.Challenged.Hp <= 1)
             {
-                _ = duel.DuelResultСheckTask.CancelAsync();
-                duel.DuelResultСheckTask = null;
+                // This one was not even guarded, so a duel already resolved on another thread
+                // threw here rather than simply having nothing left to cancel.
+                var resultCheckTask = duel.DuelResultСheckTask;
+                if (resultCheckTask != null)
+                {
+                    duel.DuelResultСheckTask = null;
+                    _ = resultCheckTask.CancelAsync();
+                }
+
                 return true;
             }
 
@@ -310,11 +323,12 @@ public class DuelManager : Singleton<DuelManager>
             if (currentDistance >= DistanceForSurrender)
             {
                 // отключаем таймер
-                if (duel.DuelDistanceСheckTask == null)
+                var distanceCheckTask = duel.DuelDistanceСheckTask;
+                if (distanceCheckTask == null)
                     return DuelDistance.ChallengerFar; // сдается тот, кто вызывал на дуэль, т.е. убежал от флага
 
-                _ = duel.DuelDistanceСheckTask.CancelAsync();
                 duel.DuelDistanceСheckTask = null;
+                _ = distanceCheckTask.CancelAsync();
                 return DuelDistance.ChallengerFar; // сдается тот, кто вызывал на дуэль, т.е. убежал от флага
             }
             // проверяем, сбежали от флага или нет
@@ -322,11 +336,12 @@ public class DuelManager : Singleton<DuelManager>
             if (currentDistance >= DistanceForSurrender)
             {
                 // отключаем таймер
-                if (duel.DuelDistanceСheckTask == null)
+                var distanceCheckTask = duel.DuelDistanceСheckTask;
+                if (distanceCheckTask == null)
                     return DuelDistance.ChallengedFar; // сдается тот, кого вызвали на дуэль, т.е. убежал от флага
 
-                _ = duel.DuelDistanceСheckTask.CancelAsync();
                 duel.DuelDistanceСheckTask = null;
+                _ = distanceCheckTask.CancelAsync();
                 return DuelDistance.ChallengedFar; // сдается тот, кого вызвали на дуэль, т.е. убежал от флага
             }
 

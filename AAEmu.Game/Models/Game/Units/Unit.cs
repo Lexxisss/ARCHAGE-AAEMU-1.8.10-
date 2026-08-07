@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 
 using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
@@ -543,13 +544,21 @@ public class Unit : BaseUnit, IUnit
 
     private static async void StopAutoSkill(Unit unit)
     {
-        if (unit.AutoAttackTask is null || !(unit is Character character))
+        if (unit is not Character character)
         {
             return;
         }
 
-        await character.AutoAttackTask.CancelAsync();
+        // The field was tested and then dereferenced a line later, and combat clears it from
+        // several places at once. Take it first; whoever gets it does the work.
+        var autoAttackTask = character.AutoAttackTask;
+        if (autoAttackTask is null)
+        {
+            return;
+        }
+
         character.AutoAttackTask = null;
+        await autoAttackTask.CancelAsync();
         character.IsAutoAttack = false; // turned off auto attack
         character.BroadcastPacket(new SCSkillEndedPacket(character.TlId), true);
         character.BroadcastPacket(new SCSkillStoppedPacket(character.ObjId, character.SkillId), true);
@@ -570,12 +579,13 @@ public class Unit : BaseUnit, IUnit
     [Obsolete("This method is deprecated", false)]
     public async void StopRegen()
     {
-        if (_regenTask == null)
+        var regenTask = Interlocked.Exchange(ref _regenTask, null);
+        if (regenTask == null)
         {
             return;
         }
-        await _regenTask.CancelAsync();
-        _regenTask = null;
+
+        await regenTask.CancelAsync();
     }
 
     public void SetInvisible(bool value)

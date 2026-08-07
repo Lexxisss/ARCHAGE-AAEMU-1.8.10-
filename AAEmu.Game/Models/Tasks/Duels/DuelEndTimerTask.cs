@@ -16,11 +16,14 @@ public class DuelEndTimerTask : Task
 
     public override async void Execute()
     {
-        if (_duel.DuelEndTimerTask == null)
+        // Read the field once: DuelManager ends duels from other threads and clears this very
+        // field, so testing it and dereferencing it separately is a crash waiting for the timing.
+        var endTimerTask = _duel.DuelEndTimerTask;
+        if (endTimerTask == null)
             return;
 
-        await _duel.DuelEndTimerTask.CancelAsync();
         _duel.DuelEndTimerTask = null;
+        await endTimerTask.CancelAsync();
 
         if (_duel.Challenger.Hp < _duel.Challenged.Hp)
         {

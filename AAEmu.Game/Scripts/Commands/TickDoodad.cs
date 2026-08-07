@@ -46,10 +46,13 @@ public class TickDoodad : ICommand
         {
             if (doodad.TemplateId == unitId)
             {
-                if (doodad.FuncTask != null)
+                // Hold the task while working with it: cancelling clears the doodad's field, so
+                // reading it again for the Execute below found nothing there.
+                var funcTask = doodad.FuncTask;
+                if (funcTask != null)
                 {
-                    doodad.FuncTask.CancelAsync().GetAwaiter().GetResult();
-                    doodad.FuncTask.Execute();
+                    funcTask.CancelAsync().GetAwaiter().GetResult();
+                    funcTask.Execute();
                     tickedCount++;
                 }
             }
