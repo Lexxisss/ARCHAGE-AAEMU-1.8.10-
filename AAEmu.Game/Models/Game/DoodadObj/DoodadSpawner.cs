@@ -172,7 +172,7 @@ public class DoodadSpawner : Spawner<Doodad>
         // First, let's check if the schedule has such an spawnerId
         if (GameScheduleManager.Instance.CheckDoodadInScheduleSpawners((int)doodad.TemplateId))
         {
-            // if there is, we'll check the time for the spawning
+            // While the window is open the doodad stays; ask again when it is due to close.
             if (GameScheduleManager.Instance.CheckDoodadInGameSchedules(doodad.TemplateId))
             {
                 var delay = GameScheduleManager.Instance.GetRemainingTimeDoodad((int)doodad.TemplateId, false);
@@ -188,14 +188,21 @@ public class DoodadSpawner : Spawner<Doodad>
                     return;
                 }
 
-                Logger.Debug("DoDespawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [1] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
-                Logger.Debug("DoDespawn: delay {0}", delay.ToString());
+                Logger.Debug("DoDespawn: Doodad TemplateId {0} stays for another {1}", doodad.TemplateId, delay);
                 TaskManager.Instance.Schedule(new DoodadSpawnerDoDespawnTask(doodad), delay);
                 return; // Reschedule when OK
             }
 
-            // couldn't find it on the schedule, but it should have been!
-            // no entries found for this unit in Game_Schedule table
+            // The window has closed. Take the doodad away and wait for the next opening, rather
+            // than leaving it standing until the server restarts.
+            Despawn(doodad);
+            var nextStart = GameScheduleManager.Instance.GetRemainingTimeDoodad((int)doodad.TemplateId, true);
+            if (nextStart > TimeSpan.Zero)
+            {
+                Logger.Debug("DoDespawn: Doodad TemplateId {0} removed, next window in {1}", doodad.TemplateId, nextStart);
+                TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), nextStart);
+            }
+
             return;
         }
         #endregion Schedule
@@ -211,8 +218,17 @@ public class DoodadSpawner : Spawner<Doodad>
         // First, let's check if the schedule has such an spawnerId
         if (GameScheduleManager.Instance.CheckDoodadInScheduleSpawners((int)UnitId))
         {
-            // if there is, we'll check the time for the spawning
+            // CheckDoodadInGameSchedules answers whether the window is open right now, and the
+            // two branches used to be the wrong way round: a doodad whose event was running was
+            // postponed, and one whose event was over was placed. Festival decorations stood in
+            // the world all year and vanished during the festival.
             if (GameScheduleManager.Instance.CheckDoodadInGameSchedules(UnitId))
+            {
+                // The window is open, so the doodad belongs in the world now. It is not permanent:
+                // the despawn chain below will take it away when the window closes.
+                _permanent = false;
+            }
+            else
             {
                 var delay = GameScheduleManager.Instance.GetRemainingTimeDoodad((int)UnitId, true);
 
@@ -230,18 +246,11 @@ public class DoodadSpawner : Spawner<Doodad>
                 else
                 {
                     _permanent = false; // Doodad on the schedule.
-                    Logger.Debug("DoSpawn: Doodad TemplateId {0}, objId {1} FuncGroupId {2} despawn [1] reschedule next time...", UnitId, Last.ObjId, Last.FuncGroupId);
-                    Logger.Debug("DoSpawn: delay {0}", delay.ToString());
+                    Logger.Debug("DoSpawn: Doodad TemplateId {0} waits {1} for its next window", UnitId, delay);
                     TaskManager.Instance.Schedule(new DoodadSpawnerDoSpawnTask(this), delay);
                     return; // Reschedule when OK
                 }
             }
-
-            // couldn't find it on the schedule, but it should have been!
-            // no entries found for this unit in Game_Schedule table
-            //return;
-            // All the same, we will be Spawn Doodad, since there was no record in Scheduler
-            // Тем не менее, мы будем спавнить doodad, так как в планировщике не было никаких записей
         }
         #endregion Schedule
 
