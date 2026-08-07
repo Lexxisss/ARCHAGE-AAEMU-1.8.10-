@@ -104,8 +104,12 @@ public class NpcGameData : Singleton<NpcGameData>, IGameDataLoader
                 template.EndTime = reader.GetFloat("endTime");
                 template.DestroyTime = reader.GetFloat("destroyTime");
                 template.SpawnDelayMin = reader.GetFloat("spawn_delay_min");
-                template.ActivationState = reader.GetBoolean("activation_state");
-                template.SaveIndun = reader.GetBoolean("save_indun");
+                // base.sqlite3 keeps its booleans as the text 't' and 'f', so they have to be read
+                // as strings. Read as a plain boolean, every one of the twenty thousand active
+                // spawners came back inactive, which is how the whole world ended up spawning from
+                // npc_spawns.json instead of the placements.
+                template.ActivationState = reader.GetBoolean("activation_state", true);
+                template.SaveIndun = reader.GetBoolean("save_indun", true);
                 template.MinPopulation = reader.GetUInt32("min_population");
                 template.TestRadiusNpc = reader.GetFloat("test_radius_npc");
                 template.TestRadiusPc = reader.GetFloat("test_radius_pc");
@@ -152,8 +156,8 @@ public class NpcGameData : Singleton<NpcGameData>, IGameDataLoader
                     Id = reader.GetUInt32("id"),
                     NpcGroupId = reader.GetUInt32("npc_group_id"),
                     NpcId = reader.GetUInt32("npc_id"),
-                    IsLeader = reader.GetBoolean("is_leader"),
-                    IsMoveLeader = reader.GetBoolean("is_move_leader"),
+                    IsLeader = reader.GetBoolean("is_leader", true),
+                    IsMoveLeader = reader.GetBoolean("is_move_leader", true),
                     FormationOffset = new Vector3(
                         reader.GetFloat("formation_offset_x"),
                         reader.GetFloat("formation_offset_y"),
