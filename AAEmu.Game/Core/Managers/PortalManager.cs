@@ -209,7 +209,11 @@ public class PortalManager : Singleton<PortalManager>
         else
             throw new GameException($"PortalManager: Parse {filePath} file");
 
-        Logger.Info("Loaded {0} Recall Portals", _recalls.Count);
+        // Count the portals, not the subzones they are filed under: the dictionary holds a list
+        // per subzone, so reporting its size said 264 where 623 had been read, and every point
+        // still waiting for a subzone shared the same key.
+        Logger.Info("Loaded {0} Recall Portals in {1} subzones",
+            _recalls.Values.Sum(x => x.Count), _recalls.Count);
 
         filePath = Path.Combine(FileManager.AppPath, "Data", "Portal", "respawns.json");
         if (!File.Exists(filePath))
