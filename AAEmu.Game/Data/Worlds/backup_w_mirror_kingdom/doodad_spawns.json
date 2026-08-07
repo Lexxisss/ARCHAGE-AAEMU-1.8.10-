@@ -1,1 +1,662 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 320,
+  "Title": "우편함",
+  "Position": {
+   "X": 309.022,
+   "Y": 680.458,
+   "Z": 101.662,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 189.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6507,
+  "Title": "물고기 판매대",
+  "Position": {
+   "X": 318.539,
+   "Y": 659.493,
+   "Z": 101.662,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 171.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 76.5485,
+   "Y": 571.538,
+   "Z": 112.095,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 81.6896,
+   "Y": 659.546,
+   "Z": 106.444,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 88.0371,
+   "Y": 440.651,
+   "Z": 116.039,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 96.0942,
+   "Y": 781.504,
+   "Z": 102.62,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 107.229,
+   "Y": 857.221,
+   "Z": 102.955,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 107.776,
+   "Y": 612.566,
+   "Z": 113.143,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 108.791,
+   "Y": 483.622,
+   "Z": 111.587,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 110.249,
+   "Y": 679.422,
+   "Z": 106.344,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 116.005,
+   "Y": 573.368,
+   "Z": 112.527,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 127.939,
+   "Y": 755.854,
+   "Z": 102.355,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 144.006,
+   "Y": 807.313,
+   "Z": 102.616,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 185.624,
+   "Y": 577.398,
+   "Z": 101.887,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 199.634,
+   "Y": 539.875,
+   "Z": 101.887,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 206.972,
+   "Y": 437.001,
+   "Z": 105.524,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 216.859,
+   "Y": 490.96,
+   "Z": 105.465,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 223.832,
+   "Y": 804.832,
+   "Z": 102.448,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 249.347,
+   "Y": 458.156,
+   "Z": 105.368,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 254.366,
+   "Y": 579.876,
+   "Z": 101.192,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 314.593,
+   "Y": 621.188,
+   "Z": 101.444,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 321.145,
+   "Y": 584.298,
+   "Z": 101.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 367.526,
+   "Y": 795.831,
+   "Z": 102.463,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 368.313,
+   "Y": 957.399,
+   "Z": 111.864,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 393.793,
+   "Y": 844.279,
+   "Z": 102.355,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 410.22,
+   "Y": 664.474,
+   "Z": 102.318,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 424.485,
+   "Y": 827.846,
+   "Z": 102.62,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 442.757,
+   "Y": 748.646,
+   "Z": 101.997,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 456.587,
+   "Y": 967.193,
+   "Z": 111.987,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 464.93,
+   "Y": 928.115,
+   "Z": 111.048,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 465.766,
+   "Y": 777.646,
+   "Z": 101.621,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 507.003,
+   "Y": 817.906,
+   "Z": 105.826,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 538.291,
+   "Y": 778.342,
+   "Z": 101.794,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 603.491,
+   "Y": 314.421,
+   "Z": 102.135,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 606.736,
+   "Y": 285.604,
+   "Z": 102.527,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 730.916,
+   "Y": 377.837,
+   "Z": 106.676,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 737.292,
+   "Y": 626.878,
+   "Z": 101.023,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 748.922,
+   "Y": 669.095,
+   "Z": 101.366,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 779.735,
+   "Y": 370.104,
+   "Z": 106.202,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 812.218,
+   "Y": 626.999,
+   "Z": 105.793,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6849,
+  "Title": "얼어붙은 바다의 조각상",
+  "Position": {
+   "X": 853.884,
+   "Y": 624.015,
+   "Z": 106.045,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8407,
+  "Title": "공간의 틈: 누이아 대륙 뼈의 땅 ",
+  "Position": {
+   "X": 281.0,
+   "Y": 663.803,
+   "Z": 105.462,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 232.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8423,
+  "Title": "사냥꾼의 처소 공간 기록서",
+  "Position": {
+   "X": 315.16,
+   "Y": 680.909,
+   "Z": 101.662,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -25.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8429,
+  "Title": "푯말",
+  "Position": {
+   "X": 311.695,
+   "Y": 658.109,
+   "Z": 101.662,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 163.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

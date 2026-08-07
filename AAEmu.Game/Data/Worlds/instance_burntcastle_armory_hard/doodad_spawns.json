@@ -1,1 +1,92 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 9530,
+  "Title": "불탄 성 무기고 깊숙한 곳 입구",
+  "Position": {
+   "X": 246.421,
+   "Y": 312.587,
+   "Z": 20.2495,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9532,
+  "Title": "[고대던전]불탄 성 무기고 출구",
+  "Position": {
+   "X": 165.587,
+   "Y": 99.9062,
+   "Z": 20.8585,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9534,
+  "Title": "불꽃파수꾼의 방 입구",
+  "Position": {
+   "X": 246.225,
+   "Y": 161.039,
+   "Z": 20.0065,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9535,
+  "Title": "철문",
+  "Position": {
+   "X": 200.834,
+   "Y": 120.954,
+   "Z": 20.0598,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9536,
+  "Title": "[고대던전]불탄 성 무기고 출구",
+  "Position": {
+   "X": 173.024,
+   "Y": 312.007,
+   "Z": 20.52,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9924,
+  "Title": "화염 마법진",
+  "Position": {
+   "X": 261.0,
+   "Y": 237.0,
+   "Z": 21.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

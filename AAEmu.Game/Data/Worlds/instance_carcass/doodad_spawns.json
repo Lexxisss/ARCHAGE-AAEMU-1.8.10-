@@ -1,0 +1,4832 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 2994.754,
+   "Y": 3987.927,
+   "Z": 121.823,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3002.296,
+   "Y": 3958.728,
+   "Z": 122.253,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 92.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3020.097,
+   "Y": 3941.305,
+   "Z": 122.534,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 64.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2332,
+  "Title": "탁자",
+  "Position": {
+   "X": 2988.396,
+   "Y": 3979.526,
+   "Z": 122.019,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 168.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2717,
+  "Title": "잉크 보관통",
+  "Position": {
+   "X": 2989.115,
+   "Y": 3956.244,
+   "Z": 121.466,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -119.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2717,
+  "Title": "잉크 보관통",
+  "Position": {
+   "X": 2991.046,
+   "Y": 3973.645,
+   "Z": 121.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 141.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2718,
+  "Title": "저승의 돌",
+  "Position": {
+   "X": 2990.38,
+   "Y": 3972.215,
+   "Z": 122.089,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -78.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2718,
+  "Title": "저승의 돌",
+  "Position": {
+   "X": 2990.639,
+   "Y": 3955.836,
+   "Z": 122.078,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2719,
+  "Title": "기억의 잉크",
+  "Position": {
+   "X": 2989.926,
+   "Y": 3971.901,
+   "Z": 122.218,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -78.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2719,
+  "Title": "기억의 잉크",
+  "Position": {
+   "X": 2991.027,
+   "Y": 3955.444,
+   "Z": 122.206,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2726,
+  "Title": "연장통",
+  "Position": {
+   "X": 3020.402,
+   "Y": 3946.076,
+   "Z": 122.35,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -79.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2727,
+  "Title": "망치",
+  "Position": {
+   "X": 3020.785,
+   "Y": 3946.85,
+   "Z": 122.848,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 58.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2728,
+  "Title": "공구 상자",
+  "Position": {
+   "X": 3020.853,
+   "Y": 3947.82,
+   "Z": 122.816,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 7.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2732,
+  "Title": "물뿌리개",
+  "Position": {
+   "X": 2990.294,
+   "Y": 3972.346,
+   "Z": 122.259,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -23.8688
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2732,
+  "Title": "물뿌리개",
+  "Position": {
+   "X": 2990.525,
+   "Y": 3955.729,
+   "Z": 122.248,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 76.1312
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4429,
+  "Title": "실용적인 의자",
+  "Position": {
+   "X": 2988.925,
+   "Y": 3978.09,
+   "Z": 122.019,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4429,
+  "Title": "실용적인 의자",
+  "Position": {
+   "X": 2989.889,
+   "Y": 3979.825,
+   "Z": 122.019,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 114.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2886.75,
+   "Y": 3574.551,
+   "Z": 85.4979,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -25.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2932.934,
+   "Y": 3550.819,
+   "Z": 190.046,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2980.409,
+   "Y": 3551.933,
+   "Z": 203.391,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3028.077,
+   "Y": 3559.017,
+   "Z": 225.434,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2487.543,
+   "Y": 5107.32,
+   "Z": 54.7476,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 3.75
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2584.794,
+   "Y": 5077.906,
+   "Z": 36.0931,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 2.55
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2596.015,
+   "Y": 5000.206,
+   "Z": 51.1655,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 2.55
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2688.387,
+   "Y": 5075.343,
+   "Z": 33.3298,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 3.654
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2726.699,
+   "Y": 5071.074,
+   "Z": 37.3907,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 100.0
+  },
+  "funcGroupId": 0,
+  "Scale": 5.607
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2805.559,
+   "Y": 4927.034,
+   "Z": -9.4524,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 6.854
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2832.68,
+   "Y": 4589.058,
+   "Z": 0.8485,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 7.762
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2981.13,
+   "Y": 4606.559,
+   "Z": 13.8131,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 210.0
+  },
+  "funcGroupId": 0,
+  "Scale": 5.384
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3061.28,
+   "Y": 4821.022,
+   "Z": 10.5309,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -95.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 11.043
+ },
+ {
+  "Id": 0,
+  "UnitId": 13425,
+  "Title": "붉은 용의 둥지로",
+  "Position": {
+   "X": 2979.779,
+   "Y": 4932.409,
+   "Z": 105.96,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 106.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2358.369,
+   "Y": 5409.523,
+   "Z": 46.4464,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2413.855,
+   "Y": 5247.794,
+   "Z": 49.6012,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 2.93
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2417.953,
+   "Y": 5620.471,
+   "Z": 57.9971,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 5.597
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2453.122,
+   "Y": 5163.304,
+   "Z": 80.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 3.22
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2503.107,
+   "Y": 5679.876,
+   "Z": 34.3224,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 7.301
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2584.192,
+   "Y": 5698.869,
+   "Z": 30.5838,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 4.746
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2639.582,
+   "Y": 5736.859,
+   "Z": 33.9317,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 4.867
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2704.551,
+   "Y": 5776.134,
+   "Z": 46.8517,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -5.0
+  },
+  "funcGroupId": 0,
+  "Scale": 4.746
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2819.842,
+   "Y": 5777.959,
+   "Z": 53.0514,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -5.0
+  },
+  "funcGroupId": 0,
+  "Scale": 4.502
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2894.827,
+   "Y": 5767.532,
+   "Z": 73.1852,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2944.442,
+   "Y": 5684.248,
+   "Z": 43.6862,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2968.796,
+   "Y": 5651.037,
+   "Z": 33.7099,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2977.225,
+   "Y": 5608.724,
+   "Z": 17.8798,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3046.426,
+   "Y": 5547.806,
+   "Z": 7.9087,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3065.79,
+   "Y": 5494.049,
+   "Z": 7.7883,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 7310,
+  "Title": "세상의 끝",
+  "Position": {
+   "X": 2755.231,
+   "Y": 5404.21,
+   "Z": 90.0632,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1722,
+  "Title": "종",
+  "Position": {
+   "X": 3862.882,
+   "Y": 3287.518,
+   "Z": 248.864,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 204.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2329,
+  "Title": "책장",
+  "Position": {
+   "X": 3824.052,
+   "Y": 3324.623,
+   "Z": 251.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2331,
+  "Title": "침대",
+  "Position": {
+   "X": 3847.467,
+   "Y": 3281.818,
+   "Z": 249.951,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2390,
+  "Title": "촛불",
+  "Position": {
+   "X": 3846.276,
+   "Y": 3314.808,
+   "Z": 252.167,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 135.999
+  },
+  "funcGroupId": 0,
+  "Scale": 0.77
+ },
+ {
+  "Id": 0,
+  "UnitId": 2390,
+  "Title": "촛불",
+  "Position": {
+   "X": 3847.349,
+   "Y": 3319.271,
+   "Z": 257.555,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 41.9645
+  },
+  "funcGroupId": 0,
+  "Scale": 0.77
+ },
+ {
+  "Id": 0,
+  "UnitId": 2390,
+  "Title": "촛불",
+  "Position": {
+   "X": 3850.17,
+   "Y": 3310.776,
+   "Z": 251.971,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 135.999
+  },
+  "funcGroupId": 0,
+  "Scale": 0.77
+ },
+ {
+  "Id": 0,
+  "UnitId": 2390,
+  "Title": "촛불",
+  "Position": {
+   "X": 3856.103,
+   "Y": 3316.736,
+   "Z": 257.282,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0003
+  },
+  "funcGroupId": 0,
+  "Scale": 0.77
+ },
+ {
+  "Id": 0,
+  "UnitId": 2390,
+  "Title": "촛불",
+  "Position": {
+   "X": 3861.785,
+   "Y": 3321.969,
+   "Z": 251.98,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.77
+ },
+ {
+  "Id": 0,
+  "UnitId": 2393,
+  "Title": "촛불",
+  "Position": {
+   "X": 3827.029,
+   "Y": 3328.779,
+   "Z": 252.502,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 48.8676
+  },
+  "funcGroupId": 0,
+  "Scale": 0.63
+ },
+ {
+  "Id": 0,
+  "UnitId": 2393,
+  "Title": "촛불",
+  "Position": {
+   "X": 3829.815,
+   "Y": 3287.256,
+   "Z": 251.687,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 42.117
+  },
+  "funcGroupId": 0,
+  "Scale": 0.63
+ },
+ {
+  "Id": 0,
+  "UnitId": 2393,
+  "Title": "촛불",
+  "Position": {
+   "X": 3831.055,
+   "Y": 3332.661,
+   "Z": 252.536,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 48.8676
+  },
+  "funcGroupId": 0,
+  "Scale": 0.63
+ },
+ {
+  "Id": 0,
+  "UnitId": 2393,
+  "Title": "촛불",
+  "Position": {
+   "X": 3831.395,
+   "Y": 3322.213,
+   "Z": 252.772,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 228.8676
+  },
+  "funcGroupId": 0,
+  "Scale": 0.63
+ },
+ {
+  "Id": 0,
+  "UnitId": 2393,
+  "Title": "촛불",
+  "Position": {
+   "X": 3831.54,
+   "Y": 3279.737,
+   "Z": 251.557,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.6623
+  },
+  "funcGroupId": 0,
+  "Scale": 0.63
+ },
+ {
+  "Id": 0,
+  "UnitId": 2393,
+  "Title": "촛불",
+  "Position": {
+   "X": 3837.533,
+   "Y": 3333.53,
+   "Z": 252.537,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -46.1324
+  },
+  "funcGroupId": 0,
+  "Scale": 0.63
+ },
+ {
+  "Id": 0,
+  "UnitId": 2396,
+  "Title": "촛불",
+  "Position": {
+   "X": 3824.912,
+   "Y": 3323.837,
+   "Z": 252.033,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -7.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2396,
+  "Title": "촛불",
+  "Position": {
+   "X": 3848.298,
+   "Y": 3284.316,
+   "Z": 250.989,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 172.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2396,
+  "Title": "촛불",
+  "Position": {
+   "X": 3853.95,
+   "Y": 3317.736,
+   "Z": 250.715,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2396,
+  "Title": "촛불",
+  "Position": {
+   "X": 3854.098,
+   "Y": 3307.375,
+   "Z": 256.363,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2697,
+  "Title": "약품 상자",
+  "Position": {
+   "X": 3961.446,
+   "Y": 3440.232,
+   "Z": 278.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -23.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.9
+ },
+ {
+  "Id": 0,
+  "UnitId": 2698,
+  "Title": "작은 붉은색 약품",
+  "Position": {
+   "X": 3962.358,
+   "Y": 3439.717,
+   "Z": 278.813,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -18.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2699,
+  "Title": "술이 담긴 병",
+  "Position": {
+   "X": 3962.799,
+   "Y": 3439.812,
+   "Z": 278.73,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -18.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.56
+ },
+ {
+  "Id": 0,
+  "UnitId": 2700,
+  "Title": "보라색 호리병",
+  "Position": {
+   "X": 3963.327,
+   "Y": 3438.77,
+   "Z": 278.257,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -4.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2701,
+  "Title": "작은 보라색 호리병",
+  "Position": {
+   "X": 3963.662,
+   "Y": 3438.63,
+   "Z": 278.309,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2702,
+  "Title": "큰 보라색 호리병",
+  "Position": {
+   "X": 3963.674,
+   "Y": 3438.989,
+   "Z": 278.492,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.61
+ },
+ {
+  "Id": 0,
+  "UnitId": 2703,
+  "Title": "항아리",
+  "Position": {
+   "X": 3964.23,
+   "Y": 3440.067,
+   "Z": 278.033,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 231.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2704,
+  "Title": "약품 보관통",
+  "Position": {
+   "X": 3961.795,
+   "Y": 3440.878,
+   "Z": 278.026,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -27.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2707,
+  "Title": "야채 바구니",
+  "Position": {
+   "X": 3958.483,
+   "Y": 3443.682,
+   "Z": 278.596,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 160.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.61
+ },
+ {
+  "Id": 0,
+  "UnitId": 2708,
+  "Title": "치즈 상자",
+  "Position": {
+   "X": 3959.637,
+   "Y": 3442.804,
+   "Z": 277.728,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 112.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2709,
+  "Title": "감자 주머니",
+  "Position": {
+   "X": 3957.865,
+   "Y": 3444.79,
+   "Z": 277.888,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 66.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.024
+ },
+ {
+  "Id": 0,
+  "UnitId": 2710,
+  "Title": "음식 자재 보관통",
+  "Position": {
+   "X": 3958.759,
+   "Y": 3442.134,
+   "Z": 277.888,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 191.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2710,
+  "Title": "음식 자재 보관통",
+  "Position": {
+   "X": 3959.476,
+   "Y": 3441.387,
+   "Z": 277.888,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 128.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2711,
+  "Title": "감자 주머니",
+  "Position": {
+   "X": 3957.278,
+   "Y": 3444.969,
+   "Z": 277.888,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 21.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.28
+ },
+ {
+  "Id": 0,
+  "UnitId": 2712,
+  "Title": "냄비",
+  "Position": {
+   "X": 3957.282,
+   "Y": 3444.585,
+   "Z": 279.064,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 127.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.3
+ },
+ {
+  "Id": 0,
+  "UnitId": 2712,
+  "Title": "냄비",
+  "Position": {
+   "X": 3957.647,
+   "Y": 3444.079,
+   "Z": 279.123,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 127.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.3
+ },
+ {
+  "Id": 0,
+  "UnitId": 2712,
+  "Title": "냄비",
+  "Position": {
+   "X": 3958.031,
+   "Y": 3443.557,
+   "Z": 279.239,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 127.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.3
+ },
+ {
+  "Id": 0,
+  "UnitId": 2712,
+  "Title": "냄비",
+  "Position": {
+   "X": 3958.476,
+   "Y": 3443.072,
+   "Z": 279.236,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 127.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.3
+ },
+ {
+  "Id": 0,
+  "UnitId": 2716,
+  "Title": "폭죽 다발",
+  "Position": {
+   "X": 3971.678,
+   "Y": 3459.266,
+   "Z": 279.218,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 240.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2717,
+  "Title": "잉크 보관통",
+  "Position": {
+   "X": 3967.048,
+   "Y": 3459.57,
+   "Z": 279.138,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -68.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2717,
+  "Title": "잉크 보관통",
+  "Position": {
+   "X": 3970.712,
+   "Y": 3458.721,
+   "Z": 279.018,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -111.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2718,
+  "Title": "저승의 돌",
+  "Position": {
+   "X": 3968.324,
+   "Y": 3460.499,
+   "Z": 279.75,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 72.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2718,
+  "Title": "저승의 돌",
+  "Position": {
+   "X": 3972.278,
+   "Y": 3458.53,
+   "Z": 279.741,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 30.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2719,
+  "Title": "기억의 잉크",
+  "Position": {
+   "X": 3968.873,
+   "Y": 3460.552,
+   "Z": 279.878,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 72.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2719,
+  "Title": "기억의 잉크",
+  "Position": {
+   "X": 3972.716,
+   "Y": 3458.195,
+   "Z": 279.856,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 30.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2722,
+  "Title": "녹색 광석 무더기",
+  "Position": {
+   "X": 3961.906,
+   "Y": 3463.801,
+   "Z": 279.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 194.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.89
+ },
+ {
+  "Id": 0,
+  "UnitId": 2723,
+  "Title": "푸른색 광석 무더기",
+  "Position": {
+   "X": 3961.47,
+   "Y": 3463.268,
+   "Z": 279.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 233.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 0.85
+ },
+ {
+  "Id": 0,
+  "UnitId": 2724,
+  "Title": "흰색 광석 무더기",
+  "Position": {
+   "X": 3961.247,
+   "Y": 3463.916,
+   "Z": 279.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 209.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.86
+ },
+ {
+  "Id": 0,
+  "UnitId": 2725,
+  "Title": "석재 가마니",
+  "Position": {
+   "X": 3960.5,
+   "Y": 3463.406,
+   "Z": 279.187,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -112.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.271
+ },
+ {
+  "Id": 0,
+  "UnitId": 2726,
+  "Title": "연장통",
+  "Position": {
+   "X": 3961.837,
+   "Y": 3462.719,
+   "Z": 279.379,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 64.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2726,
+  "Title": "연장통",
+  "Position": {
+   "X": 3965.846,
+   "Y": 3464.118,
+   "Z": 279.574,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2727,
+  "Title": "망치",
+  "Position": {
+   "X": 3961.005,
+   "Y": 3462.317,
+   "Z": 279.878,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 202.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2727,
+  "Title": "망치",
+  "Position": {
+   "X": 3965.071,
+   "Y": 3464.5,
+   "Z": 280.072,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 148.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2728,
+  "Title": "공구 상자",
+  "Position": {
+   "X": 3960.379,
+   "Y": 3461.573,
+   "Z": 279.845,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 151.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2728,
+  "Title": "공구 상자",
+  "Position": {
+   "X": 3964.102,
+   "Y": 3464.569,
+   "Z": 280.04,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2729,
+  "Title": "공구 거치대",
+  "Position": {
+   "X": 3960.127,
+   "Y": 3459.731,
+   "Z": 279.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -116.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.672
+ },
+ {
+  "Id": 0,
+  "UnitId": 2730,
+  "Title": "공구 거치대",
+  "Position": {
+   "X": 3959.062,
+   "Y": 3460.163,
+   "Z": 278.959,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -117.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.81
+ },
+ {
+  "Id": 0,
+  "UnitId": 2732,
+  "Title": "물뿌리개",
+  "Position": {
+   "X": 3968.335,
+   "Y": 3460.342,
+   "Z": 279.92,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 127.1312
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2732,
+  "Title": "물뿌리개",
+  "Position": {
+   "X": 3972.179,
+   "Y": 3458.408,
+   "Z": 279.904,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 84.1312
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2837,
+  "Title": "자유도",
+  "Position": {
+   "X": 3848.854,
+   "Y": 3320.72,
+   "Z": 252.855,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 44.0703
+  },
+  "funcGroupId": 0,
+  "Scale": 2.44
+ },
+ {
+  "Id": 0,
+  "UnitId": 2844,
+  "Title": "의자",
+  "Position": {
+   "X": 3848.255,
+   "Y": 3283.363,
+   "Z": 249.951,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4278,
+  "Title": "문",
+  "Position": {
+   "X": 3835.508,
+   "Y": 3287.265,
+   "Z": 251.867,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4321,
+  "Title": "큰 창문",
+  "Position": {
+   "X": 3847.376,
+   "Y": 3286.853,
+   "Z": 252.494,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4322,
+  "Title": "작은 창문",
+  "Position": {
+   "X": 3828.547,
+   "Y": 3286.565,
+   "Z": 251.942,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4322,
+  "Title": "작은 창문",
+  "Position": {
+   "X": 3830.61,
+   "Y": 3288.467,
+   "Z": 251.942,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3964.034,
+   "Y": 3448.521,
+   "Z": 279.003,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 114.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3964.452,
+   "Y": 3454.141,
+   "Z": 279.054,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 114.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3965.592,
+   "Y": 3449.158,
+   "Z": 278.926,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -41.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 4081.47,
+   "Y": 3681.531,
+   "Z": 344.678,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -52.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 4082.54,
+   "Y": 3678.54,
+   "Z": 344.364,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -52.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 4083.58,
+   "Y": 3682.824,
+   "Z": 344.755,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -52.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3839.267,
+   "Y": 3289.159,
+   "Z": 249.861,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 230.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3840.131,
+   "Y": 3289.943,
+   "Z": 249.861,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 202.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3841.558,
+   "Y": 3280.264,
+   "Z": 249.851,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -23.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3842.736,
+   "Y": 3289.681,
+   "Z": 249.861,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 130.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3852.564,
+   "Y": 3315.561,
+   "Z": 249.939,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 100.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3853.35,
+   "Y": 3308.78,
+   "Z": 255.529,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 218.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4441,
+  "Title": "고급스러운 고품격 의자",
+  "Position": {
+   "X": 3855.346,
+   "Y": 3308.505,
+   "Z": 255.529,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 115.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4566,
+  "Title": "문",
+  "Position": {
+   "X": 3837.659,
+   "Y": 3327.827,
+   "Z": 253.051,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4566,
+  "Title": "문",
+  "Position": {
+   "X": 3853.877,
+   "Y": 3306.576,
+   "Z": 251.869,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4566,
+  "Title": "문",
+  "Position": {
+   "X": 3858.917,
+   "Y": 3313.379,
+   "Z": 257.208,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4567,
+  "Title": "대형 창문",
+  "Position": {
+   "X": 3847.042,
+   "Y": 3313.591,
+   "Z": 257.842,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3835.643,
+   "Y": 3325.892,
+   "Z": 253.132,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3839.67,
+   "Y": 3329.782,
+   "Z": 253.132,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3847.024,
+   "Y": 3313.58,
+   "Z": 251.953,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3848.993,
+   "Y": 3311.584,
+   "Z": 251.953,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3859.777,
+   "Y": 3308.404,
+   "Z": 251.959,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3863.798,
+   "Y": 3312.303,
+   "Z": 251.959,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3863.804,
+   "Y": 3312.295,
+   "Z": 257.295,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4568,
+  "Title": "소형 창문",
+  "Position": {
+   "X": 3865.827,
+   "Y": 3314.229,
+   "Z": 257.295,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3075.5514,
+   "Y": 3574.321,
+   "Z": 261.024,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3114.0372,
+   "Y": 3576.891,
+   "Z": 290.611,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6049,
+  "Title": "손님을 위한 침대",
+  "Position": {
+   "X": 3827.043,
+   "Y": 3325.889,
+   "Z": 251.079,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 224.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6049,
+  "Title": "손님을 위한 침대",
+  "Position": {
+   "X": 3830.462,
+   "Y": 3329.191,
+   "Z": 251.079,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 224.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10461,
+  "Title": "빛나는 모루",
+  "Position": {
+   "X": 3838.861,
+   "Y": 3318.327,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 44.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10462,
+  "Title": "빛나는 갑옷 제작대",
+  "Position": {
+   "X": 3832.476,
+   "Y": 3321.907,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10463,
+  "Title": "빛나는 가죽 갑옷 제작대",
+  "Position": {
+   "X": 3833.596,
+   "Y": 3322.989,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10464,
+  "Title": "빛나는 천 갑옷 제작대",
+  "Position": {
+   "X": 3834.7,
+   "Y": 3324.055,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10465,
+  "Title": "빛나는 목공 제작대",
+  "Position": {
+   "X": 3831.657,
+   "Y": 3316.699,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -53.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10466,
+  "Title": "빛나는 공예품 제작대",
+  "Position": {
+   "X": 3833.292,
+   "Y": 3314.862,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10467,
+  "Title": "빛나는 연금 물품 제작대",
+  "Position": {
+   "X": 3835.993,
+   "Y": 3315.418,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10468,
+  "Title": "빛나는 조리 기구",
+  "Position": {
+   "X": 3837.378,
+   "Y": 3316.844,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 44.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10469,
+  "Title": "빛나는 인쇄기",
+  "Position": {
+   "X": 3829.701,
+   "Y": 3318.776,
+   "Z": 251.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -45.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3139.182,
+   "Y": 4402.505,
+   "Z": 141.595,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3537.967,
+   "Y": 4774.603,
+   "Z": 129.073,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -4.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3564.815,
+   "Y": 4777.08,
+   "Z": 128.615,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -4.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3565.585,
+   "Y": 4752.043,
+   "Z": 129.193,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3618.806,
+   "Y": 4693.939,
+   "Z": 153.85,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -57.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2497,
+  "Title": "상자",
+  "Position": {
+   "X": 3105.2794,
+   "Y": 4380.959,
+   "Z": 141.447,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2497,
+  "Title": "상자",
+  "Position": {
+   "X": 3119.715,
+   "Y": 4409.326,
+   "Z": 141.585,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2497,
+  "Title": "상자",
+  "Position": {
+   "X": 3581.467,
+   "Y": 4708.886,
+   "Z": 153.685,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 59.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2497,
+  "Title": "상자",
+  "Position": {
+   "X": 3593.597,
+   "Y": 4742.109,
+   "Z": 128.385,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2497,
+  "Title": "상자",
+  "Position": {
+   "X": 3609.873,
+   "Y": 4764.04,
+   "Z": 128.497,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2497,
+  "Title": "상자",
+  "Position": {
+   "X": 3614.968,
+   "Y": 4724.5,
+   "Z": 153.958,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 14.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2536,
+  "Title": "통",
+  "Position": {
+   "X": 3103.5626,
+   "Y": 4378.454,
+   "Z": 141.37,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 238.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2536,
+  "Title": "통",
+  "Position": {
+   "X": 3583.191,
+   "Y": 4706.385,
+   "Z": 153.608,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -53.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2536,
+  "Title": "통",
+  "Position": {
+   "X": 3592.84,
+   "Y": 4739.168,
+   "Z": 128.308,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2665,
+  "Title": "항아리",
+  "Position": {
+   "X": 3105.2977,
+   "Y": 4379.89,
+   "Z": 141.415,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2665,
+  "Title": "항아리",
+  "Position": {
+   "X": 3582.472,
+   "Y": 4708.52,
+   "Z": 153.653,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 129.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2665,
+  "Title": "항아리",
+  "Position": {
+   "X": 3593.98,
+   "Y": 4741.112,
+   "Z": 128.353,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 80.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2666,
+  "Title": "술병",
+  "Position": {
+   "X": 3099.2456,
+   "Y": 4383.469,
+   "Z": 142.342,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2666,
+  "Title": "술병",
+  "Position": {
+   "X": 3101.0725,
+   "Y": 4384.513,
+   "Z": 142.285,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2666,
+  "Title": "술병",
+  "Position": {
+   "X": 3576.642,
+   "Y": 4706.232,
+   "Z": 154.523,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2666,
+  "Title": "술병",
+  "Position": {
+   "X": 3576.961,
+   "Y": 4704.152,
+   "Z": 154.58,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2666,
+  "Title": "술병",
+  "Position": {
+   "X": 3587.068,
+   "Y": 4742.405,
+   "Z": 129.28,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2666,
+  "Title": "술병",
+  "Position": {
+   "X": 3588.428,
+   "Y": 4744.01,
+   "Z": 129.223,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3098.0612,
+   "Y": 4382.727,
+   "Z": 142.31,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 28.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3098.105,
+   "Y": 4382.347,
+   "Z": 142.31,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -59.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3098.4349,
+   "Y": 4382.572,
+   "Z": 142.31,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 231.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3113.9912,
+   "Y": 4406.275,
+   "Z": 142.502,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3114.3915,
+   "Y": 4406.168,
+   "Z": 142.502,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 86.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3119.6326,
+   "Y": 4403.327,
+   "Z": 142.478,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 86.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3120.0978,
+   "Y": 4403.671,
+   "Z": 142.478,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 75.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3120.1454,
+   "Y": 4403.292,
+   "Z": 142.478,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 219.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3577.229,
+   "Y": 4702.781,
+   "Z": 154.548,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3577.509,
+   "Y": 4703.074,
+   "Z": 154.548,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3577.6,
+   "Y": 4702.686,
+   "Z": 154.548,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3586.209,
+   "Y": 4741.303,
+   "Z": 129.248,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 48.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3586.38,
+   "Y": 4740.961,
+   "Z": 129.248,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -39.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3586.613,
+   "Y": 4741.284,
+   "Z": 129.248,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -109.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3609.993,
+   "Y": 4757.555,
+   "Z": 129.414,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 41.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3610.27,
+   "Y": 4757.863,
+   "Z": 129.414,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 150.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3611.929,
+   "Y": 4718.77,
+   "Z": 154.874,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 11.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3612.321,
+   "Y": 4718.905,
+   "Z": 154.874,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 121.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3615.086,
+   "Y": 4761.814,
+   "Z": 129.39,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 138.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3615.18,
+   "Y": 4761.244,
+   "Z": 129.39,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 150.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3615.445,
+   "Y": 4761.685,
+   "Z": 129.39,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -78.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3618.254,
+   "Y": 4719.481,
+   "Z": 154.851,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 121.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3618.448,
+   "Y": 4720.026,
+   "Z": 154.851,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 109.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2667,
+  "Title": "술병",
+  "Position": {
+   "X": 3618.699,
+   "Y": 4719.738,
+   "Z": 154.851,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -107.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2669,
+  "Title": "꽃잎",
+  "Position": {
+   "X": 3099.2827,
+   "Y": 4384.588,
+   "Z": 142.073,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 73.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2669,
+  "Title": "꽃잎",
+  "Position": {
+   "X": 3099.6345,
+   "Y": 4383.255,
+   "Z": 142.073,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 73.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2669,
+  "Title": "꽃잎",
+  "Position": {
+   "X": 3575.93,
+   "Y": 4704.588,
+   "Z": 154.311,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 142.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2669,
+  "Title": "꽃잎",
+  "Position": {
+   "X": 3577.301,
+   "Y": 4704.439,
+   "Z": 154.311,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 142.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2669,
+  "Title": "꽃잎",
+  "Position": {
+   "X": 3586.72,
+   "Y": 4743.469,
+   "Z": 129.011,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2669,
+  "Title": "꽃잎",
+  "Position": {
+   "X": 3587.507,
+   "Y": 4742.336,
+   "Z": 129.011,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2676,
+  "Title": "빨간 물약",
+  "Position": {
+   "X": 3114.3704,
+   "Y": 4407.997,
+   "Z": 142.759,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -58.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.913
+ },
+ {
+  "Id": 0,
+  "UnitId": 2676,
+  "Title": "빨간 물약",
+  "Position": {
+   "X": 3114.5188,
+   "Y": 4408.246,
+   "Z": 142.759,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -58.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.913
+ },
+ {
+  "Id": 0,
+  "UnitId": 2676,
+  "Title": "빨간 물약",
+  "Position": {
+   "X": 3608.476,
+   "Y": 4758.92,
+   "Z": 129.671,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 5.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.913
+ },
+ {
+  "Id": 0,
+  "UnitId": 2676,
+  "Title": "빨간 물약",
+  "Position": {
+   "X": 3608.631,
+   "Y": 4758.675,
+   "Z": 129.671,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 5.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.913
+ },
+ {
+  "Id": 0,
+  "UnitId": 2676,
+  "Title": "빨간 물약",
+  "Position": {
+   "X": 3611.264,
+   "Y": 4720.699,
+   "Z": 155.131,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -23.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 0.913
+ },
+ {
+  "Id": 0,
+  "UnitId": 2676,
+  "Title": "빨간 물약",
+  "Position": {
+   "X": 3611.281,
+   "Y": 4720.409,
+   "Z": 155.131,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -24.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.913
+ },
+ {
+  "Id": 0,
+  "UnitId": 2678,
+  "Title": "신비한 보석",
+  "Position": {
+   "X": 3117.6406,
+   "Y": 4406.34,
+   "Z": 141.412,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -101.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.219
+ },
+ {
+  "Id": 0,
+  "UnitId": 2678,
+  "Title": "신비한 보석",
+  "Position": {
+   "X": 3611.592,
+   "Y": 4760.837,
+   "Z": 128.324,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.219
+ },
+ {
+  "Id": 0,
+  "UnitId": 2678,
+  "Title": "신비한 보석",
+  "Position": {
+   "X": 3614.918,
+   "Y": 4720.865,
+   "Z": 153.784,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -67.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.219
+ },
+ {
+  "Id": 0,
+  "UnitId": 2679,
+  "Title": "책",
+  "Position": {
+   "X": 3115.2258,
+   "Y": 4408.031,
+   "Z": 142.765,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 110.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 0.725
+ },
+ {
+  "Id": 0,
+  "UnitId": 2679,
+  "Title": "책",
+  "Position": {
+   "X": 3608.989,
+   "Y": 4759.452,
+   "Z": 129.677,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 174.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.725
+ },
+ {
+  "Id": 0,
+  "UnitId": 2679,
+  "Title": "책",
+  "Position": {
+   "X": 3611.971,
+   "Y": 4720.916,
+   "Z": 155.138,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 145.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.725
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3120.3302,
+   "Y": 4407.043,
+   "Z": 141.54,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -78.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3121.0778,
+   "Y": 4406.892,
+   "Z": 141.54,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 209.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3124.5541,
+   "Y": 4408.361,
+   "Z": 141.391,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 193.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3124.8861,
+   "Y": 4407.739,
+   "Z": 141.376,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -107.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3125.3025,
+   "Y": 4408.376,
+   "Z": 141.376,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 228.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3125.6168,
+   "Y": 4407.742,
+   "Z": 141.376,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3612.186,
+   "Y": 4763.552,
+   "Z": 128.452,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -15.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3612.66,
+   "Y": 4764.15,
+   "Z": 128.452,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -88.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3612.929,
+   "Y": 4767.914,
+   "Z": 128.303,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -104.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3613.256,
+   "Y": 4768.588,
+   "Z": 128.288,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -69.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3613.635,
+   "Y": 4767.927,
+   "Z": 128.288,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -44.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3613.964,
+   "Y": 4768.58,
+   "Z": 128.288,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -39.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3616.755,
+   "Y": 4722.952,
+   "Z": 153.912,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -43.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3617.459,
+   "Y": 4723.245,
+   "Z": 153.912,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -116.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3619.519,
+   "Y": 4726.406,
+   "Z": 153.764,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 227.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3620.131,
+   "Y": 4726.837,
+   "Z": 153.749,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -98.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3620.143,
+   "Y": 4726.076,
+   "Z": 153.749,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -73.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2680,
+  "Title": "통",
+  "Position": {
+   "X": 3620.747,
+   "Y": 4726.487,
+   "Z": 153.749,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -68.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3114.0734,
+   "Y": 4408.028,
+   "Z": 142.766,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -83.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3114.1676,
+   "Y": 4408.13,
+   "Z": 142.766,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -83.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3114.282,
+   "Y": 4408.287,
+   "Z": 142.766,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -83.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3608.332,
+   "Y": 4758.728,
+   "Z": 129.678,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3608.42,
+   "Y": 4758.555,
+   "Z": 129.678,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3608.468,
+   "Y": 4758.424,
+   "Z": 129.678,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3611.017,
+   "Y": 4720.269,
+   "Z": 155.138,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -49.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3611.038,
+   "Y": 4720.406,
+   "Z": 155.138,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -49.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2686,
+  "Title": "빈병",
+  "Position": {
+   "X": 3611.045,
+   "Y": 4720.6,
+   "Z": 155.138,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -49.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.892
+ },
+ {
+  "Id": 0,
+  "UnitId": 2690,
+  "Title": "보물 상자",
+  "Position": {
+   "X": 3120.2791,
+   "Y": 4404.573,
+   "Z": 142.254,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -86.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2690,
+  "Title": "보물 상자",
+  "Position": {
+   "X": 3614.364,
+   "Y": 4762.385,
+   "Z": 129.166,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -23.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2690,
+  "Title": "보물 상자",
+  "Position": {
+   "X": 3618.093,
+   "Y": 4720.875,
+   "Z": 154.626,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -52.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2691,
+  "Title": "상자",
+  "Position": {
+   "X": 3120.5599,
+   "Y": 4408.912,
+   "Z": 141.541,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -17.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.27
+ },
+ {
+  "Id": 0,
+  "UnitId": 2691,
+  "Title": "상자",
+  "Position": {
+   "X": 3610.626,
+   "Y": 4764.605,
+   "Z": 128.453,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.27
+ },
+ {
+  "Id": 0,
+  "UnitId": 2691,
+  "Title": "상자",
+  "Position": {
+   "X": 3615.9,
+   "Y": 4724.629,
+   "Z": 153.914,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 17.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.27
+ },
+ {
+  "Id": 0,
+  "UnitId": 2692,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3125.277,
+   "Y": 4409.76,
+   "Z": 141.341,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2692,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3612.011,
+   "Y": 4769.193,
+   "Z": 128.253,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2692,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3619.336,
+   "Y": 4727.97,
+   "Z": 153.714,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 14.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2693,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3122.4945,
+   "Y": 4408.646,
+   "Z": 140.935,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 222.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2693,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3123.3062,
+   "Y": 4408.215,
+   "Z": 140.973,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2693,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3611.741,
+   "Y": 4766.208,
+   "Z": 127.847,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -75.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2693,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3612.493,
+   "Y": 4766.736,
+   "Z": 127.885,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2693,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3617.653,
+   "Y": 4725.49,
+   "Z": 153.308,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -104.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2693,
+  "Title": "허브 통",
+  "Position": {
+   "X": 3618.566,
+   "Y": 4725.587,
+   "Z": 153.345,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 14.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2694,
+  "Title": "도구 상자",
+  "Position": {
+   "X": 3115.0674,
+   "Y": 4408.204,
+   "Z": 142.282,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -31.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 0.805
+ },
+ {
+  "Id": 0,
+  "UnitId": 2694,
+  "Title": "도구 상자",
+  "Position": {
+   "X": 3608.763,
+   "Y": 4759.39,
+   "Z": 129.194,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 32.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.805
+ },
+ {
+  "Id": 0,
+  "UnitId": 2694,
+  "Title": "도구 상자",
+  "Position": {
+   "X": 3611.742,
+   "Y": 4720.971,
+   "Z": 154.655,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.805
+ },
+ {
+  "Id": 0,
+  "UnitId": 2695,
+  "Title": "작은 상자",
+  "Position": {
+   "X": 3114.2656,
+   "Y": 4408.445,
+   "Z": 142.289,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.746
+ },
+ {
+  "Id": 0,
+  "UnitId": 2695,
+  "Title": "작은 상자",
+  "Position": {
+   "X": 3608.184,
+   "Y": 4758.785,
+   "Z": 129.201,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 0.746
+ },
+ {
+  "Id": 0,
+  "UnitId": 2695,
+  "Title": "작은 상자",
+  "Position": {
+   "X": 3610.943,
+   "Y": 4720.723,
+   "Z": 154.662,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 56.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 0.746
+ },
+ {
+  "Id": 0,
+  "UnitId": 2717,
+  "Title": "잉크 보관통",
+  "Position": {
+   "X": 3132.6873,
+   "Y": 4383.282,
+   "Z": 141.199,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2717,
+  "Title": "잉크 보관통",
+  "Position": {
+   "X": 3605.28,
+   "Y": 4689.278,
+   "Z": 153.413,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 84.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2718,
+  "Title": "저승의 돌",
+  "Position": {
+   "X": 3131.2148,
+   "Y": 4382.715,
+   "Z": 141.811,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 237.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2718,
+  "Title": "저승의 돌",
+  "Position": {
+   "X": 3603.722,
+   "Y": 4689.03,
+   "Z": 154.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 226.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2719,
+  "Title": "기억의 잉크",
+  "Position": {
+   "X": 3130.6707,
+   "Y": 4382.805,
+   "Z": 141.94,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 237.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2719,
+  "Title": "기억의 잉크",
+  "Position": {
+   "X": 3603.208,
+   "Y": 4689.231,
+   "Z": 154.153,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 226.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2732,
+  "Title": "물뿌리개",
+  "Position": {
+   "X": 3131.244,
+   "Y": 4382.87,
+   "Z": 141.981,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -67.8688
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2732,
+  "Title": "물뿌리개",
+  "Position": {
+   "X": 3603.782,
+   "Y": 4689.175,
+   "Z": 154.195,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -79.8688
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2747,
+  "Title": "두루마리",
+  "Position": {
+   "X": 3113.7509,
+   "Y": 4407.09,
+   "Z": 142.241,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -109.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 2.318
+ },
+ {
+  "Id": 0,
+  "UnitId": 2747,
+  "Title": "두루마리",
+  "Position": {
+   "X": 3609.158,
+   "Y": 4757.711,
+   "Z": 129.153,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.0
+  },
+  "funcGroupId": 0,
+  "Scale": 2.318
+ },
+ {
+  "Id": 0,
+  "UnitId": 2747,
+  "Title": "두루마리",
+  "Position": {
+   "X": 3611.274,
+   "Y": 4719.311,
+   "Z": 154.614,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -75.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 2.318
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3099.223,
+   "Y": 4384.27,
+   "Z": 142.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3099.3701,
+   "Y": 4383.005,
+   "Z": 142.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3101.092,
+   "Y": 4384.849,
+   "Z": 142.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3101.4089,
+   "Y": 4384.53,
+   "Z": 142.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3114.7365,
+   "Y": 4405.8,
+   "Z": 142.299,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 63.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3119.1381,
+   "Y": 4403.326,
+   "Z": 142.299,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 63.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3576.205,
+   "Y": 4704.418,
+   "Z": 154.3,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -33.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3576.335,
+   "Y": 4706.371,
+   "Z": 154.3,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -33.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3576.746,
+   "Y": 4706.552,
+   "Z": 154.3,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -33.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3577.439,
+   "Y": 4704.103,
+   "Z": 154.3,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -33.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3586.773,
+   "Y": 4743.15,
+   "Z": 129.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3587.344,
+   "Y": 4742.012,
+   "Z": 129.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3588.331,
+   "Y": 4744.333,
+   "Z": 129.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3588.738,
+   "Y": 4744.142,
+   "Z": 129.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3610.754,
+   "Y": 4758.004,
+   "Z": 129.211,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 126.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3612.812,
+   "Y": 4718.793,
+   "Z": 154.671,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3614.957,
+   "Y": 4760.802,
+   "Z": 129.211,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 126.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2748,
+  "Title": "원조 기억술사의 과자",
+  "Position": {
+   "X": 3617.845,
+   "Y": 4719.203,
+   "Z": 154.671,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2786,
+  "Title": "항아리",
+  "Position": {
+   "X": 3104.4353,
+   "Y": 4379.693,
+   "Z": 141.461,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -30.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2786,
+  "Title": "항아리",
+  "Position": {
+   "X": 3582.346,
+   "Y": 4707.644,
+   "Z": 153.699,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 39.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2786,
+  "Title": "항아리",
+  "Position": {
+   "X": 3593.236,
+   "Y": 4740.632,
+   "Z": 128.399,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3100.3367,
+   "Y": 4383.971,
+   "Z": 141.378,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3101.2354,
+   "Y": 4385.716,
+   "Z": 141.454,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3104.1168,
+   "Y": 4380.873,
+   "Z": 141.505,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3114.2891,
+   "Y": 4407.21,
+   "Z": 141.572,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3115.0988,
+   "Y": 4404.007,
+   "Z": 141.571,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3119.1985,
+   "Y": 4404.339,
+   "Z": 141.755,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3575.576,
+   "Y": 4706.815,
+   "Z": 153.693,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3576.884,
+   "Y": 4705.351,
+   "Z": 153.616,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3581.131,
+   "Y": 4707.77,
+   "Z": 153.743,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3587.922,
+   "Y": 4743.25,
+   "Z": 128.316,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3588.169,
+   "Y": 4745.197,
+   "Z": 128.392,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3592.534,
+   "Y": 4741.631,
+   "Z": 128.443,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3609.295,
+   "Y": 4758.245,
+   "Z": 128.484,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -27.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3611.653,
+   "Y": 4719.711,
+   "Z": 153.944,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -55.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3612.517,
+   "Y": 4757.512,
+   "Z": 128.483,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -27.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3614.082,
+   "Y": 4761.316,
+   "Z": 128.667,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 148.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3614.116,
+   "Y": 4717.509,
+   "Z": 153.943,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -55.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 4439,
+  "Title": "동그란 의자",
+  "Position": {
+   "X": 3617.328,
+   "Y": 4720.077,
+   "Z": 154.127,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 119.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3177.013,
+   "Y": 4953.806,
+   "Z": 15.5936,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 15.91
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3250.435,
+   "Y": 5097.59,
+   "Z": 43.4569,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3270.427,
+   "Y": 5001.51,
+   "Z": 33.3273,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -100.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3390.373,
+   "Y": 5580.813,
+   "Z": 146.151,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -80.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 3412.645,
+   "Y": 5586.994,
+   "Z": 146.124,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2851,
+  "Title": "화덕",
+  "Position": {
+   "X": 3094.0403,
+   "Y": 5283.427,
+   "Z": 101.925,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.83
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3106.0496,
+   "Y": 5367.052,
+   "Z": 6.9733,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3142.495,
+   "Y": 5205.7651,
+   "Z": 22.0685,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3167.5635,
+   "Y": 5250.279,
+   "Z": 21.4735,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 3192.503,
+   "Y": 5155.093,
+   "Z": 28.9041,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 3.042
+ },
+ {
+  "Id": 0,
+  "UnitId": 13490,
+  "Title": "버려진 고대의 잔해 (붉은 용의 둥지)",
+  "Position": {
+   "X": 3097.3624,
+   "Y": 5295.269,
+   "Z": 102.397,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 120.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

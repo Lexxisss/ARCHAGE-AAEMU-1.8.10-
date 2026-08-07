@@ -1,1 +1,497 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 9472,
+  "Title": "검투장 철문",
+  "Position": {
+   "X": 575.0,
+   "Y": 550.194,
+   "Z": 256.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9472,
+  "Title": "검투장 철문",
+  "Position": {
+   "X": 575.081,
+   "Y": 461.612,
+   "Z": 256.46,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7504,
+  "Title": "전나무 아가씨 축제 깃발",
+  "Position": {
+   "X": 1588.98,
+   "Y": 1570.218,
+   "Z": 277.884,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7504,
+  "Title": "전나무 아가씨 축제 깃발",
+  "Position": {
+   "X": 1608.968,
+   "Y": 1570.286,
+   "Z": 277.951,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7505,
+  "Title": "전나무 아가씨 축제 깃발",
+  "Position": {
+   "X": 1589.137,
+   "Y": 1489.795,
+   "Z": 277.957,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 184.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7505,
+  "Title": "전나무 아가씨 축제 깃발",
+  "Position": {
+   "X": 1609.005,
+   "Y": 1489.795,
+   "Z": 277.957,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 184.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7506,
+  "Title": "전나무 아가씨 축제 띠 장식",
+  "Position": {
+   "X": 1590.083,
+   "Y": 1575.683,
+   "Z": 289.916,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 39.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7506,
+  "Title": "전나무 아가씨 축제 띠 장식",
+  "Position": {
+   "X": 1607.424,
+   "Y": 1484.072,
+   "Z": 289.503,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 219.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7507,
+  "Title": "전나무 아가씨 축제 띠 장식",
+  "Position": {
+   "X": 1536.32,
+   "Y": 1528.126,
+   "Z": 289.668,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 141.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7507,
+  "Title": "전나무 아가씨 축제 띠 장식",
+  "Position": {
+   "X": 1662.489,
+   "Y": 1531.166,
+   "Z": 289.819,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -39.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7509,
+  "Title": "소형 전나무 아가씨 축제 나무",
+  "Position": {
+   "X": 1590.051,
+   "Y": 1542.178,
+   "Z": 256.352,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7509,
+  "Title": "소형 전나무 아가씨 축제 나무",
+  "Position": {
+   "X": 1590.422,
+   "Y": 1517.269,
+   "Z": 256.352,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7509,
+  "Title": "소형 전나무 아가씨 축제 나무",
+  "Position": {
+   "X": 1607.525,
+   "Y": 1517.269,
+   "Z": 256.352,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7509,
+  "Title": "소형 전나무 아가씨 축제 나무",
+  "Position": {
+   "X": 1607.726,
+   "Y": 1542.178,
+   "Z": 256.352,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7518,
+  "Title": "전나무 아가씨 축제 나무",
+  "Position": {
+   "X": 1559.0,
+   "Y": 1529.0,
+   "Z": 257.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7518,
+  "Title": "전나무 아가씨 축제 나무",
+  "Position": {
+   "X": 1638.0,
+   "Y": 1530.0,
+   "Z": 258.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7525,
+  "Title": "전나무 아가씨 축제 풍선",
+  "Position": {
+   "X": 1547.848,
+   "Y": 1529.714,
+   "Z": 285.24,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 87.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7525,
+  "Title": "전나무 아가씨 축제 풍선",
+  "Position": {
+   "X": 1649.723,
+   "Y": 1530.257,
+   "Z": 285.588,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9189,
+  "Title": "전나무 아가씨 축제 장식",
+  "Position": {
+   "X": 1613.899,
+   "Y": 1570.437,
+   "Z": 257.496,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -37.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9472,
+  "Title": "검투장 철문",
+  "Position": {
+   "X": 1599.0,
+   "Y": 1574.194,
+   "Z": 256.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9472,
+  "Title": "검투장 철문",
+  "Position": {
+   "X": 1599.081,
+   "Y": 1485.612,
+   "Z": 256.46,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11301,
+  "Title": "전나무의 노래",
+  "Position": {
+   "X": 1599.005,
+   "Y": 1529.994,
+   "Z": 256.53,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13548,
+  "Title": "빛나는 석영",
+  "Position": {
+   "X": 1577.942,
+   "Y": 1509.099,
+   "Z": 256.301,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13548,
+  "Title": "빛나는 석영",
+  "Position": {
+   "X": 1578.725,
+   "Y": 1551.448,
+   "Z": 256.312,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13548,
+  "Title": "빛나는 석영",
+  "Position": {
+   "X": 1585.364,
+   "Y": 1529.328,
+   "Z": 256.41,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13548,
+  "Title": "빛나는 석영",
+  "Position": {
+   "X": 1612.29,
+   "Y": 1530.337,
+   "Z": 256.41,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13548,
+  "Title": "빛나는 석영",
+  "Position": {
+   "X": 1619.829,
+   "Y": 1549.952,
+   "Z": 256.41,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13548,
+  "Title": "빛나는 석영",
+  "Position": {
+   "X": 1619.854,
+   "Y": 1509.899,
+   "Z": 256.421,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13560,
+  "Title": "눈싸움 보스 몬스터 소환",
+  "Position": {
+   "X": 1579.776,
+   "Y": 1520.174,
+   "Z": 256.301,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -48.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13560,
+  "Title": "눈싸움 보스 몬스터 소환",
+  "Position": {
+   "X": 1581.0,
+   "Y": 1542.0,
+   "Z": 256.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -78.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13560,
+  "Title": "눈싸움 보스 몬스터 소환",
+  "Position": {
+   "X": 1599.01,
+   "Y": 1508.226,
+   "Z": 256.301,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 2.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13560,
+  "Title": "눈싸움 보스 몬스터 소환",
+  "Position": {
+   "X": 1616.58,
+   "Y": 1541.556,
+   "Z": 256.312,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13560,
+  "Title": "눈싸움 보스 몬스터 소환",
+  "Position": {
+   "X": 1619.58,
+   "Y": 1521.556,
+   "Z": 256.312,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

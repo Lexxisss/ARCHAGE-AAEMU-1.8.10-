@@ -1,0 +1,32 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 9472,
+  "Title": "검투장 철문",
+  "Position": {
+   "X": 1599.0,
+   "Y": 2598.194,
+   "Z": 256.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9472,
+  "Title": "검투장 철문",
+  "Position": {
+   "X": 1599.081,
+   "Y": 2509.612,
+   "Z": 256.46,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

@@ -1,0 +1,452 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 17689,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 554.513,
+   "Y": 1627.889,
+   "Z": 113.733,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 144.6494
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17746,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 501.157,
+   "Y": 1602.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17747,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 501.157,
+   "Y": 1602.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17756,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 492.495,
+   "Y": 1602.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17756,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 501.157,
+   "Y": 1611.328,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17756,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 501.157,
+   "Y": 1593.967,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17756,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 509.832,
+   "Y": 1602.655,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17757,
+  "Title": "나차쉬 차원 대항 제단",
+  "Position": {
+   "X": 620.449,
+   "Y": 1614.654,
+   "Z": 101.924,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17758,
+  "Title": "나차쉬 군단 대항 제단",
+  "Position": {
+   "X": 549.838,
+   "Y": 1675.089,
+   "Z": 127.85,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 80.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17770,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 554.513,
+   "Y": 1627.889,
+   "Z": 113.733,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 144.6494
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17771,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 554.513,
+   "Y": 1627.889,
+   "Z": 113.733,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 144.6494
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17789,
+  "Title": "차원 경계 방어전_시작NPC_소환_홍군",
+  "Position": {
+   "X": 429.897,
+   "Y": 1771.563,
+   "Z": 111.777,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17794,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 554.513,
+   "Y": 1627.889,
+   "Z": 113.733,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 144.6494
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17796,
+  "Title": "홍군_차원의파편_스코어_체크",
+  "Position": {
+   "X": 501.157,
+   "Y": 1602.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17801,
+  "Title": "달 모래뜰 이동 통로",
+  "Position": {
+   "X": 445.002,
+   "Y": 1714.703,
+   "Z": 103.357,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 15.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17746,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 2549.157,
+   "Y": 578.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17774,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 2602.416,
+   "Y": 603.75,
+   "Z": 113.666,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 140.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17775,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 2602.416,
+   "Y": 603.75,
+   "Z": 113.666,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 140.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17776,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 2602.416,
+   "Y": 603.75,
+   "Z": 113.666,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 140.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17779,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 2540.495,
+   "Y": 578.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17779,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 2549.157,
+   "Y": 587.328,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17779,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 2549.157,
+   "Y": 569.967,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17779,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 2557.832,
+   "Y": 578.655,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17780,
+  "Title": "차원 결계 복구 장치",
+  "Position": {
+   "X": 2549.157,
+   "Y": 578.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17783,
+  "Title": "나차쉬 군단 대항 제단",
+  "Position": {
+   "X": 2597.838,
+   "Y": 651.089,
+   "Z": 127.85,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 80.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17790,
+  "Title": "차원 경계 방어전_시작NPC_소환_청군",
+  "Position": {
+   "X": 2478.164,
+   "Y": 746.227,
+   "Z": 111.778,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17795,
+  "Title": "차원의 통로",
+  "Position": {
+   "X": 2602.416,
+   "Y": 603.75,
+   "Z": 113.666,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 140.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17797,
+  "Title": "청군_차원의파편_스코어_체크",
+  "Position": {
+   "X": 2549.16,
+   "Y": 578.652,
+   "Z": 120.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17802,
+  "Title": "달 모래뜰 이동 통로",
+  "Position": {
+   "X": 2492.785,
+   "Y": 690.427,
+   "Z": 103.369,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 15.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17807,
+  "Title": "나차쉬 차원 대항 제단",
+  "Position": {
+   "X": 2668.278,
+   "Y": 592.058,
+   "Z": 101.924,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

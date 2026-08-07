@@ -1,0 +1,1772 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 6590,
+  "Title": "인던_CC면역_효과지역",
+  "Position": {
+   "X": 840.653,
+   "Y": 499.913,
+   "Z": 325.805,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -85.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12876,
+  "Title": "이프니르의 황금 성소 출구",
+  "Position": {
+   "X": 91.5351,
+   "Y": 462.917,
+   "Z": 329.107,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -74.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12888,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 804.878,
+   "Y": 521.325,
+   "Z": 326.537,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12888,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 804.961,
+   "Y": 478.654,
+   "Z": 326.527,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12888,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 866.0,
+   "Y": 516.0,
+   "Z": 326.125,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12888,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 866.375,
+   "Y": 483.296,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12889,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 872.623,
+   "Y": 493.063,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12889,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 873.122,
+   "Y": 506.753,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12891,
+  "Title": "이프나의 황금성소 : 보스룸 중심 : 칼릴과 탈몬 : 반경 55m",
+  "Position": {
+   "X": 537.935,
+   "Y": 500.056,
+   "Z": 305.689,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12920,
+  "Title": "과거의 문",
+  "Position": {
+   "X": 799.315,
+   "Y": 524.5,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 240.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12920,
+  "Title": "과거의 문",
+  "Position": {
+   "X": 799.315,
+   "Y": 475.5,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12938,
+  "Title": "정원의 문 6",
+  "Position": {
+   "X": 939.087,
+   "Y": 534.986,
+   "Z": 334.2,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12938,
+  "Title": "정원의 문 6",
+  "Position": {
+   "X": 939.174,
+   "Y": 465.022,
+   "Z": 334.2,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -97.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12978,
+  "Title": "이프니르의 공중 포탑",
+  "Position": {
+   "X": 303.344,
+   "Y": 520.876,
+   "Z": 299.998,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 220.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12978,
+  "Title": "이프니르의 공중 포탑",
+  "Position": {
+   "X": 303.653,
+   "Y": 479.094,
+   "Z": 300.002,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12978,
+  "Title": "이프니르의 공중 포탑",
+  "Position": {
+   "X": 346.227,
+   "Y": 520.819,
+   "Z": 299.997,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 129.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12978,
+  "Title": "이프니르의 공중 포탑",
+  "Position": {
+   "X": 346.492,
+   "Y": 479.1,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 50.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15465,
+  "Title": "함정",
+  "Position": {
+   "X": 308.344,
+   "Y": 516.611,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15465,
+  "Title": "함정",
+  "Position": {
+   "X": 308.48,
+   "Y": 483.376,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15465,
+  "Title": "함정",
+  "Position": {
+   "X": 341.633,
+   "Y": 483.338,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15465,
+  "Title": "함정",
+  "Position": {
+   "X": 341.667,
+   "Y": 516.657,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15467,
+  "Title": "방어모드 차단막",
+  "Position": {
+   "X": 325.001,
+   "Y": 500.018,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15470,
+  "Title": "함정",
+  "Position": {
+   "X": 316.694,
+   "Y": 508.397,
+   "Z": 300.004,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15470,
+  "Title": "함정",
+  "Position": {
+   "X": 316.78,
+   "Y": 491.573,
+   "Z": 300.004,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15470,
+  "Title": "함정",
+  "Position": {
+   "X": 333.265,
+   "Y": 508.393,
+   "Z": 300.003,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15470,
+  "Title": "함정",
+  "Position": {
+   "X": 333.31,
+   "Y": 491.685,
+   "Z": 300.003,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15483,
+  "Title": "3단계 가시 함정 1번",
+  "Position": {
+   "X": 341.641,
+   "Y": 516.661,
+   "Z": 299.998,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15488,
+  "Title": "황금 성소 전투 불가 지역 (신성한 경계 앞)",
+  "Position": {
+   "X": 288.181,
+   "Y": 500.006,
+   "Z": 299.307,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15489,
+  "Title": "황금 성소 전투 불가 지역 (판별의 저울 앞)",
+  "Position": {
+   "X": 416.032,
+   "Y": 500.118,
+   "Z": 300.605,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15496,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 515.739,
+   "Y": 523.299,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -108.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15496,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 528.058,
+   "Y": 538.024,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 203.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15496,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 547.678,
+   "Y": 536.76,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 158.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15496,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 560.142,
+   "Y": 522.371,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 108.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15497,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 516.477,
+   "Y": 478.627,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -74.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15497,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 529.537,
+   "Y": 463.178,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -32.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15497,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 547.646,
+   "Y": 462.379,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 23.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15497,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 561.721,
+   "Y": 476.679,
+   "Z": 305.521,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 72.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15507,
+  "Title": "3단계 가시 함정 2번",
+  "Position": {
+   "X": 341.651,
+   "Y": 500.017,
+   "Z": 299.998,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15508,
+  "Title": "3단계 가시 함정 3번",
+  "Position": {
+   "X": 341.636,
+   "Y": 483.355,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15509,
+  "Title": "3단계 가시 함정 4번",
+  "Position": {
+   "X": 324.995,
+   "Y": 516.628,
+   "Z": 299.996,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15510,
+  "Title": "3단계 가시 함정 5번",
+  "Position": {
+   "X": 325.001,
+   "Y": 500.009,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15511,
+  "Title": "3단계 가시 함정 6번",
+  "Position": {
+   "X": 325.032,
+   "Y": 483.354,
+   "Z": 299.998,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15512,
+  "Title": "3단계 가시 함정 7번",
+  "Position": {
+   "X": 308.358,
+   "Y": 516.623,
+   "Z": 299.998,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15513,
+  "Title": "3단계 가시 함정 8번",
+  "Position": {
+   "X": 308.406,
+   "Y": 499.985,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15514,
+  "Title": "3단계 가시 함정 9번",
+  "Position": {
+   "X": 308.48,
+   "Y": 483.377,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15517,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 807.539,
+   "Y": 500.045,
+   "Z": 329.85,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -88.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15517,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 814.343,
+   "Y": 521.709,
+   "Z": 329.664,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 233.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15517,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 819.395,
+   "Y": 474.038,
+   "Z": 329.872,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -61.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15517,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 841.606,
+   "Y": 534.355,
+   "Z": 329.87,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 214.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15517,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 841.761,
+   "Y": 466.017,
+   "Z": 329.87,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15521,
+  "Title": "윤회의 인증",
+  "Position": {
+   "X": 324.982,
+   "Y": 500.015,
+   "Z": 300.06,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15542,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 785.518,
+   "Y": 500.057,
+   "Z": 325.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.701
+ },
+ {
+  "Id": 0,
+  "UnitId": 15546,
+  "Title": "열망의 안식처 입구",
+  "Position": {
+   "X": 764.75,
+   "Y": 500.0,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15546,
+  "Title": "열망의 안식처 입구",
+  "Position": {
+   "X": 773.75,
+   "Y": 500.0,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15552,
+  "Title": "신성한 경계의 문 닫혀있는 상태 (스킬 히트용)",
+  "Position": {
+   "X": 299.931,
+   "Y": 500.019,
+   "Z": 300.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15554,
+  "Title": "판별의 저울의 문 닫혀있는 상태 (스킬 히트용)",
+  "Position": {
+   "X": 585.26,
+   "Y": 500.0,
+   "Z": 306.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15555,
+  "Title": "판별의 저울의 인터렉션 가능 (닫혀있음)",
+  "Position": {
+   "X": 481.0,
+   "Y": 500.0,
+   "Z": 306.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15555,
+  "Title": "판별의 저울의 인터렉션 가능 (닫혀있음)",
+  "Position": {
+   "X": 490.697,
+   "Y": 500.0,
+   "Z": 306.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15562,
+  "Title": "영원의 회랑 출입문",
+  "Position": {
+   "X": 645.0,
+   "Y": 478.01,
+   "Z": 314.004,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15563,
+  "Title": "신성한 경계의 최종 문 닫혀있는 상태 (스킬 히트용)",
+  "Position": {
+   "X": 350.059,
+   "Y": 500.062,
+   "Z": 300.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15564,
+  "Title": "성소로 가는 길 귀면호 1차 소환",
+  "Position": {
+   "X": 170.906,
+   "Y": 455.635,
+   "Z": 312.07,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15565,
+  "Title": "성소로 가는 길 귀면호 2차 소환",
+  "Position": {
+   "X": 211.899,
+   "Y": 476.803,
+   "Z": 309.983,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15566,
+  "Title": "아르디오스",
+  "Position": {
+   "X": 903.772,
+   "Y": 493.688,
+   "Z": 328.4,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 34.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15567,
+  "Title": "각인된 이프니쉬",
+  "Position": {
+   "X": 907.746,
+   "Y": 500.342,
+   "Z": 330.981,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15573,
+  "Title": "열망의 안식처로 가는 공간의 문",
+  "Position": {
+   "X": 534.059,
+   "Y": 381.319,
+   "Z": 301.956,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 129.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15575,
+  "Title": "황금 성소 전투 불가 지역 (판별의 저울 뒤에 버프 제거용)",
+  "Position": {
+   "X": 604.566,
+   "Y": 500.313,
+   "Z": 307.272,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15577,
+  "Title": "이프니르의 황금 성소 출구",
+  "Position": {
+   "X": 857.771,
+   "Y": 469.597,
+   "Z": 327.639,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 31.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15578,
+  "Title": "함정",
+  "Position": {
+   "X": 325.004,
+   "Y": 500.009,
+   "Z": 300.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15592,
+  "Title": "황금 성소 전투 불가 지역 (시작지점)",
+  "Position": {
+   "X": 91.5581,
+   "Y": 462.861,
+   "Z": 328.889,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15594,
+  "Title": "황금 성소 전투 불가 지역 (신성한 경계 앞 부활지점)",
+  "Position": {
+   "X": 239.0,
+   "Y": 550.076,
+   "Z": 310.543,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15594,
+  "Title": "황금 성소 전투 불가 지역 (신성한 경계 앞 부활지점)",
+  "Position": {
+   "X": 322.114,
+   "Y": 401.069,
+   "Z": 302.231,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15594,
+  "Title": "황금 성소 전투 불가 지역 (신성한 경계 앞 부활지점)",
+  "Position": {
+   "X": 518.402,
+   "Y": 371.914,
+   "Z": 304.433,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15594,
+  "Title": "황금 성소 전투 불가 지역 (신성한 경계 앞 부활지점)",
+  "Position": {
+   "X": 746.935,
+   "Y": 489.677,
+   "Z": 326.001,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15596,
+  "Title": "영원의 회랑 출구",
+  "Position": {
+   "X": 686.98,
+   "Y": 500.0,
+   "Z": 314.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -91.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 805.643,
+   "Y": 479.589,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 15.974
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 806.719,
+   "Y": 522.088,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 240.0
+  },
+  "funcGroupId": 0,
+  "Scale": 15.974
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 865.361,
+   "Y": 472.188,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 16.148
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 865.361,
+   "Y": 472.188,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 16.148
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 866.237,
+   "Y": 526.802,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 15.974
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 866.237,
+   "Y": 526.802,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 15.974
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 875.877,
+   "Y": 493.146,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 79.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 875.877,
+   "Y": 493.146,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 79.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 876.238,
+   "Y": 507.231,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 876.238,
+   "Y": 507.231,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 876.771,
+   "Y": 517.192,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.148
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 876.771,
+   "Y": 517.192,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -10.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.148
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 879.547,
+   "Y": 482.086,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.148
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 879.547,
+   "Y": 482.086,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 11.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.148
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 879.772,
+   "Y": 508.039,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 879.772,
+   "Y": 508.039,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 879.798,
+   "Y": 493.179,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 79.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 879.798,
+   "Y": 493.179,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 79.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 885.227,
+   "Y": 491.033,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 81.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 885.227,
+   "Y": 491.033,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 81.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 885.284,
+   "Y": 510.814,
+   "Z": 341.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15601,
+  "Title": "보이지 않는 벽",
+  "Position": {
+   "X": 885.284,
+   "Y": 510.814,
+   "Z": 326.51,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 99.0
+  },
+  "funcGroupId": 0,
+  "Scale": 16.046
+ },
+ {
+  "Id": 0,
+  "UnitId": 15602,
+  "Title": "신성한 경계 후문",
+  "Position": {
+   "X": 349.771,
+   "Y": 500.005,
+   "Z": 300.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 5.319
+ },
+ {
+  "Id": 0,
+  "UnitId": 15635,
+  "Title": "신성한 경계 내부 지역 버프",
+  "Position": {
+   "X": 324.98,
+   "Y": 499.854,
+   "Z": 300.062,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15777,
+  "Title": "신성한 경계 외부 지역 버프 (어뷰징 방지)",
+  "Position": {
+   "X": 253.88,
+   "Y": 502.091,
+   "Z": 302.765,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15777,
+  "Title": "신성한 경계 외부 지역 버프 (어뷰징 방지)",
+  "Position": {
+   "X": 323.852,
+   "Y": 423.775,
+   "Z": 302.562,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15777,
+  "Title": "신성한 경계 외부 지역 버프 (어뷰징 방지)",
+  "Position": {
+   "X": 326.046,
+   "Y": 574.646,
+   "Z": 302.565,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17250,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 885.625,
+   "Y": 500.21,
+   "Z": 326.452,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17250,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 896.363,
+   "Y": 491.015,
+   "Z": 328.469,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17250,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 896.363,
+   "Y": 509.75,
+   "Z": 328.355,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17962,
+  "Title": "열망의 안식처로 가는 공간의 문",
+  "Position": {
+   "X": 114.571,
+   "Y": 461.043,
+   "Z": 320.411,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -95.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18121,
+  "Title": "침묵 지역",
+  "Position": {
+   "X": 326.868,
+   "Y": 500.27,
+   "Z": 313.563,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18121,
+  "Title": "침묵 지역",
+  "Position": {
+   "X": 833.178,
+   "Y": 518.258,
+   "Z": 315.788,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18121,
+  "Title": "침묵 지역",
+  "Position": {
+   "X": 834.178,
+   "Y": 481.258,
+   "Z": 315.788,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18121,
+  "Title": "침묵 지역",
+  "Position": {
+   "X": 863.363,
+   "Y": 495.978,
+   "Z": 315.788,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18121,
+  "Title": "침묵 지역",
+  "Position": {
+   "X": 871.06,
+   "Y": 480.917,
+   "Z": 315.788,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18121,
+  "Title": "침묵 지역",
+  "Position": {
+   "X": 872.089,
+   "Y": 518.083,
+   "Z": 315.788,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12953,
+  "Title": "이프나 마력 장치1",
+  "Position": {
+   "X": 1230.935,
+   "Y": 1525.915,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12954,
+  "Title": "이프나 마력 장치2",
+  "Position": {
+   "X": 1239.242,
+   "Y": 1542.707,
+   "Z": 326.044,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 61.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12955,
+  "Title": "이프나 마력 장치3",
+  "Position": {
+   "X": 1239.211,
+   "Y": 1554.203,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12956,
+  "Title": "이프나 마력 장치4",
+  "Position": {
+   "X": 1231.818,
+   "Y": 1571.572,
+   "Z": 326.044,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 120.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12957,
+  "Title": "이프나 마력 장치5",
+  "Position": {
+   "X": 1223.499,
+   "Y": 1578.058,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 144.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13030,
+  "Title": "나차쉬 차원의 틈",
+  "Position": {
+   "X": 1169.92,
+   "Y": 1548.02,
+   "Z": 326.113,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0002
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15517,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 1221.649,
+   "Y": 1518.832,
+   "Z": 326.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

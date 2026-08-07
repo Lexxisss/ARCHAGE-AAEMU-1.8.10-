@@ -1,1 +1,362 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 9597,
+  "Title": "사령술사의 책",
+  "Position": {
+   "X": 575.472,
+   "Y": 493.5,
+   "Z": 136.198,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 125.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9597,
+  "Title": "사령술사의 책",
+  "Position": {
+   "X": 589.362,
+   "Y": 595.557,
+   "Z": 136.478,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 235.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9597,
+  "Title": "사령술사의 책",
+  "Position": {
+   "X": 699.202,
+   "Y": 589.835,
+   "Z": 135.713,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 191.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9597,
+  "Title": "사령술사의 책",
+  "Position": {
+   "X": 732.899,
+   "Y": 593.953,
+   "Z": 136.559,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 231.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9597,
+  "Title": "사령술사의 책",
+  "Position": {
+   "X": 750.632,
+   "Y": 611.849,
+   "Z": 136.457,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -107.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9598,
+  "Title": "사령술사의 가마솥",
+  "Position": {
+   "X": 591.083,
+   "Y": 590.757,
+   "Z": 136.536,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9598,
+  "Title": "사령술사의 가마솥",
+  "Position": {
+   "X": 753.031,
+   "Y": 613.486,
+   "Z": 136.431,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9599,
+  "Title": "[고대던전]하디르의 농장 출구",
+  "Position": {
+   "X": 546.165,
+   "Y": 500.334,
+   "Z": 132.687,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -96.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9600,
+  "Title": "[고대던전]하디르의 농장 출구",
+  "Position": {
+   "X": 761.438,
+   "Y": 705.953,
+   "Z": 141.456,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 163.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 584.958,
+   "Y": 612.772,
+   "Z": 141.294,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 592.726,
+   "Y": 614.687,
+   "Z": 141.294,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 602.659,
+   "Y": 564.776,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 608.019,
+   "Y": 558.354,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 608.958,
+   "Y": 570.344,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 613.517,
+   "Y": 550.815,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 617.182,
+   "Y": 574.909,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 626.251,
+   "Y": 578.816,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 637.517,
+   "Y": 579.478,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 646.434,
+   "Y": 631.397,
+   "Z": 145.581,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 649.924,
+   "Y": 575.09,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 650.068,
+   "Y": 622.143,
+   "Z": 145.581,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 658.102,
+   "Y": 615.092,
+   "Z": 145.581,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 660.686,
+   "Y": 571.488,
+   "Z": 143.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9601,
+  "Title": "하디르_썩은고깃덩이_공격불가",
+  "Position": {
+   "X": 662.745,
+   "Y": 610.702,
+   "Z": 145.581,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

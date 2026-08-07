@@ -1,1 +1,212 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 281,
+  "Title": "사다리 10m",
+  "Position": {
+   "X": 1116.474,
+   "Y": 466.2,
+   "Z": 204.629,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 129.7316
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 281,
+  "Title": "사다리 10m",
+  "Position": {
+   "X": 1206.034,
+   "Y": 463.727,
+   "Z": 204.577,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2037,
+  "Title": "전장 철문",
+  "Position": {
+   "X": 1102.2781,
+   "Y": 422.489,
+   "Z": 199.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2037,
+  "Title": "전장 철문",
+  "Position": {
+   "X": 1124.289,
+   "Y": 401.752,
+   "Z": 199.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2037,
+  "Title": "전장 철문",
+  "Position": {
+   "X": 1131.752,
+   "Y": 374.341,
+   "Z": 204.71,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -45.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2037,
+  "Title": "전장 철문",
+  "Position": {
+   "X": 1194.404,
+   "Y": 554.799,
+   "Z": 204.949,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2037,
+  "Title": "전장 철문",
+  "Position": {
+   "X": 1204.539,
+   "Y": 524.998,
+   "Z": 199.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2037,
+  "Title": "전장 철문",
+  "Position": {
+   "X": 1228.28,
+   "Y": 506.277,
+   "Z": 199.267,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5922,
+  "Title": "훈련소 전장 홍군 부활 지점 지킴이",
+  "Position": {
+   "X": 1098.0,
+   "Y": 401.0,
+   "Z": 199.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -44.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5923,
+  "Title": "훈련소 전장 청군 부활 지점 지킴이",
+  "Position": {
+   "X": 1228.019,
+   "Y": 532.782,
+   "Z": 199.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -41.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6319,
+  "Title": "전장 이탈자 응징",
+  "Position": {
+   "X": 1116.0752,
+   "Y": 523.238,
+   "Z": 195.43,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 44.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6319,
+  "Title": "전장 이탈자 응징",
+  "Position": {
+   "X": 1221.415,
+   "Y": 419.659,
+   "Z": 191.626,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6785,
+  "Title": "전장 이탈자 응징",
+  "Position": {
+   "X": 1060.6075,
+   "Y": 363.534,
+   "Z": 208.622,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -46.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 6785,
+  "Title": "전장 이탈자 응징",
+  "Position": {
+   "X": 1271.075,
+   "Y": 571.726,
+   "Z": 200.406,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -43.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

@@ -1,0 +1,2657 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2846.433,
+   "Y": 1626.51,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2846.433,
+   "Y": 1665.444,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2848.686,
+   "Y": 1651.926,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2848.821,
+   "Y": 1639.939,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2851.0,
+   "Y": 1665.485,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2851.0,
+   "Y": 1626.466,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2853.258,
+   "Y": 1652.01,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2853.405,
+   "Y": 1639.94,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2855.552,
+   "Y": 1665.433,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 1240,
+  "Title": "왕실의 붉은 원목 소파",
+  "Position": {
+   "X": 2855.552,
+   "Y": 1626.359,
+   "Z": 136.927,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7543,
+  "Title": "도서관_클로인할나크_물에젖음",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1792.0,
+   "Z": 127.3,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7544,
+  "Title": "뇌전_front_visual_left",
+  "Position": {
+   "X": 2832.0,
+   "Y": 1817.75,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7545,
+  "Title": "뇌전_front_visual_mid",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1817.75,
+   "Z": 127.455,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7546,
+  "Title": "뇌전_front_visual_right",
+  "Position": {
+   "X": 2868.0,
+   "Y": 1817.75,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2823.75,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2823.75,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2823.75,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1765.5,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2846.25,
+   "Y": 1769.375,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1765.5,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1769.375,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1769.375,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2853.75,
+   "Y": 1765.5,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2876.25,
+   "Y": 1784.875,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2876.25,
+   "Y": 1792.625,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7577,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2876.25,
+   "Y": 1788.75,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1800.375,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1773.25,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1781.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1804.25,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1777.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1796.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2827.5,
+   "Y": 1769.375,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1769.375,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2831.25,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2835.0,
+   "Y": 1790.75,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2835.0,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2835.0,
+   "Y": 1786.875,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2835.0,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2838.75,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2838.75,
+   "Y": 1786.875,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2838.75,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2838.75,
+   "Y": 1790.75,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2842.5,
+   "Y": 1790.75,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2842.5,
+   "Y": 1786.875,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2842.5,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2842.5,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2848.125,
+   "Y": 1804.25,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2848.125,
+   "Y": 1781.0,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2848.125,
+   "Y": 1800.375,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2848.125,
+   "Y": 1777.125,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2848.125,
+   "Y": 1773.25,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2848.125,
+   "Y": 1796.5,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2851.875,
+   "Y": 1773.25,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2851.875,
+   "Y": 1781.0,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2851.875,
+   "Y": 1796.5,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2851.875,
+   "Y": 1804.25,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2851.875,
+   "Y": 1800.375,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2851.875,
+   "Y": 1777.125,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2857.5,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2857.5,
+   "Y": 1790.625,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2857.5,
+   "Y": 1786.75,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2857.5,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2861.25,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2861.25,
+   "Y": 1790.625,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2861.25,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2861.25,
+   "Y": 1786.75,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2865.0,
+   "Y": 1786.75,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2865.0,
+   "Y": 1790.625,
+   "Z": 127.08,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2865.0,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2865.0,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1769.375,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2868.75,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1765.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1769.375,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1812.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1781.0,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1804.25,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1800.375,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1808.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1773.25,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1796.5,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7585,
+  "Title": "보호의 석판",
+  "Position": {
+   "X": 2872.5,
+   "Y": 1777.125,
+   "Z": 127.025,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7588,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1812.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7589,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1812.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7590,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1812.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7592,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2823.5,
+   "Y": 1817.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7593,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2841.0,
+   "Y": 1817.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7594,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2859.0,
+   "Y": 1817.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7595,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2877.0,
+   "Y": 1817.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7788,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1796.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7789,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1780.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7790,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1764.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7815,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1796.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7816,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1780.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7817,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1764.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7818,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1796.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7819,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1780.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7820,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1764.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7896,
+  "Title": "얼어붙은 서리의 저주",
+  "Position": {
+   "X": 2836.5,
+   "Y": 1760.204,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7896,
+  "Title": "얼어붙은 서리의 저주",
+  "Position": {
+   "X": 2836.5,
+   "Y": 1823.567,
+   "Z": 127.564,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7896,
+  "Title": "얼어붙은 서리의 저주",
+  "Position": {
+   "X": 2863.5,
+   "Y": 1823.542,
+   "Z": 127.844,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7896,
+  "Title": "얼어붙은 서리의 저주",
+  "Position": {
+   "X": 2863.5,
+   "Y": 1760.203,
+   "Z": 127.615,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7903,
+  "Title": "뇌전_back_visual_left",
+  "Position": {
+   "X": 2832.0,
+   "Y": 1764.75,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7904,
+  "Title": "뇌전_back_visual_mid",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1764.75,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7905,
+  "Title": "뇌전_back_visual_right",
+  "Position": {
+   "X": 2868.0,
+   "Y": 1764.75,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7906,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2823.5,
+   "Y": 1764.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7907,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2841.0,
+   "Y": 1764.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7908,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2859.0,
+   "Y": 1764.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7909,
+  "Title": "연쇄 번개 충격파",
+  "Position": {
+   "X": 2877.0,
+   "Y": 1764.75,
+   "Z": 127.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7962,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1770.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7963,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1789.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7964,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1805.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7965,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2831.0,
+   "Y": 1821.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7966,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1770.5,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7967,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1786.5,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7968,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1802.5,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7969,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1818.5,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7970,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1770.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7971,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1786.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7972,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1802.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 7973,
+  "Title": "연쇄 번개 충격파의 전류",
+  "Position": {
+   "X": 2869.0,
+   "Y": 1818.625,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8057,
+  "Title": "영상: 클로인 할나크의 출현",
+  "Position": {
+   "X": 2850.006,
+   "Y": 1772.744,
+   "Z": 129.222,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8058,
+  "Title": "얼어붙은 서재의 결계",
+  "Position": {
+   "X": 2849.793,
+   "Y": 1785.657,
+   "Z": 127.201,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13232,
+  "Title": "얼어붙은 서재 안쪽으로 이동합니다.",
+  "Position": {
+   "X": 2838.051,
+   "Y": 1645.795,
+   "Z": 136.907,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13233,
+  "Title": "얼어붙은 서재 대기실로 이동합니다.",
+  "Position": {
+   "X": 2850.0,
+   "Y": 1760.0,
+   "Z": 128.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13238,
+  "Title": "입관심사실로 이동합니다.",
+  "Position": {
+   "X": 2865.305,
+   "Y": 1646.339,
+   "Z": 136.907,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13241,
+  "Title": "클로인 할나크의 빙결 마법서",
+  "Position": {
+   "X": 2849.99,
+   "Y": 1771.776,
+   "Z": 128.814,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13270,
+  "Title": "혼돈의 서고로 이동합니다.",
+  "Position": {
+   "X": 2850.022,
+   "Y": 1813.929,
+   "Z": 127.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13634,
+  "Title": "스노든",
+  "Position": {
+   "X": 2866.995,
+   "Y": 1661.633,
+   "Z": 136.923,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13647,
+  "Title": "찢어진 초상화 네 번째 조각",
+  "Position": {
+   "X": 2850.396,
+   "Y": 1652.053,
+   "Z": 138.23,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13648,
+  "Title": "찢어진 초상화 다섯 번째 조각",
+  "Position": {
+   "X": 2851.24,
+   "Y": 1639.932,
+   "Z": 138.254,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13649,
+  "Title": "찢어진 초상화 여섯 번째 조각",
+  "Position": {
+   "X": 2852.077,
+   "Y": 1639.556,
+   "Z": 138.783,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13918,
+  "Title": "데니스트리오스의지팡이삭제",
+  "Position": {
+   "X": 2851.168,
+   "Y": 1646.326,
+   "Z": 136.935,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9884,
+  "Title": "불안정한 에아나드의 심장 균열",
+  "Position": {
+   "X": 4638.286,
+   "Y": 527.791,
+   "Z": 383.05,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9885,
+  "Title": "불안정한 에아나드의 심장 외부 균열",
+  "Position": {
+   "X": 4638.286,
+   "Y": 527.791,
+   "Z": 383.05,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11368,
+  "Title": "대마법사의 마력석 판매대",
+  "Position": {
+   "X": 4181.6973,
+   "Y": 274.956,
+   "Z": 228.329,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12748,
+  "Title": "탑승 발판",
+  "Position": {
+   "X": 4205.073,
+   "Y": 287.852,
+   "Z": 228.195,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13236,
+  "Title": "에아나드의 심장 안쪽으로 이동합니다.",
+  "Position": {
+   "X": 4201.709,
+   "Y": 227.083,
+   "Z": 230.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13237,
+  "Title": "심연에 물든 에아나드 도서관 출구",
+  "Position": {
+   "X": 4627.516,
+   "Y": 486.649,
+   "Z": 389.827,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13240,
+  "Title": "혼돈의 서고로 이동합니다",
+  "Position": {
+   "X": 4204.922,
+   "Y": 306.477,
+   "Z": 240.518,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13243,
+  "Title": "폭주하는 에아나드의 심장",
+  "Position": {
+   "X": 4629.948,
+   "Y": 540.861,
+   "Z": 389.232,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13268,
+  "Title": "해방된 데니스트리오스의 지팡이",
+  "Position": {
+   "X": 4224.728,
+   "Y": 266.065,
+   "Z": 228.42,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

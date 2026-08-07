@@ -1,0 +1,362 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 18160,
+  "Title": "벌목_3등급_점수체크",
+  "Position": {
+   "X": 1264.046,
+   "Y": 890.571,
+   "Z": 106.947,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18161,
+  "Title": "벌목_2등급_점수체크",
+  "Position": {
+   "X": 1262.806,
+   "Y": 890.195,
+   "Z": 106.907,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18158,
+  "Title": "농사_3등급_점수체크",
+  "Position": {
+   "X": 1110.0892,
+   "Y": 1172.569,
+   "Z": 100.943,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18159,
+  "Title": "농사_2등급_점수체크",
+  "Position": {
+   "X": 1110.7527,
+   "Y": 1171.855,
+   "Z": 100.92,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18162,
+  "Title": "채광_3등급_점수체크",
+  "Position": {
+   "X": 1354.696,
+   "Y": 1269.422,
+   "Z": 101.841,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18163,
+  "Title": "채광_2등급_점수체크",
+  "Position": {
+   "X": 1353.766,
+   "Y": 1270.075,
+   "Z": 101.713,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18164,
+  "Title": "채집_3등급_점수체크",
+  "Position": {
+   "X": 1469.94,
+   "Y": 1051.8253,
+   "Z": 105.622,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18165,
+  "Title": "채집_2등급_점수체크",
+  "Position": {
+   "X": 1469.152,
+   "Y": 1051.3677,
+   "Z": 105.587,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18170,
+  "Title": "생활인던 룸 설정용",
+  "Position": {
+   "X": 1280.84,
+   "Y": 1107.7351,
+   "Z": 102.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18171,
+  "Title": "떨고 있는 선인장",
+  "Position": {
+   "X": 1696.56,
+   "Y": 1558.451,
+   "Z": 102.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18183,
+  "Title": "경작지 이정표",
+  "Position": {
+   "X": 1271.025,
+   "Y": 1112.0939,
+   "Z": 101.294,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18183,
+  "Title": "경작지 이정표",
+  "Position": {
+   "X": 1283.219,
+   "Y": 1096.6173,
+   "Z": 101.139,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 80.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18183,
+  "Title": "경작지 이정표",
+  "Position": {
+   "X": 1289.889,
+   "Y": 1120.3425,
+   "Z": 101.9,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -110.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18183,
+  "Title": "경작지 이정표",
+  "Position": {
+   "X": 1294.476,
+   "Y": 1109.475,
+   "Z": 101.139,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 160.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18184,
+  "Title": "바닐라",
+  "Position": {
+   "X": 1272.86,
+   "Y": 1111.4261,
+   "Z": 101.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18185,
+  "Title": "바나나 나무",
+  "Position": {
+   "X": 1283.657,
+   "Y": 1098.4803,
+   "Z": 101.292,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18186,
+  "Title": "사파이어 광맥",
+  "Position": {
+   "X": 1288.788,
+   "Y": 1118.2811,
+   "Z": 101.996,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18187,
+  "Title": "선인장",
+  "Position": {
+   "X": 1292.48,
+   "Y": 1109.9423,
+   "Z": 101.191,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18189,
+  "Title": "생활인던 시작 시 못움직임",
+  "Position": {
+   "X": 1283.0,
+   "Y": 1110.0,
+   "Z": 102.346,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18192,
+  "Title": "빛나는 다루리움 꽃",
+  "Position": {
+   "X": 1674.445,
+   "Y": 1572.589,
+   "Z": 100.844,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18193,
+  "Title": "빛나는 다루리움 꽃",
+  "Position": {
+   "X": 1680.815,
+   "Y": 1579.109,
+   "Z": 100.917,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18194,
+  "Title": "빛나는 다루리움 꽃",
+  "Position": {
+   "X": 1688.121,
+   "Y": 1584.593,
+   "Z": 100.993,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18197,
+  "Title": "보상 두대드",
+  "Position": {
+   "X": 1696.623,
+   "Y": 1558.349,
+   "Z": 102.373,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18201,
+  "Title": "보스방 다루변신",
+  "Position": {
+   "X": 1699.297,
+   "Y": 1553.278,
+   "Z": 101.712,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

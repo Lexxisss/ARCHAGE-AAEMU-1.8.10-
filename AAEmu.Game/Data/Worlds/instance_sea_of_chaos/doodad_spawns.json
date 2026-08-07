@@ -1,1 +1,152 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 12735,
+  "Title": "해상 전장 시작 지점",
+  "Position": {
+   "X": 1953.214,
+   "Y": 1889.693,
+   "Z": 102.336,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 220.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12748,
+  "Title": "탑승 발판",
+  "Position": {
+   "X": 1986.824,
+   "Y": 1845.265,
+   "Z": 110.834,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 217.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12750,
+  "Title": "전장시간이 5분 남았습니다. ",
+  "Position": {
+   "X": 1806.016,
+   "Y": 1954.576,
+   "Z": 178.512,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12648,
+  "Title": "칼리디스의 소용돌이",
+  "Position": {
+   "X": 2038.0,
+   "Y": 2292.0,
+   "Z": 100.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12735,
+  "Title": "해상 전장 시작 지점",
+  "Position": {
+   "X": 1641.399,
+   "Y": 2382.003,
+   "Z": 102.336,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 125.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12748,
+  "Title": "탑승 발판",
+  "Position": {
+   "X": 1597.763,
+   "Y": 2358.472,
+   "Z": 110.784,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 126.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12735,
+  "Title": "해상 전장 시작 지점",
+  "Position": {
+   "X": 2128.9542,
+   "Y": 2691.094,
+   "Z": 102.336,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12735,
+  "Title": "해상 전장 시작 지점",
+  "Position": {
+   "X": 2429.658,
+   "Y": 2196.096,
+   "Z": 102.336,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -52.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12748,
+  "Title": "탑승 발판",
+  "Position": {
+   "X": 2087.0679,
+   "Y": 2729.651,
+   "Z": 110.821,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 12748,
+  "Title": "탑승 발판",
+  "Position": {
+   "X": 2484.673,
+   "Y": 2229.191,
+   "Z": 110.8,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -50.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

@@ -1,0 +1,1592 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1218.24,
+   "Y": 1408.065,
+   "Z": 194.721,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1218.45,
+   "Y": 1343.565,
+   "Z": 223.808,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1218.665,
+   "Y": 1281.917,
+   "Z": 256.487,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1282.272,
+   "Y": 1471.832,
+   "Z": 144.271,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1282.889,
+   "Y": 1154.322,
+   "Z": 283.202,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1283.95,
+   "Y": 1215.342,
+   "Z": 269.032,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1283.952,
+   "Y": 1090.8103,
+   "Z": 306.846,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1287.444,
+   "Y": 1024.1575,
+   "Z": 332.107,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1346.128,
+   "Y": 1473.121,
+   "Z": 152.966,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1409.439,
+   "Y": 1535.525,
+   "Z": 141.438,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 91.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1474.129,
+   "Y": 1535.87,
+   "Z": 148.859,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 94.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1539.008,
+   "Y": 1535.27,
+   "Z": 169.018,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 87.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1603.138,
+   "Y": 1533.375,
+   "Z": 180.201,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1667.138,
+   "Y": 1533.375,
+   "Z": 176.83,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1731.138,
+   "Y": 1533.375,
+   "Z": 175.963,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1795.138,
+   "Y": 1533.375,
+   "Z": 184.976,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1859.138,
+   "Y": 1533.375,
+   "Z": 185.084,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1923.138,
+   "Y": 1533.375,
+   "Z": 173.165,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1987.138,
+   "Y": 1533.375,
+   "Z": 169.752,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1039.0288,
+   "Y": 1161.195,
+   "Z": 357.366,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 4.0837
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1114.9807,
+   "Y": 1598.828,
+   "Z": 241.102,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -47.7516
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1870.735,
+   "Y": 1703.498,
+   "Z": 180.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 200.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13996,
+  "Title": "붉은 이슬 웅덩이",
+  "Position": {
+   "X": 1761.966,
+   "Y": 1857.358,
+   "Z": 160.342,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -32.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1347.138,
+   "Y": 2813.375,
+   "Z": 99.2999,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1411.138,
+   "Y": 2813.375,
+   "Z": 160.883,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1475.138,
+   "Y": 2813.375,
+   "Z": 175.114,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1539.138,
+   "Y": 2813.375,
+   "Z": 174.844,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1603.138,
+   "Y": 2813.375,
+   "Z": 183.208,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1667.138,
+   "Y": 2813.375,
+   "Z": 185.614,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1731.138,
+   "Y": 2813.375,
+   "Z": 187.828,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1795.138,
+   "Y": 2813.375,
+   "Z": 185.451,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1859.138,
+   "Y": 2813.375,
+   "Z": 185.899,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1923.138,
+   "Y": 2813.375,
+   "Z": 184.415,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 1987.138,
+   "Y": 2813.375,
+   "Z": 186.091,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8219,
+  "Title": "붉은 이슬 제단 평화지역",
+  "Position": {
+   "X": 1914.652,
+   "Y": 2103.3884,
+   "Z": 228.018,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8735,
+  "Title": "붉은 이슬 제단 보호막",
+  "Position": {
+   "X": 1915.059,
+   "Y": 2103.481,
+   "Z": 176.654,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8814,
+  "Title": "붉은 이슬 제단 탈출 영역",
+  "Position": {
+   "X": 1908.722,
+   "Y": 2084.3408,
+   "Z": 171.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1702.118,
+   "Y": 2349.564,
+   "Z": 270.076,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 54.3707
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1866.322,
+   "Y": 2486.504,
+   "Z": 176.088,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 123.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1888.897,
+   "Y": 2103.3184,
+   "Z": 153.331,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -39.2812
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1912.5,
+   "Y": 2103.5396,
+   "Z": 209.823,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 27.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 1929.944,
+   "Y": 2084.8481,
+   "Z": 102.2,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10674,
+  "Title": "전투단 대원 너메르",
+  "Position": {
+   "X": 1904.382,
+   "Y": 2091.427,
+   "Z": 178.587,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 155.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 10675,
+  "Title": "전투단 대원 가르닥",
+  "Position": {
+   "X": 1914.796,
+   "Y": 2087.1802,
+   "Z": 178.587,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 160.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11192,
+  "Title": "붉은 호수",
+  "Position": {
+   "X": 1915.0,
+   "Y": 2100.0,
+   "Z": 125.921,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11248,
+  "Title": "타양의 빛",
+  "Position": {
+   "X": 1920.204,
+   "Y": 2100.4658,
+   "Z": 226.106,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -18.0199
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11298,
+  "Title": "전투단 대원 에이샤",
+  "Position": {
+   "X": 1925.118,
+   "Y": 2092.6533,
+   "Z": 178.587,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 220.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11299,
+  "Title": "전투단 대원 류한",
+  "Position": {
+   "X": 1927.686,
+   "Y": 2095.8281,
+   "Z": 178.587,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 240.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 11334,
+  "Title": "호수 빛 트리거",
+  "Position": {
+   "X": 1915.403,
+   "Y": 2102.312,
+   "Z": 124.061,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13997,
+  "Title": "붉은 이슬 웅덩이",
+  "Position": {
+   "X": 1636.784,
+   "Y": 2101.51,
+   "Z": 160.105,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -88.9998
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13998,
+  "Title": "붉은 이슬 웅덩이",
+  "Position": {
+   "X": 1746.127,
+   "Y": 2341.521,
+   "Z": 160.952,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 214.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13999,
+  "Title": "너무 커진 방울방울",
+  "Position": {
+   "X": 1914.44,
+   "Y": 2103.6641,
+   "Z": 176.937,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14065,
+  "Title": "붉은 이슬 제단 탈출 영역",
+  "Position": {
+   "X": 1908.871,
+   "Y": 2107.8997,
+   "Z": 172.669,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14065,
+  "Title": "붉은 이슬 제단 탈출 영역",
+  "Position": {
+   "X": 1909.291,
+   "Y": 2096.9878,
+   "Z": 172.336,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14065,
+  "Title": "붉은 이슬 제단 탈출 영역",
+  "Position": {
+   "X": 1917.558,
+   "Y": 2095.5684,
+   "Z": 172.055,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14065,
+  "Title": "붉은 이슬 제단 탈출 영역",
+  "Position": {
+   "X": 1920.323,
+   "Y": 2108.0378,
+   "Z": 172.582,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14065,
+  "Title": "붉은 이슬 제단 탈출 영역",
+  "Position": {
+   "X": 1925.532,
+   "Y": 2103.4985,
+   "Z": 169.514,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14067,
+  "Title": "붉은 이슬 제단 부활지점 받침",
+  "Position": {
+   "X": 1907.105,
+   "Y": 2092.2908,
+   "Z": 177.445,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -21.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.09
+ },
+ {
+  "Id": 0,
+  "UnitId": 14067,
+  "Title": "붉은 이슬 제단 부활지점 받침",
+  "Position": {
+   "X": 1908.066,
+   "Y": 2114.052,
+   "Z": 177.445,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -21.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.09
+ },
+ {
+  "Id": 0,
+  "UnitId": 14067,
+  "Title": "붉은 이슬 제단 부활지점 받침",
+  "Position": {
+   "X": 1919.29,
+   "Y": 2092.9141,
+   "Z": 177.445,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -21.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.09
+ },
+ {
+  "Id": 0,
+  "UnitId": 14067,
+  "Title": "붉은 이슬 제단 부활지점 받침",
+  "Position": {
+   "X": 1922.67,
+   "Y": 2114.052,
+   "Z": 177.301,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -21.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.09
+ },
+ {
+  "Id": 0,
+  "UnitId": 14067,
+  "Title": "붉은 이슬 제단 부활지점 받침",
+  "Position": {
+   "X": 1929.567,
+   "Y": 2103.6001,
+   "Z": 177.443,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -21.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.09
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2051.1382,
+   "Y": 1533.375,
+   "Z": 173.8,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2115.1382,
+   "Y": 1469.375,
+   "Z": 172.786,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2179.138,
+   "Y": 1469.375,
+   "Z": 177.729,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2243.138,
+   "Y": 1469.375,
+   "Z": 185.463,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2307.138,
+   "Y": 1469.375,
+   "Z": 209.155,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2371.138,
+   "Y": 1469.375,
+   "Z": 218.24,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2435.138,
+   "Y": 1469.375,
+   "Z": 220.999,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2499.138,
+   "Y": 1469.375,
+   "Z": 236.754,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2563.138,
+   "Y": 1533.375,
+   "Z": 210.744,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2627.138,
+   "Y": 1597.375,
+   "Z": 166.362,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2691.138,
+   "Y": 1661.375,
+   "Z": 152.292,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2045.38,
+   "Z": 150.382,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 1853.375,
+   "Z": 150.578,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 1789.375,
+   "Z": 150.39,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 1725.375,
+   "Z": 147.263,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 1981.375,
+   "Z": 150.605,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 1917.375,
+   "Z": 150.64,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 2075.9863,
+   "Y": 1812.392,
+   "Z": 201.677,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 2253.729,
+   "Y": 1815.619,
+   "Z": 179.572,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 139.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 2355.9,
+   "Y": 2004.119,
+   "Z": 178.175,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.6198
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13995,
+  "Title": "붉은 이슬 웅덩이",
+  "Position": {
+   "X": 2050.5405,
+   "Y": 1847.328,
+   "Z": 158.099,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 28.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2051.1382,
+   "Y": 2813.375,
+   "Z": 194.821,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2115.1382,
+   "Y": 2813.375,
+   "Z": 198.664,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2179.138,
+   "Y": 2813.375,
+   "Z": 197.056,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2243.138,
+   "Y": 2813.375,
+   "Z": 189.675,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2307.138,
+   "Y": 2813.375,
+   "Z": 183.124,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2371.138,
+   "Y": 2813.375,
+   "Z": 178.42,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2435.138,
+   "Y": 2813.375,
+   "Z": 184.689,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2499.138,
+   "Y": 2813.375,
+   "Z": 244.056,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2563.138,
+   "Y": 2749.375,
+   "Z": 252.832,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2627.138,
+   "Y": 2685.375,
+   "Z": 242.79,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2691.138,
+   "Y": 2621.375,
+   "Z": 241.461,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2237.375,
+   "Z": 160.065,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2429.375,
+   "Z": 155.607,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2173.375,
+   "Z": 150.637,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2109.3755,
+   "Z": 150.586,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2557.375,
+   "Z": 185.579,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2493.375,
+   "Z": 164.711,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2301.375,
+   "Z": 161.795,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 5389,
+  "Title": "못가는 지역 공사중 표시",
+  "Position": {
+   "X": 2755.138,
+   "Y": 2365.375,
+   "Z": 160.709,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 93.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 2103.1047,
+   "Y": 2077.085,
+   "Z": 183.975,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 27.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9009,
+  "Title": "탐험가의 가방",
+  "Position": {
+   "X": 2225.011,
+   "Y": 2281.732,
+   "Z": 184.346,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -42.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13991,
+  "Title": "붉은 이슬 웅덩이",
+  "Position": {
+   "X": 2060.4761,
+   "Y": 2345.296,
+   "Z": 160.174,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 148.0002
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 13994,
+  "Title": "붉은 이슬 웅덩이",
+  "Position": {
+   "X": 2184.892,
+   "Y": 2090.4927,
+   "Z": 160.714,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 87.0002
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

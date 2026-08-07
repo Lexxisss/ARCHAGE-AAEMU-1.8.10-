@@ -1,1 +1,932 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 9853,
+  "Title": "전리품 상자",
+  "Position": {
+   "X": 492.599,
+   "Y": 325.875,
+   "Z": 165.762,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -45.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 435.014,
+   "Y": 324.401,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 435.463,
+   "Y": 325.045,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 435.831,
+   "Y": 324.224,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 436.204,
+   "Y": 324.886,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 436.621,
+   "Y": 324.118,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 436.958,
+   "Y": 324.821,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 437.392,
+   "Y": 323.932,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 437.651,
+   "Y": 324.745,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 438.17,
+   "Y": 323.872,
+   "Z": 167.243,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 445.671,
+   "Y": 323.029,
+   "Z": 167.238,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 445.788,
+   "Y": 322.267,
+   "Z": 167.238,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 446.308,
+   "Y": 322.688,
+   "Z": 167.238,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 620.932,
+   "Y": 457.738,
+   "Z": 149.594,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 620.932,
+   "Y": 456.279,
+   "Z": 149.778,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 620.932,
+   "Y": 457.024,
+   "Z": 149.678,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 620.965,
+   "Y": 458.483,
+   "Z": 149.488,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 620.965,
+   "Y": 459.233,
+   "Z": 149.344,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9857,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 620.965,
+   "Y": 460.025,
+   "Z": 149.335,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9859,
+  "Title": "칼바람 폐광 화약통",
+  "Position": {
+   "X": 462.786,
+   "Y": 337.506,
+   "Z": 168.051,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9860,
+  "Title": "[고대던전] 칼바람 폐광 철교",
+  "Position": {
+   "X": 670.475,
+   "Y": 327.628,
+   "Z": 167.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9870,
+  "Title": "칼바람 폐광 바위",
+  "Position": {
+   "X": 519.936,
+   "Y": 365.758,
+   "Z": 169.029,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 92.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9870,
+  "Title": "칼바람 폐광 바위",
+  "Position": {
+   "X": 615.939,
+   "Y": 469.962,
+   "Z": 155.602,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 101.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.3
+ },
+ {
+  "Id": 0,
+  "UnitId": 9871,
+  "Title": "[고대던전] 칼바람 폐광 파괴되는 종유석",
+  "Position": {
+   "X": 608.078,
+   "Y": 544.151,
+   "Z": 124.334,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9871,
+  "Title": "[고대던전] 칼바람 폐광 파괴되는 종유석",
+  "Position": {
+   "X": 608.856,
+   "Y": 534.416,
+   "Z": 124.334,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9871,
+  "Title": "[고대던전] 칼바람 폐광 파괴되는 종유석",
+  "Position": {
+   "X": 615.085,
+   "Y": 540.072,
+   "Z": 121.76,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9871,
+  "Title": "[고대던전] 칼바람 폐광 파괴되는 종유석",
+  "Position": {
+   "X": 618.981,
+   "Y": 536.002,
+   "Z": 122.93,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 606.94,
+   "Y": 556.972,
+   "Z": 145.129,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 608.199,
+   "Y": 553.715,
+   "Z": 143.686,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 609.881,
+   "Y": 504.743,
+   "Z": 142.417,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 609.908,
+   "Y": 485.288,
+   "Z": 143.639,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 615.341,
+   "Y": 504.743,
+   "Z": 142.163,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 615.563,
+   "Y": 556.972,
+   "Z": 144.651,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 619.574,
+   "Y": 486.887,
+   "Z": 143.004,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9872,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 종유석",
+  "Position": {
+   "X": 619.736,
+   "Y": 553.715,
+   "Z": 144.106,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9873,
+  "Title": "[고대던전] 칼바람 폐광 도적단 창고문",
+  "Position": {
+   "X": 487.018,
+   "Y": 327.786,
+   "Z": 165.839,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9874,
+  "Title": "[고대던전] 칼바람 폐광 사자 석상",
+  "Position": {
+   "X": 489.479,
+   "Y": 323.848,
+   "Z": 167.294,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -53.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9875,
+  "Title": "[고대던전] 칼바람 폐광 떨어지는 바위",
+  "Position": {
+   "X": 391.5,
+   "Y": 323.2,
+   "Z": 167.1,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9876,
+  "Title": "[고대던전] 칼바람 폐광 폭탄 상자",
+  "Position": {
+   "X": 441.561,
+   "Y": 322.983,
+   "Z": 167.619,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -19.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9876,
+  "Title": "[고대던전] 칼바람 폐광 폭탄 상자",
+  "Position": {
+   "X": 444.206,
+   "Y": 322.303,
+   "Z": 167.619,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9876,
+  "Title": "[고대던전] 칼바람 폐광 폭탄 상자",
+  "Position": {
+   "X": 465.24,
+   "Y": 337.603,
+   "Z": 168.414,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9876,
+  "Title": "[고대던전] 칼바람 폐광 폭탄 상자",
+  "Position": {
+   "X": 622.664,
+   "Y": 458.793,
+   "Z": 149.942,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9876,
+  "Title": "[고대던전] 칼바람 폐광 폭탄 상자",
+  "Position": {
+   "X": 622.684,
+   "Y": 456.457,
+   "Z": 150.156,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9877,
+  "Title": "네르타의 상자",
+  "Position": {
+   "X": 399.74,
+   "Y": 324.672,
+   "Z": 168.56,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 204.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9878,
+  "Title": "[고대던전] 칼바람 폐광 출구",
+  "Position": {
+   "X": 791.899,
+   "Y": 325.781,
+   "Z": 248.042,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -88.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9879,
+  "Title": "[고대던전] 칼바람 폐광 출구",
+  "Position": {
+   "X": 613.368,
+   "Y": 642.916,
+   "Z": 139.813,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 172.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9880,
+  "Title": "[고대던전] 칼바람 폐광 출구",
+  "Position": {
+   "X": 739.676,
+   "Y": 325.706,
+   "Z": 167.239,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9881,
+  "Title": "[고대던전] 칼바람 폐광_맥기공격불가지역",
+  "Position": {
+   "X": 551.149,
+   "Y": 410.065,
+   "Z": 152.776,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9881,
+  "Title": "[고대던전] 칼바람 폐광_맥기공격불가지역",
+  "Position": {
+   "X": 560.551,
+   "Y": 415.275,
+   "Z": 150.326,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9881,
+  "Title": "[고대던전] 칼바람 폐광_맥기공격불가지역",
+  "Position": {
+   "X": 573.451,
+   "Y": 418.039,
+   "Z": 150.037,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9882,
+  "Title": "[고대던전] 칼바람 폐광_오카페공격불가지역",
+  "Position": {
+   "X": 602.288,
+   "Y": 569.629,
+   "Z": 135.686,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9882,
+  "Title": "[고대던전] 칼바람 폐광_오카페공격불가지역",
+  "Position": {
+   "X": 608.289,
+   "Y": 570.064,
+   "Z": 135.026,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 9882,
+  "Title": "[고대던전] 칼바람 폐광_오카페공격불가지역",
+  "Position": {
+   "X": 615.623,
+   "Y": 570.382,
+   "Z": 134.464,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14709,
+  "Title": "[고대던전] 칼바람 폐광 수맥",
+  "Position": {
+   "X": 672.683,
+   "Y": 317.623,
+   "Z": 143.786,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 59.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14726,
+  "Title": "[고대던전] 칼바람 폐광 수맥",
+  "Position": {
+   "X": 691.125,
+   "Y": 317.282,
+   "Z": 143.601,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14727,
+  "Title": "[고대던전] 칼바람 폐광 수맥",
+  "Position": {
+   "X": 678.331,
+   "Y": 338.674,
+   "Z": 143.875,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 64.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14728,
+  "Title": "[고대던전] 칼바람 폐광 물줄기",
+  "Position": {
+   "X": 670.133,
+   "Y": 330.637,
+   "Z": 143.994,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14728,
+  "Title": "[고대던전] 칼바람 폐광 물줄기",
+  "Position": {
+   "X": 684.838,
+   "Y": 314.117,
+   "Z": 143.856,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14728,
+  "Title": "[고대던전] 칼바람 폐광 물줄기",
+  "Position": {
+   "X": 687.912,
+   "Y": 333.87,
+   "Z": 143.961,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14728,
+  "Title": "[고대던전] 칼바람 폐광 물줄기",
+  "Position": {
+   "X": 692.929,
+   "Y": 326.997,
+   "Z": 143.707,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14728,
+  "Title": "[고대던전] 칼바람 폐광 물줄기",
+  "Position": {
+   "X": 697.694,
+   "Y": 319.181,
+   "Z": 143.848,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14736,
+  "Title": "[고대던전] 칼바람 폐광 물차오르기",
+  "Position": {
+   "X": 655.0,
+   "Y": 300.0,
+   "Z": 121.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

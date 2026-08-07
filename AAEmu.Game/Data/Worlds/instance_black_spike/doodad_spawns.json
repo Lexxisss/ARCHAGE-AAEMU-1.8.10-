@@ -1,0 +1,587 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 17065,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 969.873,
+   "Y": 562.608,
+   "Z": 146.499,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -55.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17065,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 972.02,
+   "Y": 598.808,
+   "Z": 146.62,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 230.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17065,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 1005.92,
+   "Y": 611.816,
+   "Z": 146.624,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 150.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17065,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 1008.01,
+   "Y": 548.423,
+   "Z": 146.639,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 30.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17102,
+  "Title": "검은 가시 첫 번째 시련의 방 입구",
+  "Position": {
+   "X": 736.434,
+   "Y": 598.72,
+   "Z": 151.826,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17108,
+  "Title": "아란제비아 비바람 생성",
+  "Position": {
+   "X": 500.756,
+   "Y": 304.871,
+   "Z": 117.909,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17110,
+  "Title": "검은 가시 보스1 상태 체크 (보스1 방에 배치)",
+  "Position": {
+   "X": 477.881,
+   "Y": 574.532,
+   "Z": 145.071,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17110,
+  "Title": "검은 가시 보스1 상태 체크 (보스1 방에 배치)",
+  "Position": {
+   "X": 478.674,
+   "Y": 869.291,
+   "Z": 132.174,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17110,
+  "Title": "검은 가시 보스1 상태 체크 (보스1 방에 배치)",
+  "Position": {
+   "X": 505.003,
+   "Y": 310.729,
+   "Z": 117.909,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17113,
+  "Title": "검은 가시 자물쇠",
+  "Position": {
+   "X": 748.799,
+   "Y": 586.381,
+   "Z": 151.699,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 177.0
+  },
+  "funcGroupId": 0,
+  "Scale": 0.58
+ },
+ {
+  "Id": 0,
+  "UnitId": 17114,
+  "Title": "검은 가시 두 번째 시련의 방 입구",
+  "Position": {
+   "X": 759.5,
+   "Y": 598.812,
+   "Z": 151.826,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17115,
+  "Title": "검은 가시 보스2 상태 체크",
+  "Position": {
+   "X": 989.577,
+   "Y": 584.282,
+   "Z": 145.762,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17115,
+  "Title": "검은 가시 보스2 상태 체크",
+  "Position": {
+   "X": 993.705,
+   "Y": 297.521,
+   "Z": 151.486,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17115,
+  "Title": "검은 가시 보스2 상태 체크",
+  "Position": {
+   "X": 995.678,
+   "Y": 863.289,
+   "Z": 154.531,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17116,
+  "Title": "검은 가시 입구로 귀환",
+  "Position": {
+   "X": 507.038,
+   "Y": 579.164,
+   "Z": 145.141,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 95.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17116,
+  "Title": "검은 가시 입구로 귀환",
+  "Position": {
+   "X": 524.532,
+   "Y": 867.912,
+   "Z": 134.12,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17116,
+  "Title": "검은 가시 입구로 귀환",
+  "Position": {
+   "X": 530.617,
+   "Y": 305.687,
+   "Z": 118.777,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17117,
+  "Title": "검은 가시 감옥 출구",
+  "Position": {
+   "X": 994.836,
+   "Y": 330.16,
+   "Z": 152.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17117,
+  "Title": "검은 가시 감옥 출구",
+  "Position": {
+   "X": 995.15,
+   "Y": 615.165,
+   "Z": 146.624,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17117,
+  "Title": "검은 가시 감옥 출구",
+  "Position": {
+   "X": 998.025,
+   "Y": 829.19,
+   "Z": 153.618,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17120,
+  "Title": "해방된 데니스트리오스의 지팡이",
+  "Position": {
+   "X": 998.972,
+   "Y": 261.158,
+   "Z": 151.291,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17122,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 987.071,
+   "Y": 894.385,
+   "Z": 153.861,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17122,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 998.002,
+   "Y": 898.146,
+   "Z": 153.861,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17122,
+  "Title": "금단의 영역 (아몬 파키드)",
+  "Position": {
+   "X": 1009.45,
+   "Y": 892.912,
+   "Z": 153.861,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17123,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 959.677,
+   "Y": 863.336,
+   "Z": 157.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17123,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 971.307,
+   "Y": 837.052,
+   "Z": 157.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17123,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 999.519,
+   "Y": 827.401,
+   "Z": 157.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17135,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 962.745,
+   "Y": 582.564,
+   "Z": 146.555,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17135,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 983.899,
+   "Y": 612.03,
+   "Z": 146.639,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 205.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17135,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 984.151,
+   "Y": 548.293,
+   "Z": 146.639,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -30.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17135,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 1018.92,
+   "Y": 598.09,
+   "Z": 146.665,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 120.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17135,
+  "Title": "어둠과 빛의 저울",
+  "Position": {
+   "X": 1019.91,
+   "Y": 560.213,
+   "Z": 146.624,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 50.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17263,
+  "Title": "심장 수호자의 방",
+  "Position": {
+   "X": 992.911,
+   "Y": 296.564,
+   "Z": 151.486,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17293,
+  "Title": "나차쉬가르방 룸 설정용",
+  "Position": {
+   "X": 479.211,
+   "Y": 868.101,
+   "Z": 132.273,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17294,
+  "Title": "칼릴탈몬방 룸 설정용",
+  "Position": {
+   "X": 995.733,
+   "Y": 579.155,
+   "Z": 146.713,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17315,
+  "Title": "영혼을 먹힌 자",
+  "Position": {
+   "X": 744.321,
+   "Y": 564.375,
+   "Z": 151.699,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -116.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17065,
+  "Title": "빛과 어둠의 저울",
+  "Position": {
+   "X": 1028.3953,
+   "Y": 580.781,
+   "Z": 146.624,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17123,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 1025.7198,
+   "Y": 835.912,
+   "Z": 157.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 17123,
+  "Title": "이프니르의 마력 장치",
+  "Position": {
+   "X": 1037.9772,
+   "Y": 863.336,
+   "Z": 157.477,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

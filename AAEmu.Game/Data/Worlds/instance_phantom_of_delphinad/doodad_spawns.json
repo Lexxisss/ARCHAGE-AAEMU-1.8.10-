@@ -1,0 +1,1022 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 14994,
+  "Title": "델피나드의 환영 출구",
+  "Position": {
+   "X": 1608.151,
+   "Y": 2034.53,
+   "Z": 281.844,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -119.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15087,
+  "Title": "그림자 매 형제 네옵스",
+  "Position": {
+   "X": 1519.598,
+   "Y": 2015.799,
+   "Z": 283.909,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -112.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15088,
+  "Title": "그림자 매 형제 테리",
+  "Position": {
+   "X": 1596.772,
+   "Y": 1915.135,
+   "Z": 282.9,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 96.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15092,
+  "Title": "그림자 매 형제 엔샤카",
+  "Position": {
+   "X": 1761.795,
+   "Y": 1885.141,
+   "Z": 291.474,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 159.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15156,
+  "Title": "그림자 매 형제 엔샤카",
+  "Position": {
+   "X": 1743.358,
+   "Y": 1969.639,
+   "Z": 284.652,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15209,
+  "Title": "그림자 매 형제 할",
+  "Position": {
+   "X": 1734.38,
+   "Y": 2042.44,
+   "Z": 284.438,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -68.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15210,
+  "Title": "그림자 매 형제 네옵스",
+  "Position": {
+   "X": 1732.755,
+   "Y": 2040.72,
+   "Z": 284.37,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -61.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15211,
+  "Title": "그림자 매 형제 테리",
+  "Position": {
+   "X": 1732.454,
+   "Y": 2042.93,
+   "Z": 284.511,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -98.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15212,
+  "Title": "그림자 매 형제 엔샤카",
+  "Position": {
+   "X": 1734.967,
+   "Y": 2037.26,
+   "Z": 284.43,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -41.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15213,
+  "Title": "그림자 매 형제 하라트",
+  "Position": {
+   "X": 1732.848,
+   "Y": 2036.59,
+   "Z": 283.931,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -26.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15214,
+  "Title": "그림자 매 형제 한본",
+  "Position": {
+   "X": 1730.337,
+   "Y": 2039.46,
+   "Z": 283.726,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -71.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15266,
+  "Title": "멜리사라의 영혼",
+  "Position": {
+   "X": 1735.457,
+   "Y": 2039.26,
+   "Z": 284.427,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -65.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 18166,
+  "Title": "멜리사라의 영혼",
+  "Position": {
+   "X": 1671.019,
+   "Y": 2015.665,
+   "Z": 280.253,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 134.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14925,
+  "Title": "부활의 나무",
+  "Position": {
+   "X": 1097.9165,
+   "Y": 2697.11,
+   "Z": 361.776,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 177.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14946,
+  "Title": "타양의 영혼",
+  "Position": {
+   "X": 1080.1406,
+   "Y": 2449.674,
+   "Z": 389.327,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -40.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14953,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1070.6233,
+   "Y": 2445.175,
+   "Z": 389.12,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -32.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14953,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1075.3955,
+   "Y": 2448.98,
+   "Z": 389.461,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -69.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14953,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1077.8938,
+   "Y": 2440.396,
+   "Z": 389.411,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -51.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14953,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1079.8997,
+   "Y": 2444.848,
+   "Z": 389.62,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -8.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14953,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1081.9946,
+   "Y": 2440.255,
+   "Z": 389.143,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -16.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14953,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1082.7693,
+   "Y": 2445.219,
+   "Z": 389.277,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 23.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14955,
+  "Title": "타양의 영혼",
+  "Position": {
+   "X": 1313.732,
+   "Y": 2684.276,
+   "Z": 363.047,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -44.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14956,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1314.53,
+   "Y": 2682.113,
+   "Z": 364.228,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -52.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14957,
+  "Title": "타양의 영혼",
+  "Position": {
+   "X": 1660.907,
+   "Y": 2886.96,
+   "Z": 365.061,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 66.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14958,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1662.337,
+   "Y": 2888.47,
+   "Z": 365.004,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 65.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1373.208,
+   "Y": 2669.889,
+   "Z": 329.258,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 73.37
+  },
+  "funcGroupId": 0,
+  "Scale": 3.408
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1378.165,
+   "Y": 2730.97,
+   "Z": 329.133,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 73.37
+  },
+  "funcGroupId": 0,
+  "Scale": 2.728
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1408.49,
+   "Y": 2634.327,
+   "Z": 333.094,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.52
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1419.868,
+   "Y": 2695.864,
+   "Z": 329.552,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.67
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1422.388,
+   "Y": 2622.915,
+   "Z": 337.554,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.4817
+  },
+  "funcGroupId": 0,
+  "Scale": 2.371
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1432.962,
+   "Y": 2617.262,
+   "Z": 339.322,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.4817
+  },
+  "funcGroupId": 0,
+  "Scale": 3.581
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1440.681,
+   "Y": 2662.1,
+   "Z": 333.897,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -56.5083
+  },
+  "funcGroupId": 0,
+  "Scale": 1.718
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1445.123,
+   "Y": 2625.538,
+   "Z": 340.487,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 73.37
+  },
+  "funcGroupId": 0,
+  "Scale": 2.371
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1445.379,
+   "Y": 2650.604,
+   "Z": 336.189,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.5765
+  },
+  "funcGroupId": 0,
+  "Scale": 1.353
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1451.958,
+   "Y": 2630.143,
+   "Z": 340.992,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 166.928
+  },
+  "funcGroupId": 0,
+  "Scale": 1.908
+ },
+ {
+  "Id": 0,
+  "UnitId": 14959,
+  "Title": "폭포의 눈",
+  "Position": {
+   "X": 1452.825,
+   "Y": 2642.302,
+   "Z": 337.679,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.5765
+  },
+  "funcGroupId": 0,
+  "Scale": 2.029
+ },
+ {
+  "Id": 0,
+  "UnitId": 14962,
+  "Title": "안탈론의 분신",
+  "Position": {
+   "X": 1614.229,
+   "Y": 3038.911,
+   "Z": 359.094,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 207.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14992,
+  "Title": "멜리사라의 영혼",
+  "Position": {
+   "X": 1734.258,
+   "Y": 2099.6257,
+   "Z": 288.198,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 117.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 14993,
+  "Title": "그림자 매 기지 지하실 출구",
+  "Position": {
+   "X": 1760.221,
+   "Y": 2115.8243,
+   "Z": 273.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 210.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15086,
+  "Title": "그림자 매 형제 할",
+  "Position": {
+   "X": 1572.845,
+   "Y": 2068.8956,
+   "Z": 282.8,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 121.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15093,
+  "Title": "그림자 매 형제 하라트",
+  "Position": {
+   "X": 1659.0,
+   "Y": 2132.4165,
+   "Z": 286.253,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 49.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15094,
+  "Title": "그림자 매 형제 한본",
+  "Position": {
+   "X": 1658.028,
+   "Y": 2131.4984,
+   "Z": 286.253,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 35.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15096,
+  "Title": "비상종 거치대",
+  "Position": {
+   "X": 1794.967,
+   "Y": 2106.2162,
+   "Z": 290.459,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -57.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15097,
+  "Title": "비상종",
+  "Position": {
+   "X": 1794.9,
+   "Y": 2106.1439,
+   "Z": 293.323,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15101,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1067.9067,
+   "Y": 2752.935,
+   "Z": 336.877,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -75.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15102,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1266.481,
+   "Y": 2586.801,
+   "Z": 380.799,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15103,
+  "Title": "정원의 눈사자",
+  "Position": {
+   "X": 1097.5359,
+   "Y": 2462.409,
+   "Z": 386.86,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 125.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15153,
+  "Title": "그림자 매 형제 할",
+  "Position": {
+   "X": 1738.261,
+   "Y": 2102.2943,
+   "Z": 289.577,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 126.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15154,
+  "Title": "그림자 매 형제 네옵스",
+  "Position": {
+   "X": 1736.723,
+   "Y": 2103.5532,
+   "Z": 289.103,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 182.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15155,
+  "Title": "그림자 매 형제 테리",
+  "Position": {
+   "X": 1734.864,
+   "Y": 2102.1034,
+   "Z": 288.557,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 223.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15156,
+  "Title": "그림자 매 형제 엔샤카",
+  "Position": {
+   "X": 1739.058,
+   "Y": 2096.7664,
+   "Z": 289.633,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 54.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15157,
+  "Title": "그림자 매 형제 하라트",
+  "Position": {
+   "X": 1738.943,
+   "Y": 2094.8595,
+   "Z": 289.511,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 44.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15158,
+  "Title": "그림자 매 형제 한본",
+  "Position": {
+   "X": 1736.316,
+   "Y": 2095.7792,
+   "Z": 288.785,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -7.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15160,
+  "Title": "널부러진 문서들",
+  "Position": {
+   "X": 1856.632,
+   "Y": 2195.707,
+   "Z": 273.901,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15162,
+  "Title": "낡은 소파",
+  "Position": {
+   "X": 1862.26,
+   "Y": 2185.807,
+   "Z": 273.753,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15163,
+  "Title": "널부러진 문서들",
+  "Position": {
+   "X": 1843.235,
+   "Y": 2186.829,
+   "Z": 273.979,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15164,
+  "Title": "오래된 책장",
+  "Position": {
+   "X": 1813.377,
+   "Y": 2181.0,
+   "Z": 274.397,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15169,
+  "Title": "의심스런 책장",
+  "Position": {
+   "X": 1811.776,
+   "Y": 2165.018,
+   "Z": 273.206,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 122.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15173,
+  "Title": "박제된 정령",
+  "Position": {
+   "X": 1769.884,
+   "Y": 2131.6055,
+   "Z": 274.235,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -56.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15219,
+  "Title": "멜리사라의 영혼",
+  "Position": {
+   "X": 1826.427,
+   "Y": 2108.0608,
+   "Z": 290.02,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 116.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15221,
+  "Title": "알 수 없는 문",
+  "Position": {
+   "X": 1766.341,
+   "Y": 2138.9417,
+   "Z": 273.041,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -60.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15222,
+  "Title": "델피나드의 환영 출구",
+  "Position": {
+   "X": 1541.926,
+   "Y": 2073.9769,
+   "Z": 282.441,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 59.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15244,
+  "Title": "멜리사라의 영혼",
+  "Position": {
+   "X": 1780.556,
+   "Y": 2049.6006,
+   "Z": 290.12,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -102.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15270,
+  "Title": "박제된 정령",
+  "Position": {
+   "X": 1767.912,
+   "Y": 2135.1312,
+   "Z": 274.235,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -59.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15271,
+  "Title": "박제된 정령",
+  "Position": {
+   "X": 1763.866,
+   "Y": 2142.0347,
+   "Z": 274.235,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -63.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15272,
+  "Title": "박제된 정령",
+  "Position": {
+   "X": 1761.879,
+   "Y": 2145.504,
+   "Z": 274.235,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -64.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15281,
+  "Title": "염료 제작대",
+  "Position": {
+   "X": 1787.49,
+   "Y": 2167.262,
+   "Z": 274.805,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 120.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 15285,
+  "Title": "의심스런 책장",
+  "Position": {
+   "X": 1812.276,
+   "Y": 2165.3,
+   "Z": 275.467,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -65.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

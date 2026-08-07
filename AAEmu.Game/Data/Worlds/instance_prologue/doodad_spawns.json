@@ -1,1 +1,47 @@
-[]
+[
+ {
+  "Id": 0,
+  "UnitId": 7437,
+  "Title": "범선 사다리",
+  "Position": {
+   "X": 111.121,
+   "Y": 488.9,
+   "Z": 100.005,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 28.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8023,
+  "Title": "성문",
+  "Position": {
+   "X": 911.188,
+   "Y": 1487.593,
+   "Z": 135.663,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 198.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 8023,
+  "Title": "성문",
+  "Position": {
+   "X": 949.707,
+   "Y": 1644.732,
+   "Z": 172.455,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -88.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]

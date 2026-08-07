@@ -1,0 +1,2297 @@
+[
+ {
+  "Id": 0,
+  "UnitId": 16776,
+  "Title": "공간의 틈: 기갑병단 지부로 이동",
+  "Position": {
+   "X": 325.691,
+   "Y": 1292.195,
+   "Z": 457.341,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 180.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16545,
+  "Title": "여왕의 제단의 문",
+  "Position": {
+   "X": 6956.055,
+   "Y": 6920.227,
+   "Z": 666.864,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -90.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16572,
+  "Title": "나차쉬 차원의 문_01",
+  "Position": {
+   "X": 6898.379,
+   "Y": 6942.564,
+   "Z": 669.398,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 133.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16674,
+  "Title": "차원의 문",
+  "Position": {
+   "X": 6789.91,
+   "Y": 6921.521,
+   "Z": 683.438,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16703,
+  "Title": "지정된 지점",
+  "Position": {
+   "X": 7157.34,
+   "Y": 6774.581,
+   "Z": 682.089,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6297.25,
+   "Y": 6435.625,
+   "Z": 370.125,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.8422
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6307.125,
+   "Y": 6434.875,
+   "Z": 371.625,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6309.125,
+   "Y": 6409.125,
+   "Z": 379.646,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -1.4787
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6325.819,
+   "Y": 6419.677,
+   "Z": 376.305,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.3755
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6330.541,
+   "Y": 6424.25,
+   "Z": 375.913,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6341.808,
+   "Y": 6418.256,
+   "Z": 379.502,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -3.3755
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6345.009,
+   "Y": 6406.069,
+   "Z": 382.027,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.4787
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6346.566,
+   "Y": 6564.306,
+   "Z": 368.147,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6417.599,
+   "Y": 6462.248,
+   "Z": 366.991,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0361
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6442.706,
+   "Y": 6453.853,
+   "Z": 368.37,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6445.482,
+   "Y": 6441.071,
+   "Z": 371.918,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6450.63,
+   "Y": 6452.852,
+   "Z": 368.7,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6708.464,
+   "Y": 6686.784,
+   "Z": 343.272,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -118.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6712.156,
+   "Y": 6716.892,
+   "Z": 346.731,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -118.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6719.878,
+   "Y": 6708.022,
+   "Z": 345.138,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -118.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6721.416,
+   "Y": 6701.085,
+   "Z": 344.02,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.985
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6795.93,
+   "Y": 6827.194,
+   "Z": 347.373,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6798.801,
+   "Y": 6824.524,
+   "Z": 347.648,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6805.506,
+   "Y": 6823.301,
+   "Z": 347.855,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6818.361,
+   "Y": 6829.577,
+   "Z": 347.795,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6283.336,
+   "Y": 6348.47,
+   "Z": 396.326,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 2.6367
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6298.914,
+   "Y": 6433.115,
+   "Z": 371.112,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 1.2674
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6304.414,
+   "Y": 6353.15,
+   "Z": 398.435,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 2.6367
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6311.622,
+   "Y": 6427.331,
+   "Z": 373.636,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6328.434,
+   "Y": 6406.947,
+   "Z": 378.96,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6352.889,
+   "Y": 6579.887,
+   "Z": 370.332,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 239.3404
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6359.734,
+   "Y": 6584.783,
+   "Z": 369.857,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -2.6596
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6369.273,
+   "Y": 6600.385,
+   "Z": 370.652,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6444.868,
+   "Y": 6464.048,
+   "Z": 365.604,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -2.0448
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6446.823,
+   "Y": 6453.003,
+   "Z": 368.545,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6455.447,
+   "Y": 6469.437,
+   "Z": 364.195,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -101.768
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6719.114,
+   "Y": 6693.938,
+   "Z": 342.612,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.32
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6719.479,
+   "Y": 6738.555,
+   "Z": 346.507,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6803.154,
+   "Y": 6821.976,
+   "Z": 347.904,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6270.979,
+   "Y": 6416.097,
+   "Z": 369.176,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -1.4875
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6278.522,
+   "Y": 6346.169,
+   "Z": 396.119,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6283.222,
+   "Y": 6342.767,
+   "Z": 395.827,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6289.702,
+   "Y": 6304.397,
+   "Z": 400.339,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -2.0395
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6296.688,
+   "Y": 6312.866,
+   "Z": 400.953,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6304.663,
+   "Y": 6348.359,
+   "Z": 398.472,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6305.0,
+   "Y": 6432.75,
+   "Z": 371.875,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6305.483,
+   "Y": 6410.51,
+   "Z": 379.517,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6306.901,
+   "Y": 6356.006,
+   "Z": 398.34,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6309.622,
+   "Y": 6424.956,
+   "Z": 373.853,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6326.434,
+   "Y": 6404.572,
+   "Z": 378.96,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6328.218,
+   "Y": 6424.002,
+   "Z": 375.513,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6339.267,
+   "Y": 6428.333,
+   "Z": 376.489,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.8238
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6342.25,
+   "Y": 6405.375,
+   "Z": 381.5,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6374.569,
+   "Y": 6600.103,
+   "Z": 369.501,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6441.421,
+   "Y": 6451.843,
+   "Z": 368.73,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6701.555,
+   "Y": 6661.611,
+   "Z": 345.953,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6715.38,
+   "Y": 6721.387,
+   "Z": 346.21,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -75.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6718.431,
+   "Y": 6703.657,
+   "Z": 344.487,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6719.477,
+   "Y": 6732.062,
+   "Z": 345.914,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6794.171,
+   "Y": 6827.999,
+   "Z": 347.131,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6816.549,
+   "Y": 6828.949,
+   "Z": 347.782,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 203.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16746,
+  "Title": "나차쉬 차원의 문_02",
+  "Position": {
+   "X": 6898.082,
+   "Y": 6897.588,
+   "Z": 669.398,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 44.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16747,
+  "Title": "나차쉬 차원의 문_03",
+  "Position": {
+   "X": 6827.012,
+   "Y": 6898.375,
+   "Z": 676.6,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 48.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16748,
+  "Title": "나차쉬 차원의 문_04",
+  "Position": {
+   "X": 6827.37,
+   "Y": 6941.593,
+   "Z": 676.6,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 131.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16774,
+  "Title": "공간의 틈: 여왕의 방으로 이동",
+  "Position": {
+   "X": 6824.979,
+   "Y": 6920.581,
+   "Z": 677.757,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 96.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16795,
+  "Title": "여왕의제단 출구",
+  "Position": {
+   "X": 6825.118,
+   "Y": 6920.734,
+   "Z": 677.758,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 96.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16845,
+  "Title": "구름 효과 지역 (침공전 - 나차쉬 보스 전용)",
+  "Position": {
+   "X": 6762.573,
+   "Y": 6919.277,
+   "Z": 670.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16845,
+  "Title": "구름 효과 지역 (침공전 - 나차쉬 보스 전용)",
+  "Position": {
+   "X": 6783.09,
+   "Y": 6919.277,
+   "Z": 670.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16845,
+  "Title": "구름 효과 지역 (침공전 - 나차쉬 보스 전용)",
+  "Position": {
+   "X": 6805.459,
+   "Y": 6919.277,
+   "Z": 670.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16845,
+  "Title": "구름 효과 지역 (침공전 - 나차쉬 보스 전용)",
+  "Position": {
+   "X": 6847.641,
+   "Y": 6919.277,
+   "Z": 670.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16845,
+  "Title": "구름 효과 지역 (침공전 - 나차쉬 보스 전용)",
+  "Position": {
+   "X": 6883.23,
+   "Y": 6919.277,
+   "Z": 670.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16845,
+  "Title": "구름 효과 지역 (침공전 - 나차쉬 보스 전용)",
+  "Position": {
+   "X": 6902.943,
+   "Y": 6919.153,
+   "Z": 670.0,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6904.394,
+   "Y": 6909.139,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -54.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6906.765,
+   "Y": 6911.24,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -95.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6907.092,
+   "Y": 6909.561,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -37.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6907.224,
+   "Y": 6928.109,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -26.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6907.348,
+   "Y": 6930.104,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 143.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6907.789,
+   "Y": 6931.789,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 202.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6908.37,
+   "Y": 6912.504,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -66.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6908.384,
+   "Y": 6910.849,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6908.83,
+   "Y": 6931.37,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 24.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6908.833,
+   "Y": 6929.05,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 237.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6909.241,
+   "Y": 6908.585,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 120.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6909.737,
+   "Y": 6930.013,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -37.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6909.901,
+   "Y": 6910.821,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 202.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16846,
+  "Title": "부패한 시체",
+  "Position": {
+   "X": 6910.008,
+   "Y": 6928.578,
+   "Z": 671.013,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 191.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16876,
+  "Title": "여왕의제단 출구",
+  "Position": {
+   "X": 6976.739,
+   "Y": 6919.796,
+   "Z": 666.771,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 87.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16884,
+  "Title": "여왕의제단 시작 지점 가이드 제공",
+  "Position": {
+   "X": 6947.16,
+   "Y": 6919.833,
+   "Z": 666.864,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16896,
+  "Title": "이동할수없음",
+  "Position": {
+   "X": 6815.972,
+   "Y": 6920.561,
+   "Z": 679.292,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 520,
+  "Title": "모루",
+  "Position": {
+   "X": 6267.6,
+   "Y": 7471.742,
+   "Z": 107.636,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 77.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 532,
+  "Title": "목공 제작대",
+  "Position": {
+   "X": 6270.791,
+   "Y": 7464.589,
+   "Z": 107.568,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 113.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 557,
+  "Title": "용광로",
+  "Position": {
+   "X": 6272.359,
+   "Y": 7478.541,
+   "Z": 107.568,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 28.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 558,
+  "Title": "목공 선반",
+  "Position": {
+   "X": 6269.347,
+   "Y": 7467.209,
+   "Z": 107.568,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -65.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 559,
+  "Title": "암석 가공대",
+  "Position": {
+   "X": 6268.329,
+   "Y": 7477.395,
+   "Z": 107.568,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 115.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 561,
+  "Title": "직조 선반",
+  "Position": {
+   "X": 6276.603,
+   "Y": 7464.988,
+   "Z": 107.609,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 117.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 987,
+  "Title": "휴대용 램프",
+  "Position": {
+   "X": 6273.699,
+   "Y": 7470.08,
+   "Z": 109.346,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 66.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 6256.729,
+   "Y": 7484.929,
+   "Z": 107.973,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 88.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 6267.466,
+   "Y": 7481.214,
+   "Z": 108.19,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -71.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 6268.676,
+   "Y": 7446.197,
+   "Z": 107.856,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -19.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 6273.769,
+   "Y": 7458.913,
+   "Z": 108.32,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -120.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6457.104,
+   "Y": 7562.361,
+   "Z": 351.945,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6683.411,
+   "Y": 7762.557,
+   "Z": 354.318,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16716,
+  "Title": "나차쉬의 알 (유란기)",
+  "Position": {
+   "X": 6684.898,
+   "Y": 7755.107,
+   "Z": 354.68,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6455.889,
+   "Y": 7566.774,
+   "Z": 352.317,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -69.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6458.661,
+   "Y": 7575.106,
+   "Z": 354.576,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6480.084,
+   "Y": 7556.696,
+   "Z": 352.973,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6485.298,
+   "Y": 7554.389,
+   "Z": 352.594,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6569.993,
+   "Y": 7412.74,
+   "Z": 345.433,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.8947
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6570.96,
+   "Y": 7406.485,
+   "Z": 345.621,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.8947
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6584.48,
+   "Y": 7375.702,
+   "Z": 340.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6604.124,
+   "Y": 7411.537,
+   "Z": 337.617,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 189.5817
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6611.48,
+   "Y": 7413.959,
+   "Z": 339.09,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 189.5817
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6673.774,
+   "Y": 7754.588,
+   "Z": 355.686,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6680.904,
+   "Y": 7763.316,
+   "Z": 354.871,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16719,
+  "Title": "나차쉬의 알 (청란기)",
+  "Position": {
+   "X": 6685.464,
+   "Y": 7764.262,
+   "Z": 354.176,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -71.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6468.331,
+   "Y": 7553.299,
+   "Z": 353.212,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6481.546,
+   "Y": 7556.662,
+   "Z": 352.834,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6490.595,
+   "Y": 7579.349,
+   "Z": 352.372,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 194.3857
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6493.793,
+   "Y": 7577.986,
+   "Z": 351.245,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 215.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6501.469,
+   "Y": 7544.18,
+   "Z": 353.113,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6586.423,
+   "Y": 7371.008,
+   "Z": 338.468,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 215.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6586.678,
+   "Y": 7391.55,
+   "Z": 339.561,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 214.9523
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6598.999,
+   "Y": 7412.47,
+   "Z": 337.946,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 212.321
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6622.477,
+   "Y": 7405.119,
+   "Z": 339.219,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 212.321
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6677.201,
+   "Y": 7756.354,
+   "Z": 355.124,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 3.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6692.305,
+   "Y": 7759.799,
+   "Z": 353.39,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6712.2,
+   "Y": 7730.477,
+   "Z": 352.793,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16720,
+  "Title": "나차쉬의 알 (성란기)",
+  "Position": {
+   "X": 6717.297,
+   "Y": 7716.226,
+   "Z": 353.192,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 85.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16724,
+  "Title": "무너진 돌 틈",
+  "Position": {
+   "X": 6381.29,
+   "Y": 7759.035,
+   "Z": 390.96,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 557,
+  "Title": "용광로",
+  "Position": {
+   "X": 7539.67,
+   "Y": 6082.911,
+   "Z": 237.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -104.9999
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 557,
+  "Title": "용광로",
+  "Position": {
+   "X": 7548.469,
+   "Y": 6090.887,
+   "Z": 238.407,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 16.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 558,
+  "Title": "목공 선반",
+  "Position": {
+   "X": 7536.496,
+   "Y": 6093.359,
+   "Z": 237.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 160.0001
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 559,
+  "Title": "암석 가공대",
+  "Position": {
+   "X": 7541.502,
+   "Y": 6086.344,
+   "Z": 237.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -18.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 559,
+  "Title": "암석 가공대",
+  "Position": {
+   "X": 7545.165,
+   "Y": 6090.183,
+   "Z": 238.413,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 9.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 560,
+  "Title": "가죽 세공 선반",
+  "Position": {
+   "X": 7523.556,
+   "Y": 6090.674,
+   "Z": 237.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -111.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 561,
+  "Title": "직조 선반",
+  "Position": {
+   "X": 7525.903,
+   "Y": 6095.462,
+   "Z": 237.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 71.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 566,
+  "Title": "아키움 가공대",
+  "Position": {
+   "X": 7531.61,
+   "Y": 6093.595,
+   "Z": 237.098,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -20.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 986,
+  "Title": "테이블 램프",
+  "Position": {
+   "X": 7550.765,
+   "Y": 6089.25,
+   "Z": 240.184,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -38.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 987,
+  "Title": "휴대용 램프",
+  "Position": {
+   "X": 7532.49,
+   "Y": 6087.406,
+   "Z": 238.876,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -67.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 7511.878,
+   "Y": 6096.548,
+   "Z": 237.682,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 212.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 7546.958,
+   "Y": 6082.236,
+   "Z": 238.997,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 22.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 7562.168,
+   "Y": 6101.395,
+   "Z": 239.155,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 25.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 7562.737,
+   "Y": 6112.183,
+   "Z": 239.514,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 235.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 2319,
+  "Title": "램프",
+  "Position": {
+   "X": 7565.723,
+   "Y": 6122.71,
+   "Z": 238.452,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": -82.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16726,
+  "Title": "나미우",
+  "Position": {
+   "X": 7542.791,
+   "Y": 6099.231,
+   "Z": 237.418,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16542,
+  "Title": "이프니르 산 차원의 연구소 기계 장치",
+  "Position": {
+   "X": 7323.957,
+   "Y": 6694.187,
+   "Z": 694.435,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 179.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16701,
+  "Title": "지정된 지점",
+  "Position": {
+   "X": 7481.735,
+   "Y": 7078.315,
+   "Z": 680.267,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16702,
+  "Title": "지정된 지점",
+  "Position": {
+   "X": 7168.4121,
+   "Y": 7079.418,
+   "Z": 680.266,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16704,
+  "Title": "지정된 지점",
+  "Position": {
+   "X": 7490.649,
+   "Y": 6774.595,
+   "Z": 682.086,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16712,
+  "Title": "차원 연구소 출입문 (닫힘)",
+  "Position": {
+   "X": 7324.12,
+   "Y": 6746.903,
+   "Z": 699.805,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16727,
+  "Title": "어린 뮤닷시",
+  "Position": {
+   "X": 8099.058,
+   "Y": 7005.055,
+   "Z": 218.976,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16759,
+  "Title": "하파쉬",
+  "Position": {
+   "X": 7324.172,
+   "Y": 6707.422,
+   "Z": 694.357,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 0.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ },
+ {
+  "Id": 0,
+  "UnitId": 16698,
+  "Title": "공중섬 이동장치",
+  "Position": {
+   "X": 7579.735,
+   "Y": 7486.798,
+   "Z": 137.849,
+   "Roll": 0.0,
+   "Pitch": 0.0,
+   "Yaw": 75.0
+  },
+  "funcGroupId": 0,
+  "Scale": 1.0
+ }
+]
