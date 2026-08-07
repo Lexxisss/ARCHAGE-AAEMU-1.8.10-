@@ -98,8 +98,10 @@ public class DoodadFuncClout : DoodadPhaseFuncTemplate
         if (Duration > 0)
         {
             // TODO : Add a proper delay in here
-            owner.FuncTask = new DoodadFuncCloutTask(caster, owner, 0, NextPhase, areaTrigger);
-            TaskManager.Instance.Schedule(owner.FuncTask, TimeSpan.FromMilliseconds(Duration));
+            // Schedule the task we just built; FuncTask can be cleared by a delete in between.
+            var task = new DoodadFuncCloutTask(caster, owner, 0, NextPhase, areaTrigger);
+            owner.FuncTask = task;
+            TaskManager.Instance.Schedule(task, TimeSpan.FromMilliseconds(Duration));
         }
         //owner.OverridePhase = NextPhase; // Since phases trigger all at once let the doodad know its okay to stop here if the roll succeeded
 

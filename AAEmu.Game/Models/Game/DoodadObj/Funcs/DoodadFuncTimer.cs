@@ -44,8 +44,12 @@ public class DoodadFuncTimer : DoodadPhaseFuncTemplate
 
             owner.GrowthTime = DateTime.UtcNow.AddMilliseconds(timeLeft);
 
-            owner.FuncTask = new DoodadFuncTimerTask(caster, owner, 0, NextPhase);
-            TaskManager.Instance.Schedule(owner.FuncTask, TimeSpan.FromMilliseconds(timeLeft));
+            // Hand the scheduler the task itself, not a second read of the field: a doodad that
+            // is deleted between these two lines clears FuncTask, and the scheduler was then
+            // asked to run nothing.
+            var task = new DoodadFuncTimerTask(caster, owner, 0, NextPhase);
+            owner.FuncTask = task;
+            TaskManager.Instance.Schedule(task, TimeSpan.FromMilliseconds(timeLeft));
         }
 
         // никогда не прерываем последовательность фазовых функций

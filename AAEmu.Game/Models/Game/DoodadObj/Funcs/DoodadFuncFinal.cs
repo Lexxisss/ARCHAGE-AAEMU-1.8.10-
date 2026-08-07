@@ -37,16 +37,20 @@ public class DoodadFuncFinal : DoodadPhaseFuncTemplate
                 owner.OverridePhaseTime = DateTime.MinValue;
                 afterTimerDelay = owner.TimeLeft;
             }
-            owner.FuncTask = new DoodadFuncFinalTask(caster, owner, 0, Respawn, delay);
-            TaskManager.Instance.Schedule(owner.FuncTask, TimeSpan.FromMilliseconds(afterTimerDelay)); // After ms remove the object from visibility
+            // Keep the task in hand rather than reading FuncTask back - a concurrent delete
+            // clears the field, and the scheduler was then handed nothing at all.
+            var afterTask = new DoodadFuncFinalTask(caster, owner, 0, Respawn, delay);
+            owner.FuncTask = afterTask;
+            TaskManager.Instance.Schedule(afterTask, TimeSpan.FromMilliseconds(afterTimerDelay)); // After ms remove the object from visibility
         }
         else
         {
             owner.Delete();
             if (!Respawn) { return false; }
 
-            owner.FuncTask = new DoodadFuncFinalTask(caster, owner, 0, Respawn, delay);
-            TaskManager.Instance.Schedule(owner.FuncTask, TimeSpan.FromMilliseconds(delay));
+            var respawnTask = new DoodadFuncFinalTask(caster, owner, 0, Respawn, delay);
+            owner.FuncTask = respawnTask;
+            TaskManager.Instance.Schedule(respawnTask, TimeSpan.FromMilliseconds(delay));
         }
 
         return true;

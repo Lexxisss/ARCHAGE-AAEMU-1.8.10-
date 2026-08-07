@@ -44,8 +44,10 @@ public class DoodadFuncGrowth : DoodadPhaseFuncTemplate
         else
             Logger.Trace("DoodadFuncGrowth: Delay {0}, StartScale {1}, EndScale {2}, NextPhase {3}", Delay, StartScale, EndScale, NextPhase);
 
-        owner.FuncTask = new DoodadFuncGrowthTask(caster, owner, 0, NextPhase, EndScale / 1000f);
-        TaskManager.Instance.Schedule(owner.FuncTask, TimeSpan.FromMilliseconds(timeLeft));
+        // Schedule the task we just built; FuncTask can be cleared by a delete in between.
+        var task = new DoodadFuncGrowthTask(caster, owner, 0, NextPhase, EndScale / 1000f);
+        owner.FuncTask = task;
+        TaskManager.Instance.Schedule(task, TimeSpan.FromMilliseconds(timeLeft));
 
         return false;
     }

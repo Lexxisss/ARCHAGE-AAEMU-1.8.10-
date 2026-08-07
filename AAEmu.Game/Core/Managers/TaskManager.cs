@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers.Id;
@@ -58,7 +60,8 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
         _generalScheduler?.Shutdown(true);
     }
 
-    public async void Schedule(Task task, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1)
+    public async void Schedule(Task task, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1,
+        [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
     {
         this.ScheduleRequestCount++;
 
@@ -67,7 +70,12 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
 
         if (task == null)
         {
-            Logger.Error("Task.Schedule: Task is NULL !!! StartTime: {0}, repeatInterval: {1}, count: {2}", startTime, repeatInterval, count);
+            // Nothing is scheduled and nothing breaks, but somebody upstream is holding a task
+            // that has already been let go. The old message named neither the caller nor the
+            // file, so the same line appeared hundreds of times with no way to find its source.
+            Logger.Warn(
+                "Task.Schedule called with no task from {0}:{1} (start {2}, repeat {3}, count {4})",
+                Path.GetFileName(callerFile), callerLine, startTime, repeatInterval, count);
             return;
         }
 
@@ -166,14 +174,17 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
         }
     }
 
-    public async void CronSchedule(Task task, string cronExpression, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1)
+    public async void CronSchedule(Task task, string cronExpression, TimeSpan? startTime = null, TimeSpan? repeatInterval = null, int count = -1,
+        [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
     {
         if (_generalScheduler.IsShutdown)
             return;
 
         if (task == null)
         {
-            Logger.Error("Task.Schedule: Task is NULL !!! StartTime: {0}, repeatInterval: {1}, count: {2}", startTime, repeatInterval, count);
+            Logger.Warn(
+                "Task.CronSchedule called with no task from {0}:{1} (cron {2}, start {3}, repeat {4}, count {5})",
+                Path.GetFileName(callerFile), callerLine, cronExpression, startTime, repeatInterval, count);
             return;
         }
 
@@ -261,9 +272,12 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
             Release(task);
             return result;
         }
-        catch (SchedulerException e)
+        catch (SchedulerException)
         {
-            Logger.Debug(e, "Task {0} was already gone when it was cancelled", task.JobDetail.Key);
+            // A task that fired while its cancellation was in flight is an everyday race, not a
+            // fault, so it is logged at trace and without the exception: the stack trace said
+            // nothing but "Quartz threw", and it said it dozens of times a minute.
+            Logger.Trace("Task {0} was already gone when it was cancelled", task.JobDetail.Key);
             Release(task);
             return true;
         }

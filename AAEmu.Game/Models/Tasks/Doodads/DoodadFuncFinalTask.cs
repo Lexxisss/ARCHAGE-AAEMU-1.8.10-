@@ -41,11 +41,14 @@ public class DoodadFuncFinalTask : DoodadFuncTask
 
         if (_respawn && _owner.Spawner != null)
         {
-            if (_respawnTime == null && _owner.FuncTask != null)
+            // Read the field once. Despawn deletes the doodad, and Delete clears FuncTask, so
+            // the value tested here was not the value handed to the scheduler a line later.
+            var pendingTask = _owner.FuncTask;
+            if (_respawnTime == null && pendingTask != null)
             {
                 _owner.Spawner.Despawn(_owner);
                 _respawnTime = DateTime.UtcNow;
-                TaskManager.Instance.Schedule(_owner.FuncTask, TimeSpan.FromMilliseconds(_delay));
+                TaskManager.Instance.Schedule(pendingTask, TimeSpan.FromMilliseconds(_delay));
                 return;
             }
 
