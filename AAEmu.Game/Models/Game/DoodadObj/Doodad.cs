@@ -804,12 +804,27 @@ public class Doodad : BaseUnit
     private bool _suppressCreatePacket;
 
     /// <summary>
+    /// A fixture that only ever reaches a client in its parent's batch, never on its own.
+    /// </summary>
+    /// <remarks>
+    /// The suppression used to last only as long as the call that spawned it, which held for the
+    /// moment a building was put up and for nothing afterwards. On the next login the fixtures
+    /// were already standing, so the ordinary visibility pass announced all five of them one by
+    /// one - and it does that before the building's own record goes out. A fixture that arrives
+    /// before that record is never fitted to anything, and the batch that follows a second later
+    /// is ignored as a repeat of objects the client already has. Hence a house that came out of
+    /// the ground furnished and came back from a relog bare.
+    /// </remarks>
+    public bool PublishedInParentBatchOnly { get; set; }
+
+    /// <summary>
     /// Registers this doodad in the world without emitting the one-object create packet.
     /// Houses use this for their built-in fixtures: the fixtures are published together only
     /// after the client's house record has had a separate processing turn.
     /// </summary>
     public void SpawnForBatch()
     {
+        PublishedInParentBatchOnly = true;
         _suppressCreatePacket = true;
         try
         {
@@ -823,11 +838,12 @@ public class Doodad : BaseUnit
 
     public override void AddVisibleObject(Character character)
     {
-        if (!_suppressCreatePacket)
+        var announceOnItsOwn = !_suppressCreatePacket && !PublishedInParentBatchOnly;
+        if (announceOnItsOwn)
             character.SendPacket(new SCDoodadCreatedPacket(this));
 
         base.AddVisibleObject(character);
-        if (!_suppressCreatePacket && HasQuestFunction())
+        if (announceOnItsOwn && HasQuestFunction())
             character.Quests.RefreshQuestNotifier();
     }
 
