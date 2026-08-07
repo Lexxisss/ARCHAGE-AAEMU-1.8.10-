@@ -98,6 +98,9 @@ public class Doodad : BaseUnit
         }
     }
 
+    /// <summary>How many times one interaction may be passed on to another phase before we stop.</summary>
+    private const int MaxPhaseRedirects = 8;
+
     public uint FuncGroupId
     {
         get => _funcGroupId;
@@ -279,6 +282,10 @@ public class Doodad : BaseUnit
             FuncGroupId = (uint)funcGroupId;
         }
 
+        // Phase functions may pass an interaction along to another phase. Two phases that point at
+        // each other would otherwise hand it back and forth forever.
+        var redirects = 0;
+
         while (true)
         {
             var player = caster as Character;
@@ -300,8 +307,21 @@ public class Doodad : BaseUnit
 
             if (allFuncsForGroup.Count <= 0)
             {
-                // Phase has no funcs
-                return;
+                // A phase may hold nothing but a reaction to who is standing there - the unknown
+                // ore vein waits in one whose only content is a quest reaction, and only the phase
+                // it leads to knows how to be broken. Returning here left every such doodad inert.
+                //
+                // Only the reactions are consulted, not the whole phase: better than seven thousand
+                // phases sit on a timer with no funcs of their own, and re-running those would
+                // restart a crop's growth every time somebody clicked it.
+                var reactionPhase = FindCasterReactionPhase(caster);
+                if (reactionPhase <= 0 || ++redirects > MaxPhaseRedirects ||
+                    DoChangePhase(caster, reactionPhase))
+                {
+                    return;
+                }
+
+                continue; // the reaction chose a new phase; offer the same skill to it
             }
 
             if (skillId == 0)
@@ -346,6 +366,44 @@ public class Doodad : BaseUnit
 
             skillId = 0;
         }
+    }
+
+    /// <summary>
+    /// Asks this phase's caster-dependent reactions where they would send the interacting
+    /// character, without running the rest of the phase.
+    /// </summary>
+    /// <returns>The phase chosen, or 0 when nothing reacted to this caster.</returns>
+    private int FindCasterReactionPhase(BaseUnit caster)
+    {
+        if (caster is not Character)
+        {
+            return 0; // reactions read a quest log; anything else has none
+        }
+
+        foreach (var phaseFunc in DoodadManager.Instance.GetPhaseFunc(FuncGroupId))
+        {
+            if (phaseFunc?.FuncType != nameof(DoodadFuncQuestReact))
+            {
+                continue;
+            }
+
+            var template = DoodadManager.Instance.GetPhaseFuncTemplate(phaseFunc.FuncId, phaseFunc.FuncType);
+            if (template == null || !template.Use(caster, this))
+            {
+                continue;
+            }
+
+            // Use reports its choice through OverridePhase. Take it back off the doodad: the phase
+            // change below is ours to make, and a leftover value would be applied a second time.
+            var chosen = OverridePhase;
+            OverridePhase = 0;
+            if (chosen > 0 && chosen != FuncGroupId)
+            {
+                return chosen;
+            }
+        }
+
+        return 0;
     }
 
     /// <summary>

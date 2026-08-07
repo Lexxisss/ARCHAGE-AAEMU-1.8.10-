@@ -17,6 +17,7 @@ using AAEmu.Game.Models.Game.DoodadObj.Templates;
 using AAEmu.Game.Models.Game.Housing;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
+using AAEmu.Game.Models.Game.Quests.Static;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.World;
@@ -456,6 +457,30 @@ public class DoodadManager : Singleton<DoodadManager>
                             NextPhase = reader.GetInt32("next_phase", -1)
                         };
                         _phaseFuncTemplates["DoodadFuncClimateReact"].Add(func.Id, func);
+                    }
+                }
+            }
+
+            // doodad_func_quest_reacts
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM doodad_func_quest_reacts";
+                command.Prepare();
+                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                {
+                    while (reader.Read())
+                    {
+                        var func = new DoodadFuncQuestReact
+                        {
+                            Id = reader.GetUInt32("id"),
+                            QuestId = reader.GetUInt32("quest_id", 0),
+                            QuestStatusId = (QuestStatus)reader.GetUInt32("quest_status_id", 0),
+                            QuestComponentId = reader.GetUInt32("quest_component_id", 0),
+                            NextPhase = reader.GetInt32("next_phase", -1),
+                            BubbleOnce = reader.GetBoolean("bubble_once", true), // stored as 't'/'f'
+                            BubbleId = reader.GetUInt32("bubble_id", 0)
+                        };
+                        _phaseFuncTemplates["DoodadFuncQuestReact"].Add(func.Id, func);
                     }
                 }
             }
