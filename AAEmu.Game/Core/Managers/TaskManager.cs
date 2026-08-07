@@ -235,6 +235,16 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
         }
     }
 
+    /// <summary>Marks a task cancelled once and hands its id back exactly once.</summary>
+    private static void Release(Task task)
+    {
+        if (task.Cancelled)
+            return;
+
+        task.Cancelled = true;
+        TaskIdManager.Instance.ReleaseId(task.Id);
+    }
+
     public async Task<bool> Cancel(Task task)
     {
         if (task?.JobDetail == null)
@@ -242,21 +252,21 @@ public class TaskManager : Singleton<TaskManager>, ITaskManager
         try
         {
             var result = await _generalScheduler.DeleteJob(task.JobDetail.Key);
-            if (result)
-            {
-                task.Cancelled = true;
 
-                TaskIdManager.Instance.ReleaseId(task.Id);
-            }
-
+            // A job that is no longer there is a job that needs no cancelling. Quartz answers
+            // false when it never found it and throws when it is already on its way out - a task
+            // that fired while this call was in flight. Both mean the same thing, and both used
+            // to leave the task id held forever: only the successful path ever gave it back, so
+            // every doodad timer that finished a moment too early leaked one.
+            Release(task);
             return result;
         }
         catch (SchedulerException e)
         {
-            Logger.Warn(e, "Error canceling task");
+            Logger.Debug(e, "Task {0} was already gone when it was cancelled", task.JobDetail.Key);
+            Release(task);
+            return true;
         }
-
-        return task.Cancelled;
     }
 }
 
