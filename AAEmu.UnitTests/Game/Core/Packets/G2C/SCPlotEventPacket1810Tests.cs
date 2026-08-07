@@ -9,7 +9,7 @@ namespace AAEmu.UnitTests.Game.Core.Packets.G2C;
 public class SCPlotEventPacket1810Tests
 {
     [Fact]
-    public void CastingAndChannelingTimesUseUInt32TenMillisecondUnits()
+    public void CastingAndChannelingTimesUseUInt16TenMillisecondUnits()
     {
         var packet = new SCPlotEventPacket(
             0x1234,
@@ -22,13 +22,14 @@ public class SCPlotEventPacket1810Tests
             0x0A0B0C,
             4560,
             PlotEventFlags.ConditionOk,
+            targetUnitIds: [0x0D0E0Fu],
             inputDirection: 7);
 
         var encoded = new PacketStream();
         packet.Write(encoded);
 
         // Two UNIT PlotObjects and no target-unit/value arrays make this layout fixed.
-        Assert.Equal(43, encoded.Count);
+        Assert.Equal(42, encoded.Count);
 
         var stream = new PacketStream(encoded.GetBytes());
         Assert.Equal((ushort)0x1234, stream.ReadUInt16());
@@ -42,11 +43,12 @@ public class SCPlotEventPacket1810Tests
 
         Assert.Equal(0ul, stream.ReadUInt64());
         Assert.Equal(0x070809u, stream.ReadBc());
-        Assert.Equal(123u, stream.ReadUInt32());
+        Assert.Equal((ushort)123, stream.ReadUInt16());
         Assert.Equal(0x0A0B0Cu, stream.ReadBc());
-        Assert.Equal(456u, stream.ReadUInt32());
+        Assert.Equal((ushort)456, stream.ReadUInt16());
 
-        Assert.Equal((byte)0, stream.ReadByte()); // targetUnitCount
+        Assert.Equal((byte)1, stream.ReadByte()); // targetUnitCount
+        Assert.Equal(0x0D0E0Fu, stream.ReadBc());
         Assert.Equal((byte)PlotEventFlags.ConditionOk, stream.ReadByte());
         Assert.Equal((byte)7, stream.ReadByte());
         Assert.Equal(0, stream.LeftBytes);

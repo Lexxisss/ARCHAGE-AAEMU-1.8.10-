@@ -1,6 +1,5 @@
 ﻿using System;
 
-using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Units;
 
 namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects;
@@ -20,7 +19,9 @@ public class FxGroupAnim : SpecialEffectAction
         int value3,
         int value4)
     {
-        // TODO ...
-        if (caster is Character) { Logger.Debug("Special effects: FxGroupAnim value1 {0}, value2 {1}, value3 {2}, value4 {3}", value1, value2, value3, value4); }
+        // No standalone visual packet belongs here. Target x2game.dll 0x39638450 resolves
+        // FxGroupAnim from the local special_effects row selected by SCPlotEvent.eventId.
+        // These value1..value4 fields are therefore not serialized by this action. PlotNode
+        // supplies the event id, source/target PlotObjects and targetUnitIds in SCPlotEventPacket.
     }
 }

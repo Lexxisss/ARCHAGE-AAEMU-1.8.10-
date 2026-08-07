@@ -59,8 +59,10 @@ public class SCPlotEventPacket : GamePacket
         stream.Write(_itemId);  // itemObjId:u64
 
         // The client keeps casting and channeling as two independent references.
-        // Both durations are u32 values in 10 ms units. Target x2game.dll
-        // 0x399EBAAA/0x399EBB07 call the same serializer at 0x399CD9B0.
+        // Both durations are u16 values in 10 ms units on the wire. Target x2game.dll
+        // 0x399EBAAA/0x399EBB07 call 0x399CD9B0; that helper keeps a u32 millisecond
+        // value in memory but serializes it through PacketSerializer slot +0x88 (u16).
+        // Writing u32 here shifts targetUnitCount and the flags byte by four bytes.
         stream.WriteBc(_castingObjId);
         stream.Write(EncodeMilliseconds(_castingTimeMs));
         stream.WriteBc(_channelingObjId);
@@ -84,11 +86,9 @@ public class SCPlotEventPacket : GamePacket
         return stream;
     }
 
-    private static uint EncodeMilliseconds(uint milliseconds)
+    private static ushort EncodeMilliseconds(uint milliseconds)
     {
-        // x2game.dll 0x399CD9B0 serializes a dword and stores time in 10 ms wire units.
-        // Using u16 shifted channelingObjId, targetUnitCount, flags and inputDirection by
-        // two bytes for each duration, so the client never reached ConditionOk/effect dispatch.
-        return milliseconds / 10u;
+        var wireUnits = milliseconds / 10u;
+        return (ushort)Math.Min(wireUnits, ushort.MaxValue);
     }
 }

@@ -208,9 +208,13 @@ public class LeapSkillController : SkillController
         moveType.RotationX = rx;
         moveType.RotationY = ry;
         moveType.RotationZ = rz;
+        // ActorFlags is the independent actor optional-block gate word (TARGET 0x399F0928).
+        // It is not the skill-controller type: scType/phase use common Flags bit 0x10.
+        // Player positional Leap is client-driven, so this server-generated path must not invent
+        // an actor.subType (ActorFlags 0x8000) or an unproved scType/phase.
         moveType.ActorFlags = 0;
-        // As in NPC movement, common Flags bit 0x04 suppresses the client branch
-        // that consumes stance/locomotion state (target 0x391FF970).
+        // Keep 0x04 clear: target 0x391FF970 takes the locomotion-consuming branch only when
+        // this suppressor bit is absent.
         moveType.Flags = 0;
         moveType.DeltaMovement = new sbyte[3];
         moveType.DeltaMovement[1] = completed ? (sbyte)0 : (sbyte)127;
