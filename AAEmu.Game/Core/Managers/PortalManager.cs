@@ -40,6 +40,7 @@ public class PortalManager : Singleton<PortalManager>
     private Dictionary<uint, List<Portal>> _recalls;
     private Dictionary<uint, uint> _recallsKey;
     private Dictionary<uint, Portal> _respawns;
+    private Dictionary<uint, Portal> _respawnsBySubZone;
     private Dictionary<uint, Portal> _worldgates;
 
     private Dictionary<uint, OpenPortalReagents> _openPortalInlandReagents;
@@ -79,7 +80,9 @@ public class PortalManager : Singleton<PortalManager>
 
     public Portal GetRespawnBySubZoneId(uint subZoneId)
     {
-        return _respawns?.Values.FirstOrDefault(x => x.SubZoneId == subZoneId);
+        return _respawnsBySubZone != null && _respawnsBySubZone.TryGetValue(subZoneId, out var respawn)
+            ? respawn
+            : null;
     }
 
     public Portal GetRespawnById(uint id)
@@ -139,6 +142,7 @@ public class PortalManager : Singleton<PortalManager>
 
         _recalls = new Dictionary<uint, List<Portal>>();
         _respawns = new Dictionary<uint, Portal>();
+        _respawnsBySubZone = new Dictionary<uint, Portal>();
         _worldgates = new Dictionary<uint, Portal>();
         _recallsKey = new Dictionary<uint, uint>();
 
@@ -234,6 +238,13 @@ public class PortalManager : Singleton<PortalManager>
                     Logger.Warn(
                         "Respawn point {0} ({1}) is listed twice; keeping the first",
                         respawn.Id, respawn.Name);
+
+                // A separate index for "which grave belongs to this subzone". Asking the
+                // id-keyed dictionary that question answered it with whichever point happened
+                // to carry that number as its id - fifteen of them do - and the answer was a
+                // grave in another province.
+                if (respawn.SubZoneId != 0)
+                    _respawnsBySubZone.TryAdd(respawn.SubZoneId, respawn);
             }
         else
             throw new GameException($"PortalManager: Parse {filePath} file");
@@ -473,7 +484,11 @@ public class PortalManager : Singleton<PortalManager>
         // The sub-zone mapping is authoritative when present. Falling back to a raw nearest-point
         // search across every world can select a Nui from another continent/instance whose local
         // coordinates merely happen to be closer.
-        if (_respawns.TryGetValue(character.SubZoneId, out var localRespawn) &&
+        // Ask the subzone index, not the one keyed by return point id. Asking the id-keyed
+        // dictionary for a subzone answered with whichever point happens to carry that number
+        // as its own id, and fifteen of them do - which is how dying in Arcum Iris put the
+        // character down in Cinderstone Moor.
+        if (_respawnsBySubZone.TryGetValue(character.SubZoneId, out var localRespawn) &&
             (localRespawn.WorldId == 0 || localRespawn.WorldId == character.Transform.WorldId))
             return localRespawn;
 
