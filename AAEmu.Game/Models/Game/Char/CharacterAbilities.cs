@@ -56,6 +56,31 @@ public class CharacterAbilities
             ability.Exp += exp;
     }
 
+    /// <summary>
+    /// Initializes a live special/mutation ability (Predator/Trooper).
+    /// Client LearnSpecialAbility sends hidden skill 33995 with SkillObjectAbility(type 19);
+    /// the learned ability is initialized from the character's current experience.
+    /// </summary>
+    public bool LearnSpecialAbility(AbilityType type)
+    {
+        if (!type.IsSpecialAbility() || !Abilities.TryGetValue(type, out var ability))
+            return false;
+
+        ability.Exp = Owner.Experience;
+        return true;
+    }
+
+    public uint GetAbilityExpForWire(byte abilityId)
+    {
+        if (abilityId == (byte)AbilityType.General)
+            return 0;
+
+        if (!Abilities.TryGetValue((AbilityType)abilityId, out var ability))
+            return 0;
+
+        return ability.Exp > 0 ? (uint)ability.Exp : 0;
+    }
+
     public void AddActiveExp(int exp)
     {
         // TODO SCExpChangedPacket

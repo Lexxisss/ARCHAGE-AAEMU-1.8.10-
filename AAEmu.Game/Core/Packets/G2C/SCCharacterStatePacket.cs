@@ -42,8 +42,10 @@ public class SCCharacterStatePacket : GamePacket
         stream.Write(0);  // return district type id
         stream.Write(0u); // resurrection district type id
 
-        for (var i = 0; i < Protocol1810AbilityCount; i++)
-            stream.Write(0u);
+        // TARGET/DEV serialize a fixed abilityExp[30] array (u32 each). Slot 0 is General;
+        // CharacterAbilities owns the persistent records for ids 1..29.
+        for (byte i = 0; i < Protocol1810AbilityCount; i++)
+            stream.Write(_character.Abilities?.GetAbilityExpForWire(i) ?? 0u);
 
         stream.Write(_character.Mails.UnreadMailCount.TotalSent);
         stream.Write(_character.Mails.UnreadMailCount.TotalReceived);

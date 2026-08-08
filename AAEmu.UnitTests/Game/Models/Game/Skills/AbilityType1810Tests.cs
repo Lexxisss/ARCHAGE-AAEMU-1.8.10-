@@ -48,4 +48,21 @@ public class AbilityType1810Tests
         Assert.True(abilities.Abilities.ContainsKey(AbilityType.Trooper));
         Assert.Equal(14, abilities.Abilities.Keys.Count(x => x.IsPlayerSkillset()));
     }
+
+    [Fact]
+    public void SpecialAbilityCopiesCurrentCharacterExperienceAndAppearsInWireExpTable()
+    {
+        var character = new Character(new UnitCustomModelParams())
+        {
+            Experience = 123456
+        };
+        var abilities = new CharacterAbilities(character);
+        character.Abilities = abilities;
+
+        Assert.True(abilities.LearnSpecialAbility(AbilityType.Predator));
+        Assert.Equal(123456, abilities.Abilities[AbilityType.Predator].Exp);
+        Assert.Equal(123456u, abilities.GetAbilityExpForWire((byte)AbilityType.Predator));
+        Assert.False(abilities.LearnSpecialAbility(AbilityType.Madness));
+        Assert.Equal(0u, abilities.GetAbilityExpForWire((byte)AbilityType.General));
+    }
 }

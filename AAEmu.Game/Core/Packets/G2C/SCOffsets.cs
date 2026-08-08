@@ -251,7 +251,9 @@ public static class SCOffsets
     public const ushort SCSkillsResetPacket = 0x068;
     public const ushort off_3A108B8C = 0x206;
     public const ushort SCAbilitySwappedPacket = 0x23E;
-    public const ushort SCSpecialAbilityActivedPacket = 0x03F;
+    // TARGET/Dedicated: SCSpecialAbilityLearnedPacket, body = u8 ability id.
+    public const ushort SCSpecialAbilityLearnedPacket = 0x03F;
+    public const ushort SCSpecialAbilityActivedPacket = SCSpecialAbilityLearnedPacket; // legacy name
     public const ushort SCAbilitySetUpdatedPacket = 0x252;
     public const ushort SCAbilitySetUsableSlotCountUpdatedPacket = 0x2FA;
     public const ushort SCChangeAbilitySetPassiveBuffPacket = 0x064;
