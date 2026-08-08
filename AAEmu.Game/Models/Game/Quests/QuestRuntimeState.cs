@@ -15,6 +15,7 @@ using AAEmu.Game.Models.Game.Items.Actions;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Models.Game.World;
 using AAEmu.Game.Models.Game.Quests.Static;
 using AAEmu.Game.Models.StaticValues;
 using AAEmu.Game.Models.Tasks.Quests;
@@ -36,6 +37,11 @@ public partial class Quest
     private readonly object _runtimeLock = new();
     private readonly Dictionary<uint, int> _runtimeActProgress = new();
     private readonly HashSet<uint> _runtimeCompletedComponents = new();
+
+    /// <summary>How often a watched sphere asks whether the player is standing in it, in ms.</summary>
+    private const int SphereWatchTickRate = 500;
+
+    private readonly List<SphereQuestTrigger> _sphereWatches = new();
     // Supply acts run before the next Progress component becomes active. Keep
     // only those quest-generated item events long enough to apply them to that
     // next component; pre-existing inventory is deliberately not included.
@@ -563,7 +569,62 @@ public partial class Quest
         }
 
         ApplyDeferredSupplyEvents(component, objectiveActs);
+        WatchQuestSpheres(component, objectiveActs);
         RebuildClientObjectives();
+    }
+
+    /// <summary>
+    /// Starts watching the places on the map this step is asking the player to reach.
+    /// </summary>
+    /// <remarks>
+    /// A sphere objective is answered by walking into a volume the client's level design
+    /// describes, and the volume is only watched while somebody is being asked to reach it -
+    /// which means a watch has to be put up when the step begins. Two older code paths did
+    /// that and this one did not, so the volume was never watched at all: entering it did
+    /// nothing, however right the objective and the sphere behind it were.
+    ///
+    /// The volumes are listed under the id of the component that asks for them.
+    /// </remarks>
+    private void WatchQuestSpheres(QuestComponent component, QuestAct[] objectiveActs)
+    {
+        if (Owner == null || objectiveActs.All(x => x.DetailType != "QuestActObjSphere"))
+            return;
+
+        var spheres = SphereQuestManager.Instance.GetQuestSpheres(component.Id);
+        if (spheres == null || spheres.Count == 0)
+        {
+            Logger.Warn("Quest {0}: step {1} asks for a sphere the level design does not describe",
+                TemplateId, component.Id);
+            return;
+        }
+
+        foreach (var sphere in spheres)
+        {
+            var trigger = new SphereQuestTrigger
+            {
+                Sphere = sphere,
+                Owner = Owner,
+                Quest = this as Quest,
+                TickRate = SphereWatchTickRate
+            };
+
+            _sphereWatches.Add(trigger);
+            SphereQuestManager.Instance.AddSphereQuestTrigger(trigger);
+        }
+
+        Logger.Info("Quest {0}: watching {1} sphere(s) for step {2}", TemplateId, spheres.Count, component.Id);
+    }
+
+    /// <summary>Stops watching, whatever the quest ended by.</summary>
+    private void StopWatchingQuestSpheres()
+    {
+        if (_sphereWatches.Count == 0)
+            return;
+
+        foreach (var trigger in _sphereWatches)
+            SphereQuestManager.Instance.RemoveSphereQuestTrigger(trigger);
+
+        _sphereWatches.Clear();
     }
 
     /// <summary>
@@ -1278,6 +1339,11 @@ public partial class Quest
     {
         lock (_runtimeLock)
         {
+            // Both endings come through here - dropped and finished - so this is where a watch
+            // put up for a step is taken back down. Left standing it would keep asking where
+            // the player is for a quest that is over.
+            StopWatchingQuestSpheres();
+
             // Reward acts carry the same cleanup/destroy_when_drop flags as the items a
             // quest hands out for its own use, but those flags describe the quest's
             // supplies, not its payout. ApplyRuntimeRewards calls this right after
