@@ -749,13 +749,13 @@ public partial class Quest
                 return false;
             }
 
-            // On a scored quest every objective feeds the same total, so an event has to be
-            // offered to all of them. Looking only at the component the quest currently sits on
-            // meant that once it moved past the monsters, killing more of them counted for
-            // nothing at all - the progress simply stopped arriving.
-            var candidateActs = Template.Score > 0
-                ? ScoredObjectiveComponents().SelectMany(x => x.Acts.OfType<QuestAct>()).OrderBy(x => x.Id)
-                : component.Acts.OfType<QuestAct>().OrderBy(x => x.Id);
+            // Every objective of the quest is listening, not only the one its current component
+            // holds. They stand beside one another, and the player is free to do them in any
+            // order - one swing at a vein that yields iron and copper answers both at once.
+            // Looking only at the component the quest sits on threw the other half away.
+            var candidateActs = ObjectiveComponents()
+                .SelectMany(x => x.Acts.OfType<QuestAct>())
+                .OrderBy(x => x.Id);
 
             var changed = false;
             foreach (var act in candidateActs)
@@ -882,16 +882,19 @@ public partial class Quest
     }
 
     /// <summary>
-    /// Every objective a scored quest counts towards its total, wherever it is listed.
+    /// Every objective the quest has, wherever it is listed.
     /// </summary>
     /// <remarks>
-    /// The score belongs to the quest, not to one of its components: quest_contexts.score is a
-    /// single number for the whole thing. Quest 1135 asks for twenty points a kill or ten points
-    /// an item, so either objective alone reaches a hundred - they are two ways to do the same
-    /// job, not two stages of it. Counting one component at a time made the second an extra stage
-    /// and asked for two hundred points' worth of work.
+    /// Objective components stand beside one another rather than in a row. The field that would
+    /// put them in a row, next_component, is zero on 8699 of this client's 8700 of them, and the
+    /// client shows their objectives together from the moment the quest is accepted.
+    ///
+    /// A scored quest makes the same point from the other side: quest_contexts.score is a single
+    /// number for the whole thing. Quest 1135 asks for twenty points a kill or ten points an item,
+    /// so either objective alone reaches a hundred - two ways to do the same job, not two stages
+    /// of it.
     /// </remarks>
-    private IEnumerable<QuestComponent> ScoredObjectiveComponents()
+    private IEnumerable<QuestComponent> ObjectiveComponents()
         => Template.GetComponents(QuestComponentKind.Progress);
 
     private int CalculateScore(QuestComponent component)
@@ -899,7 +902,7 @@ public partial class Quest
         if (Template.Score > 0)
         {
             long total = 0;
-            foreach (var scored in ScoredObjectiveComponents())
+            foreach (var scored in ObjectiveComponents())
             {
                 total += ScoreOf(scored);
             }
@@ -1346,25 +1349,17 @@ public partial class Quest
     /// The objectives the client is shown, in the order it shows them.
     /// </summary>
     /// <remarks>
-    /// A scored quest spreads its objectives over several components and counts them all towards
-    /// one total, so all of them belong on the client's list. Taking only the component the quest
-    /// happens to be standing on left the others invisible: gathering counted on the server and
-    /// the bar never moved, because the gathering lived in a component the list never looked at.
+    /// A quest spreads its objectives over several components and the client shows all of them
+    /// side by side, so all of them belong on the list. Taking only the component the quest
+    /// happens to be standing on left the others invisible: the ore quest asks for fifty iron and
+    /// two copper, and a vein that yields both filled the iron bar and left the copper one alone.
     /// </remarks>
     private QuestAct[] GetClientObjectiveActs()
     {
-        if (Template.Score > 0)
-        {
-            return ScoredObjectiveComponents()
-                .OrderBy(x => x.Id)
-                .SelectMany(x => x.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(a => a.Id))
-                .ToArray();
-        }
-
-        if (_objectiveComponentId == 0 || !Template.Components.TryGetValue(_objectiveComponentId, out var component))
-            return Array.Empty<QuestAct>();
-
-        return component.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(x => x.Id).ToArray();
+        return ObjectiveComponents()
+            .OrderBy(x => x.Id)
+            .SelectMany(x => x.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(a => a.Id))
+            .ToArray();
     }
 
     public int[] GetClientObjectiveTargets()
