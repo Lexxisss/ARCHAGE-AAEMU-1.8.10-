@@ -83,9 +83,13 @@ public class PlotObject : PacketMarshaler
             transform.Local.Position.X,
             transform.Local.Position.Y,
             transform.Local.Position.Z);
-        var ypr = transform.Local.ToRollPitchYawSBytes();
-        stream.Write(ypr.Item1); // rot.x : i8
-        stream.Write(ypr.Item2); // rot.y : i8
-        stream.Write(ypr.Item3); // rot.z : i8
+        // TARGET/DEV decode these three bytes as one axis-angle rotation vector and rebuild a
+        // quaternion from it. They are not three independently quantized Euler angles. Use the
+        // same codec as Unit movement so combined roll/pitch/yaw (glider Leap in particular)
+        // preserves the intended heading. TARGET decode: 0x39635870; DEV: 0x39390CF0.
+        var rotation = transform.Local.ToRollPitchYawSBytesMovement();
+        stream.Write(rotation.Item1); // rot.x : i8 rotation-vector component
+        stream.Write(rotation.Item2); // rot.y : i8 rotation-vector component
+        stream.Write(rotation.Item3); // rot.z : i8 rotation-vector component
     }
 }

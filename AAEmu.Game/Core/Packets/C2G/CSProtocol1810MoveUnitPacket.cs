@@ -11,6 +11,7 @@ using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj.Static;
 using AAEmu.Game.Models.Game.Units;
 using AAEmu.Game.Models.Game.Units.Movements;
+using AAEmu.Game.Models.Game.World.Transform;
 using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Core.Packets.C2G;
@@ -302,7 +303,22 @@ public sealed class CSProtocol1810MoveUnitPacket : GamePacket
 
         var oldRegion = character.Region;
         var oldZone = character.Transform.ZoneId;
+
+        // TARGET 1.8 Unit movement carries the actor orientation as one three-byte axis-angle
+        // rotation vector. The old 0x0104 handler updated X/Y/Z but deliberately kept the previous
+        // server rotation, so Area plot targets were projected from a stale heading. Glider Leap
+        // event 8977 is exactly such a target (20 m in front of the caster): when the client had
+        // turned since the last server-authored transform, the temporary controller steered toward
+        // that stale bearing and then snapped back to the locally controlled heading.
         var rotation = character.Transform.Local.Rotation;
+        if (_movement is UnitMoveType unitMovement)
+        {
+            var quaternion = PositionAndRotation.FromMovementRotation(
+                unitMovement.RotationX,
+                unitMovement.RotationY,
+                unitMovement.RotationZ);
+            rotation = PositionAndRotation.FromQuaternion(quaternion);
+        }
 
         if (firstWorldMovement)
             character.IsVisible = true;
