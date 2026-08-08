@@ -115,16 +115,27 @@ public class PlotCondition
     // 6
     private static bool ConditionWeaponEquipStatus(BaseUnit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject, int weaponEquipStatus, int unused2, int unused3, int unused4)
     {
-        // Weapon equip status can be :
-        // 1 = 1handed
-        // 2 = 2handed
-        // 3 = duel-wielded
-        var wieldKind = (WeaponWieldKind)weaponEquipStatus;
-        if (caster is Character character)
+        // Target data uses five values:
+        // 1 = 1handed, 2 = 2handed, 3 = dual-wielded, 4 = bow, 5 = shotgun.
+        // Bow and shotgun are both ranged-slot weapons; the holdable id distinguishes them.
+        const uint bowHoldableId = 19;
+        const uint shotGunHoldableId = 31;
+
+        if (caster is not Character character)
+            return false;
+
+        if (weaponEquipStatus is >= 1 and <= 3)
+            return character.GetWeaponWieldKind() == (WeaponWieldKind)weaponEquipStatus;
+
+        var rangedItem = character.Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlot.Ranged);
+        var rangedHoldable = (rangedItem?.Template as WeaponTemplate)?.HoldableTemplate;
+
+        return weaponEquipStatus switch
         {
-            return character.GetWeaponWieldKind() == wieldKind;
-        }
-        return false;
+            4 => rangedHoldable?.Id == bowHoldableId,
+            5 => rangedHoldable?.Id == shotGunHoldableId,
+            _ => false
+        };
     }
 
     // 7
