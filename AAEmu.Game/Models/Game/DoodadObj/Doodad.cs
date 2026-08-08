@@ -804,18 +804,30 @@ public class Doodad : BaseUnit
     private bool _suppressCreatePacket;
 
     /// <summary>
-    /// A fixture that only ever reaches a client in its parent's batch, never on its own.
+    /// Anything standing on a building reaches a client only in that building's batch, never on
+    /// its own and never in a sweep of the region.
     /// </summary>
     /// <remarks>
-    /// The suppression used to last only as long as the call that spawned it, which held for the
-    /// moment a building was put up and for nothing afterwards. On the next login the fixtures
-    /// were already standing, so the ordinary visibility pass announced all five of them one by
-    /// one - and it does that before the building's own record goes out. A fixture that arrives
-    /// before that record is never fitted to anything, and the batch that follows a second later
-    /// is ignored as a repeat of objects the client already has. Hence a house that came out of
-    /// the ground furnished and came back from a relog bare.
+    /// A doodad whose parent is a building is fitted to the building's record at the far end, and
+    /// one that arrives before that record exists is never fitted afterwards. That is true of the
+    /// windows and doors the building brings with it, of furniture a player puts down, and of
+    /// whatever grows in the garden - so the question this answers is simply whether a building
+    /// stands anywhere above it, however many doodads deep. A chair on a table on a porch counts.
     /// </remarks>
-    public bool PublishedInParentBatchOnly { get; set; }
+    public bool PublishedInParentBatchOnly
+    {
+        get
+        {
+            for (var ancestor = ParentObj; ancestor != null; )
+            {
+                if (ancestor is Housing.House)
+                    return true;
+                ancestor = ancestor is Doodad parentDoodad ? parentDoodad.ParentObj : null;
+            }
+
+            return false;
+        }
+    }
 
     /// <summary>
     /// Registers this doodad in the world without emitting the one-object create packet.
@@ -824,7 +836,6 @@ public class Doodad : BaseUnit
     /// </summary>
     public void SpawnForBatch()
     {
-        PublishedInParentBatchOnly = true;
         _suppressCreatePacket = true;
         try
         {
@@ -838,7 +849,12 @@ public class Doodad : BaseUnit
 
     public override void AddVisibleObject(Character character)
     {
-        var announceOnItsOwn = !_suppressCreatePacket && !PublishedInParentBatchOnly;
+        // Announced here only when this doodad is the one appearing - a decoration just put down,
+        // a seed just planted - and then the building it stands on is already on the client, so the
+        // order holds. The case that has to stay quiet is the reverse one, a character arriving to
+        // find it already standing; that goes through the region and world sweeps, which leave
+        // PublishedInParentBatchOnly out and let the building send it.
+        var announceOnItsOwn = !_suppressCreatePacket;
         if (announceOnItsOwn)
             character.SendPacket(new SCDoodadCreatedPacket(this));
 

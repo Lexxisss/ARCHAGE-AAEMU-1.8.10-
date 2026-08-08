@@ -409,13 +409,30 @@ public sealed class House : Unit
         }
     }
 
-    /// <summary>Sends this house's built-in fixtures to one viewer in target-sized batches.</summary>
+    /// <summary>
+    /// Sends everything standing on this house to one viewer, in target-sized batches.
+    /// </summary>
+    /// <remarks>
+    /// Not only the fixtures the building brings with it. Furniture a player puts down and
+    /// whatever grows in the garden hang off the same record and are dropped by the client just
+    /// as readily if they arrive before it, so they travel together - which also means the list
+    /// is taken from what is actually parented to the building rather than from a register this
+    /// would have to keep in step with every placement, pickup and harvest.
+    /// </remarks>
     public void SendAttachedDoodads(Character character)
     {
-        if (character == null || AttachedDoodads.Count == 0)
+        if (character == null)
             return;
 
-        var doodads = AttachedDoodads.Where(d => d != null && d.ObjId > 0).ToArray();
+        var doodads = AttachedDoodads
+            .Concat(WorldManager.GetAround<Doodad>(this).Where(StandsOnThisHouse))
+            .Where(d => d != null && d.ObjId > 0)
+            .Distinct()
+            .ToArray();
+
+        if (doodads.Length == 0)
+            return;
+
         for (var offset = 0; offset < doodads.Length; offset += SCDoodadsCreatedPacket.MaxCountPerPacket)
         {
             var count = Math.Min(SCDoodadsCreatedPacket.MaxCountPerPacket, doodads.Length - offset);
@@ -425,6 +442,19 @@ public sealed class House : Unit
             Logger.Info("House {0}: sent fixture batch to {1}, offset={2}, count={3}",
                 Id, character.Name, offset, count);
         }
+    }
+
+    /// <summary>Whether this doodad hangs off this building, however many doodads deep.</summary>
+    private bool StandsOnThisHouse(Doodad doodad)
+    {
+        for (var ancestor = doodad?.ParentObj; ancestor != null; )
+        {
+            if (ReferenceEquals(ancestor, this))
+                return true;
+            ancestor = ancestor is Doodad parentDoodad ? parentDoodad.ParentObj : null;
+        }
+
+        return false;
     }
 
     /// <summary>
