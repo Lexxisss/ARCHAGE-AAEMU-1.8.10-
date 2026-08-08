@@ -153,7 +153,12 @@ public class Region
             // this normal visibility path.
             if (objectAsCharacter.Connection?.WorldEntryReady == true)
             {
-                var doodads = GetList(new List<Doodad>(), obj.ObjId).ToArray();
+                // Everything here except a building's fixtures: those are published by the
+                // building itself, after its record has landed, and a region sweep that
+                // includes them puts them in front of it. See PublishedInParentBatchOnly.
+                var doodads = GetList(new List<Doodad>(), obj.ObjId)
+                    .Where(d => !d.PublishedInParentBatchOnly)
+                    .ToArray();
                 for (var i = 0; i < doodads.Length; i += SCDoodadsCreatedPacket.MaxCountPerPacket)
                 {
                     var count = doodads.Length - i;

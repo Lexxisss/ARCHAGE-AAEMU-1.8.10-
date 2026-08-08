@@ -1010,7 +1010,10 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
 
             foreach (var doodad in neighbor.GetList(new List<Doodad>(), character.ObjId))
             {
-                if (doodad?.IsVisible == true)
+                // A building's fixtures belong to its own batch and to nothing else - see
+                // Doodad.PublishedInParentBatchOnly. Sweeping them up here puts them in front of
+                // the building's record, which is the one thing they must never arrive before.
+                if (doodad?.IsVisible == true && !doodad.PublishedInParentBatchOnly)
                     doodadsById[doodad.ObjId] = doodad;
             }
         }
@@ -1594,7 +1597,11 @@ public class WorldManager : Singleton<WorldManager>, IWorldManager
         foreach (var stuff in stuffs)
         {
             if (stuff is Doodad doodad)
-                doodads.Add(doodad);
+            {
+                // Fixtures ride in their building's batch only; see PublishedInParentBatchOnly.
+                if (!doodad.PublishedInParentBatchOnly)
+                    doodads.Add(doodad);
+            }
             else if (stuff is not Npc)
                 stuff.AddVisibleObject(character);
         }
