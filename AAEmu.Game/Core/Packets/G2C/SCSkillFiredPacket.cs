@@ -8,6 +8,7 @@ using AAEmu.Game.Models.Game.Items.Templates;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Skills;
+using AAEmu.Game.Models.Game.Skills.Templates;
 using AAEmu.Game.Models.Game.Units;
 
 namespace AAEmu.Game.Core.Packets.G2C;
@@ -20,13 +21,13 @@ public class SCSkillFiredPacket : GamePacket
 {
     public override PacketLogLevel LogLevel => PacketLogLevel.Debug;
 
-    /// <summary>Melee auto attack - the one skill whose animation is weapon dependent.</summary>
+    /// <summary>Melee auto attack - a separate holdable-swing path from skill animation overrides.</summary>
     private const uint MeleeAttackSkillId = 2;
 
     // Melee does not use the skill template's flat FireAnimId: the client only accepts a
     // swing id belonging to the equipped weapon, and silently plays nothing for anything
-    // else - which is why melee dealt damage with no visible swing while ranged skills,
-    // which do use the template value, animated fine.
+    // else. This path is intentionally kept separate from the SkillDesc weapon-specific
+    // overrides used by ordinary skills below.
     //
     // The ids come from the weapon's holdable record: anim_r1/r2/r3 for the right hand and
     // anim_l1/l2/l3 for the left, with the *_ratio fields weighting the first two. Another
@@ -35,8 +36,17 @@ public class SCSkillFiredPacket : GamePacket
     /// <summary>Holdable id used when nothing is equipped.</summary>
     private const uint FistHoldableId = 0;
 
-    private const int MainHandSlot = 15;
-    private const int OffHandSlot = 16;
+    // TARGET 0x39ACEBF0 and dedicated 0x39CEDAB0 compare the equipped holdable
+    // descriptor against these exact ids when selecting a skill-specific animation.
+    private const uint StringInstrumentHoldableId = 21;
+    private const uint PercussionInstrumentHoldableId = 22;
+    private const uint TubeInstrumentHoldableId = 23;
+    private const uint ShotGunHoldableId = 31;
+
+    private const int MainHandSlot = (int)EquipmentItemSlot.Mainhand;
+    private const int OffHandSlot = (int)EquipmentItemSlot.Offhand;
+    private const int RangedSlot = (int)EquipmentItemSlot.Ranged;
+    private const int MusicalSlot = (int)EquipmentItemSlot.Musical;
 
     private enum SwingHand { Right, Left }
 
@@ -51,6 +61,8 @@ public class SCSkillFiredPacket : GamePacket
 
     private readonly Holdable _mainHand;
     private readonly Holdable _offHand;
+    private readonly Holdable _ranged;
+    private readonly Holdable _instrument;
 
     /// <summary>Delay before the server applies the effects, in milliseconds.</summary>
     public int ComputedDelay { get; set; }
@@ -83,11 +95,16 @@ public class SCSkillFiredPacket : GamePacket
         _casterUnit = casterUnit as Unit;
         _character = casterUnit as Character;
 
-        if (_skill.Template.Id != MeleeAttackSkillId || _character == null)
+        if (_character == null)
             return;
 
         _mainHand = GetHoldable(_character.Equipment.GetItemBySlot(MainHandSlot));
         _offHand = GetHoldable(_character.Equipment.GetItemBySlot(OffHandSlot));
+        _ranged = GetHoldable(_character.Equipment.GetItemBySlot(RangedSlot));
+        _instrument = GetHoldable(_character.Equipment.GetItemBySlot(MusicalSlot));
+
+        if (_skill.Template.Id != MeleeAttackSkillId)
+            return;
 
         // A shield sits in the off hand without being something to swing with.
         if (_character.Buffs.CheckBuff((uint)BuffConstants.EquipShield))
@@ -101,6 +118,54 @@ public class SCSkillFiredPacket : GamePacket
     private static Holdable GetHoldable(Item item)
     {
         return (item?.Template as WeaponTemplate)?.HoldableTemplate;
+    }
+
+    private uint PickSkillFireAnimation()
+    {
+        if (_character == null)
+            return _skill.Template.FireAnimId;
+
+        return SelectSkillFireAnimation(
+            _skill.Template,
+            _instrument,
+            _ranged,
+            _mainHand,
+            _character.GetWeaponWieldKind() == WeaponWieldKind.DuelWielded);
+    }
+
+    /// <summary>
+    /// Mirrors the target client's skill animation selector (TARGET 0x39ACEBF0,
+    /// dedicated 0x39CEDAB0). Zero is the descriptor's "no override" value.
+    /// Priority is instrument, shotgun, two-hand, dual-wield, then base fire animation.
+    /// </summary>
+    internal static uint SelectSkillFireAnimation(
+        SkillTemplate template,
+        Holdable instrument,
+        Holdable ranged,
+        Holdable mainHand,
+        bool dualWield)
+    {
+        if (instrument != null)
+        {
+            if (template.StringInstrumentFireAnimId != 0 && instrument.Id == StringInstrumentHoldableId)
+                return template.StringInstrumentFireAnimId;
+            if (template.PercussionInstrumentFireAnimId != 0 && instrument.Id == PercussionInstrumentHoldableId)
+                return template.PercussionInstrumentFireAnimId;
+            if (template.TubeInstrumentFireAnimId != 0 && instrument.Id == TubeInstrumentHoldableId)
+                return template.TubeInstrumentFireAnimId;
+        }
+
+        if (template.ShotGunFireAnimId != 0 && ranged?.Id == ShotGunHoldableId)
+            return template.ShotGunFireAnimId;
+
+        if (template.TwoHandFireAnimId != 0
+            && mainHand?.SlotTypeId == (uint)EquipmentItemSlotType.TwoHanded)
+            return template.TwoHandFireAnimId;
+
+        if (template.DualWieldFireAnimId != 0 && dualWield)
+            return template.DualWieldFireAnimId;
+
+        return template.FireAnimId;
     }
 
     public override PacketStream Write(PacketStream stream)
@@ -123,7 +188,7 @@ public class SCSkillFiredPacket : GamePacket
         stream.Write(ToWireTime(_skill.Template.ChannelingTime));
 
         ExtraData.Write(stream);
-        stream.WritePisc(_id, _skill.Template.FireAnimId);
+        stream.WritePisc(_id, PickSkillFireAnimation());
         WriteTrailingFlag(stream);
         return stream;
     }

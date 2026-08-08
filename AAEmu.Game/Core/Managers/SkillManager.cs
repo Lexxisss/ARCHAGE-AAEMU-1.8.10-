@@ -487,6 +487,17 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                         template.Show = reader.GetBoolean("show", true);
                         template.StartAnimId = reader.GetUInt32("start_anim_id", 0);
                         template.FireAnimId = reader.GetUInt32("fire_anim_id", 0);
+                        template.ChannelingAnimId = reader.GetUInt32("channeling_anim_id", 0);
+                        template.TwoHandFireAnimId = reader.GetUInt32("twohand_fire_anim_id", 0);
+                        template.DualWieldFireAnimId = reader.GetUInt32("dual_wield_fire_anim_id", 0);
+                        template.StringInstrumentFireAnimId = reader.GetUInt32("string_instrument_fire_anim_id", 0);
+                        template.StringInstrumentStartAnimId = reader.GetUInt32("string_instrument_start_anim_id", 0);
+                        template.PercussionInstrumentFireAnimId = reader.GetUInt32("percussion_instrument_fire_anim_id", 0);
+                        template.PercussionInstrumentStartAnimId = reader.GetUInt32("percussion_instrument_start_anim_id", 0);
+                        template.TubeInstrumentFireAnimId = reader.GetUInt32("tube_instrument_fire_anim_id", 0);
+                        template.TubeInstrumentStartAnimId = reader.GetUInt32("tube_instrument_start_anim_id", 0);
+                        template.ShotGunFireAnimId = reader.GetUInt32("shot_gun_fire_anim_id", 0);
+                        template.ShotGunStartAnimId = reader.GetUInt32("shot_gun_start_anim_id", 0);
                         template.FireAnim = AnimationManager.Instance.GetAnimation(template.FireAnimId);
                         template.AbilityId = reader.GetByte("ability_id");
                         template.ManaCost = reader.GetInt32("mana_cost");
@@ -543,6 +554,8 @@ public class SkillManager : Singleton<SkillManager>, ISkillManager
                         template.AllowToPrisoner = reader.GetBoolean("allow_to_prisoner", true);
                         template.MilestoneId = reader.GetUInt32("milestone_id", 0);
                         template.MatchAnimation = reader.GetBoolean("match_animation", true);
+                        template.MatchAnimationCount = reader.GetBoolean("match_animation_count", true);
+                        template.CanActiveWeaponWithoutAnim = reader.GetBoolean("can_active_weapon_without_anim", true);
                         template.Plot = reader.IsDBNull("plot_id") ? null : PlotManager.Instance.GetPlot(reader.GetUInt32("plot_id"));
                         template.UseAnimTime = reader.GetBoolean("use_anim_time", true);
                         template.ConsumeLaborPower = reader.GetInt32("consume_lp", 0);

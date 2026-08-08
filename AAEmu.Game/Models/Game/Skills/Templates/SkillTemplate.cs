@@ -11,6 +11,17 @@ public class SkillTemplate
     public bool Show { get; set; }
     public uint StartAnimId { get; set; }
     public uint FireAnimId { get; set; }
+    public uint ChannelingAnimId { get; set; }
+    public uint TwoHandFireAnimId { get; set; }
+    public uint DualWieldFireAnimId { get; set; }
+    public uint StringInstrumentFireAnimId { get; set; }
+    public uint StringInstrumentStartAnimId { get; set; }
+    public uint PercussionInstrumentFireAnimId { get; set; }
+    public uint PercussionInstrumentStartAnimId { get; set; }
+    public uint TubeInstrumentFireAnimId { get; set; }
+    public uint TubeInstrumentStartAnimId { get; set; }
+    public uint ShotGunFireAnimId { get; set; }
+    public uint ShotGunStartAnimId { get; set; }
     public Anim FireAnim { get; set; }
     public byte AbilityId { get; set; }
     public int ManaCost { get; set; }
@@ -64,6 +75,8 @@ public class SkillTemplate
     public bool AllowToPrisoner { get; set; }
     public uint MilestoneId { get; set; }
     public bool MatchAnimation { get; set; }
+    public bool MatchAnimationCount { get; set; }
+    public bool CanActiveWeaponWithoutAnim { get; set; }
     public Plot Plot { get; set; }
     public bool UseAnimTime { get; set; }
     public int ConsumeLaborPower { get; set; }

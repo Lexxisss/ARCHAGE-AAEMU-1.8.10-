@@ -287,13 +287,22 @@ public class Skill
             // fired handler runs the start processor itself with zeroed start times, so
             // announcing a start for an instant skill risks a duplicate start state.
             //
-            // The live server always reports a unit target here, even when the client asked
-            // to cast at something else - gathering targets the doodad, and passing that
-            // through left the client with no unit to animate, so mining ran its full cast
-            // and produced ore with no gathering animation at all.
-            var startedTarget = targetCaster is SkillCastUnitTarget
-                ? targetCaster
-                : new SkillCastUnitTarget(caster.ObjId);
+            // Preserve the cast-target variant. TARGET SCSkillStarted (0x399FA750) and
+            // SCSkillFired (0x399FA890) both call the same SkillCastTarget serializer
+            // (0x399E7010), whose explicit branches include POSITION/POSITION2/POSITION3.
+            // Replacing a positional target with the caster makes the client animate the
+            // start phase on the source even though server-side hit resolution still uses
+            // the original position - which is what put skill 23593's animation on the
+            // caster instead of the ground it was aimed at.
+            //
+            // A doodad target is the one variant still reported as the caster. That branch
+            // exists in the serializer too, but passing it through was observed to leave
+            // mining running its whole cast, producing ore and playing nothing (c7b1621);
+            // whether the client wants the doodad here is not settled, so the behaviour
+            // that was seen to work is kept until it is.
+            var startedTarget = targetCaster is SkillCastDoodadTarget
+                ? new SkillCastUnitTarget(caster.ObjId)
+                : targetCaster;
 
             caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, startedTarget, this, skillObject)
             {
