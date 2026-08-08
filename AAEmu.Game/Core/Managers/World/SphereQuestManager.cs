@@ -7,6 +7,8 @@ using System.Numerics;
 using System.Threading;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.IO;
+using AAEmu.Game.Models.Game.Quests;
+using AAEmu.Game.Models.Game.Quests.Static;
 using AAEmu.Game.Models.Game.World;
 
 using NLog;
@@ -18,6 +20,7 @@ public class SphereQuestManager : Singleton<SphereQuestManager>, ISphereQuestMan
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
     private Dictionary<uint, List<SphereQuest>> _sphereQuests;
+    private Dictionary<uint, List<SphereQuest>> _startingSpheresByZone = new();
 
     private readonly List<SphereQuestTrigger> _sphereQuestTriggers;
     private List<SphereQuestTrigger> _addQueue;
@@ -42,6 +45,95 @@ public class SphereQuestManager : Singleton<SphereQuestManager>, ISphereQuestMan
     {
         //_sphereQuests = LoadSphereQuests();
         _sphereQuests = LoadQuestSpheres();
+        _startingSpheresByZone = IndexStartingSpheres();
+    }
+
+    /// <summary>
+    /// The volumes that hand a quest out to whoever walks into them, indexed by zone.
+    /// </summary>
+    /// <remarks>
+    /// Seven hundred and fifty-two quests begin this way, so a watch per player per volume is
+    /// out of the question - that is why these are not triggers like the objective ones. A
+    /// player is only ever standing in one zone, and a zone holds a handful of these, so the
+    /// tick compares against those and nothing else.
+    /// </remarks>
+    private Dictionary<uint, List<SphereQuest>> IndexStartingSpheres()
+    {
+        var byZone = new Dictionary<uint, List<SphereQuest>>();
+        var count = 0;
+
+        foreach (var spheres in _sphereQuests.Values)
+        {
+            foreach (var sphere in spheres)
+            {
+                if (!StartsItsQuest(sphere))
+                    continue;
+
+                if (!byZone.TryGetValue(sphere.ZoneId, out var zoneSpheres))
+                {
+                    zoneSpheres = new List<SphereQuest>();
+                    byZone[sphere.ZoneId] = zoneSpheres;
+                }
+
+                zoneSpheres.Add(sphere);
+                count++;
+            }
+        }
+
+        Logger.Info("Loaded {0} quest-starting spheres across {1} zones", count, byZone.Count);
+        return byZone;
+    }
+
+    /// <summary>
+    /// Hands a quest to anyone standing where it is given out.
+    /// </summary>
+    /// <remarks>
+    /// Only the zone the player is in is looked at, and only players who could take the quest -
+    /// one they already carry or have finished is not offered again. Starting it is left to the
+    /// ordinary path, which is what decides whether it can be started at all.
+    /// </remarks>
+    private void HandOutQuestsToPlayersStandingInTheirSpheres()
+    {
+        if (_startingSpheresByZone.Count == 0)
+            return;
+
+        foreach (var character in WorldManager.Instance.GetAllCharacters())
+        {
+            if (character?.Transform == null || character.IsDead)
+                continue;
+            if (!_startingSpheresByZone.TryGetValue(character.Transform.ZoneId, out var spheres))
+                continue;
+
+            var position = character.Transform.World.Position;
+            foreach (var sphere in spheres)
+            {
+                if (character.Quests.ActiveQuests.ContainsKey(sphere.QuestId))
+                    continue;
+                if (character.Quests.HasQuestCompleted(sphere.QuestId))
+                    continue;
+
+                var dx = position.X - sphere.X;
+                var dy = position.Y - sphere.Y;
+                var dz = position.Z - sphere.Z;
+                if (dx * dx + dy * dy + dz * dz > sphere.Radius * sphere.Radius)
+                    continue;
+
+                Logger.Info("Quest {0} handed to {1} for standing in its sphere", sphere.QuestId, character.Name);
+                character.Quests.Add(sphere.QuestId);
+                break;
+            }
+        }
+    }
+
+    /// <summary>Whether this volume is the one a quest is accepted in rather than answered in.</summary>
+    private static bool StartsItsQuest(SphereQuest sphere)
+    {
+        var template = QuestManager.Instance.GetTemplate(sphere.QuestId);
+        if (template == null || !template.Components.TryGetValue(sphere.ComponentId, out var component))
+            return false;
+
+        return component.KindId == QuestComponentKind.Start &&
+               component.Acts.OfType<QuestAct>().Any(x => x.DetailType == "QuestActConAcceptSphere");
     }
 
     public void AddSphereQuestTrigger(SphereQuestTrigger trigger)
@@ -86,6 +178,8 @@ public class SphereQuestManager : Singleton<SphereQuestManager>, ISphereQuestMan
 
                 _removeQueue = new List<SphereQuestTrigger>();
             }
+
+            HandOutQuestsToPlayersStandingInTheirSpheres();
         }
         catch (Exception e)
         {
