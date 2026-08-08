@@ -376,6 +376,19 @@ public class Doodad : BaseUnit
             }
             else
             {
+                // A quest phase holds every reaction the doodad has at once - hand this one out,
+                // take that one back - and which of them answers depends on what the player is
+                // carrying. GetFunc returns a single entry, so only the first was ever consulted,
+                // and a giver fell silent the moment that first entry stopped matching: the one
+                // that was reported had four reactions and only ever ran the one that takes back a
+                // quest the player did not have. Two hundred and forty-eight phases in this
+                // client's data carry more than one.
+                if (OfferQuests(caster, skillId, allFuncsForGroup))
+                {
+                    DoChangePhase(caster, (int)FuncGroupId);
+                    return;
+                }
+
                 if (DoFunc(caster, skillId, funcWithSkill))
                 {
                     // FuncGroupId будет равен либо текущая фаза, либо func.NextPhase, либо OverridePhase
@@ -451,6 +464,35 @@ public class Doodad : BaseUnit
     /// <param name="skillId"></param>
     /// <param name="func"></param>
     /// <returns>If TRUE, then we stop further execution of functions and wait for interaction</returns>
+    /// <summary>
+    /// Puts the phase's quest reactions to the player in table order, keeping the first answer.
+    /// </summary>
+    /// <remarks>
+    /// Order is the table's own, which is how a giver ends up taking a quest back before handing
+    /// the next one out. A reaction that has nothing to show for this player says so and the next
+    /// one gets its turn.
+    /// </remarks>
+    /// <returns>Whether one of them answered, and the client was sent something.</returns>
+    private bool OfferQuests(BaseUnit caster, uint skillId, List<DoodadFunc> funcsForGroup)
+    {
+        if (caster is not Character)
+            return false;
+
+        foreach (var func in funcsForGroup)
+        {
+            if (func.FuncType != nameof(DoodadFuncQuest))
+                continue;
+
+            if (DoodadManager.Instance.GetFuncTemplate(func.FuncId, func.FuncType) is DoodadFuncQuest quest &&
+                quest.Offer(caster, this, skillId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public bool DoFunc(BaseUnit caster, uint skillId, DoodadFunc func)
     {
         // if there is no function, complete the cycle
