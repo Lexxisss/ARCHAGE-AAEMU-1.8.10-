@@ -376,14 +376,20 @@ public class Doodad : BaseUnit
             }
             else
             {
-                // A quest phase holds every reaction the doodad has at once - hand this one out,
-                // take that one back - and which of them answers depends on what the player is
-                // carrying. GetFunc returns a single entry, so only the first was ever consulted,
-                // and a giver fell silent the moment that first entry stopped matching: the one
-                // that was reported had four reactions and only ever ran the one that takes back a
-                // quest the player did not have. Two hundred and forty-eight phases in this
-                // client's data carry more than one.
-                if (OfferQuests(caster, skillId, allFuncsForGroup))
+                // A phase holds every reaction the doodad has at once, and GetFunc returns one of
+                // them, so a giver fell silent the moment that one stopped matching: the doodad
+                // that was reported had four reactions and only ever ran the one that takes back
+                // a quest the player did not have.
+                //
+                // But a reaction never takes the click away from the func that names this skill.
+                // The shining ore vein carries both - it hands out a daily and it can be mined -
+                // and mining is what the player asked for, so the ore comes first and the quest
+                // is offered once it has. Two hundred and fifty-eight phases pair a reaction with
+                // a func of their own like that.
+                var skillHasItsOwnFunc = funcWithSkill != null &&
+                                         funcWithSkill.FuncType != nameof(DoodadFuncQuest);
+
+                if (!skillHasItsOwnFunc && OfferQuests(caster, skillId, allFuncsForGroup))
                 {
                     DoChangePhase(caster, (int)FuncGroupId);
                     return;
@@ -391,6 +397,9 @@ public class Doodad : BaseUnit
 
                 if (DoFunc(caster, skillId, funcWithSkill))
                 {
+                    if (skillHasItsOwnFunc)
+                        OfferQuests(caster, skillId, allFuncsForGroup);
+
                     // FuncGroupId будет равен либо текущая фаза, либо func.NextPhase, либо OverridePhase
                     DoChangePhase(caster, (int)FuncGroupId);
                     return;
