@@ -66,8 +66,31 @@ public class CharacterAbilities
         if (!type.IsSpecialAbility() || !Abilities.TryGetValue(type, out var ability))
             return false;
 
+        ability.Learned = true;
         ability.Exp = Owner.Experience;
         return true;
+    }
+
+    /// <summary>
+    /// Tells the client again which forms this character has learned.
+    /// </summary>
+    /// <remarks>
+    /// The client's learned-ability record is built in one place - dev x2game.dll 0x39CF09F0 -
+    /// and the only thing that calls it is the handler for this packet, at 0x394E21C0. The
+    /// abilityExp array in SCCharacterState never reaches it, so a form that is not announced
+    /// again is a form the client does not know the character has, however much experience its
+    /// slot carries.
+    ///
+    /// Where exactly the live server puts this inside the login sequence is not settled; it goes
+    /// with the rest of the character's own state here.
+    /// </remarks>
+    public void SendSpecialAbilities()
+    {
+        foreach (var ability in Abilities.Values)
+        {
+            if (ability.Id.IsSpecialAbility() && ability.Learned)
+                Owner.SendPacket(new SCSpecialAbilityLearnedPacket(ability.Id));
+        }
     }
 
     public uint GetAbilityExpForWire(byte abilityId)
@@ -160,7 +183,8 @@ public class CharacterAbilities
                     var ability = new Ability
                     {
                         Id = (AbilityType)reader.GetByte("id"),
-                        Exp = reader.GetInt32("exp")
+                        Exp = reader.GetInt32("exp"),
+                        Learned = reader.GetBoolean("learned")
                     };
                     if ((byte)ability.Id <= (byte)AbilityType.General || (byte)ability.Id >= (byte)AbilityType.None)
                         continue;
@@ -185,10 +209,11 @@ public class CharacterAbilities
                 command.Connection = connection;
                 command.Transaction = transaction;
 
-                command.CommandText = "REPLACE INTO abilities(`id`,`exp`,`owner`) VALUES (@id, @exp, @owner)";
+                command.CommandText = "REPLACE INTO abilities(`id`,`exp`,`owner`,`learned`) VALUES (@id, @exp, @owner, @learned)";
                 command.Parameters.AddWithValue("@id", (byte)ability.Id);
                 command.Parameters.AddWithValue("@exp", ability.Exp);
                 command.Parameters.AddWithValue("@owner", Owner.Id);
+                command.Parameters.AddWithValue("@learned", ability.Learned);
                 command.ExecuteNonQuery();
             }
         }

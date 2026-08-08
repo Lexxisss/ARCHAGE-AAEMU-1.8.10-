@@ -13,6 +13,7 @@ CREATE TABLE `abilities` (
   `id` tinyint unsigned NOT NULL,
   `exp` int NOT NULL,
   `owner` int unsigned NOT NULL,
+  `learned` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Special ability has been learned (ids 28/29)',
   PRIMARY KEY (`id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Skillsets Exp';
 

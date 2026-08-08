@@ -70,6 +70,10 @@ public class CSSelectCharacterPacket : GamePacket
 
 
             Connection.SendPacket(new SCCharacterStatePacket(character));
+            // The abilityExp array that just went out carries what the forms are worth, but not
+            // that the character has them: the client builds its learned-ability record from the
+            // announcement below and from nothing else.
+            Connection.ActiveChar.Abilities.SendSpecialAbilities();
             // SCCharacterGamePoints is 0x05A in the target DLL. The legacy class is
             // still mapped to 0x2EE and is unsafe until its 10.8 serializer is rebuilt.
             Connection.ActiveChar.Inventory.Send();

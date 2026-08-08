@@ -64,6 +64,15 @@ public class Ability
     public byte Order { get; set; }
     public int Exp { get; set; }
 
+    /// <summary>
+    /// Whether a special ability has been learned. Meaningless for an ordinary skillset.
+    /// </summary>
+    /// <remarks>
+    /// The client keeps this apart from progression, and experience cannot stand in for it: a
+    /// form can be learned while its experience is still zero.
+    /// </remarks>
+    public bool Learned { get; set; }
+
     public Ability()
     {
         Order = 255;
