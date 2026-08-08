@@ -1437,17 +1437,28 @@ public partial class Quest
     /// The objectives the client is shown, in the order it shows them.
     /// </summary>
     /// <remarks>
-    /// A quest spreads its objectives over several components and the client shows all of them
-    /// side by side, so all of them belong on the list. Taking only the component the quest
-    /// happens to be standing on left the others invisible: the ore quest asks for fifty iron and
-    /// two copper, and a vein that yields both filled the iron bar and left the copper one alone.
+    /// The client draws the objectives it knows the quest has and reads these as the numbers to
+    /// put on them, so what belongs here is the component's own list and in its own order. Handing
+    /// it every objective of the quest at once was tried and made things worse: the ore quest went
+    /// from showing two bars, one of which did not move, to showing one.
+    ///
+    /// This is only about what is shown. Which objectives are listening is a separate question,
+    /// and the answer to that one is all of them - see the event dispatch.
     /// </remarks>
     private QuestAct[] GetClientObjectiveActs()
     {
-        return ObjectiveComponents()
-            .OrderBy(x => x.Id)
-            .SelectMany(x => x.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(a => a.Id))
-            .ToArray();
+        if (Template.Score > 0)
+        {
+            return ObjectiveComponents()
+                .OrderBy(x => x.Id)
+                .SelectMany(x => x.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(a => a.Id))
+                .ToArray();
+        }
+
+        if (_objectiveComponentId == 0 || !Template.Components.TryGetValue(_objectiveComponentId, out var component))
+            return Array.Empty<QuestAct>();
+
+        return component.Acts.OfType<QuestAct>().Where(IsObjectiveAct).OrderBy(x => x.Id).ToArray();
     }
 
     public int[] GetClientObjectiveTargets()
