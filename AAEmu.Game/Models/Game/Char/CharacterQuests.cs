@@ -53,6 +53,16 @@ public partial class CharacterQuests
         return ActiveQuests.ContainsKey(questId);
     }
 
+    /// <summary>Whether the player is inside the levels a quest names, if it names any.</summary>
+    /// <remarks>Zero is not a level here, it is the absence of a bound.</remarks>
+    private bool IsWithinLevelRange(Quests.Templates.QuestTemplate template)
+    {
+        if (template.MinLevel > 0 && Owner.Level < template.MinLevel)
+            return false;
+
+        return template.MaxLevel <= 0 || Owner.Level <= template.MaxLevel;
+    }
+
     public bool HasQuestCompleted(uint questId)
     {
         var questBlockId = (ushort)(questId / 64);
@@ -86,6 +96,24 @@ public partial class CharacterQuests
             Owner.SendPacket(new SCQuestContextFailedPacket(questId, 2));
             return false;
         }
+        // A quest can name the levels it is for, and until now nobody was asked: an ore vein
+        // handed a level thirty-five daily to a character who had just been made, and the client
+        // drew it in the red it draws anything far above the player.
+        //
+        // Only an explicit range refuses. quest_contexts.level is what the quest is worth rather
+        // than what it demands - the client colours by it - and treating it as a demand would
+        // refuse quests that are meant to be taken a little early.
+        if (!forcibly && !IsWithinLevelRange(template))
+        {
+            Owner.SendErrorMessage(Owner.Level < template.MinLevel
+                ? ErrorMessageType.LevelLowToUse
+                : ErrorMessageType.LevelHighToUse);
+            Owner.SendPacket(new SCQuestContextFailedPacket(questId, 3));
+            Logger.Info("Quest {0} refused for {1}: level {2} is outside {3}..{4}",
+                questId, Owner.Name, Owner.Level, template.MinLevel, template.MaxLevel);
+            return false;
+        }
+
         if (forcibly)
             ResetCompletedQuest(questId);
 
