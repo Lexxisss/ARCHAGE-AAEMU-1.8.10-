@@ -1291,20 +1291,42 @@ public partial class Quest
 
                 foreach (var act in component.Acts.OfType<QuestAct>())
                 {
-                var d = act.Definition;
-                if (d == null)
-                    continue;
-                if (!d.Has("item_id"))
-                    continue;
-                var cleanup = d.GetBoolean("cleanup");
-                var destroyOnDrop = d.GetBoolean("destroy_when_drop");
-                if (!cleanup && !(dropped && destroyOnDrop))
-                    continue;
-                var itemId = d.GetUInt32("item_id");
-                var count = Math.Max(1, d.GetInt32("count", int.MaxValue));
-                var available = GetInventoryCount(itemId, -1);
-                if (available > 0)
-                    Owner.Inventory.ConsumeItem(new[] { SlotType.Inventory }, ItemTaskType.QuestRemoveSupplies, itemId, Math.Min(available, count), null);
+                    var d = act.Definition;
+                    if (d?.Has("item_id") != true)
+                        continue;
+
+                    // Three flags say a quest's item goes away with it, and they are not all
+                    // spelled the same way in every table: an item the quest asked to be used
+                    // carries drop_when_destroy and neither of the other two. Reading only the
+                    // first two left those items in the bag for good.
+                    var cleanup = d.GetBoolean("cleanup");
+                    var destroyOnDrop = d.GetBoolean("destroy_when_drop");
+                    var dropOnDestroy = d.GetBoolean("drop_when_destroy");
+                    if (!cleanup && !dropOnDestroy && !(dropped && destroyOnDrop))
+                        continue;
+
+                    var itemId = d.GetUInt32("item_id");
+                    if (itemId == 0)
+                        continue;
+
+                    // A quest's own pack is worn rather than carried, and taking it off has to
+                    // come first or there is nothing in the bag to take away.
+                    if (Owner.Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlotType.Backpack)?.TemplateId == itemId)
+                        Owner.Inventory.TakeoffBackpack(ItemTaskType.QuestRemoveSupplies);
+
+                    // Everywhere the player could be keeping it, not just the bag: a quest item
+                    // put in the bank or worn is still the quest's, and the search that only
+                    // looked in the bag found nothing to remove.
+                    var count = Math.Max(1, d.GetInt32("count", int.MaxValue));
+                    Owner.Inventory.GetAllItemsByTemplate(null, itemId, -1, out _, out var available);
+                    if (available <= 0)
+                        continue;
+
+                    var toRemove = Math.Min(available, count);
+                    var removed = Owner.Inventory.ConsumeItem(null, ItemTaskType.QuestRemoveSupplies, itemId, toRemove, null);
+                    Logger.Info(
+                        "Quest {0}: {1} item {2}, wanted {3} of {4} held, removed {5}",
+                        TemplateId, dropped ? "dropped, clearing" : "finished, clearing", itemId, toRemove, available, removed);
                 }
             }
         }
