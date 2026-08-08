@@ -25,7 +25,7 @@ public class ExpressTextManager : Singleton<ExpressTextManager>, IExpressTextMan
 
         Logger.Info("Loading express text...");
 
-        using var connection = SQLite.CreateConnection();
+        using var connection = SQLite.CreateTargetClientConnection();
         using var command = connection.CreateCommand();
         command.CommandText = "SELECT * FROM express_texts";
         command.Prepare();

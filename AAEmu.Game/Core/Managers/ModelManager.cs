@@ -99,7 +99,7 @@ namespace AAEmu.Game.Core.Managers
                 _modelTypes = new Dictionary<uint, ModelType>();
                 _gameStances = new Dictionary<uint, GameStance>();
 
-                using (var connection = SQLite.CreateConnection())
+                using (var connection = SQLite.CreateTargetClientConnection())
                 {
                     using (var command = connection.CreateCommand())
                     {

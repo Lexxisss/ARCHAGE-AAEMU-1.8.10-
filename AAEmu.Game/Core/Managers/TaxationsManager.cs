@@ -18,7 +18,7 @@ public class TaxationsManager : Singleton<TaxationsManager>
     {
         taxations = new Dictionary<uint, Taxation>();
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             Logger.Info("Loading taxations ...");
 

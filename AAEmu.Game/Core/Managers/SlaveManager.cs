@@ -1807,19 +1807,25 @@ public class SlaveManager : Singleton<SlaveManager>
                 }
             }
 
-            using (var command = connection2.CreateCommand())
+            // Which ship repairs with which effect is listed by the old server supplement alone,
+            // and this one is a real gap rather than an empty table: it holds twenty-eight rows.
+            // The effects themselves are in the client database as repair_slave_effects, but
+            // nothing there says which ship uses which - no table and no column under any name
+            // mentioning repair - so the pairing has nowhere else to come from and belongs in
+            // this server's own data. Until it is put there, a database without the table
+            // leaves the list empty rather than failing to start.
+            if (SQLite.TableExists(connection2, "repairable_slaves"))
             {
+                using var command = connection2.CreateCommand();
                 command.CommandText = "SELECT * FROM repairable_slaves";
                 command.Prepare();
 
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        if (!_repairableSlaves.TryAdd(reader.GetUInt32("slave_id"),
-                                reader.GetUInt32("repair_slave_effect_id")))
-                            Logger.Warn($"Duplicate entry for repairable_slaves");
-                    }
+                    if (!_repairableSlaves.TryAdd(reader.GetUInt32("slave_id"),
+                            reader.GetUInt32("repair_slave_effect_id")))
+                        Logger.Warn($"Duplicate entry for repairable_slaves");
                 }
             }
 

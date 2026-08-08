@@ -112,7 +112,7 @@ public class AnimationManager : Singleton<AnimationManager>
 
         Logger.Info("Loading animations...");
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             /* Anims */
             using (var command = connection.CreateCommand())

@@ -124,7 +124,7 @@ public class GimmickManager : Singleton<GimmickManager>
         Logger.Info("Loading gimmick templates...");
 
         #region SQLLite
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {

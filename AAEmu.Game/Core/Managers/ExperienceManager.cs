@@ -50,7 +50,7 @@ public class ExperienceManager : Singleton<ExperienceManager>
     public void Load()
     {
         _levels = new Dictionary<byte, ExperienceLevelTemplate>();
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             Logger.Info("Loading experience data...");
             using (var command = connection.CreateCommand())

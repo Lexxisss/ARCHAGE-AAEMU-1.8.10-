@@ -41,7 +41,7 @@ public class FactionManager : Singleton<FactionManager>
 
         _systemFactions = new Dictionary<uint, SystemFaction>();
         _relations = new List<FactionRelation>();
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             Logger.Info("Loading system factions...");
             using (var command = connection.CreateCommand())

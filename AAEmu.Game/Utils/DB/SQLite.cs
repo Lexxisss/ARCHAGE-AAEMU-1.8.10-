@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 using AAEmu.Commons.IO;
@@ -117,8 +118,54 @@ public static class SQLite
             Path.Combine(dataDirectory, FallbackClientDatabase));
     }
 
+    /// <summary>
+    /// The server-side supplement tables. These now come from the fallback client database.
+    /// </summary>
+    /// <remarks>
+    /// Of the sixty-five tables the old supplement carried, fifty-five are in the fallback with
+    /// the same columns; of the ten that are not, this server reads exactly one - and that one
+    /// asks whether it is there first. Two columns differ, and the reader returns a default for
+    /// a column it cannot find rather than failing.
+    /// </remarks>
     public static SqliteConnection CreateServerConnection()
     {
-        return CreateConnection("Data", ServerDatabase);
+        return CreateConnection("Data", FallbackClientDatabase);
+    }
+
+    /// <summary>
+    /// Whether a table exists in any database open on this connection.
+    /// </summary>
+    /// <remarks>
+    /// The client this server targets does not carry every table an older build had, and a
+    /// loader written against the older one has to be able to ask before it reads. Every
+    /// attached database is consulted, so a table the target lacks is still found in the
+    /// fallback the target connection attaches beside it.
+    /// </remarks>
+    public static bool TableExists(SqliteConnection connection, string table)
+    {
+        if (connection == null || string.IsNullOrWhiteSpace(table))
+            return false;
+
+        var schemas = new List<string>();
+        using (var databaseList = connection.CreateCommand())
+        {
+            databaseList.CommandText = "PRAGMA database_list";
+            using var reader = databaseList.ExecuteReader();
+            while (reader.Read())
+                schemas.Add(reader.GetString(1));
+        }
+
+        foreach (var schema in schemas)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText =
+                $"SELECT 1 FROM \"{schema.Replace("\"", "\"\"")}\".sqlite_master " +
+                "WHERE type IN ('table','view') AND name = $name LIMIT 1";
+            command.Parameters.Add("$name", SqliteType.Text).Value = table;
+            if (command.ExecuteScalar() != null)
+                return true;
+        }
+
+        return false;
     }
 }

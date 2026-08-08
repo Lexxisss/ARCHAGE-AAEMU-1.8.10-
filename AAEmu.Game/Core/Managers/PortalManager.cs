@@ -302,7 +302,7 @@ public class PortalManager : Singleton<PortalManager>
 
         #region Sqlite
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             // NOTE - priority -> to remove item from inventory first
             using (var command = connection.CreateCommand())

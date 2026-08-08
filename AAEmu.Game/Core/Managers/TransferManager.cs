@@ -270,7 +270,7 @@ public class TransferManager : Singleton<TransferManager>
 
         #region SQLLite
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {

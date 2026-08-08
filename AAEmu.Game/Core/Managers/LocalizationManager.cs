@@ -31,7 +31,7 @@ public class LocalizationManager : Singleton<LocalizationManager>
     {
         Logger.Info("Loading translations ...", _translations.Count);
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {

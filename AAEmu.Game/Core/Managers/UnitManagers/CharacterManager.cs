@@ -99,7 +99,7 @@ public class CharacterManager : Singleton<CharacterManager>
     {
         Logger.Info("Loading character templates...");
 
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             var temp = new Dictionary<uint, byte>();
             using (var command = connection.CreateCommand())
@@ -142,19 +142,22 @@ public class CharacterManager : Singleton<CharacterManager>
                 }
             }
 
-            using (var command = connection.CreateCommand())
+            // Nothing is lost with this table gone: the older client declares it and leaves it
+            // empty - no build of it has ever carried a row - so there is no starting buff to
+            // find anywhere else. Asked for rather than assumed, because the table is simply
+            // absent from the databases this server reads now.
+            if (SQLite.TableExists(connection, "character_buffs"))
             {
+                using var command = connection.CreateCommand();
                 command.CommandText = "SELECT * FROM character_buffs";
                 command.Prepare();
-                using (var reader = new SQLiteWrapperReader(command.ExecuteReader()))
+                using var reader = new SQLiteWrapperReader(command.ExecuteReader());
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        var characterId = reader.GetUInt32("character_id");
-                        var buffId = reader.GetUInt32("buff_id");
-                        var template = _templates[temp[characterId]];
-                        template.Buffs.Add(buffId);
-                    }
+                    var characterId = reader.GetUInt32("character_id");
+                    var buffId = reader.GetUInt32("buff_id");
+                    var template = _templates[temp[characterId]];
+                    template.Buffs.Add(buffId);
                 }
             }
 

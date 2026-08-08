@@ -298,7 +298,7 @@ public class ShipyardManager : Singleton<ShipyardManager>
     public void Load()
     {
         Logger.Info("Loading Shipyards...");
-        using (var connection = SQLite.CreateConnection())
+        using (var connection = SQLite.CreateTargetClientConnection())
         {
             using (var command = connection.CreateCommand())
             {

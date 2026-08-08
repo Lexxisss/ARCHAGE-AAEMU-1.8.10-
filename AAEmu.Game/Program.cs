@@ -85,11 +85,11 @@ public static class Program
         try
         {
             // Test the DB connection
-            using var connection = SQLite.CreateConnection();
+            using var connection = SQLite.CreateTargetClientConnection();
         }
         catch (Exception ex)
         {
-            Logger.Fatal(ex, "Failed to load the temporary legacy bootstrap database; check AAEmu.Game/Data!");
+            Logger.Fatal(ex, "Failed to open the target client database; check AAEmu.Game/Data!");
             LogManager.Flush();
             return 1;
         }
