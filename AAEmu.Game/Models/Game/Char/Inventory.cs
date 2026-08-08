@@ -1136,9 +1136,12 @@ public class Inventory
         // TODO квест id=4294 "Feeding Your Foal", используемый для посадки предмет ID=23635 "Vita Seed" уже имеет Count= 0, поэтому вызов проверки квеста не происходит
         // TODO quest id=4294 "Feeding Your Foal", used for planting item id=23635 "Vita Seed" already has Count= 0, so the quest check is not called
         //if (count > 0 && item != null)
-        if (item != null)
+        // An item that carries a skill announces itself through Character.ItemUse when the player
+        // uses it, so reporting it again here would count one use twice - and ninety-seven of the
+        // objectives that ask for a use ask for more than one. Everything else still reaches the
+        // quest runtime from here, which is where it always did.
+        if (item != null && item.Template?.UseSkillId == 0)
         {
-            //Owner?.Quests?.OnItemUse(item);
             // инициируем событие
             //Task.Run(() => QuestManager.Instance.DoConsumedEvents((Character)Owner, item.TemplateId, count));
             QuestManager.Instance.DoConsumedEvents((Character)Owner, item.TemplateId, count);

@@ -1662,7 +1662,13 @@ public partial class Character : Unit, ICharacter
         var item = Inventory.GetItemById(id);
         if (item is { Count: > 0 })
         {
-            //Quests.OnItemUse(item);
+            // The quest runtime hears about using an item here and only here. It used to hear
+            // about it from the bag instead, when the item was spent - which works right up
+            // until an item is used without being spent. The quest for the cool egg asks for
+            // exactly that: the egg carries a skill, the skill takes no reagents, and the egg
+            // stays in the bag afterwards, so the objective was never told anything.
+            Quests?.OnItemUse(item);
+
             // инициируем событие
             Events?.OnItemUse(this, new OnItemUseArgs
             {
