@@ -465,12 +465,13 @@ public class Doodad : BaseUnit
     /// <param name="func"></param>
     /// <returns>If TRUE, then we stop further execution of functions and wait for interaction</returns>
     /// <summary>
-    /// Puts the phase's quest reactions to the player in table order, keeping the first answer.
+    /// Puts the phase's quest reactions to the player, keeping the first answer.
     /// </summary>
     /// <remarks>
-    /// Order is the table's own, which is how a giver ends up taking a quest back before handing
-    /// the next one out. A reaction that has nothing to show for this player says so and the next
-    /// one gets its turn.
+    /// A reaction that has nothing to show for this player says so, and the next one gets its
+    /// turn. Taking a quest back is asked first and in the order the table lists: a turn-in only
+    /// answers for the quest the player is carrying, so two of them never compete for the same
+    /// click.
     /// </remarks>
     /// <returns>Whether one of them answered, and the client was sent something.</returns>
     private bool OfferQuests(BaseUnit caster, uint skillId, List<DoodadFunc> funcsForGroup)
@@ -478,16 +479,48 @@ public class Doodad : BaseUnit
         if (caster is not Character)
             return false;
 
+        var reactions = new List<DoodadFuncQuest>();
         foreach (var func in funcsForGroup)
         {
-            if (func.FuncType != nameof(DoodadFuncQuest))
-                continue;
-
-            if (DoodadManager.Instance.GetFuncTemplate(func.FuncId, func.FuncType) is DoodadFuncQuest quest &&
-                quest.Offer(caster, this, skillId))
+            if (func.FuncType == nameof(DoodadFuncQuest) &&
+                DoodadManager.Instance.GetFuncTemplate(func.FuncId, func.FuncType) is DoodadFuncQuest reaction)
             {
-                return true;
+                reactions.Add(reaction);
             }
+        }
+
+        if (reactions.Count == 0)
+            return false;
+
+        foreach (var reaction in reactions.Where(r => r.QuestKindId == DoodadFuncQuest.HandBackKind))
+        {
+            if (reaction.Offer(caster, this, skillId))
+                return true;
+        }
+
+        // Handing out is where order shows, and the table is not laid out in story order
+        // everywhere: of the phases that hand out more than one quest, a fifth list them out of
+        // sequence. So the quest's own place in its chapter decides which comes first, not the
+        // row's place in the table.
+        //
+        // Unless the phase offers a choice rather than a chain. A quest marked selective is one
+        // of a set the player may take, and there is no sequence there to impose.
+        var handOuts = reactions.Where(r => r.QuestKindId == DoodadFuncQuest.HandOutKind).ToList();
+        if (!handOuts.Any(r => r.IsSelective))
+            handOuts = handOuts.OrderBy(r => r.ChainPosition).ToList();
+
+        foreach (var reaction in handOuts)
+        {
+            if (reaction.Offer(caster, this, skillId))
+                return true;
+        }
+
+        // Whatever else the phase carries: kinds that only feed an interaction objective. They
+        // show the player nothing, so none of them can be the answer.
+        foreach (var reaction in reactions.Where(r =>
+                     r.QuestKindId is not (DoodadFuncQuest.HandOutKind or DoodadFuncQuest.HandBackKind)))
+        {
+            reaction.Offer(caster, this, skillId);
         }
 
         return false;

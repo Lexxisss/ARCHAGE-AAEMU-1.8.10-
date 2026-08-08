@@ -10,8 +10,33 @@ namespace AAEmu.Game.Models.Game.DoodadObj.Funcs;
 
 public class DoodadFuncQuest : DoodadFuncTemplate
 {
+    /// <summary>quest_kind_id, from doodad_quest_kinds: this reaction hands a quest out.</summary>
+    public const uint HandOutKind = 1;
+
+    /// <summary>quest_kind_id, from doodad_quest_kinds: this reaction takes a quest back.</summary>
+    public const uint HandBackKind = 2;
+
     public uint QuestKindId { get; set; }
     public uint QuestId { get; set; }
+
+    /// <summary>
+    /// Where this quest sits in its story, for putting a chain of them in order.
+    /// </summary>
+    /// <remarks>
+    /// The order a doodad's reactions are listed in is not the order its quests come in: of the
+    /// ninety-seven phases that hand out more than one, nineteen list them out of sequence.
+    /// </remarks>
+    public (uint Chapter, uint Position) ChainPosition
+    {
+        get
+        {
+            var template = QuestManager.Instance.GetTemplate(QuestId);
+            return template == null ? (0u, 0u) : (template.ChapterIdx, template.QuestIdx);
+        }
+    }
+
+    /// <summary>Whether this quest is one of a set to choose from rather than a link in a chain.</summary>
+    public bool IsSelective => QuestManager.Instance.GetTemplate(QuestId)?.Selective == true;
 
     public override void Use(BaseUnit caster, Doodad owner, uint skillId, int nextPhase = 0)
     {
@@ -37,8 +62,7 @@ public class DoodadFuncQuest : DoodadFuncTemplate
 
         var hasQuest = character.Quests.ActiveQuests.TryGetValue(QuestId, out var quest);
 
-        // quest_kind_id is defined by doodad_quest_kinds: 1=give, 2=complete.
-        if (QuestKindId == 1)
+        if (QuestKindId == HandOutKind)
         {
             // Handing one out again once it has been finished would be the obvious way to get
             // this wrong: a giver whose chain is done would keep offering its first quest.
@@ -50,7 +74,7 @@ public class DoodadFuncQuest : DoodadFuncTemplate
             return true;
         }
 
-        if (QuestKindId == 2)
+        if (QuestKindId == HandBackKind)
         {
             if (!hasQuest)
                 return false;
