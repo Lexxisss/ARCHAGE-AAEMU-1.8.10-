@@ -75,7 +75,14 @@ public class PlotObject : PacketMarshaler
 
     private static void WritePositionAndRotation(PacketStream stream, Transform transform)
     {
-        stream.WritePosition(transform.Local.Position);
+        // Eleven bytes, not nine: the client reads each coordinate as four bytes and the last as
+        // three - target x2game.dll 0x399653A0, dev 0x39B47020, both eleven byte reads. The nine
+        // byte form left this object four bytes short, and with two transforms in it that is what
+        // every field after them was out by.
+        stream.WriteWorldPosition(
+            transform.Local.Position.X,
+            transform.Local.Position.Y,
+            transform.Local.Position.Z);
         var ypr = transform.Local.ToRollPitchYawSBytes();
         stream.Write(ypr.Item1); // rot.x : i8
         stream.Write(ypr.Item2); // rot.y : i8
