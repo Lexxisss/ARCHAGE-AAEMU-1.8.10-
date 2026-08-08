@@ -627,7 +627,7 @@ public class ItemManager : Singleton<ItemManager>
 
         SkillManager.Instance.OnSkillsLoaded += OnSkillsLoaded;
 
-        using (var connection2 = SQLite.CreateConnection("Data", SQLite.ServerDatabase))
+        using (var connection2 = SQLite.CreateServerConnection())
         using (var connection = SQLite.CreateConnection("Data", SQLite.TargetClientDatabase))
         {
             Logger.Info("Loading item templates ...");

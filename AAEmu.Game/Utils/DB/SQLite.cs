@@ -14,17 +14,18 @@ public static class SQLite
 {
     public const string TargetClientDatabase = "1.8.1.0-Kakao-KR.sqlite";
     public const string FallbackClientDatabase = "base.sqlite3";
-    public const string ServerDatabase = "compact.server.table.sqlite3";
-    public const string LegacyBootstrapDatabase = "compact.sqlite3";
 
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
     /// <summary>
-    /// Opens an immutable SQLite database. Until each loader is migrated together with its
-    /// SQL and models, the implicit connection remains the legacy bootstrap database.
-    /// New/migrated code must choose an explicit database-role method below.
+    /// Opens an immutable SQLite database, the target client's own unless told otherwise.
     /// </summary>
-    public static SqliteConnection CreateConnection(string directory = "Data", string sqlite = LegacyBootstrapDatabase)
+    /// <remarks>
+    /// It used to be an older client's database that answered when nobody said which, and a
+    /// loader that forgot to choose quietly read data for a game this server does not serve.
+    /// Forgetting now lands on the right one.
+    /// </remarks>
+    public static SqliteConnection CreateConnection(string directory = "Data", string sqlite = TargetClientDatabase)
     {
         var dbPath = Path.Combine(FileManager.AppPath, directory, sqlite);
         if (!File.Exists(dbPath))
