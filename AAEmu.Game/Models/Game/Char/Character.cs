@@ -1289,7 +1289,7 @@ public partial class Character : Unit, ICharacter
     public WeaponWieldKind GetWeaponWieldKind()
     {
         var item = Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlot.Mainhand);
-        if (item != null && item.Template is WeaponTemplate weapon)
+        if (item != null && item.Template is WeaponTemplate weapon && weapon.HoldableTemplate != null)
         {
             var slotId = (EquipmentItemSlotType)weapon.HoldableTemplate.SlotTypeId;
             if (slotId == EquipmentItemSlotType.TwoHanded)
@@ -1297,7 +1297,7 @@ public partial class Character : Unit, ICharacter
             else if (slotId == EquipmentItemSlotType.OneHanded || slotId == EquipmentItemSlotType.Mainhand)
             {
                 var item2 = Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlot.Offhand);
-                if (item2 != null && item2.Template is WeaponTemplate weapon2)
+                if (item2 != null && item2.Template is WeaponTemplate weapon2 && weapon2.HoldableTemplate != null)
                 {
                     var slotId2 = (EquipmentItemSlotType)weapon2.HoldableTemplate.SlotTypeId;
                     if (slotId2 == EquipmentItemSlotType.OneHanded || slotId2 == EquipmentItemSlotType.Offhand)

@@ -295,16 +295,10 @@ public class Skill
             // the original position - which is what put skill 23593's animation on the
             // caster instead of the ground it was aimed at.
             //
-            // A doodad target is the one variant still reported as the caster. That branch
-            // exists in the serializer too, but passing it through was observed to leave
-            // mining running its whole cast, producing ore and playing nothing (c7b1621);
-            // whether the client wants the doodad here is not settled, so the behaviour
-            // that was seen to work is kept until it is.
-            var startedTarget = targetCaster is SkillCastDoodadTarget
-                ? new SkillCastUnitTarget(caster.ObjId)
-                : targetCaster;
-
-            caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, startedTarget, this, skillObject)
+            // DOODAD is also a native SCSkillStarted target. The client resolves the doodad id
+            // to its world position in the cast-start handler; substituting the caster loses
+            // that target information and is not part of the target protocol.
+            caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, targetCaster, this, skillObject)
             {
                 CastTime = castTime,
                 BaseCastTime = Template.CastingTime

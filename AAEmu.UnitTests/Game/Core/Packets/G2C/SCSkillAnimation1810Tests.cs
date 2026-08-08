@@ -66,6 +66,47 @@ public class SCSkillAnimation1810Tests
     }
 
     [Fact]
+    public void SkillStartedPreservesDoodadTargetVariant()
+    {
+        var target = new SkillCastDoodadTarget
+        {
+            Type = SkillCastTargetType.Doodad,
+            ObjId = 0x12345
+        };
+        var skill = new Skill(new SkillTemplate { Id = 1 });
+        var packet = new SCSkillStartedPacket(
+            1,
+            7,
+            new SkillCasterUnit(0x44),
+            target,
+            skill,
+            new SkillObject())
+        {
+            CastTime = 1000,
+            BaseCastTime = 1000
+        };
+
+        var encoded = new PacketStream();
+        packet.Write(encoded);
+        var stream = new PacketStream(encoded.GetBytes());
+
+        Assert.Equal(1u, stream.ReadUInt32());
+        Assert.Equal((ushort)7, stream.ReadUInt16());
+
+        var casterType = (SkillCasterType)stream.ReadByte();
+        var caster = SkillCaster.GetByType(casterType);
+        caster.Read(stream);
+
+        var targetType = (SkillCastTargetType)stream.ReadByte();
+        var decodedTarget = SkillCastTarget.GetByType(targetType);
+        decodedTarget.Read(stream);
+
+        var decodedDoodad = Assert.IsType<SkillCastDoodadTarget>(decodedTarget);
+        Assert.Equal(SkillCastTargetType.Doodad, targetType);
+        Assert.Equal(target.ObjId, decodedDoodad.ObjId);
+    }
+
+    [Fact]
     public void FireAnimationSelectorMatchesTargetPriority()
     {
         var template = new SkillTemplate

@@ -49,7 +49,7 @@ public partial class Character
             case WeaponWieldKind.None:
             case WeaponWieldKind.OneHanded:
                 var item = Inventory.Equipment.GetItemBySlot((int)EquipmentItemSlot.Offhand);
-                if (item != null && item.Template is WeaponTemplate weapon)
+                if (item != null && item.Template is WeaponTemplate weapon && weapon.HoldableTemplate != null)
                 {
                     var slotId = (EquipmentItemSlotType)weapon.HoldableTemplate.SlotTypeId;
                     if (slotId == EquipmentItemSlotType.Shield)
