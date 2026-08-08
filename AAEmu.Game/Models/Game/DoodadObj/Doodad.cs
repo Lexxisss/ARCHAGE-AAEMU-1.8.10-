@@ -395,11 +395,16 @@ public class Doodad : BaseUnit
                     return;
                 }
 
-                if (DoFunc(caster, skillId, funcWithSkill))
-                {
-                    if (skillHasItsOwnFunc)
-                        OfferQuests(caster, skillId, allFuncsForGroup);
+                var interactionFinished = DoFunc(caster, skillId, funcWithSkill);
 
+                // Offered whether or not the func moved the doodad on, because on an ore vein it
+                // always does: mining hands the vein to the phase that shows it broken. Waiting
+                // for a func that stays put meant the vein was mined and the quest never offered.
+                if (skillHasItsOwnFunc)
+                    OfferQuests(caster, skillId, allFuncsForGroup);
+
+                if (interactionFinished)
+                {
                     // FuncGroupId будет равен либо текущая фаза, либо func.NextPhase, либо OverridePhase
                     DoChangePhase(caster, (int)FuncGroupId);
                     return;
