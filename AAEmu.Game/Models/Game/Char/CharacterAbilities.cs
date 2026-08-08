@@ -17,10 +17,9 @@ public class CharacterAbilities
         Owner = owner;
         Abilities = new Dictionary<AbilityType, Ability>();
 
-        // This client has ability slots 1..29 and uses 30 for an empty selection, which is why
-        // AbilityType.None is 30. Stopping at 12 was right for 3.0.3.0 and wrong here: a character
-        // who had picked slot 14 crashed the moment anything granted them experience, and because
-        // that happens while a quest hands out its rewards, the whole completion was lost with it.
+        // Target 1.8.1.0 keeps a fixed 29-record ability table on the character.
+        // Keep all wire slots addressable because special mutation skills still carry ability ids
+        // 28/29. Only ids 1..14 are normal selectable/player-XP skillsets.
         for (var i = 1; i < (int)AbilityType.None; i++)
         {
             var id = (AbilityType)i;
@@ -32,17 +31,20 @@ public class CharacterAbilities
 
     public void SetAbility(AbilityType id, byte order)
     {
-        Abilities[id].Order = order;
+        if (!id.IsPlayerSkillset() || !Abilities.TryGetValue(id, out var ability))
+            return;
+
+        ability.Order = order;
     }
 
     public List<AbilityType> GetActiveAbilities()
     {
         var list = new List<AbilityType>();
-        if (Owner.Ability1 != AbilityType.None)
+        if (Owner.Ability1.IsPlayerSkillset())
             list.Add(Owner.Ability1);
-        if (Owner.Ability2 != AbilityType.None)
+        if (Owner.Ability2.IsPlayerSkillset())
             list.Add(Owner.Ability2);
-        if (Owner.Ability3 != AbilityType.None)
+        if (Owner.Ability3.IsPlayerSkillset())
             list.Add(Owner.Ability3);
         return list;
     }
@@ -50,23 +52,35 @@ public class CharacterAbilities
     public void AddExp(AbilityType type, int exp)
     {
         // TODO SCAbilityExpChangedPacket
-        if (type != AbilityType.None)
-            Abilities[type].Exp += exp;
+        if (type.IsPlayerSkillset() && Abilities.TryGetValue(type, out var ability))
+            ability.Exp += exp;
     }
 
     public void AddActiveExp(int exp)
     {
         // TODO SCExpChangedPacket
-        if (Owner.Ability1 != AbilityType.None)
-            Abilities[Owner.Ability1].Exp = Math.Min(Abilities[Owner.Ability1].Exp + exp, ExperienceManager.Instance.GetExpForLevel(55));
-        if (Owner.Ability2 != AbilityType.None)
-            Abilities[Owner.Ability2].Exp = Math.Min(Abilities[Owner.Ability2].Exp + exp, ExperienceManager.Instance.GetExpForLevel(55));
-        if (Owner.Ability3 != AbilityType.None)
-            Abilities[Owner.Ability3].Exp = Math.Min(Abilities[Owner.Ability3].Exp + exp, ExperienceManager.Instance.GetExpForLevel(55));
+        AddActiveAbilityExp(Owner.Ability1, exp);
+        AddActiveAbilityExp(Owner.Ability2, exp);
+        AddActiveAbilityExp(Owner.Ability3, exp);
+    }
+
+    private void AddActiveAbilityExp(AbilityType id, int exp)
+    {
+        if (!id.IsPlayerSkillset() || !Abilities.TryGetValue(id, out var ability))
+            return;
+
+        ability.Exp = Math.Min(ability.Exp + exp, ExperienceManager.Instance.GetExpForLevel(55));
     }
 
     public void Swap(AbilityType oldAbilityId, AbilityType abilityId)
     {
+        // 15..27 are reserved; 28/29 are learned through SpecialAbility, not the
+        // ordinary three-skillset selection. Do not let them enter Ability1..3.
+        if (!abilityId.IsPlayerSkillset())
+            return;
+        if (oldAbilityId != AbilityType.None && !oldAbilityId.IsPlayerSkillset())
+            return;
+
         Owner.Skills.Reset(oldAbilityId, true);
         if (Owner.Ability1 == oldAbilityId)
         {
@@ -94,14 +108,11 @@ public class CharacterAbilities
                 Abilities[Owner.Ability3].Exp = Abilities[Owner.Ability1].Exp;
 
                 //every unchosen ability is default level 10 besides are selected ones since spillover exp can unsync character exp with skill exp
-                var c = GetActiveAbilities();
-                for (var i = 1; i < Abilities.Count; i++)
+                var active = GetActiveAbilities();
+                foreach (var ability in Abilities.Values)
                 {
-                    var id = (AbilityType)i;
-                    if (!c.Contains(Abilities[id].Id))
-                    {
-                        Abilities[id].Exp = 42000;
-                    }
+                    if (ability.Id.IsPlayerSkillset() && !active.Contains(ability.Id))
+                        ability.Exp = 42000;
                 }
             }
         }
@@ -126,6 +137,8 @@ public class CharacterAbilities
                         Id = (AbilityType)reader.GetByte("id"),
                         Exp = reader.GetInt32("exp")
                     };
+                    if ((byte)ability.Id <= (byte)AbilityType.General || (byte)ability.Id >= (byte)AbilityType.None)
+                        continue;
                     if (ability.Id == Owner.Ability1)
                         ability.Order = 0;
                     if (ability.Id == Owner.Ability2)

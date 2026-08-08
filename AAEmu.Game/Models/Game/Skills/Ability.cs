@@ -13,13 +13,49 @@ public enum AbilityType : byte
     Vocation = 8,
     Romance = 9,
     Love = 10,
-    Predator = 11, // add in 3+
-    Trooper = 12,  // add in 3+
 
-    // Target 10.8.1 has ability slots 1..29. The character-creation wire
-    // serializer uses 30 as the empty second/third selection. Keeping the old
-    // 3.x value (13) made 30 appear as a real active ability in SCUnitState.
+    // Target 1.8.1.0 client ability-name mapper:
+    // hatred=11, assassin=12, madness=13, pleasure=14.
+    Hatred = 11,
+    Assassin = 12,
+    Madness = 13,  // Gunslinger
+    Pleasure = 14, // Spelldance
+
+    // 15..27 are real protocol slots, but the client names them space4..space16
+    // and does not expose them as ordinary selectable skillsets.
+    Space4 = 15,
+    Space5 = 16,
+    Space6 = 17,
+    Space7 = 18,
+    Space8 = 19,
+    Space9 = 20,
+    Space10 = 21,
+    Space11 = 22,
+    Space12 = 23,
+    Space13 = 24,
+    Space14 = 25,
+    Space15 = 26,
+    Space16 = 27,
+
+    // Live special/mutation abilities. The client learns them through a separate
+    // SpecialAbility path rather than the normal three selectable skillsets.
+    Predator = 28,
+    Trooper = 29,
+
     None = 30
+}
+
+public static class AbilityTypeExtensions
+{
+    public static bool IsPlayerSkillset(this AbilityType ability)
+    {
+        return (byte)ability >= (byte)AbilityType.Fight && (byte)ability <= (byte)AbilityType.Pleasure;
+    }
+
+    public static bool IsSpecialAbility(this AbilityType ability)
+    {
+        return ability is AbilityType.Predator or AbilityType.Trooper;
+    }
 }
 
 public class Ability

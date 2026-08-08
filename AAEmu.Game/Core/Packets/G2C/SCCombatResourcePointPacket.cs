@@ -4,8 +4,10 @@ using AAEmu.Game.Core.Network.Game;
 namespace AAEmu.Game.Core.Packets.G2C;
 
 /// <summary>
-/// Target 1.8.1.0 layout recovered from x2game.dll:
-/// bc, type, point(int64), updateTime(uint32).
+/// Target 1.8.1.0 factory 0x393670B0 assigns opcode 0x304. Serializer
+/// 0x399DB4D0 writes bc objId, uint32 type, int64 point, uint32 updateTime.
+/// DEV 0x39C654A0 independently names the same fields and uses the same widths/order.
+/// updateTime is stored separately from point; its exact clock origin is not proven.
 /// </summary>
 public sealed class SCCombatResourcePointPacket : GamePacket
 {
